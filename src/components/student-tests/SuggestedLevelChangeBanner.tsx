@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { readLevelEvidence } from '@/lib/welcomeTest/profileDisplay';
 
 interface SuggestedLevelChangeBannerProps {
   studentId: string;
@@ -52,14 +53,17 @@ export function SuggestedLevelChangeBanner({
       try {
         let query = supabase
           .from('student_learning_profiles')
-          .select('estimated_level, updated_at')
+          .select('estimated_level, raw_answers, updated_at')
           .eq('student_id', studentId)
           .not('estimated_level', 'is', null)
           .order('updated_at', { ascending: false })
           .limit(1);
         if (testId) query = query.eq('welcome_test_id', testId);
         const { data } = await query;
-        const lvl = Array.isArray(data) && data[0] ? String((data[0] as any).estimated_level || '') : '';
+        const row = Array.isArray(data) && data[0] ? (data[0] as any) : null;
+        // Too little evidence for a level: never suggest one.
+        const insufficient = readLevelEvidence(row?.raw_answers)?.status === 'insufficient';
+        const lvl = row && !insufficient ? String(row.estimated_level || '') : '';
         if (!cancelled && lvl) setEstimatedLevel(lvl);
       } catch { /* silent, banner just stays hidden */ }
     })();
@@ -101,7 +105,7 @@ export function SuggestedLevelChangeBanner({
             <div className="min-w-0">
               <p className="font-medium text-sm">Suggested level change: {currentLevel} → {estimatedLevel}</p>
               <p className="text-xs text-muted-foreground">
-                Welcome Test results indicate a different CEFR level than the one set on the student profile.
+                The placement test estimate differs from the level on the student profile.
               </p>
             </div>
           </div>

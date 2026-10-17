@@ -19,7 +19,7 @@ export interface PacingProposal {
   current_pacing: number;
   proposed_pacing: number;
   reasoning: string[];
-  status: 'pending' | 'accepted' | 'rejected' | 'superseded';
+  status: 'pending' | 'accepted' | 'rejected' | 'superseded' | 'reverted';
   decided_at: string | null;
   created_at: string;
   // joined student name (best-effort)

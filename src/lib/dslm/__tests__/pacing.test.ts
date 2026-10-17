@@ -7,6 +7,9 @@ import {
   loadLearningProfileForPacing,
   resolvePromptPacing,
   selfProfileFromEntries,
+  shouldAutoApplyInitialWtPacing,
+  capacityOfLearningPath,
+  WT_INITIAL_AUTO_REASON,
   type StylePacingInput,
 } from '../../../../supabase/functions/_shared/pacing';
 
@@ -297,5 +300,78 @@ describe('resolvePromptPacing: "set" is decided by last_pacing_set_manually (own
   it('without the flag in the row, the previous rule applies', () => {
     expect(resolvePromptPacing({ dslm_pacing_mode: 30 }, null)).toBe(30);
     expect(resolvePromptPacing({ dslm_pacing_mode: 50, main_goal: 'IELTS', english_level: 'A2' }, null)).toBe(10);
+  });
+});
+
+describe('computeStylePacing: triangulated study capacity (Stage 4.7, B1-10)', () => {
+  it('B1-10: declared 2_3_hours but avoidant homework (capacity low) pushes DOWN (-5), not up (+5)', () => {
+    const declared = run({ profile: { weekly_study_time: '2_3_hours' } });
+    expect(declared.pacing).toBe(55); // legacy profile without capacity: declaration is all there is
+    const triangulated = run({ profile: { weekly_study_time: '2_3_hours', capacity: 'low' } });
+    expect(triangulated.pacing).toBe(45);
+    expect(triangulated.reasoning.join(' ')).toContain('Low study capacity');
+  });
+
+  it('study time contributes in one place only: capacity replaces the raw declared time (no double count)', () => {
+    const r = run({ profile: { weekly_study_time: 'none', capacity: 'low' } });
+    expect(r.pacing).toBe(45); // -5 once, not -10
+    const high = run({ profile: { weekly_study_time: '3_plus_hours', capacity: 'high' } });
+    expect(high.pacing).toBe(55);
+    expect(run({ profile: { weekly_study_time: '3_plus_hours', capacity: 'normal' } }).pacing).toBe(50);
+  });
+
+  it('the Self-Profile slider still wins over capacity', () => {
+    const r = run({ profile: { capacity: 'low' }, selfProfile: { time_availability_per_week: 10 } });
+    expect(r.pacing).toBe(55); // +5 slider only
+  });
+
+  it('intensity never changes the style number', () => {
+    const base = run({ profile: { capacity: 'low' } }).pacing;
+    computeIntensity({ version: 3, score: 90, path: 'target', capacity: 'low', capacity_cap: 50 }, 10);
+    expect(run({ profile: { capacity: 'low' } }).pacing).toBe(base);
+  });
+
+  it('reads LPS v3 in computeIntensity and the capacity from a stored learning path', () => {
+    const i = computeIntensity({ version: 3, score: 50, path: 'guided', capacity: 'low', capacity_cap: 50, capacity_warning: 'unrealistic_goal' }, 20);
+    expect(i.version).toBe(3);
+    expect(i.intensity).toBe('guided');
+    expect(i.capacityWarning).toBe('unrealistic_goal');
+    expect(capacityOfLearningPath({ version: 3, capacity: 'low' })).toBe('low');
+    expect(capacityOfLearningPath({ version: 1, score: 40 })).toBeNull();
+    expect(capacityOfLearningPath(null)).toBeNull();
+  });
+
+  it('the loader exposes the triangulated capacity from learning_path', async () => {
+    const supabase: any = {
+      from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({
+        data: { weekly_study_time: '2_3_hours', learning_path: { version: 3, capacity: 'low' } }, error: null,
+      }) }) }) }) }),
+    };
+    const r = await loadLearningProfileForPacing(supabase, 's', 't');
+    expect(r.profile?.capacity).toBe('low');
+    expect(r.profile?.weekly_study_time).toBe('2_3_hours');
+  });
+});
+
+describe('shouldAutoApplyInitialWtPacing (Decision 5)', () => {
+  const base = { triggerType: 'placement_test', lastPacingSetManually: null as boolean | null, hasEarlierAppliedProposal: false };
+  it('applies the first Welcome Test proposal when pacing was never set', () => {
+    expect(shouldAutoApplyInitialWtPacing(base)).toBe(true);
+    expect(shouldAutoApplyInitialWtPacing({ ...base, lastPacingSetManually: false })).toBe(true);
+    expect(WT_INITIAL_AUTO_REASON).toBe('welcome_test_initial_auto');
+  });
+  it('keeps the approval flow when the teacher set pacing manually', () => {
+    expect(shouldAutoApplyInitialWtPacing({ ...base, lastPacingSetManually: true })).toBe(false);
+  });
+  it('keeps the approval flow for a retake (an earlier proposal was accepted or applied)', () => {
+    expect(shouldAutoApplyInitialWtPacing({ ...base, hasEarlierAppliedProposal: true })).toBe(false);
+  });
+  it('only the placement_test trigger auto-applies', () => {
+    for (const t of ['goal_added', 'periodic_30d', 'manual', undefined, null]) {
+      expect(shouldAutoApplyInitialWtPacing({ ...base, triggerType: t as any })).toBe(false);
+    }
+  });
+  it('the applied value is then respected by resolvePromptPacing even when it equals 50 (flag false)', () => {
+    expect(resolvePromptPacing({ dslm_pacing_mode: 50, last_pacing_set_manually: false, main_goal: 'IELTS exam' }, null)).toBe(50);
   });
 });

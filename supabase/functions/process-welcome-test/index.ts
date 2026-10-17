@@ -15,6 +15,13 @@ import {
   type ProfileModelOutput,
 } from "../_shared/welcomeTestLevel.ts";
 import { buildReconcileEvents } from "../_shared/welcomeTestEventPayload.ts";
+import { regradeQuestionRows, welcomeTestRatingFor } from "../_shared/welcomeTestKeyedAnswer.ts";
+import {
+  INTERPRETATION_VERSION,
+  INTERPRETATION_VERSION_KEY,
+  buildTraitEvidence,
+  interpretationVersionOf,
+} from "../_shared/welcomeTestInterpretation.ts";
 import { WELCOME_TEST_EVENT_QUESTIONS } from "../_shared/welcomeTestQuestionMeta.ts";
 import {
   answerBehaviour,
@@ -80,57 +87,20 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // v6.9.50: extracted, idempotent. Applies skill ratings to learning
-  // elements and promotes status to 'reviewed'. Safe to call multiple times.
-  // Returns final status string for the response payload.
-  async function applyAndPromote(supabase: any, p_test_id: string, p_student_id: string): Promise<'reviewed' | 'completed'> {
-    try {
-      const { data: skillResults } = await supabase
-        .from('test_skill_results')
-        .select('id, element_type, applied_to_element_id, suggested_rating, applied_at')
-        .eq('test_id', p_test_id);
-      if (skillResults && skillResults.length > 0) {
-        for (const r of skillResults as any[]) {
-          if (r.applied_at) continue; // already applied
-          if (r.suggested_rating == null) continue;
-          let elementId: string | null = r.applied_to_element_id ?? null;
-          if (!elementId && r.element_type) {
-            const { data: existingEl } = await supabase
-              .from('student_learning_elements')
-              .select('id')
-              .eq('student_id', p_student_id)
-              .eq('element_type', r.element_type)
-              .is('deleted_at', null)
-              .maybeSingle();
-            if (existingEl?.id) elementId = existingEl.id;
-          }
-          if (elementId) {
-            await supabase
-              .from('student_learning_elements')
-              .update({ current_rating: r.suggested_rating, last_rated_at: new Date().toISOString() })
-              .eq('id', elementId);
-            await supabase
-              .from('test_skill_results')
-              .update({ applied_at: new Date().toISOString(), applied_to_element_id: elementId })
-              .eq('id', r.id);
-          } else {
-            await supabase
-              .from('test_skill_results')
-              .update({ applied_at: new Date().toISOString() })
-              .eq('id', r.id);
-          }
-        }
-      }
-      await supabase
-        .from('student_tests')
-        .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
-        .eq('id', p_test_id)
-        .neq('status', 'reviewed');
-      return 'reviewed';
-    } catch (err) {
-      console.error('[process-welcome-test v6.9.50] applyAndPromote failed', err);
+  // Marks the test reviewed once its analysis is complete. Skill ratings are no
+  // longer copied to student_learning_elements (unused table, owner decision 3):
+  // skill evidence reaches the student model through the answer events.
+  async function promoteToReviewed(supabase: any, p_test_id: string): Promise<'reviewed' | 'completed'> {
+    const { error } = await supabase
+      .from('student_tests')
+      .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
+      .eq('id', p_test_id)
+      .neq('status', 'reviewed');
+    if (error) {
+      console.error('[process-welcome-test] promoting the test to reviewed failed', error);
       return 'completed';
     }
+    return 'reviewed';
   }
 
   try {
@@ -192,14 +162,12 @@ serve(async (req) => {
       .maybeSingle();
     const profileTestId: string | null = (profileOwnerRow as any)?.welcome_test_id ?? null;
 
-    // A student proves access with the test link token. A call without it (a
-    // client released before the token was sent) is accepted only for the first
-    // processing of this test, so a known test id cannot be replayed to rewrite
-    // the profile, re-send emails and spend AI calls.
+    // A student proves access with the test link token, on every call (a call
+    // without it once could write a profile from any data for a known test id).
     if (!force && !isOwnerOrService) {
       const tokenOk = typeof bodyShareToken === 'string' && !!bodyShareToken
         && bodyShareToken === (testOwnerRow as any).share_token;
-      if (!tokenOk && profileTestId === test_id) {
+      if (!tokenOk) {
         return new Response(JSON.stringify({ error: 'Forbidden' }), {
           status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -218,16 +186,18 @@ serve(async (req) => {
       const profileAttempt = Number((profileTest as any)?.attempt_number ?? 0);
       const thisAttempt = Number((testOwnerRow as any).attempt_number ?? 0);
       if (profileAttempt > thisAttempt) {
-        const status = await applyAndPromote(supabaseAdmin, test_id, student_id);
+        const status = await promoteToReviewed(supabaseAdmin, test_id);
         return new Response(JSON.stringify({ success: true, status, profile_unchanged: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
     }
 
-    // Force re-run without answers: rebuild them from student_test_questions,
-    // keyed by the real question id of each question_index (wt_q3b, wt_q3c...).
-    if (force && (!answers || Object.keys(answers).length === 0)) {
+    // The stored rows are the source of truth: answers are rebuilt from
+    // student_test_questions, keyed by the real question id of each question_index
+    // (wt_q3b, wt_q3c...). The answers in the request body are used only for a
+    // legacy test without stored rows (they disagreed with the rows after a skip).
+    {
       const { data: persistedQs } = await supabaseAdmin
         .from('student_test_questions')
         .select('student_answer, question_index')
@@ -238,14 +208,18 @@ serve(async (req) => {
       const totalQuestions = Number((testOwnerRow as any).total_questions ?? 0);
       const isLegacyTest = totalQuestions > 0 && totalQuestions !== WELCOME_TEST_QUESTION_IDS.length;
       const storedRaw = profileTestId === test_id ? (profileOwnerRow as any)?.raw_answers : null;
-      if (isLegacyTest && storedRaw && typeof storedRaw === 'object' && !Array.isArray(storedRaw)) {
+      if (isLegacyTest && (!answers || Object.keys(answers).length === 0)
+          && storedRaw && typeof storedRaw === 'object' && !Array.isArray(storedRaw)) {
         const fromRaw: Record<string, unknown> = {};
         for (const [k, v] of Object.entries(storedRaw as Record<string, unknown>)) {
           if (k.startsWith('wt_') && v !== null && v !== undefined) fromRaw[k] = v;
         }
         if (Object.keys(fromRaw).length > 0) answers = fromRaw;
       }
-      if (!answers || Object.keys(answers).length === 0) {
+      if (!isLegacyTest) {
+        const map = answersFromQuestionRows((persistedQs || []) as any[]);
+        if (Object.keys(map).length > 0 || (persistedQs || []).length > 0) answers = map;
+      } else if (!answers || Object.keys(answers).length === 0) {
         const map = answersFromQuestionRows((persistedQs || []) as any[]);
         if (Object.keys(map).length > 0) answers = map;
       }
@@ -257,6 +231,13 @@ serve(async (req) => {
       });
     }
 
+    // The analysis (AI scoring, transcription, pacing) takes about a minute. The
+    // student's request is answered as soon as it is accepted and the analysis
+    // continues in the background; status 'completed' means "analysing" and
+    // 'reviewed' means done. A teacher's force re-run stays synchronous because
+    // the teacher view reloads the profile right after it.
+    const pipeline = async (): Promise<Response> => {
+    try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -272,6 +253,33 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'No questions found' }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // The server decides correctness: keyed answers are re-graded from the stored
+    // key (the browser's is_correct is provisional), open, speaking and profile
+    // items carry no verdict until the AI scores them. Then the test results are
+    // computed once from those verdicts.
+    const regradedRows: Array<{ question_index: number; is_correct: boolean | null }> = [];
+    {
+      const changes = regradeQuestionRows(questions as any[]);
+      for (const c of changes) {
+        const { error: regradeError } = await supabase
+          .from('student_test_questions')
+          .update({ is_correct: c.is_correct })
+          .eq('id', c.id);
+        if (regradeError) {
+          console.error('[process-welcome-test] re-grading failed', regradeError);
+          continue;
+        }
+        const row = (questions as any[]).find((q) => q.id === c.id);
+        if (row) {
+          row.is_correct = c.is_correct;
+          regradedRows.push({ question_index: row.question_index, is_correct: c.is_correct });
+        }
+      }
+      if (changes.length > 0) console.log(`[process-welcome-test] re-graded ${changes.length} stored answers`);
+      const { error: resultsError } = await supabase.rpc('calculate_test_results', { p_test_id: test_id });
+      if (resultsError) console.error('[process-welcome-test] calculate_test_results failed', resultsError);
     }
 
     // Events of answered questions that lost theirs (fast sessions) are rebuilt
@@ -294,6 +302,39 @@ serve(async (req) => {
       }
     } catch (reconcileErr) {
       console.warn('[process-welcome-test] event reconciliation failed', reconcileErr);
+    }
+
+    // Events logged by the browser carry its provisional verdict: bring every
+    // keyed answer event in line with the server verdict (the skill metrics are
+    // built from the events, not from the rows).
+    if (regradedRows.length > 0) {
+      for (const row of regradedRows) {
+        const { data: evts, error: evtErr } = await supabase
+          .from('student_events')
+          .select('id, event_payload, mastery')
+          .eq('source_id', test_id)
+          .eq('event_source', 'welcome_test')
+          .eq('event_type', 'test_answer_submitted')
+          .eq('event_payload->>exercise_index', String(row.question_index));
+        if (evtErr) {
+          console.warn('[process-welcome-test] event verdict sync failed', evtErr.message);
+          continue;
+        }
+        const rating = welcomeTestRatingFor(row.is_correct);
+        for (const evt of (evts || []) as any[]) {
+          const payload = { ...(evt.event_payload || {}) } as Record<string, any>;
+          payload.is_correct = row.is_correct;
+          if (Array.isArray(payload.nano_skill_ratings)) {
+            payload.nano_skill_ratings = payload.nano_skill_ratings.map((r: any) => ({ ...r, mastery: rating.mastery, hasValue: rating.hasValue }));
+          }
+          const mastery = rating.hasValue ? rating.mastery : null;
+          const { error: updErr } = await supabase
+            .from('student_events')
+            .update({ event_payload: payload, mastery })
+            .eq('id', evt.id);
+          if (updErr) console.warn('[process-welcome-test] event verdict update failed', updErr.message);
+        }
+      }
     }
 
     // Percent per skill from the scored items (is_correct null = not scored).
@@ -355,10 +396,6 @@ serve(async (req) => {
       ? Math.round((idkCountSkill / skillWrongOrIdk) * 100)
       : null;
 
-    // Traits from the answers (option string -> value), then the client's
-    // detected_traits for anything the answers do not resolve.
-    const traits: Record<string, string> = reconstructTraits(answers, detected_traits);
-
     // PROBLEM 3 (v6.2): Snapshot previous profile BEFORE upsert so we can
     // generate an evolution_summary comparing this attempt to the prior one.
     // The upsert below will overwrite the row, so we must capture it first.
@@ -370,6 +407,28 @@ serve(async (req) => {
       .maybeSingle();
     const sameAttemptAsStored = (previousProfile as any)?.welcome_test_id === test_id;
 
+    // Traits from the answers (option string -> value), then the client's
+    // detected_traits for anything the answers do not resolve. A force re-run of
+    // the same attempt keeps the interpretation version its profile was written
+    // with; every new run uses the current one.
+    const interpretationVersion = force && sameAttemptAsStored
+      ? interpretationVersionOf((previousProfile as any)?.raw_answers ?? (previousProfile as any)?.traits)
+      : INTERPRETATION_VERSION;
+    const traits: Record<string, string> = reconstructTraits(answers, detected_traits, interpretationVersion);
+    const traitEvidence = buildTraitEvidence(answers, interpretationVersion);
+
+    // Evidence behind the level (version 3 gate): scored keyed items of the
+    // level skills, and how many of them were real answers, not "I don't know".
+    const LEVEL_EVIDENCE_TYPES = new Set(['grammar', 'vocabulary', 'reading', 'listening']);
+    let levelScoredItems = 0;
+    let levelAnsweredItems = 0;
+    for (const q of questions as any[]) {
+      if (!LEVEL_EVIDENCE_TYPES.has(q.element_type) || q.is_correct === null || q.is_correct === undefined) continue;
+      levelScoredItems++;
+      if (q.student_answer !== '__IDK__') levelAnsweredItems++;
+    }
+    const levelEvidence = { scoredItems: levelScoredItems, answeredItems: levelAnsweredItems };
+
     // A force re-run rebuilds from stored rows: a self-assessed level the rows no
     // longer resolve is still the one the stored profile holds.
     const selfAssessedLevel: string | null = traits.self_assessed_level
@@ -380,10 +439,8 @@ serve(async (req) => {
     // items now and again after the AI step, from the final writing score. A force re-run of a
     // stored profile keeps its level unless it was written by the current algorithm version.
     const levelOpts = { force: !!force, sameAttempt: sameAttemptAsStored, previous: previousProfile as any };
-    let levelDecision = decideLevel(
-      estimateLevel({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore, selfAssessedLevel }),
-      levelOpts,
-    );
+    let levelEstimate = estimateLevel({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore, selfAssessedLevel, evidence: levelEvidence });
+    let levelDecision = decideLevel(levelEstimate, levelOpts);
     let estimatedLevel: string | null = levelDecision.level;
     let levelConfidence: string | null = levelDecision.confidence;
 
@@ -414,6 +471,9 @@ serve(async (req) => {
       enrichedAnswers.level_change_suggestion = levelChangeSuggestion;
     }
     if (levelDecision.stampVersion !== null) enrichedAnswers[LEVEL_VERSION_KEY] = levelDecision.stampVersion;
+    if (levelEstimate.evidence && !levelDecision.keptStored) enrichedAnswers.level_evidence = levelEstimate.evidence;
+    enrichedAnswers[INTERPRETATION_VERSION_KEY] = interpretationVersion;
+    enrichedAnswers.trait_evidence = traitEvidence;
     // v6.9.56: integrity snapshot (tab-blur count + recent events) captured
     // client-side. Surfaces as a teacher-only signal of potential outside
     // help (translator/AI) during the placement test.
@@ -423,7 +483,15 @@ serve(async (req) => {
 
     // Signals computed in code before any AI step (they must not depend on it).
     const behaviour = answerBehaviour(questions as any[]);
-    const learningPath = computeLearningPathScore(traits, answers);
+    // A force re-run of the same attempt keeps the learning-path version its
+    // profile was written with: v2 is recomputed as v2, an older stored path is kept.
+    const storedLearningPath = force && sameAttemptAsStored
+      ? ((previousProfile as any)?.learning_path ?? (previousProfile as any)?.raw_answers?.learning_path ?? null)
+      : null;
+    const storedLpsVersion = Number(storedLearningPath?.version ?? 0);
+    const learningPath: any = storedLearningPath && storedLpsVersion < 2
+      ? storedLearningPath
+      : computeLearningPathScore(traits, answers, storedLearningPath && storedLpsVersion === 2 ? { version: 2 } : undefined);
     enrichedAnswers.learning_path = learningPath; // older readers look in raw_answers
     let divergences: Divergence[] = computeDivergences({
       traits,
@@ -532,7 +600,7 @@ serve(async (req) => {
     }
 
     const v2Columns = {
-      traits: { version: 1, ...traits },
+      traits: { version: 1, [INTERPRETATION_VERSION_KEY]: interpretationVersion, ...traits },
       learning_path: learningPath,
       divergences,
       answer_behaviour: behaviour,
@@ -560,7 +628,7 @@ serve(async (req) => {
 
     // Keep the profile this run replaced (written after a successful upsert, so a
     // failed run that is retried does not store duplicates).
-    if (previousProfile) {
+    if (previousProfile && !sameAttemptAsStored) {
       const { error: versionError } = await supabase
         .from('student_learning_profile_versions')
         .insert({
@@ -607,11 +675,9 @@ serve(async (req) => {
       console.error('[process-welcome-test] WT-4 status update failed', statusErr);
     }
 
-    // v6.9.50: initial auto-apply pass (idempotent, helper handles errors).
-    // A second pass runs at the very end of the function so that any later
-    // calls to `calculate_test_results` (AI rescoring path) cannot leave us
-    // with applied_at=NULL on the regenerated skill rows.
-    await applyAndPromote(supabase, test_id, student_id);
+    // The test stays 'completed' (analysing) until the end of this run; it is
+    // promoted to 'reviewed' only after the AI step, so a teacher never sees an
+    // interim result as final and a crash leaves the test re-runnable.
 
     // v6.9.29: Fire-and-forget thank-you email to the student. Idempotent server-side.
     try {
@@ -667,10 +733,8 @@ serve(async (req) => {
         { skill: 'reading', score: readingScore },
         { skill: 'writing', score: writingScore },
       ]));
-      levelDecision = decideLevel(
-        estimateLevel({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore, selfAssessedLevel }),
-        levelOpts,
-      );
+      levelEstimate = estimateLevel({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore, selfAssessedLevel, evidence: levelEvidence });
+      levelDecision = decideLevel(levelEstimate, levelOpts);
       estimatedLevel = levelDecision.level;
       levelConfidence = levelDecision.confidence;
       divergences = computeDivergences({
@@ -791,7 +855,7 @@ serve(async (req) => {
           ? `- IDK signal: no metacognition signal (no incorrect/IDK on skill items).`
           : `- IDK signal: self-awareness ${selfAwarenessScore}% (admitted "I don't know" on ${idkCountSkill}/${skillWrongOrIdk} skill items where they were uncertain; ${idkCountTotal} IDK overall). High = honest metacognition, prefer scaffolding before harder content. Low = compulsive guessing, recalibrate confidence and add formative checks.`;
         const pct = (v: number | null) => (v === null ? 'no data' : `${v}%`);
-        const lpsLine = `- Learning Path Score: ${learningPath.score === null ? 'not computed (not enough signals)' : `${learningPath.score} (${learningPath.path})`}; signal coverage ${learningPath.coverage}; capacity ${learningPath.capacity ?? 'unknown'}${learningPath.overrides_applied.length > 0 ? `; overrides: ${learningPath.overrides_applied.join(', ')}` : ''}`;
+        const lpsLine = `- Learning Path Score: ${learningPath.score === null ? 'not computed (not enough signals)' : `${learningPath.score} (${learningPath.path})`}; signal coverage ${learningPath.coverage}; capacity ${learningPath.capacity ?? 'unknown'}${(learningPath.overrides_applied ?? []).length > 0 ? `; overrides: ${(learningPath.overrides_applied ?? []).join(', ')}` : ''}`;
         const behaviourLine = `- Answer behaviour: skill items answered ${behaviour.keyed_answered}/${behaviour.keyed_total}, skipped ${behaviour.skip_count_skill}, "I don't know" ${behaviour.idk_count_skill}, median time ${behaviour.median_seconds_keyed ?? 'n/a'}s, very fast answers ${behaviour.rushed_count}`;
         const answeredLine = `- Questions answered: ${questions.filter((q: any) => q.student_answer !== null).length}/${questions.length}`;
         // Everything the model is told, from the current values. Built before the scoring call
@@ -882,14 +946,15 @@ serve(async (req) => {
                     .eq('id', matchQ.id)
                     .single();
                   const existingData = (freshQ?.question_data || {}) as Record<string, unknown>;
+                  // The 0-100 AI score is the verdict of an open item; no pass/fail
+                  // is_correct is derived from it (writing and speaking scores below
+                  // average the AI scores).
                   await supabase
                     .from('student_test_questions')
                     .update({
-                      is_correct: score >= 40,
                       question_data: { ...existingData, ai_score: score },
                     })
                     .eq('id', matchQ.id);
-                  matchQ.is_correct = score >= 40; // in-memory copy feeds the final skill scores
                 }
 
                 // One update of that event: mastery column and its skill rating.
@@ -926,9 +991,18 @@ serve(async (req) => {
             ? Math.round(writingScoresArr.reduce((a: number, b: number) => a + b, 0) / writingScoresArr.length)
             : null;
 
-          // Re-calculate test results after updating is_correct
-          await supabase.rpc('calculate_test_results', { p_test_id: test_id });
-          console.log('[process-welcome-test] Re-calculated test results after AI scoring');
+          // Writing and speaking results come from the AI scores, not from a count
+          // of items marked correct (all open items were "correct" before).
+          const ratingFor = (pctScore: number) => pctScore >= 80 ? 5 : pctScore >= 60 ? 4 : pctScore >= 40 ? 3 : pctScore >= 20 ? 2 : 1;
+          for (const [elementType, aiScore] of [['writing', aiWritingScore], ['speaking', aiSpeakingScore]] as const) {
+            if (aiScore === null) continue;
+            const { error: skillResultError } = await supabase
+              .from('test_skill_results')
+              .update({ score_percentage: aiScore, suggested_rating: ratingFor(aiScore) })
+              .eq('test_id', test_id)
+              .eq('element_type', elementType);
+            if (skillResultError) console.warn(`[process-welcome-test] ${elementType} result not updated:`, skillResultError.message);
+          }
         } catch (masteryErr) {
           console.error('[process-welcome-test] Error updating mastery:', masteryErr);
         }
@@ -969,6 +1043,7 @@ serve(async (req) => {
     {
       const finalRaw = (profileData.raw_answers && typeof profileData.raw_answers === 'object' ? profileData.raw_answers : {}) as Record<string, unknown>;
       if (levelDecision.stampVersion !== null) finalRaw[LEVEL_VERSION_KEY] = levelDecision.stampVersion;
+      if (levelEstimate.evidence && !levelDecision.keptStored) finalRaw.level_evidence = levelEstimate.evidence;
       const finalSuggestion = suggestionFor(estimatedLevel);
       if (finalSuggestion) finalRaw.level_change_suggestion = finalSuggestion;
       else if (levelChangeSuggestion) delete finalRaw.level_change_suggestion;
@@ -1128,8 +1203,29 @@ serve(async (req) => {
 
     // Note: welcome_test_completed event removed - only test_answer_submitted events are logged per-question
 
+    // Notification, teacher email and student thank-you email are sent once per
+    // attempt: a re-run of an attempt the profile already describes sends none.
+    let firstRunOfAttempt = !sameAttemptAsStored;
+    if (firstRunOfAttempt) {
+      // Two runs of the same attempt in flight (a retried completion): the
+      // notification written by the other run since this test was completed wins.
+      const { data: completedRow } = await supabase
+        .from('student_tests').select('completed_at').eq('id', test_id).maybeSingle();
+      const since = (completedRow as any)?.completed_at;
+      if (since) {
+        const { count: alreadyNotified } = await supabase
+          .from('homework_notifications')
+          .select('id', { count: 'exact', head: true })
+          .eq('student_id', student_id)
+          .eq('teacher_id', teacher_id)
+          .eq('notification_type', 'welcome_test_completed')
+          .gte('created_at', since);
+        if ((alreadyNotified ?? 0) > 0) firstRunOfAttempt = false;
+      }
+    }
+
     // --- Point 6: Create notification for teacher ---
-    try {
+    if (firstRunOfAttempt) try {
       // Get student name
       const { data: studentData } = await supabase
         .from('students')
@@ -1153,7 +1249,7 @@ serve(async (req) => {
     }
 
     // --- Point 8: Email teacher on completion ---
-    if (RESEND_API_KEY) {
+    if (RESEND_API_KEY && firstRunOfAttempt) {
       try {
         const { data: teacherData } = await supabase
           .from('profiles')
@@ -1321,7 +1417,7 @@ serve(async (req) => {
 
     // Learning Path Score: computed and stored with the profile above.
     const learningPathResult = learningPath;
-    console.log(`[process-welcome-test] Learning Path Score v2: ${learningPath.score} (${learningPath.path}), coverage ${learningPath.coverage}, overrides: ${learningPath.overrides_applied.join(', ') || 'none'}`);
+    console.log(`[process-welcome-test] Learning Path Score v${learningPath.version ?? 1}: ${learningPath.score} (${learningPath.path}), coverage ${learningPath.coverage}, overrides: ${(learningPath.overrides_applied ?? []).join(', ') || 'none'}`);
 
     // v5.0: pacing proposal after the Welcome Test. Runs last, so it reads the
     // complete profile of THIS attempt (learning path, AI scores, metrics).
@@ -1340,11 +1436,7 @@ serve(async (req) => {
       console.warn('[v5.0] placement_test pacing trigger failed', e);
     }
 
-    // v6.9.50: final auto-apply + promotion pass. Re-runs the helper after the
-    // AI rescoring block (which may have called calculate_test_results and
-    // regenerated test_skill_results rows). The DB migration also preserves
-    // applied_at on UPSERT now, but this is a second defense.
-    const finalStatus = await applyAndPromote(supabase, test_id, student_id);
+    const finalStatus = await promoteToReviewed(supabase, test_id);
     const finalReviewedAt = new Date().toISOString();
 
     return new Response(JSON.stringify({
@@ -1356,6 +1448,51 @@ serve(async (req) => {
       reviewed_at: finalReviewedAt,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+    } catch (pipelineError) {
+      console.error('Error processing welcome test:', pipelineError);
+      // Background runs have no caller to tell: leave a record for /admin/error-logs.
+      // The test stays 'completed' (analysing) and the teacher can re-run it.
+      try {
+        await supabaseAdmin.from('error_logs').insert({
+          severity: 'critical',
+          source: 'edge_function',
+          source_name: 'process-welcome-test',
+          component: 'pipeline',
+          error_code: 'welcome_test_processing_failed',
+          message: String((pipelineError as Error)?.message ?? pipelineError).slice(0, 500),
+          context: { test_id, student_id, teacher_id, force: !!force },
+        });
+      } catch (logErr) {
+        console.error('[process-welcome-test] failure record not written', logErr);
+      }
+      return new Response(JSON.stringify({ error: (pipelineError as Error)?.message ?? String(pipelineError) }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    };
+
+    // Checks that can fail are answered to the caller before the 202.
+    {
+      const { count: questionCount } = await supabaseAdmin
+        .from('student_test_questions')
+        .select('id', { count: 'exact', head: true })
+        .eq('test_id', test_id);
+      if (!questionCount) {
+        return new Response(JSON.stringify({ error: 'No questions found' }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // deno-lint-ignore no-explicit-any
+    const edgeRuntime = (globalThis as any).EdgeRuntime;
+    if (force || !edgeRuntime?.waitUntil) {
+      return await pipeline();
+    }
+    edgeRuntime.waitUntil(pipeline());
+    return new Response(JSON.stringify({ success: true, accepted: true, status: 'completed' }), {
+      status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error processing welcome test:', error);

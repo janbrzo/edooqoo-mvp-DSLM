@@ -33,7 +33,7 @@ export function useWelcomeTestState(studentId: string, teacherId: string): {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('student_tests')
-        .select('status, created_at')
+        .select('status, created_at, share_token')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .eq('test_type', 'welcome')

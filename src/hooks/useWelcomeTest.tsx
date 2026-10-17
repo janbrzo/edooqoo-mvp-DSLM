@@ -15,9 +15,12 @@ import type { WelcomeTestQuestionDef, WelcomeTestSectionDef } from '@/types/welc
 import type { Json } from '@/integrations/supabase/types';
 import { buildAnswerEvent, buildSkipEvent, toEventQuestion } from '../../supabase/functions/_shared/welcomeTestEventPayload';
 import { createEventLogger } from '@/lib/welcomeTest/eventLogRetry';
-import { devLog, devWarn } from '@/utils/logger';
+import { devWarn } from '@/utils/logger';
 import { consumeWelcomeTestIntegrity } from '@/hooks/useWelcomeTestIntegrity';
-import { checkWelcomeTestKeyedAnswer, welcomeTestRatingFor } from '@/lib/welcomeTest/keyedAnswer';
+import { checkWelcomeTestKeyedAnswer } from '@/lib/welcomeTest/keyedAnswer';
+import { createAnswerSaveQueue, type AnswerSaveQueue, type SaveSnapshot, type SaveState } from '@/lib/welcomeTest/answerSaveQueue';
+import { createPendingSaves } from '@/lib/answers/pendingSaves';
+import { flushSpeaking } from '@/lib/welcomeTest/speakingFlush';
 
 interface UseWelcomeTestProps {
   shareToken: string | null;
@@ -41,6 +44,16 @@ interface WelcomeTestState {
   studentNativeLanguage: string | null;
 }
 
+interface SavePayload {
+  questionIndex: number;
+  answer: unknown;
+  isCorrect: boolean | null;
+  timeSpent: number | null;
+}
+
+/** Text answers autosave this long after the last keystroke. */
+const TEXT_AUTOSAVE_DEBOUNCE_MS = 1200;
+
 // Questions that are text-input based and should only commit on blur/navigate
 const TEXT_INPUT_TYPES = new Set(['fill_blank', 'open_ended', 'open_reflection']);
 
@@ -63,10 +76,41 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     studentNativeLanguage: null,
   });
 
+  // Latest values for callbacks that outlive a render (debounced saves, page-hide
+  // handlers, speaking uploads) so they never act on a stale closure.
+  const ctxRef = useRef({ testId: null as string | null, studentId: null as string | null, teacherId: null as string | null, isTeacherMode: false });
+  ctxRef.current = { testId: state.testId, studentId: state.studentId, teacherId: state.teacherId, isTeacherMode: state.isTeacherMode };
+  const answersRef = useRef<Record<string, unknown>>({});
+  const shareTokenRef = useRef<string | null>(shareToken);
+  shareTokenRef.current = shareToken;
+  const completingRef = useRef(false);
+  const commitRef = useRef<(questionId: string, answer: unknown, opts?: { isIdk?: boolean }) => Promise<boolean>>(async () => true);
+  const [saveSnapshot, setSaveSnapshot] = useState<SaveSnapshot>({ state: 'saved', unsaved: 0, hardFailed: false });
+  const [textPending, setTextPending] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
+  const pendingSaves = useRef(createPendingSaves(TEXT_AUTOSAVE_DEBOUNCE_MS));
+  const queueRef = useRef<AnswerSaveQueue<SavePayload> | null>(null);
+  if (!queueRef.current) {
+    queueRef.current = createAnswerSaveQueue<SavePayload>({
+      // false from the RPC = not saved (token rotated/expired, test closed): a hard failure.
+      save: async (_key, p) => {
+        const { data, error } = await supabase.rpc('save_test_answer_by_share_token', {
+          p_share_token: shareTokenRef.current as string,
+          p_question_index: p.questionIndex,
+          p_answer: p.answer as Json,
+          p_is_correct: p.isCorrect,
+          p_time_spent_seconds: p.timeSpent,
+        });
+        if (error) throw error;
+        return data !== false;
+      },
+      onChange: setSaveSnapshot,
+    });
+  }
+
   const questionTimers = useRef<Record<string, number>>({});
   const detectedTraits = useRef<Record<string, string>>({});
   const committedSections = useRef<Set<string>>(new Set());
-  const pendingCommit = useRef<string | null>(null);
   // Answer and skip events: first attempt awaited, up to 2 background retries (1 s, 3 s).
   const eventLogger = useRef(createEventLogger<Record<string, unknown>>({
     call: (args) => (supabase.rpc as any)('log_welcome_test_event_by_share_token', args),
@@ -115,8 +159,9 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
         const testInfo = data[0];
 
         // Token-scoped context (RLS-safe: requires the exact share token)
-        const { data: contextRows } = await supabase
+        const { data: contextRows, error: contextError } = await supabase
           .rpc('get_test_context_by_share_token', { p_share_token: shareToken });
+        if (contextError) devWarn('[useWelcomeTest] context load failed:', contextError.message);
         const fullTest = contextRows?.[0] ?? null;
 
         const studentId = fullTest?.student_id || null;
@@ -124,8 +169,11 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
         const nativeLang: string | null = fullTest?.student_native_language || null;
 
         // Load existing answers (token-scoped)
-        const { data: questionsData } = await supabase
+        const { data: questionsData, error: questionsError } = await supabase
           .rpc('get_test_questions_by_share_token', { p_share_token: shareToken });
+        // Failing to load saved answers must not look like an empty test: the
+        // student would re-answer and overwrite real progress.
+        if (questionsError) throw questionsError;
 
         const existingAnswers: Record<string, unknown> = {};
         let dbAnsweredCount = 0;
@@ -147,7 +195,8 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
         // Update status to in_progress if assigned (only if not teacher)
         if (testInfo.status === 'assigned' && !isTeacher) {
-          await supabase.rpc('start_test_by_share_token', { p_share_token: shareToken });
+          const { error: startError } = await supabase.rpc('start_test_by_share_token', { p_share_token: shareToken });
+          if (startError) devWarn('[useWelcomeTest] start_test failed:', startError.message);
         }
 
         // For cross-device resume: find first unanswered question
@@ -176,6 +225,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
         const shouldPause = !isCompleted && hasExistingAnswers && !isTeacher;
         const persistedCount = (testInfo as any).answered_count || dbAnsweredCount || null;
 
+        answersRef.current = existingAnswers;
         setState(prev => ({
           ...prev,
           testId: testInfo.id,
@@ -193,7 +243,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           studentNativeLanguage: nativeLang,
         }));
       } catch (err) {
-        console.error('Error loading welcome test:', err);
+        devWarn('[useWelcomeTest] Error loading welcome test:', err);
         setState(prev => ({ ...prev, loading: false, error: 'Failed to load test' }));
       }
     };
@@ -225,20 +275,22 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     }
   }, [state.currentSectionIndex, state.currentQuestionIndex, shareToken, state.completed]);
 
-  // commitAnswer with fixed element_type, enriched payload, and fixed dedup
-
-  // Commit answer to DB + log event (called on blur/navigate for text, immediately for radio/checkbox)
+  // Commit answer to DB + log event. Text answers arrive here from the debounce,
+  // blur, navigation or page-hide flush; radio/checkbox/matrix commit immediately.
+  // The DB write goes through the per-question save queue (retry + hard-failure
+  // detection); the DSLM event is logged only after the save is confirmed.
   // v6.9.67: opts.isIdk flags the event_payload so analytics can distinguish
   // an honest "I don't know" from a wrong guess.
   const commitAnswer = useCallback(async (
     questionId: string,
     answer: unknown,
     opts: { isIdk?: boolean } = {},
-  ) => {
-    if (!state.testId || state.isTeacherMode) return;
+  ): Promise<boolean> => {
+    const ctx = ctxRef.current;
+    if (!ctx.testId || ctx.isTeacherMode) return true;
 
     const questionDef = ALL_WELCOME_TEST_QUESTIONS.find(q => q.id === questionId);
-    if (!questionDef) return;
+    if (!questionDef) return true;
 
     const questionIndex = ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef);
     // PROBLEM 5: Subtract paused time from total time
@@ -277,45 +329,43 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       }
     }
 
-    try {
-      await supabase.rpc('save_test_answer_by_share_token', {
-        p_share_token: shareToken as string,
-        p_question_index: questionIndex,
-        p_answer: answer as Json,
-        p_is_correct: isCorrect,
-        p_time_spent_seconds: timeSpent,
+    const { studentId, teacherId } = ctx;
+    const onSaved = async () => {
+      if (!studentId || !teacherId) return;
+      // Payload built by the shared builder (also used by the server to
+      // reconcile events lost here). Dedup + insert happen server-side in
+      // log_welcome_test_event_by_share_token (anonymous students may not
+      // call add_student_event or touch student_events).
+      const draft = buildAnswerEvent(toEventQuestion(questionDef), {
+        questionIndex,
+        answer,
+        isCorrect,
+        timeSpentSeconds: timeSpent,
+        isIdk: opts.isIdk === true,
       });
+      await eventLogger.current.log(draft.answer_id, {
+        p_share_token: shareTokenRef.current as string,
+        p_event_type: 'test_answer_submitted',
+        p_answer_id: draft.answer_id,
+        p_legacy_answer_id: draft.legacy_answer_id,
+        p_element_type: draft.element_type,
+        p_event_payload: draft.event_payload as unknown as Json,
+        p_skill_ids: draft.skill_ids,
+      });
+    };
 
-      // Log test_answer_submitted event with nano_skill_ratings
-      if (state.studentId && state.teacherId) {
-        // Payload built by the shared builder (also used by the server to
-        // reconcile events lost here). Dedup + insert happen server-side in
-        // log_welcome_test_event_by_share_token (anonymous students may not
-        // call add_student_event or touch student_events).
-        const draft = buildAnswerEvent(toEventQuestion(questionDef), {
-          questionIndex,
-          answer,
-          isCorrect,
-          timeSpentSeconds: timeSpent,
-          isIdk: opts.isIdk === true,
-        });
-        await eventLogger.current.log(draft.answer_id, {
-          p_share_token: shareToken as string,
-          p_event_type: 'test_answer_submitted',
-          p_answer_id: draft.answer_id,
-          p_legacy_answer_id: draft.legacy_answer_id,
-          p_element_type: draft.element_type,
-          p_event_payload: draft.event_payload as unknown as Json,
-          p_skill_ids: draft.skill_ids,
-        });
-      }
-    } catch (err) {
-      console.error('Error committing answer:', err);
-    }
-  }, [state.testId, state.studentId, state.teacherId, state.answers, state.isTeacherMode]);
+    return queueRef.current!.enqueue(
+      questionId,
+      { questionIndex, answer, isCorrect, timeSpent },
+      { onSaved },
+    );
+  }, []);
+  commitRef.current = commitAnswer;
 
-  // Save answer - updates local state, commits immediately for non-text questions
-  const saveAnswer = useCallback(async (questionId: string, answer: unknown) => {
+  // Save answer - updates local state; text answers autosave after a short pause
+  // (and on blur, navigation, page hide and unmount), other types commit at once.
+  const saveAnswer = useCallback((questionId: string, answer: unknown) => {
+    answersRef.current = { ...answersRef.current, [questionId]: answer };
     setState(prev => ({
       ...prev,
       answers: { ...prev.answers, [questionId]: answer },
@@ -324,61 +374,69 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     const questionDef = ALL_WELCOME_TEST_QUESTIONS.find(q => q.id === questionId);
     if (!questionDef) return;
 
-    // For text inputs, defer commit to blur/navigation
     if (TEXT_INPUT_TYPES.has(questionDef.question_type)) {
-      pendingCommit.current = questionId;
+      const questionIndex = ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef);
+      pendingSaves.current.schedule(questionIndex, () => {
+        void commitRef.current(questionId, answer);
+        setTextPending(pendingSaves.current.size() > 0);
+      });
+      setTextPending(true);
       return;
     }
 
-    // For radio/checkbox/matrix, commit immediately
-    await commitAnswer(questionId, answer);
-  }, [commitAnswer]);
+    void commitRef.current(questionId, answer);
+  }, []);
 
-  // Flush pending text answer (called on navigation)
+  // Flush debounced text answers into the save queue (navigation, blur, page hide).
   const flushPendingAnswer = useCallback(async () => {
-    if (pendingCommit.current && state.answers[pendingCommit.current] !== undefined) {
-      await commitAnswer(pendingCommit.current, state.answers[pendingCommit.current]);
-      pendingCommit.current = null;
-    }
-  }, [commitAnswer, state.answers]);
+    await pendingSaves.current.flush();
+    setTextPending(false);
+  }, []);
 
   // Save "I don't know" answer
   const saveIdontKnow = useCallback((questionId: string) => {
+    const questionDef = ALL_WELCOME_TEST_QUESTIONS.find(q => q.id === questionId);
+    if (questionDef) pendingSaves.current.cancel(ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef));
+    answersRef.current = { ...answersRef.current, [questionId]: '__IDK__' };
     setState(prev => ({
       ...prev,
       answers: { ...prev.answers, [questionId]: '__IDK__' },
     }));
-    commitAnswer(questionId, '__IDK__', { isIdk: true });
-  }, [commitAnswer]);
+    setTextPending(pendingSaves.current.size() > 0);
+    void commitRef.current(questionId, '__IDK__', { isIdk: true });
+  }, []);
 
-  // Flush pending speaking recording before navigation.
-  // P1.8: never fabricate a "recording_pending_*" placeholder: a failed upload
-  // must stay unanswered so the student (and teacher) see the truth.
-  const flushSpeakingIfNeeded = useCallback(async () => {
-    const pending = (window as any).__pendingSpeakingRecording;
-    if (!pending?.blob || !pending?.questionId) return;
+  // Stop an active recording, wait for its final blob and upload it once (the
+  // recorder saves the URL through saveAnswer). Resolves false when a recording
+  // could not be saved: navigation then stays on the question so the audio is
+  // not lost, and the recorder shows why.
+  const flushSpeakingIfNeeded = useCallback(async (): Promise<boolean> => flushSpeaking(), []);
 
-    delete (window as any).__pendingSpeakingRecording;
+  // Retry every failed save (manual button or the browser coming back online).
+  const retrySaves = useCallback(async () => {
+    await pendingSaves.current.flush();
+    return queueRef.current!.retryFailed();
+  }, []);
 
-    try {
-      const { uploadRecording } = await import('@/lib/audio/recorder');
-
-      devLog('[flushSpeaking] Uploading pending recording for:', pending.questionId);
-      const url = await uploadRecording(pending.blob, { filenamePrefix: 'welcome-test-speaking' });
-      devLog('[flushSpeaking] Upload success, saving answer:', url);
-      await saveAnswer(pending.questionId, url);
-      await commitAnswer(pending.questionId, url);
-    } catch (err) {
-      console.error('[flushSpeaking] Upload failed:', err);
-      devWarn('[flushSpeaking] Leaving question unanswered instead of saving a placeholder');
-      toast.error('Your recording could not be uploaded. You can record it again.');
-    }
-  }, [saveAnswer, commitAnswer]);
-
+  // Autosave safety net: flush on tab hide / page hide / unmount, retry on reconnect.
+  useEffect(() => {
+    const flushNow = () => { void pendingSaves.current.flush(); };
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flushNow(); };
+    const onOnline = () => { void queueRef.current?.retryFailed(); };
+    window.addEventListener('pagehide', flushNow);
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.removeEventListener('pagehide', flushNow);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('online', onOnline);
+      flushNow();
+    };
+  }, []);
 
   // Navigation
   const goToNext = useCallback(async () => {
-    await flushSpeakingIfNeeded();
+    if (!(await flushSpeakingIfNeeded())) return;
     await flushPendingAnswer();
     setState(prev => {
       const section = sections[prev.currentSectionIndex];
@@ -392,46 +450,43 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     });
   }, [sections, flushPendingAnswer, flushSpeakingIfNeeded]);
 
-  // Skip question (v6.9.67: log a lightweight test_answer_skipped event so
-  // teachers can see which questions the student avoided, without polluting
-  // skill scoring: process-welcome-test ignores unknown event types).
+  // Skip question. An already answered question just navigates (never overwrite
+  // a real answer with null). Only an unanswered one logs a lightweight
+  // test_answer_skipped event so teachers can see which questions the student
+  // avoided, without polluting skill scoring: process-welcome-test ignores
+  // unknown event types.
   const skipQuestion = useCallback(async () => {
-    await flushSpeakingIfNeeded();
+    if (!(await flushSpeakingIfNeeded())) return;
     await flushPendingAnswer();
 
     const section = sections[state.currentSectionIndex];
     const questionDef = section?.questions[state.currentQuestionIndex];
-    if (state.testId && questionDef && state.studentId && state.teacherId && !state.isTeacherMode) {
+    const alreadyAnswered = !!questionDef && answersRef.current[questionDef.id] !== undefined;
+    if (!alreadyAnswered && state.testId && questionDef && state.studentId && state.teacherId && !state.isTeacherMode) {
       const questionIndex = ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef);
-      try {
-        await supabase.rpc('save_test_answer_by_share_token', {
-          p_share_token: shareToken as string,
-          p_question_index: questionIndex,
-          p_answer: null,
-          p_is_correct: null,
-          p_time_spent_seconds: null,
-        });
-
-        const draft = buildSkipEvent(toEventQuestion(questionDef), questionIndex);
-        await eventLogger.current.log(draft.answer_id, {
-          p_share_token: shareToken as string,
-          p_event_type: 'test_answer_skipped',
-          p_answer_id: draft.answer_id,
-          p_legacy_answer_id: draft.legacy_answer_id,
-          p_element_type: draft.element_type,
-          p_event_payload: draft.event_payload as unknown as Json,
-          p_skill_ids: draft.skill_ids,
-        });
-      } catch (err) {
-        console.error('Error logging skip event:', err);
-      }
+      const draft = buildSkipEvent(toEventQuestion(questionDef), questionIndex);
+      void queueRef.current!.enqueue(
+        questionDef.id,
+        { questionIndex, answer: null, isCorrect: null, timeSpent: null },
+        {
+          onSaved: () => eventLogger.current.log(draft.answer_id, {
+            p_share_token: shareTokenRef.current as string,
+            p_event_type: 'test_answer_skipped',
+            p_answer_id: draft.answer_id,
+            p_legacy_answer_id: draft.legacy_answer_id,
+            p_element_type: draft.element_type,
+            p_event_payload: draft.event_payload as unknown as Json,
+            p_skill_ids: draft.skill_ids,
+          }),
+        },
+      );
     }
 
     await goToNext();
   }, [flushPendingAnswer, flushSpeakingIfNeeded, goToNext, sections, state.currentSectionIndex, state.currentQuestionIndex, state.testId, state.studentId, state.teacherId, state.isTeacherMode]);
 
   const goToPrevious = useCallback(async () => {
-    await flushSpeakingIfNeeded();
+    if (!(await flushSpeakingIfNeeded())) return;
     await flushPendingAnswer();
     setState(prev => {
       if (prev.currentQuestionIndex > 0) {
@@ -444,75 +499,104 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     });
   }, [sections, flushPendingAnswer, flushSpeakingIfNeeded]);
 
-  const goToSection = useCallback((sectionIndex: number) => {
-    flushPendingAnswer();
+  const goToSection = useCallback(async (sectionIndex: number) => {
+    if (!(await flushSpeakingIfNeeded())) return;
+    await flushPendingAnswer();
     setState(prev => ({ ...prev, currentSectionIndex: sectionIndex, currentQuestionIndex: 0 }));
-  }, [flushPendingAnswer]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded]);
 
-  const goToQuestionInSection = useCallback((sectionIndex: number, questionIndex: number) => {
-    flushPendingAnswer();
+  const goToQuestionInSection = useCallback(async (sectionIndex: number, questionIndex: number) => {
+    if (!(await flushSpeakingIfNeeded())) return;
+    await flushPendingAnswer();
     setState(prev => ({ ...prev, currentSectionIndex: sectionIndex, currentQuestionIndex: questionIndex }));
-  }, [flushPendingAnswer]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded]);
 
   // Pause test
   const pauseTest = useCallback(() => {
-    flushPendingAnswer();
+    void flushSpeakingIfNeeded();
+    void flushPendingAnswer();
     setState(prev => ({ ...prev, paused: true }));
     toast.success('Test paused. Your progress is saved. Come back anytime!');
-  }, [flushPendingAnswer]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded]);
 
   const resumeTest = useCallback(() => {
     setState(prev => ({ ...prev, paused: false }));
   }, []);
 
-  // Complete test
+  // Complete test. Shows the completed screen only after every answer is
+  // confirmed saved and the server accepted the submission; otherwise an error
+  // with retry is shown. The server re-grades from the DB and calculates the
+  // results itself, so the student client never calls calculate_test_results.
   const completeTest = useCallback(async () => {
-    if (!state.testId) return false;
-
-    await flushPendingAnswer();
+    const testId = ctxRef.current.testId;
+    if (!testId || completingRef.current) return false;
+    completingRef.current = true;
+    setCompleteError(null);
     setState(prev => ({ ...prev, submitting: true }));
 
-    try {
-      await supabase.rpc('calculate_test_results', { p_test_id: state.testId });
+    const fail = (message: string, detail?: unknown) => {
+      devWarn('[useWelcomeTest] completeTest failed:', message, detail);
+      setCompleteError(message);
+      toast.error(message);
+      setState(prev => ({ ...prev, submitting: false }));
+      return false;
+    };
 
-      const finalAnsweredCount = allVisibleQuestions.filter(q => state.answers[q.id] !== undefined).length;
-      
-      await supabase.rpc('set_test_answered_count_by_share_token', {
-        p_share_token: shareToken as string,
+    try {
+      const speakingOk = await flushSpeakingIfNeeded();
+      if (!speakingOk) return fail('Your recording is not saved yet. Save or re-record it, then try again.');
+      await flushPendingAnswer();
+      const allSaved = await queueRef.current!.flush();
+      if (!allSaved) {
+        return fail('Some answers are not saved yet. Check your connection and tap "Retry saving".');
+      }
+
+      const answers = answersRef.current;
+      const finalAnsweredCount = allVisibleQuestions.filter(q => answers[q.id] !== undefined).length;
+
+      // Transitional (rollout window): an older process-welcome-test computes the
+      // results only after its AI step. The server re-grades and recomputes anyway,
+      // so a refusal here (test no longer in progress, e.g. a retry) is harmless.
+      const { error: resultsError } = await supabase.rpc('calculate_test_results', { p_test_id: testId });
+      if (resultsError) devWarn('[welcome-test] calculate_test_results skipped:', resultsError.message);
+
+      const { error: countError } = await supabase.rpc('set_test_answered_count_by_share_token', {
+        p_share_token: shareTokenRef.current as string,
         p_answered_count: finalAnsweredCount,
       });
+      if (countError) return fail('Could not submit your test. Please try again.', countError.message);
 
-      await supabase.functions.invoke('process-welcome-test', {
+      const { error: processError } = await supabase.functions.invoke('process-welcome-test', {
         body: {
-          test_id: state.testId,
-          student_id: state.studentId,
-          teacher_id: state.teacherId,
+          test_id: testId,
+          student_id: ctxRef.current.studentId,
+          teacher_id: ctxRef.current.teacherId,
           // Proves access to this test (process-welcome-test refuses replays without it).
-          share_token: shareToken,
-          answers: state.answers,
+          share_token: shareTokenRef.current,
+          answers,
           // v6.9.56: attach integrity snapshot (tab-blur count + recent
           // events) buffered by `useWelcomeTestIntegrity`. Stored on the
           // backend under `raw_answers.__integrity__`.
-          integrity: consumeWelcomeTestIntegrity(state.testId),
+          integrity: consumeWelcomeTestIntegrity(testId),
           detected_traits: detectedTraits.current,
           answered_count: finalAnsweredCount,
         },
       });
+      if (processError) return fail('Could not submit your test. Please try again.', processError.message);
 
-      if (shareToken) {
-        localStorage.removeItem(`wt_position_${shareToken}`);
+      if (shareTokenRef.current) {
+        try { localStorage.removeItem(`wt_position_${shareTokenRef.current}`); } catch { /* storage unavailable */ }
       }
 
       setState(prev => ({ ...prev, completed: true, submitting: false, persistedAnsweredCount: finalAnsweredCount }));
       toast.success('Welcome Test completed! Your teacher will review the results.');
       return true;
     } catch (err) {
-      console.error('Error completing welcome test:', err);
-      toast.error('Failed to complete test');
-      setState(prev => ({ ...prev, submitting: false }));
-      return false;
+      return fail('Could not submit your test. Please try again.', err instanceof Error ? err.message : err);
+    } finally {
+      completingRef.current = false;
     }
-  }, [state.testId, state.studentId, state.teacherId, state.answers, shareToken, flushPendingAnswer, allVisibleQuestions]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded, allVisibleQuestions]);
 
   // Progress calculation
   const totalQuestions = allVisibleQuestions.length;
@@ -558,6 +642,11 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     goToSection,
     goToQuestionInSection,
     completeTest,
+    completeError,
+    saveState: (textPending && saveSnapshot.state === 'saved' ? 'saving' : saveSnapshot.state) as SaveState,
+    hasUnsavedAnswers: textPending || saveSnapshot.unsaved > 0,
+    saveHardFailed: saveSnapshot.hardFailed,
+    retrySaves,
     pauseTest,
     resumeTest,
     flushPendingAnswer,

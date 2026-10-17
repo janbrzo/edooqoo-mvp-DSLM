@@ -9,6 +9,7 @@ import {
   storedLevelVersion,
 } from '../../../../supabase/functions/_shared/welcomeTestLevel';
 import { reconstructTraits } from '../../../../supabase/functions/_shared/welcomeTestTraits';
+import { regradeQuestionRows } from '../../../../supabase/functions/_shared/welcomeTestKeyedAnswer';
 
 describe('estimateLevel', () => {
   it('uses the thresholds of the inline version (90/75/55/35)', () => {
@@ -133,5 +134,55 @@ describe('reconstructTraits usage_context (multi-select q3b)', () => {
   });
   it('the client detected_traits value still fills it when the answers do not resolve', () => {
     expect(reconstructTraits({}, { usage_context: 'travel' }).usage_context).toBe('travel');
+  });
+});
+
+describe('level evidence gate (version 3)', () => {
+  const scores = { grammar: 90, vocabulary: 90, reading: 100, writing: null, selfAssessedLevel: 'B2' };
+
+  it('gives no level for one answered item (forged C1 case)', () => {
+    const r = estimateLevel({ ...scores, evidence: { scoredItems: 1, answeredItems: 1 } });
+    expect(r.level).toBeNull();
+    expect(r.confidence).toBeNull();
+    expect(r.evidence?.status).toBe('insufficient');
+  });
+
+  it('gives no level when almost everything is "I don\'t know"', () => {
+    const r = estimateLevel({ grammar: 0, vocabulary: 0, reading: 0, writing: null, selfAssessedLevel: null, evidence: { scoredItems: 20, answeredItems: 0 } });
+    expect(r.level).toBeNull();
+    expect(r.evidence).toMatchObject({ status: 'insufficient', scored_items: 20, answered_items: 0 });
+  });
+
+  it('needs two scored skills', () => {
+    const r = estimateLevel({ grammar: 80, vocabulary: null, reading: null, writing: null, selfAssessedLevel: null, evidence: { scoredItems: 9, answeredItems: 9 } });
+    expect(r.level).toBeNull();
+    expect(r.evidence?.scored_skills).toBe(1);
+  });
+
+  it('levels a student with enough evidence', () => {
+    const r = estimateLevel({ ...scores, evidence: { scoredItems: 18, answeredItems: 15 } });
+    expect(r.level).toBe('C1');
+    expect(r.evidence?.status).toBe('ok');
+    expect(r.version).toBe(LEVEL_ALGORITHM_VERSION);
+  });
+});
+
+describe('server re-grading of stored rows', () => {
+  it('grades keyed rows from the stored key and clears client verdicts on open and unanswered rows', () => {
+    const changes = regradeQuestionRows([
+      { id: 'a', question_type: 'fill_blank', element_type: 'grammar', correct_answer: 'goes', student_answer: 'gos', is_correct: true },
+      { id: 'b', question_type: 'multiple_choice', element_type: 'reading', correct_answer: 'B', student_answer: 'B', is_correct: false },
+      { id: 'c', question_type: 'open_ended', element_type: 'writing', correct_answer: '', student_answer: 'Some text', is_correct: true },
+      { id: 'd', question_type: 'multiple_choice', element_type: 'grammar', correct_answer: 'A', student_answer: null, is_correct: true },
+      { id: 'e', question_type: 'multiple_choice', element_type: 'grammar', correct_answer: 'A', student_answer: '__IDK__', is_correct: false },
+      { id: 'f', question_type: 'fill_blank', element_type: 'grammar', correct_answer: ['have been studying', 'have studied'], student_answer: 'Have studied.', is_correct: null },
+    ]);
+    expect(changes).toEqual([
+      { id: 'a', is_correct: false },
+      { id: 'b', is_correct: true },
+      { id: 'c', is_correct: null },
+      { id: 'd', is_correct: null },
+      { id: 'f', is_correct: true },
+    ]);
   });
 });

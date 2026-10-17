@@ -40,7 +40,7 @@ type: feature
 - `src/hooks/useAuthFlow.tsx`
 
 ## v6.9.30 Follow-ups
-- `backfill-welcome-test-auto-apply` Edge Function: one-shot/idempotent backfill of legacy `completed` tests. Auth via `x-cron-secret`. Copies `test_skill_results.suggested_rating` → `student_learning_elements.current_rating`, stamps `applied_at`, promotes `student_tests.status` → `reviewed`.
+- (REMOVED 2026-10-17, it filtered a non-existent column and the target table is unused) `backfill-welcome-test-auto-apply` Edge Function: one-shot/idempotent backfill of legacy `completed` tests. Auth via `x-cron-secret`. Copies `test_skill_results.suggested_rating` → `student_learning_elements.current_rating`, stamps `applied_at`, promotes `student_tests.status` → `reviewed`.
 - `getWelcomeTestTotal()` in `src/utils/welcomeTestNumbering.ts` is the SINGLE source of truth for the progress denominator (fixes "58/54" drift).
 - `sanitizeAiText` / `sanitizeAiList` in `src/utils/sanitizeAiSummary.ts` scrub `(wt_)?q\d+[a-z]?` IDs + dangling fillers from legacy AI summaries; new `process-welcome-test` prompt forbids IDs at generation time.
 - `WelcomeTestResults.tsx` recalculates listening/reading/etc. from the `questions` prop when DB aggregates are missing (avoids spurious `0` scores).

@@ -106,4 +106,15 @@ describe('resolveWelcomeTestState', () => {
       ]).state,
     ).toBe('completed');
   });
+
+  it('does not treat a draft or a row without a share token as sent', () => {
+    expect(resolveWelcomeTestState([{ status: 'draft', created_at: '2026-10-01T10:00:00Z', share_token: 'tok' }]).state).toBe('none');
+    expect(resolveWelcomeTestState([{ status: 'assigned', created_at: '2026-10-01T10:00:00Z', share_token: null }]).state).toBe('none');
+    expect(
+      resolveWelcomeTestState([
+        { status: 'draft', created_at: '2026-10-05T10:00:00Z', share_token: null },
+        { status: 'assigned', created_at: '2026-10-02T10:00:00Z', share_token: 'tok' },
+      ]),
+    ).toEqual({ state: 'sent', sentAt: '2026-10-02T10:00:00Z' });
+  });
 });

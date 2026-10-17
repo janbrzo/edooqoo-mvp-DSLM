@@ -135,8 +135,8 @@ describe('Iteration 8: compute_skill_metric v3', () => {
   const fn = latestDefinition('compute_skill_metric');
   const upsert = fn.slice(fn.indexOf('ON CONFLICT (student_id, teacher_id, skill_name) DO UPDATE SET'));
 
-  it('is defined by 20261015090000 (the newest definition)', () => {
-    expect(fn).toBe(read('20261015090000_compute_skill_metric_v3.sql'));
+  it('is defined by 20261017100000 (v3 plus the superseded-event filter)', () => {
+    expect(fn).toBe(read('20261017100000_welcome_test_server_authority.sql'));
   });
 
   it('serialises recomputes per student, teacher and skill with an advisory lock before reading events', () => {
@@ -158,6 +158,14 @@ describe('Iteration 8: compute_skill_metric v3', () => {
     expect(fn).toMatch(/IF v_total_events >= 4 THEN/);
     expect(fn).toMatch(/v_recent_avg > v_older_avg \+ 10/);
     expect(fn).toMatch(/v_recent_avg < v_older_avg - 10/);
+  });
+
+  it('allows insufficient_data in the trend check constraint', () => {
+    // The metric upsert runs in the student_events trigger: a rejected trend
+    // rolls back the event itself (2026-10-15 incident).
+    const checks = [...sql.matchAll(/ADD CONSTRAINT student_skill_metrics_trend_check\s+CHECK \(([^;]+)\);/g)];
+    expect(checks.length).toBeGreaterThan(0);
+    expect(checks[checks.length - 1][1]).toMatch(/'insufficient_data'/);
   });
 
   it('keeps the history ascending with the last 20 points and the date key', () => {
@@ -184,7 +192,7 @@ describe('Iteration 8: compute_skill_metric v3', () => {
 
   it('a Mark done event refreshes the skills of its worksheet exercise, in a fixed lock order', () => {
     const trig = latestDefinition('refresh_skill_metrics_on_event');
-    expect(trig).toBe(fn);
+    expect(trig).toBe(read('20261015090000_compute_skill_metric_v3.sql'));
     const body = trig.slice(trig.indexOf('FUNCTION public.refresh_skill_metrics_on_event'));
     expect(body).toMatch(/event_type = 'mark_done_evaluation'/);
     expect(body).toMatch(/w\.event_source = 'worksheet'/);
@@ -225,5 +233,52 @@ describe('Iteration 8: metric engine v3 review fixes', () => {
       const bad = lines.filter((l) => /^\s*--.*'/.test(l));
       expect({ f, bad }).toEqual({ f, bad: [] });
     }
+  });
+});
+
+describe('Welcome Test server authority and retake history (2026-10-17 audit)', () => {
+  const file = readFileSync(join(MIGRATIONS, '20261017100000_welcome_test_server_authority.sql'), 'utf8');
+
+  it('a retake marks older attempts superseded instead of deleting them (decision 1)', () => {
+    const body = latestDefinition('supersede_previous_welcome_test_events');
+    expect(body).toBe(file);
+    expect(body).toMatch(/SET superseded_at = now\(\), superseded_by = t\.id/);
+    expect(body).not.toMatch(/DELETE FROM public\.student_events e USING _welcome_superseded/);
+  });
+
+  it('compute_skill_metric ignores superseded events and the update trigger recomputes on supersede', () => {
+    expect(latestDefinition('compute_skill_metric')).toBe(file);
+    expect(file.match(/AND se\.superseded_at IS NULL/g)?.length).toBe(2);
+    expect(file).toMatch(/AFTER UPDATE OF event_payload, mastery, created_at, superseded_at ON public\.student_events/);
+  });
+
+  it('calculate_test_results is limited to the service role, the owner, or an in-progress test', () => {
+    const body = latestDefinition('calculate_test_results');
+    expect(body).toBe(file);
+    expect(body).toMatch(/v_current_status IS DISTINCT FROM 'in_progress'/);
+    expect(body).toMatch(/v_score := CASE WHEN v_scored > 0/);
+    expect(body).not.toMatch(/s\.total \* 100/);
+  });
+
+  it('the student answer RPC refuses closed or expired tests and the questions RPC hides the key', () => {
+    expect(latestDefinition('save_test_answer_by_share_token')).toBe(file);
+    expect(file).toMatch(/AND t\.status IN \('assigned', 'in_progress'\)/);
+    expect(file).toMatch(/RETURN v_updated > 0;/);
+    expect(latestDefinition('get_test_questions_by_share_token')).toBe(file);
+    expect(file).toMatch(/jsonb_populate_record\(q, jsonb_build_object\('correct_answer', NULL\)\)/);
+  });
+});
+
+describe('Timestamp defaults (2026-10-17)', () => {
+  it('no migration after the fix sets a column default with AT TIME ZONE', () => {
+    const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql') && f >= '20261017140000').sort();
+    for (const f of files) {
+      expect(readFileSync(join(MIGRATIONS, f), 'utf8')).not.toMatch(/DEFAULT\s*\(?\s*now\(\)\s*AT TIME ZONE/i);
+    }
+  });
+
+  it('resets every Europe/Warsaw default to now()', () => {
+    const fix = readFileSync(join(MIGRATIONS, '20261017140000_timestamp_defaults_utc.sql'), 'utf8');
+    expect(fix.match(/ALTER COLUMN \w+ SET DEFAULT now\(\);/g)?.length).toBe(26);
   });
 });

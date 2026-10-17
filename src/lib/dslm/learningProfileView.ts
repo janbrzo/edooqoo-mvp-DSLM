@@ -163,6 +163,11 @@ export const SEVERITY_LABELS: Record<DivergenceSeverity, string> = {
 
 export interface DivergenceRow {
   key: string;
+  /** Raw pair name and the original server text, for readable formatting and feedback keys. */
+  pair: string;
+  index: number;
+  rawDeclared: string;
+  rawObserved: string;
   label: string;
   declared: string;
   observed: string;
@@ -193,6 +198,10 @@ export const toDivergenceRows = (raw: unknown): DivergenceRow[] | null => {
       : 'info';
     rows.push({
       key: `${d.pair}-${index}`,
+      pair: d.pair,
+      index,
+      rawDeclared: typeof d.declared === 'string' ? d.declared : declared,
+      rawObserved: typeof d.observed === 'string' ? d.observed : observed,
       label: DIVERGENCE_PAIR_LABELS[d.pair] ?? capitalize(humanize(d.pair)),
       declared,
       observed,

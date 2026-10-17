@@ -14,6 +14,7 @@ import {
   ChevronRight,
   CheckCircle,
   Loader2,
+  AlertTriangle,
   Sparkles,
   User,
   BookOpen,
@@ -116,6 +117,11 @@ export default function WelcomeTestPage() {
     goToSection,
     goToQuestionInSection,
     completeTest,
+    completeError,
+    saveState,
+    hasUnsavedAnswers,
+    saveHardFailed,
+    retrySaves,
     pauseTest,
     resumeTest,
     flushPendingAnswer,
@@ -142,16 +148,6 @@ export default function WelcomeTestPage() {
     isExpired: boolean;
     teacherEmail: string | null;
   }>({ checked: false, isExpired: false, teacherEmail: null });
-
-  // Global auto-save handler for SpeakingRecorder (bypasses stale closures)
-  useEffect(() => {
-    (window as any).__welcomeTestAutoSave = (questionId: string, audioUrl: string) => {
-      saveAnswer(questionId, audioUrl);
-    };
-    return () => {
-      delete (window as any).__welcomeTestAutoSave;
-    };
-  }, [saveAnswer]);
 
   // v6.9.56: integrity layer (tab-blur logging + paste blocker on
   // open-ended). Must run BEFORE any early returns to keep hook order
@@ -802,6 +798,8 @@ export default function WelcomeTestPage() {
               question={currentQuestion}
               answer={answers[currentQuestion.id]}
               onAnswer={(val) => saveAnswer(currentQuestion.id, val)}
+              onAnswerFor={saveAnswer}
+              onBlur={() => { void flushPendingAnswer(); }}
               translatedOptions={!isSkillQuestion ? currentTranslation?.options : undefined}
               disabled={teacherPreviewMode}
               onNext={!isLastQuestion ? () => { void goToNext(); } : undefined}
@@ -811,10 +809,27 @@ export default function WelcomeTestPage() {
             <div className="flex items-center justify-between">
               <div>
                 {answers[currentQuestion.id] !== undefined && answers[currentQuestion.id] !== "__IDK__" && (
-                  <div className="flex items-center gap-1.5 text-xs text-green-600">
-                    <CheckCircle className="h-3 w-3" />
-                    <span>Saved</span>
-                  </div>
+                  saveState === 'saved' || teacherPreviewMode ? (
+                    <div className="flex items-center gap-1.5 text-xs text-green-600">
+                      <CheckCircle className="h-3 w-3" />
+                      <span>Saved</span>
+                    </div>
+                  ) : saveState === 'failed' ? (
+                    <div className="flex items-center gap-1.5 text-xs text-destructive" role="alert">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span>Not saved</span>
+                    </div>
+                  ) : saveState === 'retrying' ? (
+                    <div className="flex items-center gap-1.5 text-xs text-amber-600" role="status">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Not saved, retrying</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground" role="status">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Saving...</span>
+                    </div>
+                  )
                 )}
                 {answers[currentQuestion.id] === "__IDK__" && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -839,6 +854,24 @@ export default function WelcomeTestPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Save problems stay visible on every question until resolved */}
+        {!teacherPreviewMode && (saveState === 'failed' || saveState === 'retrying') && (
+          <div className="mb-1 flex items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1.5 text-xs text-destructive" role="alert">
+            <span>
+              {saveState === 'retrying'
+                ? 'Not saved, retrying. Keep this page open.'
+                : saveHardFailed
+                  ? 'Your answers cannot be saved. This link may have been replaced or closed: ask your teacher for a new link.'
+                  : 'Some answers are not saved. Check your connection.'}
+            </span>
+            {saveState === 'failed' && (
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { void retrySaves(); }}>
+                Retry saving
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Navigation - sticky bottom (v6.9.49) */}
         <div className="sticky bottom-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 -mx-2 px-2 py-1 flex items-center justify-between gap-2">
@@ -869,8 +902,8 @@ export default function WelcomeTestPage() {
             <div className="flex flex-col items-end">
               <Button
                 size="sm"
-                onClick={completeTest}
-                disabled={!canComplete || submitting || teacherPreviewMode}
+                onClick={() => { void completeTest(); }}
+                disabled={!canComplete || submitting || teacherPreviewMode || hasUnsavedAnswers}
                 className="bg-green-600 hover:bg-green-700 min-h-[34px] text-xs"
               >
                 {submitting ? (
@@ -880,6 +913,19 @@ export default function WelcomeTestPage() {
                 )}
                 Complete
               </Button>
+              {hasUnsavedAnswers && !teacherPreviewMode && (
+                <p className="text-[10px] text-amber-600 text-center mt-1">
+                  {saveState === 'failed' ? 'Some answers are not saved yet.' : 'Saving your answers...'}
+                </p>
+              )}
+              {completeError && !teacherPreviewMode && (
+                <div className="mt-1 flex items-center gap-2 text-[11px] text-destructive" role="alert">
+                  <span>{completeError}</span>
+                  <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" disabled={submitting} onClick={() => { void completeTest(); }}>
+                    Try again
+                  </Button>
+                </div>
+              )}
               {!canComplete && !teacherPreviewMode && (
                 <p className="text-[10px] text-amber-600 text-center mt-1">
                   Answer at least {Math.ceil(totalQuestions * 0.5)} of {totalQuestions} questions ({answeredCount} answered)
@@ -943,6 +989,8 @@ function QuestionInput({
   translatedOptions,
   disabled = false,
   onNext,
+  onBlur,
+  onAnswerFor,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
@@ -950,6 +998,8 @@ function QuestionInput({
   translatedOptions?: string[];
   disabled?: boolean;
   onNext?: () => void;
+  onBlur?: () => void;
+  onAnswerFor?: (questionId: string, val: unknown) => void;
 }) {
   const displayAnswer = answer === "__IDK__" ? "" : answer;
 
@@ -974,6 +1024,8 @@ function QuestionInput({
       onAnswer={onAnswer}
       translatedOptions={translatedOptions}
       onNext={onNext}
+      onBlur={onBlur}
+      onAnswerFor={onAnswerFor}
     />
   );
 }
@@ -984,12 +1036,16 @@ function QuestionInputInner({
   onAnswer,
   translatedOptions,
   onNext,
+  onBlur,
+  onAnswerFor,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
   onAnswer: (val: unknown) => void;
   translatedOptions?: string[];
   onNext?: () => void;
+  onBlur?: () => void;
+  onAnswerFor?: (questionId: string, val: unknown) => void;
 }) {
   switch (question.question_type) {
     case "speaking_record":
@@ -997,13 +1053,10 @@ function QuestionInputInner({
         <SpeakingRecorder
           maxSeconds={question.max_recording_seconds || 60}
           answer={typeof answer === "string" ? answer : undefined}
-          onAnswer={(url) => onAnswer(url)}
+          // The recorder reports the question it was recorded for, so a save that
+          // finishes after navigation still lands on the right question.
+          onAnswer={(url, qId) => (onAnswerFor && qId ? onAnswerFor(qId, url) : onAnswer(url))}
           questionId={question.id}
-          onAutoSave={(qId, url) => {
-            // This bypasses stale closures - saves directly with the correct questionId
-            // The parent's saveAnswer handles routing to commitAnswer
-            (window as any).__welcomeTestAutoSave?.(qId, url);
-          }}
         />
       );
 
@@ -1138,6 +1191,7 @@ function QuestionInputInner({
         <Input
           value={(answer as string) || ""}
           onChange={(e) => onAnswer(e.target.value)}
+          onBlur={onBlur}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onNext?.(); } }}
           placeholder="Type your answer..."
           className="text-sm"
@@ -1150,6 +1204,7 @@ function QuestionInputInner({
         <Textarea
           value={(answer as string) || ""}
           onChange={(e) => onAnswer(e.target.value)}
+          onBlur={onBlur}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onNext?.(); } }}
           placeholder={question.question_type === "open_reflection" ? "Share your thoughts..." : "Write your answer..."}
           className="min-h-[90px] text-sm"

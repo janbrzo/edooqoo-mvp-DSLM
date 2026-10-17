@@ -27,6 +27,7 @@ export interface WelcomeAttempt {
   created_at: string | null;
   total_questions: number | null;
   answered_count: number | null;
+  /** DB-computed over scored items only; may be NULL. Never a score over all questions. */
   score_percentage: number | null;
   profile: StudentProfile | null; // populated only for the latest completed attempt
 }

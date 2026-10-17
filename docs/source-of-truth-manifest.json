@@ -17,14 +17,14 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 392,
-    "hookModules": 94,
+    "componentModules": 396,
+    "hookModules": 96,
     "contextModules": 1,
     "serviceModules": 11,
-    "edgeFunctions": 81,
-    "typedTables": 66,
+    "edgeFunctions": 80,
+    "typedTables": 67,
     "typedRpcs": 103,
-    "migrationIndexes": 21
+    "migrationIndexes": 23
   },
   "routes": [
     {
@@ -851,20 +851,8 @@
         "edgeFunctions": [],
         "fetchTargets": []
       },
-      "hooks": [
-        "useEffect",
-        "useNavigate",
-        "useParams",
-        "useState",
-        "useStudentTestSession"
-      ],
-      "userActions": [
-        "handleAnswerChange",
-        "handleCompleteTest",
-        "handleSubmitAnswer",
-        "handleVerifyEmail",
-        "handleVisibilityChange"
-      ],
+      "hooks": [],
+      "userActions": [],
       "navigateTargets": []
     },
     {
@@ -7219,77 +7207,9 @@
         "StudentTestPage"
       ],
       "props": [],
-      "state": [
-        {
-          "value": "currentAnswer",
-          "setter": "setCurrentAnswer",
-          "initial": "null"
-        },
-        {
-          "value": "startTime",
-          "setter": "setStartTime",
-          "initial": "Date.now()"
-        },
-        {
-          "value": "pausedTime",
-          "setter": "setPausedTime",
-          "initial": "0"
-        },
-        {
-          "value": "isTabActive",
-          "setter": "setIsTabActive",
-          "initial": "true"
-        },
-        {
-          "value": "submitting",
-          "setter": "setSubmitting",
-          "initial": "false"
-        },
-        {
-          "value": "completed",
-          "setter": "setCompleted",
-          "initial": "false"
-        },
-        {
-          "value": "results",
-          "setter": "setResults",
-          "initial": "null"
-        },
-        {
-          "value": "verifiedEmail",
-          "setter": "setVerifiedEmail",
-          "initial": "null"
-        },
-        {
-          "value": "emailInput",
-          "setter": "setEmailInput",
-          "initial": "''"
-        },
-        {
-          "value": "verifyingEmail",
-          "setter": "setVerifyingEmail",
-          "initial": "false"
-        },
-        {
-          "value": "isTeacher",
-          "setter": "setIsTeacher",
-          "initial": "false"
-        }
-      ],
-      "hooks": [
-        "useEffect",
-        "useNavigate",
-        "useParams",
-        "useState",
-        "useStudentTestSession"
-      ],
-      "actions": [
-        "handleAnswerChange",
-        "handleCompleteTest",
-        "handleSubmitAnswer",
-        "handleVerifyEmail",
-        "handleVisibilityChange"
-      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
@@ -7297,62 +7217,13 @@
         "edgeFunctions": [],
         "fetchTargets": []
       },
-      "storage": [
-        {
-          "storage": "localStorage",
-          "operation": "getItem",
-          "key": "storageKey",
-          "file": "src/pages/StudentTestPage.tsx"
-        },
-        {
-          "storage": "localStorage",
-          "operation": "removeItem",
-          "key": "storageKey",
-          "file": "src/pages/StudentTestPage.tsx"
-        },
-        {
-          "storage": "localStorage",
-          "operation": "removeItem",
-          "key": "storageKey",
-          "file": "src/pages/StudentTestPage.tsx"
-        },
-        {
-          "storage": "localStorage",
-          "operation": "setItem",
-          "key": "storageKey",
-          "file": "src/pages/StudentTestPage.tsx"
-        }
-      ],
+      "storage": [],
       "userFacingText": [
-        "% complete",
-        "Answer saved",
-        "Complete Test",
-        "Correct",
-        "Enter Your Email",
-        "False",
-        "Incorrect",
-        "Loading test...",
-        "Next",
-        "Please enter your email to start the test for",
-        "Previous",
-        "Question",
-        "Start Test",
-        "Test Completed!",
-        "Test Not Available",
-        "True",
-        "Type your answer...",
-        "Write your answer...",
-        "You got",
-        "Your progress will be tracked and sent to your teacher."
+        "Ask your teacher for a new link.",
+        "This test link is no longer active"
       ],
       "userFacingBehavior": {
-        "actionHandlers": [
-          "handleAnswerChange",
-          "handleCompleteTest",
-          "handleSubmitAnswer",
-          "handleVerifyEmail",
-          "handleVisibilityChange"
-        ],
+        "actionHandlers": [],
         "navigationTargets": []
       },
       "routes": [
@@ -7663,12 +7534,12 @@
         "Loading your Welcome Test...",
         "Marked as \"I don't know\"",
         "Next",
+        "Not saved",
+        "Not saved, retrying",
         "Pause",
         "Prev",
         "Preview Test (Read-only)",
-        "Previous",
-        "Question",
-        "Question 1 of 58"
+        "Previous"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -17138,6 +17009,37 @@
         "Clear all drawings?",
         "Saving...",
         "This will remove all drawings from the worksheet. This action cannot be undone."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/AutoAppliedPacingCard.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Auto Applied Pacing Card behavior in the dslm domain.",
+      "exports": [
+        "AutoAppliedPacingCard"
+      ],
+      "props": [],
+      "state": [],
+      "hooks": [
+        "useAutoAppliedWtPacing"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        ") (was",
+        "Pacing set from the Welcome Test:",
+        "Undo"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -29055,7 +28957,7 @@
         "Apply",
         "Keep",
         "Suggested level change:",
-        "Welcome Test results indicate a different CEFR level than the one set on the student profile."
+        "The placement test estimate differs from the level on the student profile."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -29197,8 +29099,8 @@
           "initial": "false"
         },
         {
-          "value": "manualApplyCompleted",
-          "setter": "setManualApplyCompleted",
+          "value": "rerunning",
+          "setter": "setRerunning",
           "initial": "false"
         },
         {
@@ -29232,6 +29134,7 @@
         "handleApplyResults",
         "handleCalculateResults",
         "handleGenerateShareLink",
+        "handleRerunAnalysis",
         "handleRetake"
       ],
       "navigateTargets": [],
@@ -29254,9 +29157,8 @@
         "All Questions Answered",
         "Answered",
         "Applied",
-        "Apply skill ratings to Progress manually.",
+        "Apply the skill results to Progress.",
         "Apply to Progress",
-        "Auto-apply did not complete",
         "Back to Tests",
         "Calculate Results",
         "Calculate final results and mark test as completed",
@@ -29266,16 +29168,18 @@
         "Needs review",
         "Profile Questions",
         "Questions",
+        "Re-run analysis",
         "Re-take Test",
         "Recording was not uploaded (saved as:",
         "Results by Skill",
-        "Score"
+        "Results not applied yet"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
           "handleApplyResults",
           "handleCalculateResults",
           "handleGenerateShareLink",
+          "handleRerunAnalysis",
           "handleRetake"
         ],
         "navigationTargets": []
@@ -29310,6 +29214,16 @@
             {
               "name": "questions",
               "type": "TestQuestionLike[]",
+              "optional": true
+            },
+            {
+              "name": "testStatus",
+              "type": "string | null",
+              "optional": true
+            },
+            {
+              "name": "completedAt",
+              "type": "string | null",
               "optional": true
             }
           ]
@@ -29356,24 +29270,21 @@
       "userFacingText": [
         "(AI)",
         "AI Analysis",
-        "Ambiguity Tolerance",
-        "Anxiety Level",
+        "Analysing results...",
         "Confidence Self-Assessment (1-5)",
-        "Error Attitude",
-        "Estimated Level",
-        "Feedback",
-        "Input Channel",
         "Interest Topics",
         "Key Observations",
-        "Learning Preferences",
+        "Learner Profile",
         "Learning profile not yet generated. The student needs to complete the Welcome Test first, or the profile is still being processed.",
         "Level Assessment",
         "Loading learning profile...",
-        "Motivation",
-        "Motivation & Personality",
         "Preferred Activities",
         "Recommendations",
-        "Self-Assessed"
+        "Skill Scores",
+        "Skipped",
+        "Strongest:",
+        "Weakest:",
+        "Writing Quality:"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -32833,7 +32744,8 @@
         "This is NOT a graded exam",
         "You can pause anytime",
         "Your progress is saved automatically. Close the browser and come back later; you'll continue where you left off.",
-        "questions • ~30 min"
+        "min",
+        "questions • ~"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -32934,17 +32846,12 @@
             },
             {
               "name": "onAnswer",
-              "type": "(audioUrl: string) => void",
+              "type": "(audioUrl: string, questionId?: string) => void",
               "optional": false
             },
             {
               "name": "questionId",
               "type": "string",
-              "optional": true
-            },
-            {
-              "name": "onAutoSave",
-              "type": "(questionId: string, audioUrl: string) => void",
               "optional": true
             }
           ]
@@ -33225,6 +33132,185 @@
         "Welcome Test: Progress Comparison",
         "answered"
       ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/welcome-test/profile/ProfileTraits.tsx",
+      "domain": "welcome-test",
+      "purpose": "Implements Awareness Block behavior in the welcome test domain.",
+      "exports": [
+        "AwarenessBlock",
+        "LevelAssessmentBlock",
+        "ProfileTraits"
+      ],
+      "props": [
+        {
+          "name": "LevelBlockProps",
+          "fields": [
+            {
+              "name": "profile",
+              "type": "ProfileLike",
+              "optional": false
+            },
+            {
+              "name": "testStatus",
+              "type": "string | null",
+              "optional": true
+            },
+            {
+              "name": "isWelcomeTest",
+              "type": "boolean",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "\"I don't know\" answers:",
+        "Admits not knowing:",
+        "Estimated Level",
+        "Self-Assessed",
+        "Self-awareness",
+        "on skill questions",
+        "total,"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/welcome-test/profile/SignalFeedback.tsx",
+      "domain": "welcome-test",
+      "purpose": "Implements Feedback Hint behavior in the welcome test domain.",
+      "exports": [
+        "FeedbackHint",
+        "SignalFeedback",
+        "WtFeedbackProvider"
+      ],
+      "props": [
+        {
+          "name": "ProviderProps",
+          "fields": [
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "teacherId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "testId",
+              "type": "string | null | undefined",
+              "optional": false
+            },
+            {
+              "name": "interpretationVersion",
+              "type": "number | null | undefined",
+              "optional": false
+            },
+            {
+              "name": "children",
+              "type": "React.ReactNode",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "SignalFeedbackProps",
+          "fields": [
+            {
+              "name": "signalKey",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "signalValue",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "className",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "noteOpen",
+          "setter": "setNoteOpen",
+          "initial": "false"
+        },
+        {
+          "value": "note",
+          "setter": "setNote",
+          "initial": "existing?.comment ?? ''"
+        }
+      ],
+      "hooks": [
+        "useContext",
+        "useEffect",
+        "useMemo",
+        "useState",
+        "useWtSignalFeedback"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Optional note",
+        "Pick Agree, Partly or Disagree first.",
+        "Save note",
+        "What did you see in class? (optional)"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/welcome-test/profile/__tests__/ProfileTraits.test.tsx",
+      "domain": "welcome-test",
+      "purpose": "Implements Profile Traits behavior in the welcome test domain.",
+      "exports": [],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -39796,6 +39882,50 @@
         }
       },
       {
+        "path": "src/hooks/useAutoAppliedWtPacing.tsx",
+        "domain": "state",
+        "purpose": "Implements use Auto Applied Wt Pacing behavior in the state domain.",
+        "exports": [
+          "useAutoAppliedWtPacing"
+        ],
+        "props": [],
+        "state": [
+          {
+            "value": "applied",
+            "setter": "setApplied",
+            "initial": "null"
+          },
+          {
+            "value": "undoing",
+            "setter": "setUndoing",
+            "initial": "false"
+          }
+        ],
+        "hooks": [
+          "useAuthUser",
+          "useCallback",
+          "useEffect",
+          "useState"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [
+            "pacing_proposals",
+            "students"
+          ],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
         "path": "src/hooks/useCalendarNotifications.tsx",
         "domain": "state",
         "purpose": "Implements use Calendar Notifications behavior in the state domain.",
@@ -42451,7 +42581,6 @@
         "domain": "state",
         "purpose": "Implements use Student Tests behavior in the state domain.",
         "exports": [
-          "useStudentTestSession",
           "useStudentTests"
         ],
         "props": [
@@ -42486,31 +42615,6 @@
             "value": "error",
             "setter": "setError",
             "initial": "null"
-          },
-          {
-            "value": "test",
-            "setter": "setTest",
-            "initial": "null"
-          },
-          {
-            "value": "questions",
-            "setter": "setQuestions",
-            "initial": "[]"
-          },
-          {
-            "value": "loading",
-            "setter": "setLoading",
-            "initial": "true"
-          },
-          {
-            "value": "error",
-            "setter": "setError",
-            "initial": "null"
-          },
-          {
-            "value": "currentIndex",
-            "setter": "setCurrentIndex",
-            "initial": "0"
           }
         ],
         "hooks": [
@@ -42529,8 +42633,7 @@
           ],
           "rpcs": [
             "calculate_test_results",
-            "generate_test_share_token",
-            "get_test_by_share_token"
+            "generate_test_share_token"
           ],
           "edgeFunctions": [],
           "fetchTargets": []
@@ -42955,6 +43058,21 @@
             "value": "state",
             "setter": "setState",
             "initial": "{ testId: null, studentId: null, teacherId: null, title: 'Welcome Test', loading: true, error: null, answers: {}, currentSectionIndex: 0, currentQuestionIndex: 0, completed: false, submitting: false, paused: false, persistedAnsweredCount: null, isTeacherMode: false, studentNativeLanguage: null, }"
+          },
+          {
+            "value": "saveSnapshot",
+            "setter": "setSaveSnapshot",
+            "initial": "{ state: 'saved', unsaved: 0, hardFailed: false }"
+          },
+          {
+            "value": "textPending",
+            "setter": "setTextPending",
+            "initial": "false"
+          },
+          {
+            "value": "completeError",
+            "setter": "setCompleteError",
+            "initial": "null"
           }
         ],
         "hooks": [
@@ -42964,7 +43082,11 @@
           "useRef",
           "useState"
         ],
-        "actions": [],
+        "actions": [
+          "onOnline",
+          "onSaved",
+          "onVisibility"
+        ],
         "navigateTargets": [],
         "dataDependencies": {
           "tables": [],
@@ -42992,13 +43114,17 @@
           {
             "storage": "localStorage",
             "operation": "removeItem",
-            "key": "wt_position_${shareToken}",
+            "key": "wt_position_${shareTokenRef.current}",
             "file": "src/hooks/useWelcomeTest.tsx"
           }
         ],
         "userFacingText": [],
         "userFacingBehavior": {
-          "actionHandlers": [],
+          "actionHandlers": [
+            "onOnline",
+            "onSaved",
+            "onVisibility"
+          ],
           "navigationTargets": []
         }
       },
@@ -43931,6 +44057,48 @@
           "actionHandlers": [],
           "navigationTargets": []
         }
+      },
+      {
+        "path": "src/hooks/useWtSignalFeedback.ts",
+        "domain": "state",
+        "purpose": "Implements use Wt Signal Feedback behavior in the state domain.",
+        "exports": [
+          "normalizeFeedbackComment",
+          "useWtSignalFeedback",
+          "wtSignalFeedbackKey"
+        ],
+        "props": [],
+        "state": [],
+        "hooks": [
+          "useCallback",
+          "useMemo",
+          "useMutation",
+          "useQuery",
+          "useQueryClient"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [
+            "wt_signal_feedback"
+          ],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [
+          {
+            "storage": "localStorage",
+            "operation": "getItem",
+            "key": "edooqoo_demo_mode",
+            "file": "src/hooks/useWtSignalFeedback.ts"
+          }
+        ],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
       }
     ],
     "contexts": [
@@ -44078,7 +44246,8 @@
         "files": [
           "src/components/calendar/SlotDetailModal.tsx",
           "src/components/worksheet/WorksheetContent.tsx",
-          "src/hooks/useWorksheetAutosave.ts"
+          "src/hooks/useWorksheetAutosave.ts",
+          "src/hooks/useWtSignalFeedback.ts"
         ]
       },
       {
@@ -44252,8 +44421,7 @@
           "src/components/worksheet/DraftTeacherNotes.tsx",
           "src/components/worksheet/ExerciseSection.tsx",
           "src/hooks/useWorksheetFormPersistence.ts",
-          "src/pages/HomeworkPage.tsx",
-          "src/pages/StudentTestPage.tsx"
+          "src/pages/HomeworkPage.tsx"
         ]
       },
       {
@@ -44317,8 +44485,17 @@
         "storage": "localStorage",
         "key": "wt_position_${shareToken}",
         "operations": [
-          "removeItem",
           "setItem"
+        ],
+        "files": [
+          "src/hooks/useWelcomeTest.tsx"
+        ]
+      },
+      {
+        "storage": "localStorage",
+        "key": "wt_position_${shareTokenRef.current}",
+        "operations": [
+          "removeItem"
         ],
         "files": [
           "src/hooks/useWelcomeTest.tsx"
@@ -44977,41 +45154,6 @@
           "GEMINI_VERTEX_API_KEY",
           "MODEL_ADVISOR_MODEL",
           "OPENAI_API_KEY",
-          "SUPABASE_SERVICE_ROLE_KEY",
-          "SUPABASE_URL"
-        ]
-      },
-      {
-        "name": "backfill-welcome-test-auto-apply",
-        "path": "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
-        "invocation": "POST via supabase.functions.invoke or direct /functions/v1 request unless method list says otherwise",
-        "methods": [
-          "OPTIONS",
-          "POST"
-        ],
-        "requestFields": [
-          "limit",
-          "testId"
-        ],
-        "visibleResponseFields": [
-          "error",
-          "ok",
-          "processed",
-          "results"
-        ],
-        "dataDependencies": {
-          "tables": [
-            "error_logs",
-            "student_learning_elements",
-            "student_tests",
-            "test_skill_results"
-          ],
-          "rpcs": [],
-          "edgeFunctions": [],
-          "fetchTargets": []
-        },
-        "environmentVariables": [
-          "CRON_SECRET",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -46549,21 +46691,18 @@
         "requestFields": [
           "answered_count",
           "answers",
-          "applied_to_element_id",
-          "data",
           "detected_traits",
-          "element_type",
           "force",
           "integrity",
-          "last_rated_at",
+          "is_correct",
           "nano_skill_ratings",
           "reviewed_at",
           "share_token",
           "student_id",
-          "suggested_rating",
           "teacher_id"
         ],
         "visibleResponseFields": [
+          "accepted",
           "ai_summary",
           "audio_url",
           "error",
@@ -46590,10 +46729,10 @@
         ],
         "dataDependencies": {
           "tables": [
+            "error_logs",
             "homework_notifications",
             "profiles",
             "student_events",
-            "student_learning_elements",
             "student_learning_profile_versions",
             "student_learning_profiles",
             "student_progress_goals",
@@ -46672,6 +46811,7 @@
           "triggerType"
         ],
         "visibleResponseFields": [
+          "autoApplied",
           "current",
           "error",
           "intensity",
@@ -46679,6 +46819,7 @@
           "pacingMode",
           "proposalId",
           "proposed",
+          "reason",
           "reasoning",
           "skipReason",
           "skipped"
@@ -48837,7 +48978,6 @@
       {
         "name": "get_test_by_share_token",
         "callsites": [
-          "src/hooks/useStudentTests.tsx",
           "src/hooks/useWelcomeTest.tsx"
         ],
         "payloadFields": [
@@ -50966,7 +51106,7 @@
           "clientFiles": [],
           "edgeFunctions": [
             "audit-llm-models",
-            "backfill-welcome-test-auto-apply",
+            "process-welcome-test",
             "send-welcome-test-completion-email"
           ]
         }
@@ -52502,6 +52642,7 @@
         "relationships": [],
         "featureOwnership": {
           "clientFiles": [
+            "src/hooks/useAutoAppliedWtPacing.tsx",
             "src/hooks/usePacingProposals.tsx",
             "src/hooks/useStudentAttentionDots.tsx"
           ],
@@ -53337,10 +53478,7 @@
             "src/hooks/useStudentProgress.tsx",
             "src/hooks/useStudentTests.tsx"
           ],
-          "edgeFunctions": [
-            "backfill-welcome-test-auto-apply",
-            "process-welcome-test"
-          ]
+          "edgeFunctions": []
         }
       },
       {
@@ -54191,7 +54329,6 @@
             "src/lib/welcomeTest/ensureWelcomeTest.ts"
           ],
           "edgeFunctions": [
-            "backfill-welcome-test-auto-apply",
             "process-welcome-test",
             "send-welcome-test-completion-email"
           ]
@@ -54316,6 +54453,7 @@
             "src/components/student-tests/SuggestedLevelChangeBanner.tsx",
             "src/components/student-tests/TestDetailsView.tsx",
             "src/components/worksheet/WorksheetToolbar.tsx",
+            "src/hooks/useAutoAppliedWtPacing.tsx",
             "src/hooks/useCalendarSlots.tsx",
             "src/hooks/useOnboardingProgress.tsx",
             "src/hooks/usePacingProposals.tsx",
@@ -54832,7 +54970,6 @@
             "src/hooks/useStudentTests.tsx"
           ],
           "edgeFunctions": [
-            "backfill-welcome-test-auto-apply",
             "process-welcome-test"
           ]
         }
@@ -55406,6 +55543,96 @@
             "unpublish-worksheet",
             "verify-export-payment"
           ]
+        }
+      },
+      {
+        "name": "wt_signal_feedback",
+        "fields": [
+          {
+            "name": "comment",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "interpretation_version",
+            "type": "number | null",
+            "optional": false
+          },
+          {
+            "name": "signal_key",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "signal_value",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "test_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "updated_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "verdict",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [
+          {
+            "foreignKeyName": "wt_signal_feedback_student_id_fkey",
+            "columns": [
+              "student_id"
+            ],
+            "isOneToOne": false,
+            "referencedRelation": "students",
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "foreignKeyName": "wt_signal_feedback_test_id_fkey",
+            "columns": [
+              "test_id"
+            ],
+            "isOneToOne": false,
+            "referencedRelation": "student_tests",
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ],
+        "featureOwnership": {
+          "clientFiles": [
+            "src/hooks/useWtSignalFeedback.ts"
+          ],
+          "edgeFunctions": []
         }
       }
     ],
@@ -57589,6 +57816,18 @@
         "table": "student_learning_profile_versions",
         "unique": false,
         "migration": "supabase/migrations/20261012180000_welcome_test_profile_v2.sql"
+      },
+      {
+        "name": "idx_student_events_welcome_active",
+        "table": "student_events",
+        "unique": false,
+        "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
+      },
+      {
+        "name": "wt_signal_feedback_student_idx",
+        "table": "wt_signal_feedback",
+        "unique": false,
+        "migration": "supabase/migrations/20261017120000_wt_signal_feedback.sql"
       }
     ],
     "migrationFunctions": [
@@ -57633,6 +57872,10 @@
         "migration": "supabase/migrations/20261015090500_test_results_null_for_unattempted.sql"
       },
       {
+        "name": "calculate_test_results",
+        "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
+      },
+      {
         "name": "claim_homework_answer_ai_attempt",
         "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
       },
@@ -57655,6 +57898,10 @@
       {
         "name": "compute_skill_metric",
         "migration": "supabase/migrations/20261015090000_compute_skill_metric_v3.sql"
+      },
+      {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
       },
       {
         "name": "consume_newsletter_rate_limit",
@@ -57755,6 +58002,10 @@
       {
         "name": "get_test_questions_by_share_token",
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
+      },
+      {
+        "name": "get_test_questions_by_share_token",
+        "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
       },
       {
         "name": "get_worksheet_live_answers",
@@ -57985,6 +58236,10 @@
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
       },
       {
+        "name": "save_test_answer_by_share_token",
+        "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
+      },
+      {
         "name": "save_worksheet_answer_by_share_token",
         "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
       },
@@ -58041,6 +58296,10 @@
         "migration": "supabase/migrations/20261015090300_welcome_test_event_reconciliation.sql"
       },
       {
+        "name": "supersede_previous_welcome_test_events",
+        "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
+      },
+      {
         "name": "try_parse_jsonb",
         "migration": "supabase/migrations/20260601082424_08261ec2-f683-4520-94d9-4c1bef3bab9b.sql"
       },
@@ -58065,8 +58324,16 @@
         "migration": "supabase/migrations/20260611110910_b784b86f-9ccf-49e8-a222-0403bb67e6b3.sql"
       },
       {
+        "name": "verify_welcome_test_email",
+        "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
+      },
+      {
         "name": "worksheet_answers_differ",
         "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
+      },
+      {
+        "name": "wt_signal_feedback_touch_updated_at",
+        "migration": "supabase/migrations/20261017120000_wt_signal_feedback.sql"
       }
     ]
   },
@@ -58188,7 +58455,6 @@
           "supabase/functions/add-tokens/index.ts",
           "supabase/functions/admin-impersonate/index.ts",
           "supabase/functions/audit-llm-models/index.ts",
-          "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
           "supabase/functions/check-subscription-status/index.ts",
           "supabase/functions/claim-anonymous-worksheets/index.ts",
@@ -58245,7 +58511,6 @@
           "supabase/functions/add-tokens/index.ts",
           "supabase/functions/admin-impersonate/index.ts",
           "supabase/functions/audit-llm-models/index.ts",
-          "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
           "supabase/functions/calendar-export-csv/index.ts",
           "supabase/functions/calendar-handle-reschedule-decision/index.ts",
@@ -58514,7 +58779,6 @@
         "name": "CRON_SECRET",
         "callsites": [
           "supabase/functions/audit-llm-models/index.ts",
-          "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
           "supabase/functions/loop-pacing-aggregator/index.ts",
           "supabase/functions/pacing-periodic-check/index.ts",
@@ -58731,7 +58995,6 @@
           "supabase/functions/add-tokens/index.ts",
           "supabase/functions/admin-impersonate/index.ts",
           "supabase/functions/audit-llm-models/index.ts",
-          "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
           "supabase/functions/calendar-export-csv/index.ts",
           "supabase/functions/calendar-handle-reschedule-decision/index.ts",
@@ -58800,7 +59063,6 @@
           "supabase/functions/add-tokens/index.ts",
           "supabase/functions/admin-impersonate/index.ts",
           "supabase/functions/audit-llm-models/index.ts",
-          "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
           "supabase/functions/calendar-export-csv/index.ts",
           "supabase/functions/calendar-handle-reschedule-decision/index.ts",

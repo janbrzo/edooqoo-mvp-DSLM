@@ -17,6 +17,7 @@ import { useSkillMetrics } from '@/hooks/useSkillMetrics';
 import { useStudentProfile } from '@/hooks/dslm/useStudentProfile';
 import { useBehavioralStats } from '@/hooks/dslm/useBehavioralStats';
 import { useDemoGuard } from '@/hooks/useDemoGuard';
+import { readLevelEvidence } from '@/lib/welcomeTest/profileDisplay';
 import { buildInsightsSummary, type RankedCategory } from '@/lib/dslm/insightsSummary';
 import type { WelcomeTestState } from '@/lib/dslm/modelReadiness';
 import type { ModelAnchor } from '@/lib/students/workspaceTabs';
@@ -66,6 +67,7 @@ export const InsightsView: React.FC<InsightsViewProps> = ({
         englishLevel,
         hasPlacementProfile: !!profile,
         estimatedLevel: profile?.estimated_level ?? null,
+        levelEvidenceStatus: readLevelEvidence(profile?.raw_answers)?.status ?? null,
         categories,
         daysSinceLastActivity: stats?.daysSinceLastActivity ?? null,
         homeworkTotal: stats?.homeworkTotal ?? 0,

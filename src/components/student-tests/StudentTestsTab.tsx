@@ -232,7 +232,7 @@ export function StudentTestsTab({
       );
       const nextAttempt = maxAttempt + 1;
       const { data: student } = await supabase
-        .from('students').select('name').eq('id', studentId).maybeSingle();
+        .from('students').select('name, student_email').eq('id', studentId).maybeSingle();
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
@@ -422,7 +422,9 @@ export function StudentTestsTab({
                       <Badge variant="outline" className="text-[10px] shrink-0">Latest</Badge>
                     )}
                     <Badge className={`${statusClass} shrink-0`}>{statusLabel}</Badge>
-                    {attempt.score_percentage !== null && (
+                    {/* Welcome Test: never a percentage here (score_percentage is DB-computed over
+                        scored items and may be NULL); the keyed skill score lives in the results view. */}
+                    {answered > 0 && (
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
                         · {answered}/{total} answered
                       </span>
@@ -566,21 +568,21 @@ function TestCard({ test, onClick }: TestCardProps) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {test.score_percentage !== null && (
+            {isWelcome ? (
+              (test.answered_count ?? 0) > 0 && (
+                <div className="text-right">
+                  <div className="text-lg font-bold">{test.answered_count}/{getWelcomeTestTotal(test)}</div>
+                  <div className="text-xs text-muted-foreground">answered</div>
+                </div>
+              )
+            ) : (
               <div className="text-right">
-                {isWelcome ? (
-                  <>
-                    <div className="text-lg font-bold">{test.answered_count || test.correct_answers || 0}/{getWelcomeTestTotal(test)}</div>
-                    <div className="text-xs text-muted-foreground">answered</div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-2xl font-bold">{test.score_percentage.toFixed(0)}%</div>
-                    <div className="text-xs text-muted-foreground">
-                      {test.correct_answers}/{test.total_questions} correct
-                    </div>
-                  </>
-                )}
+                <div className="text-2xl font-bold">
+                  {test.score_percentage === null || test.score_percentage === undefined ? '-' : `${test.score_percentage.toFixed(0)}%`}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {test.correct_answers}/{test.total_questions} correct
+                </div>
               </div>
             )}
             <Badge className={`${statusConfig.bgColor} ${statusConfig.color}`}>

@@ -10,6 +10,11 @@
 //       Welcome Test signals read from real student_learning_profiles columns;
 //       deadline floors applied last; Learning Path intensity reported separately
 //       (computeIntensity) and never changes the style pacing number.
+// v8 (Stage 4): style pacing reads the triangulated study capacity (q5c over q5);
+//       Decision 5: the FIRST Welcome Test proposal is applied automatically
+//       (shouldAutoApplyInitialWtPacing) and recorded as an accepted proposal with
+//       trigger_details.reason 'welcome_test_initial_auto' (previous values kept
+//       there so the teacher can undo); later retakes keep the approval flow.
 //
 // Body: { studentId, teacherId, mode?, triggerType?, triggerDetails? }
 // Output: { pacingMode, reasoning, intensity, mode, proposalId?, skipped?: boolean }
@@ -21,6 +26,8 @@ import {
   computeStylePacing,
   loadLearningProfileForPacing,
   selfProfileFromEntries,
+  shouldAutoApplyInitialWtPacing,
+  WT_INITIAL_AUTO_REASON,
 } from "../_shared/pacing.ts";
 
 const corsHeaders = {
@@ -119,6 +126,59 @@ serve(async (req) => {
       return new Response(JSON.stringify({ pacingMode, proposed: pacingMode, current: currentPacing, reasoning, intensity, mode: 'apply' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Decision 5: first Welcome Test proposal for a student is applied, not left pending.
+    if (triggerType === 'placement_test') {
+      const { data: earlier, error: eErr } = await supabase.from('pacing_proposals')
+        .select('id')
+        .eq('student_id', studentId).eq('teacher_id', teacherId)
+        // Any earlier teacher decision counts: an undone auto-apply ('reverted') or a
+        // rejected proposal must not be overridden by the next Welcome Test.
+        .in('status', ['accepted', 'applied', 'reverted', 'rejected'])
+        .limit(1);
+      const flag = (student as any).last_pacing_set_manually;
+      // A failed lookup must not auto-apply: fall through to the approval flow.
+      // Nothing to apply when the Welcome Test confirms the current pacing.
+      if (!eErr && pacingMode !== currentPacing && shouldAutoApplyInitialWtPacing({
+        triggerType,
+        lastPacingSetManually: typeof flag === 'boolean' ? flag : null,
+        hasEarlierAppliedProposal: (earlier || []).length > 0,
+      })) {
+        const decidedAt = new Date().toISOString();
+        const { error: aErr } = await supabase.from('students')
+          .update({ dslm_pacing_mode: pacingMode, last_pacing_set_manually: false } as any)
+          .eq('id', studentId).eq('teacher_id', teacherId);
+        if (aErr) throw aErr;
+        await supabase.from('pacing_proposals')
+          .update({ status: 'superseded', decided_at: decidedAt })
+          .eq('student_id', studentId).eq('status', 'pending');
+        const { data: applied, error: iErr } = await supabase.from('pacing_proposals')
+          .insert({
+            student_id: studentId,
+            teacher_id: teacherId,
+            trigger_type: triggerType,
+            trigger_details: {
+              ...triggerDetails,
+              intensity,
+              reason: WT_INITIAL_AUTO_REASON,
+              previous_pacing: currentPacing,
+              previous_last_pacing_set_manually: typeof flag === 'boolean' ? flag : null,
+            },
+            current_pacing: currentPacing,
+            proposed_pacing: pacingMode,
+            reasoning,
+            status: 'accepted',
+            decided_at: decidedAt,
+          })
+          .select('id')
+          .single();
+        if (iErr) console.warn('[recalculate-pacing] auto-applied proposal record failed', iErr.message);
+        return new Response(JSON.stringify({
+          pacingMode, proposed: pacingMode, current: currentPacing, reasoning, intensity,
+          mode: 'proposal', autoApplied: true, reason: WT_INITIAL_AUTO_REASON, proposalId: applied?.id,
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
     }
 
     // proposal mode: dynamic threshold: 3 for goal_added (manual UX-sensitive), 5 for cron
