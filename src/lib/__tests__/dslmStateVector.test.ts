@@ -145,10 +145,12 @@ describe.skipIf(!pgBin)('student state vector in isolated PostgreSQL', () => {
     expect(result.strongest_skills.map((s: { micro_skill: string }) => s.micro_skill)).toEqual(['review']);
     expect(result.recommended_focus).toMatchObject({ skill_name: 'ns.review', reason: 'spaced_review' });
     // Use the RPC statement clock itself to avoid crossing the strict boundary between statements.
-    const boundary = JSON.parse(asOwner(`WITH inserted AS (
+    const boundary = JSON.parse(query(`
       INSERT INTO public.student_skill_metrics VALUES
-      ('${emptyStudent}','${owner}','ns.boundary','grammar','boundary',100,4,'stable',statement_timestamp()-interval '30 days') RETURNING 1)
-      SELECT public.get_student_dslm_state_vector('${emptyStudent}','${owner}') FROM inserted;`));
+      ('${emptyStudent}','${owner}','ns.boundary','grammar','boundary',100,4,'stable',statement_timestamp()-interval '30 days');
+      SET ROLE authenticated; SET request.jwt.claim.sub='${owner}'; SET request.jwt.claim.role='authenticated';
+      SELECT public.get_student_dslm_state_vector('${emptyStudent}','${owner}');`));
+    expect(boundary.strongest_skills.some((s: { micro_skill: string }) => s.micro_skill === 'boundary')).toBe(true);
     expect(boundary.decaying_skills.some((s: { micro_skill: string }) => s.micro_skill === 'boundary')).toBe(false);
   });
   it('computes micro averages without weighting by repetition count and scopes category keys', () => {
