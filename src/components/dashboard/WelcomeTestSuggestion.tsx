@@ -338,6 +338,10 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
 
   const handleRefreshLink = async (): Promise<string | null> => {
     if (isDemoMode) { showDemoBlockedToast('Refreshing the Welcome Test link'); return null; }
+    // A new link invalidates the old one: the student's open page would stop saving answers.
+    if (status === 'in_progress' && !window.confirm(
+      'The student has already started this test. A new link will stop their open page from saving answers, so they must continue from the new link. Refresh the link anyway?',
+    )) return null;
     // Lazily create the test if it does not yet exist so Refresh works on day 0.
     const ensured = await ensureWelcomeTest();
     if (!ensured) return null;
