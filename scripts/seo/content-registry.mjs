@@ -358,6 +358,107 @@ export const CONTENT_OVERRIDES = {
     cluster: 'One-to-One Lesson Planning',
     reason: 'Strategic evidence-led personalization framework.',
   },
+  // Consolidation (2026-10): near-duplicate AI comparison pages (containment
+  // 0.65-0.93 in docs/seo/content-uniqueness.generated.json) merged into five
+  // canonical targets. Retired URLs 301 to the canonical page of their cluster.
+  ...Object.fromEntries([
+    // General-purpose AI chatbot comparisons -> canonical Edooqoo vs ChatGPT.
+    '/edooqoo-vs-claude.html',
+    '/edooqoo-vs-gemini.html',
+    '/edooqoo-vs-copilot.html',
+    '/edooqoo-vs-perplexity.html',
+    '/edooqoo-vs-general-purpose-ai.html',
+    '/chatgpt-vs-ai-worksheet-generator.html',
+    '/chatgpt-vs-homework-evidence-workflow.html',
+    '/chatgpt-for-esl-teachers-limitations.html',
+    '/claude-for-english-tutors-limitations.html',
+    '/gemini-for-esl-lesson-planning-limitations.html',
+    '/perplexity-for-esl-teachers-limitations.html',
+    '/teacher-controlled-ai-vs-ai-autopilot.html',
+    '/teacher-controlled-ai-for-english-tutors.html',
+    '/ai-chatbot-vs-student-context-system.html',
+    '/student-context-system-vs-chatbot-for-english-tutors.html',
+    '/llm-vs-edtech-workflow-for-private-tutors.html',
+    '/ai-lesson-planner-vs-worksheet-workflow.html',
+  ].map((route) => [route, {
+    state: 'merge',
+    redirectTo: '/edooqoo-vs-chatgpt.html',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Consolidation: near-duplicate AI chatbot comparison page merged into the canonical Edooqoo vs ChatGPT comparison.',
+  }])),
+  ...Object.fromEntries([
+    // "Alternative to ChatGPT/Claude/..." variants -> canonical alternative page.
+    '/chatgpt-alternative-for-private-esl-tutors.html',
+    '/chatgpt-alternative-for-business-english-tutors.html',
+    '/chatgpt-alternative-for-homework-review.html',
+    '/claude-alternative-for-english-tutors.html',
+    '/gemini-alternative-for-english-tutors.html',
+    '/perplexity-alternative-for-esl-teachers.html',
+    '/best-chatgpt-alternatives-for-esl-teachers.html',
+    '/best-chatgpt-prompts-for-esl-teachers-vs-workflow.html',
+    '/ai-lesson-prep-tool-vs-chatbot.html',
+  ].map((route) => [route, {
+    state: 'merge',
+    redirectTo: '/chatgpt-alternative-for-english-tutors.html',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Consolidation: near-duplicate chatbot-alternative page merged into the canonical ChatGPT alternative page.',
+  }])),
+  ...Object.fromEntries([
+    // AI tools listicles -> canonical AI tools page.
+    '/best-ai-tools-for-private-english-tutors.html',
+    '/ai-tools-for-online-esl-teachers.html',
+    '/ai-tools-for-adult-esl-homework.html',
+    '/ai-tools-for-business-english-tutors.html',
+    '/ai-tools-for-esl-progress-tracking.html',
+    '/ai-tools-for-one-to-one-english-lessons.html',
+    '/ai-tools-for-private-tutor-student-context.html',
+    '/best-ai-tools-for-english-tutors-with-student-context.html',
+    '/ai-lesson-prep-software-for-private-tutors.html',
+    '/best-ai-worksheet-tools-for-english-tutors.html',
+    '/best-ai-worksheet-generator-for-adult-esl.html',
+    '/best-ai-homework-tools-for-private-english-tutors.html',
+    '/worksheet-generator-for-language-schools.html',
+  ].map((route) => [route, {
+    state: 'merge',
+    redirectTo: '/ai-tools-for-private-english-tutors.html',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Consolidation: near-duplicate AI tools page merged into the canonical AI tools for private English tutors page.',
+  }])),
+  ...Object.fromEntries([
+    // Worksheet-library and classroom-tool comparisons -> canonical BusyTeacher page.
+    '/edooqoo-vs-islcollective.html',
+    '/edooqoo-vs-liveworksheets.html',
+    '/edooqoo-vs-wordwall.html',
+    '/edooqoo-vs-quizlet.html',
+    '/edooqoo-vs-kahoot.html',
+  ].map((route) => [route, {
+    state: 'merge',
+    redirectTo: '/edooqoo-vs-busyteacher.html',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Consolidation: near-duplicate worksheet-library or classroom-tool comparison merged into the canonical Edooqoo vs BusyTeacher page.',
+  }])),
+  '/edooqoo-vs-magicschool.html': {
+    state: 'merge',
+    redirectTo: '/edooqoo-vs-twee.html',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Consolidation: near-duplicate AI worksheet-tool comparison merged into the canonical Edooqoo vs Twee page.',
+  },
+  ...Object.fromEntries([
+    // Per-profession 'worksheet' variants -> their 'lesson-prep' counterpart.
+    'doctor-patient-explanation',
+    'nurse-handover',
+    'ux-designer-research-interview',
+    'data-analyst-insight-presentation',
+    'customer-success-renewal-call',
+    'operations-manager-process-update',
+    'finance-manager-budget-explanation',
+    'product-manager-roadmap-tradeoff',
+  ].map((base) => [`/${base}-worksheet.html`, {
+    state: 'merge',
+    redirectTo: `/${base}-lesson-prep.html`,
+    cluster: 'Adult and Business English',
+    reason: 'Consolidation: per-profession worksheet variant was a near-duplicate of the lesson-prep page; merged into it.',
+  }])),
   ...Object.fromEntries(legacyEditorialDecisions.map((decision) => {
     const base = {
       cluster: 'Adult and Business English',
