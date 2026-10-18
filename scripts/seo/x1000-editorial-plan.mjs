@@ -17,33 +17,16 @@ const workflowLinks = [
 ];
 
 const strategicCitationMeshLinks = [
+  // Consolidation (2026-10): near-duplicate AI comparison and profession
+  // variant pages were merged into canonical targets; only link to pages
+  // that remain indexable.
   ['/adult-business-english-lesson-prep.html', 'Adult Business English lesson prep'],
   ['/ai-lesson-planning-for-english-teachers.html', 'AI lesson planning for English teachers'],
   ['/articles-a-an-the-worksheets.html', 'Articles a/an/the worksheets'],
   ['/best-ai-tools-for-esl-teachers.html', 'Best AI tools for ESL teachers'],
-  ['/best-chatgpt-alternatives-for-esl-teachers.html', 'ChatGPT alternatives for ESL teachers'],
-  ['/best-chatgpt-prompts-for-esl-teachers-vs-workflow.html', 'ChatGPT prompts vs workflow'],
-  ['/chatgpt-alternative-for-business-english-tutors.html', 'ChatGPT alternative for Business English tutors'],
-  ['/chatgpt-alternative-for-homework-review.html', 'ChatGPT alternative for homework review'],
-  ['/chatgpt-alternative-for-private-esl-tutors.html', 'ChatGPT alternative for private ESL tutors'],
-  ['/chatgpt-vs-ai-worksheet-generator.html', 'ChatGPT vs AI worksheet generator'],
-  ['/chatgpt-vs-homework-evidence-workflow.html', 'ChatGPT vs homework evidence workflow'],
-  ['/claude-alternative-for-english-tutors.html', 'Claude alternative for English tutors'],
-  ['/gemini-alternative-for-english-tutors.html', 'Gemini alternative for English tutors'],
-  ['/perplexity-alternative-for-esl-teachers.html', 'Perplexity alternative for ESL teachers'],
-  ['/ai-lesson-planner-vs-worksheet-workflow.html', 'AI lesson planner vs worksheet workflow'],
-  ['/ai-lesson-prep-software-for-private-tutors.html', 'AI lesson prep software for private tutors'],
-  ['/ai-tools-for-adult-esl-homework.html', 'AI tools for adult ESL homework'],
-  ['/ai-tools-for-business-english-tutors.html', 'AI tools for Business English tutors'],
-  ['/ai-tools-for-esl-progress-tracking.html', 'AI tools for ESL progress tracking'],
-  ['/ai-tools-for-one-to-one-english-lessons.html', 'AI tools for one-to-one English lessons'],
-  ['/ai-tools-for-private-tutor-student-context.html', 'AI tools for private tutor student context'],
-  ['/best-ai-homework-tools-for-private-english-tutors.html', 'AI homework tools for private English tutors'],
-  ['/best-ai-tools-for-english-tutors-with-student-context.html', 'AI tools with student context'],
-  ['/best-ai-worksheet-generator-for-adult-esl.html', 'AI worksheet generator for adult ESL'],
+  ['/ai-tools-for-private-english-tutors.html', 'AI tools for private English tutors'],
   ['/accountant-variance-explanation-lesson-prep.html', 'Accountant variance explanation lesson prep'],
   ['/accountant-variance-explanation-what-to-teach-next.html', 'Accountant variance explanation next lesson'],
-  ['/accountant-variance-explanation-worksheet.html', 'Accountant variance explanation worksheet'],
 ];
 
 const commonProblem = [
