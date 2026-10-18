@@ -1,11 +1,11 @@
 # W2 rollout (answer saves merge, homework lock after submit, per-exercise reveal)
 
-**Status 2026-10-16:** `20261016110010` (homework: merge, lock after submit, first completion date) is APPLIED in
-production and verified. `20261016110000` (worksheet answers merge) is NOT applied: it is built on the iteration 8
-`save_worksheet_answer` from `20261015090400_homework_ai_queue_and_worksheet_save.sql` and refuses to run before it.
-Apply it right after iteration 8 step 3 (see `iteration-8-rollout.md`). Until then the old client keeps working with the
-previous worksheet save. Files are under 8 KB; `20261016110000` contains `SELECT ... INTO` (inherited from the
-iteration 8 body), so apply it with the Supabase CLI / psql / MCP, not the SQL Editor paste.
+**Status 2026-10-18: all W2 migrations are APPLIED in production and verified.** `20261016110010` (homework: merge, lock
+after submit, first completion date) and `20261016110000` (worksheet answers merge, built on the iteration 8
+`save_worksheet_answer`) are live together with the client release (PR 71). Post-release test on the test account:
+answers from two tabs both kept, offline save retried and saved, a two-blank sentence stored as `0_0`/`0_1`, a submitted
+homework locked and readable by the teacher. `20261016110000` contains `SELECT ... INTO` (inherited from the iteration 8
+body), so apply it with the Supabase CLI / psql / MCP, not the SQL Editor paste.
 
 1. `supabase/migrations/20261016110000_w2_merge_answers_on_save.sql`
    `save_worksheet_answer` (9 arguments) merges the new answers over the stored ones (`stored || new`) before the
