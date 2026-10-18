@@ -1,5 +1,10 @@
 # Owner checklist after the worksheet + DSLM audit (W0-W2), 2026-10-16
 
+**Status 2026-10-18: everything below is done** (PR 71 merged, Edge Functions deployed, `APP_BASE_URL` set, iteration 8
+and W2 migrations applied, legacy revokes applied, post-release test passed). The only open item is removing cron job 3
+(`send-homework-reminders-every-15min`) in the dashboard; its owner role is not changeable from SQL and it only returns
+401. The steps are kept as a record.
+
 What is already done in production (applied through the Supabase connector, verified):
 
 - W0: `consume_token`, `mark_homework_completed`, `soft_delete_worksheet`, `get_worksheet_live_answers`,
