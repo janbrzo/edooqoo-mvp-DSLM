@@ -91,7 +91,9 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
 ## AI Defensibility, Pillar 1
 
-- [ ] Closure: three-tier taxonomy documentation and project memory, service-only database hardening, full regression run and honest production latency evidence (spec: docs/operational/pillar-1-closure.md)
+- [x] Closure: three-tier taxonomy documentation and project memory, service-only database hardening (145 -> 138 findings), production catalog readback (spec: docs/operational/pillar-1-closure.md)
+- [ ] Production state-vector workload benchmark and authenticated HTTP latency: blocked by absence of an authorized operational/session connection for external Supabase; earlier 4.1/15.8 ms samples do not certify <15 ms or p95
+- [ ] Remaining 138 database findings: individual RPC contract review and hosted Auth settings/database maintenance access required; no blanket execution revoke or reserved-schema changes
 - [x] Stage 1.1: additive micro-skill taxonomy
 - [x] Stage 1.2: canonical ratings at the event boundary, flashcard vocabulary evidence, knowledge classification updates, regression tests (869 passed; isolated SQL flow passed; authenticated browser verification unavailable for external Supabase)
 - [x] Stage 1.3: owner/service-only read-time state vector RPC, canonical metrics, parity-tested decay, 1056 tests passed; production student reads and <15 ms latency unverified because external Supabase testing has no authorized session (spec: docs/operational/pillar-1-stage-13.md)

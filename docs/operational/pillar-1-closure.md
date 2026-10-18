@@ -27,7 +27,7 @@ Selected: the explicit allowlist, cross-checked against source callers and the
 production catalog. Five `service_role`-only policies express existing closed
 client access. Client table grants are revoked, service CRUD grants preserved.
 Only the verified internal newsletter limiter needs a new execution restriction;
-already-closed cleanup function permissions are pinned without executing them.
+already-closed cleanup function permissions are verified and left unchanged.
 No blanket revocation is authorized by this closure.
 
 ## Taxonomy and documentation
@@ -92,3 +92,19 @@ Baseline before migration: 81 test files, 1074 tests passed. Final migration
 catalog, linter and regression results are recorded below after execution.
 Remaining intentional or unaudited SECURITY DEFINER warnings are not represented
 as repaired or automatically classified as safe.
+
+- Applied migration: `20261018082946_f70f80f4-6caa-45ef-a5ac-cbd580b6a0a5.sql`.
+- Production readback: all five tables retain RLS, one service-only policy, no
+  anon/authenticated read grants and service CRUD. Limiter execution is false
+  for anon/authenticated, true for service_role. State-vector and already-private
+  helper execution privileges are unchanged.
+- Fresh linter: 138 findings, down by seven (five policy information findings
+  and two limiter warnings). No migration-related findings were introduced.
+- Remaining: 53 anonymous and 82 authenticated definer warnings need individual
+  contract review; three hosted-setting warnings require the operational actions
+  described above. They are not 138 proven vulnerabilities.
+- Regression coverage executes the actual closure SQL in isolated PostgreSQL:
+  one test per internal table checks denied client reads/truncation and preserved
+  service CRUD; a limiter test checks denied client execution and retained service
+  execution. Existing vector authorization/read-only tests run after the migration.
+  The limiter's minimal test body isolates ACL behavior, not live email delivery.

@@ -38,3 +38,9 @@ Production migrations succeeded. A read-only production catalog probe confirms S
 Final verification: 80 test files and 1056 tests passed, including 11 actual PostgreSQL cases plus the static state-vector contract case. SEO asset audit passed and preview build logs reported build OK. Independent review identified fresh fractional-score rounding drift; the follow-up migration fixed it and new parity cases pass. No production student data was changed for testing.
 
 No UI change is part of this stage. Prep/dashboard integration and whole-pillar validation remain separate work. Existing 145 database security findings predate this migration and are outside scope. public/llms.txt stays unchanged because this internal read contract is not a new public product capability.
+
+2026-10-18 closure: see `pillar-1-closure.md` for production catalog verification,
+service-only hardening and the remaining benchmark procedure. Earlier chat
+samples (4.1 ms typical, 15.8 ms heavy) are not a reproduced authorized RPC
+benchmark or a universal <15 ms guarantee. Authenticated production reads and
+HTTP latency remain unverified; no execution privilege was relaxed for testing.

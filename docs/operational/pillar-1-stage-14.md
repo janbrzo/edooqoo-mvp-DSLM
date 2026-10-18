@@ -66,3 +66,14 @@ Cross-cutting TypeScript and TS<->SQL parity invariants:
   remain unverified (external Supabase, no authorized test session) — carried
   over from Stage 1.3.
 - Pre-existing database security warnings (145) unrelated to this pillar.
+
+## Closure follow-up (2026-10-18)
+
+See `pillar-1-closure.md`. The five approved internal tables now have explicit
+service-only policies and no client table privileges. The newsletter limiter
+is restricted to service execution; all teacher and share-token RPC grants are
+preserved. The linter decreased from 145 to 138 findings with no new findings.
+The reported 15.8 ms heavy sample exceeds the target, so production p95 and
+authenticated HTTP checks remain open rather than being recorded as PASS.
+Taxonomy memory and architecture documentation are updated; generated llms.txt
+files and the protected Worksheet Generation Engine remain unchanged.

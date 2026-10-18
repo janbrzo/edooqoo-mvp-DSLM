@@ -11,6 +11,8 @@ const allSql = readdirSync(migrations).sort().filter(f => f.endsWith('.sql'))
 const definitions = allSql.filter(sql => /CREATE OR REPLACE FUNCTION public\.get_student_dslm_state_vector\(/i.test(sql));
 const latest = definitions.at(-1) ?? '';
 const latestHelper = allSql.filter(sql => /CREATE OR REPLACE FUNCTION public\.dslm_effective_mastery\(/i.test(sql)).at(-1) ?? '';
+const serviceOnlyClosure = readFileSync(join(migrations, '20261018082946_f70f80f4-6caa-45ef-a5ac-cbd580b6a0a5.sql'), 'utf8');
+const internalTables = ['app_internal_config', 'newsletter_subscribers', 'newsletter_rate_limits', 'dslm_event_errors', 'dslm_backfill_audit'];
 
 describe('versioned student state vector contract', () => {
   it('has a read-only, invoker-authorized implementation with restricted execution', () => {
@@ -81,6 +83,17 @@ describe.skipIf(!pgBin)('student state vector in isolated PostgreSQL', () => {
       INSERT INTO public.student_skill_metrics SELECT '${student}','${owner}','ns.strong.'||n,'vocabulary','strong.'||n,90+n,4,'stable',now() FROM generate_series(1,7) n;`);
     query(latest);
     query(latestHelper);
+    // Start with exposed ACLs, then execute the actual closure migration.
+    for (const table of internalTables) {
+      query(`CREATE TABLE public.${table}(value integer);
+        GRANT ALL ON public.${table} TO PUBLIC, anon, authenticated, service_role;
+        INSERT INTO public.${table} VALUES (1);`);
+    }
+    query(`CREATE FUNCTION public.consume_newsletter_rate_limit(text,text,integer,integer)
+      RETURNS boolean LANGUAGE sql SECURITY DEFINER AS $$ SELECT true $$;
+      GRANT EXECUTE ON FUNCTION public.consume_newsletter_rate_limit(text,text,integer,integer)
+      TO PUBLIC, anon, authenticated, service_role;`);
+    query(serviceOnlyClosure);
   }, 30000);
   afterAll(() => {
     if (started) pg('pg_ctl', ['-D', join(directory, 'data'), '-m', 'immediate', '-w', 'stop']);
@@ -176,5 +189,25 @@ describe.skipIf(!pgBin)('student state vector in isolated PostgreSQL', () => {
     expect(result.critical_gaps[0]).toMatchObject({ effective_mastery: 40, nano_skill_count: 2, skill_observation_count: 101 });
     expect(result.strongest_skills[0]).toMatchObject({ skill_category: 'speaking', effective_mastery: 95 });
     expect(result.recommended_focus.skill_name).toBe('ns.a');
+  });
+  it.each(internalTables)('%s denies client access and preserves service CRUD after closure', (table) => {
+    for (const role of ['anon', 'authenticated']) {
+      expect(() => query(`SET ROLE ${role}; SELECT * FROM public.${table};`)).toThrow();
+      expect(query(`SELECT has_table_privilege('${role}','public.${table}','TRUNCATE');`)).toBe('f');
+    }
+    expect(query(`SET ROLE service_role; SELECT value FROM public.${table};`)).toBe('1');
+    expect(query(`SET ROLE service_role; INSERT INTO public.${table} VALUES (2);
+      UPDATE public.${table} SET value=3 WHERE value=2;
+      SELECT value FROM public.${table} WHERE value=3;`)).toBe('3');
+    query(`SET ROLE service_role; DELETE FROM public.${table} WHERE value=3;`);
+    expect(query(`SET ROLE service_role; SELECT count(*) FROM public.${table};`)).toBe('1');
+    expect(query(`SELECT polroles::regrole[]::text FROM pg_policy
+      WHERE polrelid='public.${table}'::regclass;`)).toBe('{service_role}');
+  });
+  it('the newsletter limiter denies both client roles while remaining service-executable', () => {
+    for (const role of ['anon', 'authenticated']) {
+      expect(() => query(`SET ROLE ${role}; SELECT public.consume_newsletter_rate_limit('key','action',5,900);`)).toThrow();
+    }
+    expect(query(`SET ROLE service_role; SELECT public.consume_newsletter_rate_limit('key','action',5,900);`)).toBe('t');
   });
 });
