@@ -444,9 +444,11 @@ const professionCases = [
   ['executive-board-update', 'executive board update', 'presenting a board update with priority, risk, decision, and follow-up'],
 ];
 
+// Consolidation (2026-10): the per-profession 'worksheet' variant was a
+// near-duplicate of 'lesson-prep' (containment 0.86-0.93) and was merged
+// into the lesson-prep page via CONTENT_OVERRIDES redirects.
 const professionPageTypes = [
   ['lesson-prep', 'Lesson Prep Use Case', 'prepare the next lesson from the learner current professional task and recent evidence'],
-  ['worksheet', 'Worksheet Use Case', 'create an editable worksheet that practices the professional communication task'],
   ['what-to-teach-next', 'What-to-Teach-Next Use Case', 'choose whether to repair, continue, or advance the professional communication target'],
 ];
 
