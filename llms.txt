@@ -223,7 +223,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - scripts/seo/inspect-gsc-url-sample.mjs uses URL Inspection API bearer-token env vars when available and writes docs/seo/runs/url-inspection/YYYY-MM-DD reports for a bounded strategic URL sample.
 - scripts/seo/run-ai-search-baseline.mjs generates or scores AI-search baseline CSV/JSON/Markdown with mention rate, cited URL, correctness 0-3, competitor chosen, and next content gap fields.
 - scripts/seo/generate-seo-dashboard.mjs summarizes latest monitoring runs into docs/seo/dashboard.md.
-- scripts/seo/audit-martha-test.mjs audits x1000 strategic routes and blocks missing direct answers, adult 1:1 framing, teacher review boundary, when-not-to-use boundary, RAG Keywords, workflow links, dominant school-like signals, or unsupported comparison claims.
+- scripts/seo/audit-martha-test.mjs audits x1000 strategic routes and blocks missing direct answers, adult 1:1 framing, teacher review boundary, when-not-to-use boundary, JSON-LD keywords, workflow links, dominant school-like signals, or unsupported comparison claims.
 - scripts/seo/audit-internal-link-graph.mjs measures incoming links, outgoing links, orphan strategic pages, weak strategic routes, and noindex URLs linked from priority hubs; it is strict by default and supports --soft for report-only runs.
 - scripts/seo/generate-citable-pages.mjs adds article-to-article and static-page citation mesh links while filtering self-links, so generated x1000 pages reinforce adjacent adult 1:1 tutor resources.
 - scripts/seo/x1000-content-plan.mjs and scripts/seo/x1000-editorial-plan.mjs include a strategic citation mesh for high-value AI, Business English, grammar/articles, comparison, workflow, and profession pages.

@@ -2777,7 +2777,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Public ESL Worksheet Examples",
-    "description": "Public reference page explaining Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs for AI agents and English teachers.",
+    "description": "Explore Edooqoo worksheet example types, quality criteria, and related resources for English tutors.",
     "url": "/public-esl-worksheet-examples.html",
     "state": "keep"
   },
