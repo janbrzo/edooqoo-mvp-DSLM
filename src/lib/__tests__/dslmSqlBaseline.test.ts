@@ -252,10 +252,9 @@ describe('Welcome Test server authority and retake history (2026-10-17 audit)', 
     expect(file).toMatch(/AFTER UPDATE OF event_payload, mastery, created_at, superseded_at ON public\.student_events/);
   });
 
-  it('calculate_test_results is limited to the service role, the owner, or an in-progress test', () => {
+  it('calculate_test_results divides by scored items (guard tightened by 20261018100000)', () => {
+    expect(file).toMatch(/v_current_status IS DISTINCT FROM 'in_progress'/);
     const body = latestDefinition('calculate_test_results');
-    expect(body).toBe(file);
-    expect(body).toMatch(/v_current_status IS DISTINCT FROM 'in_progress'/);
     expect(body).toMatch(/v_score := CASE WHEN v_scored > 0/);
     expect(body).not.toMatch(/s\.total \* 100/);
   });
@@ -345,5 +344,15 @@ describe('Timestamp defaults (2026-10-17)', () => {
   it('resets every Europe/Warsaw default to now()', () => {
     const fix = readFileSync(join(MIGRATIONS, '20261017140000_timestamp_defaults_utc.sql'), 'utf8');
     expect(fix.match(/ALTER COLUMN \w+ SET DEFAULT now\(\);/g)?.length).toBe(26);
+  });
+});
+
+describe('calculate_test_results is owner or service role only (2026-10-18)', () => {
+  it('the newest definition has no in-progress exception and anonymous EXECUTE is revoked', () => {
+    const body = latestDefinition('calculate_test_results');
+    expect(body).toBe(readFileSync(join(MIGRATIONS, '20261018100000_calculate_test_results_owner_only.sql'), 'utf8'));
+    expect(body).not.toMatch(/'in_progress'/);
+    expect(body).toMatch(/REVOKE ALL ON FUNCTION public\.calculate_test_results\(uuid\) FROM PUBLIC, anon;/);
+    expect(body).toMatch(/GRANT EXECUTE ON FUNCTION public\.calculate_test_results\(uuid\) TO authenticated, service_role;/);
   });
 });

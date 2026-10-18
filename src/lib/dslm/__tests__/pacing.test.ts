@@ -36,6 +36,9 @@ describe('computeStylePacing: parity with the pre-iteration-5 recalculate-pacing
         { skill_category: 'writing', current_mastery: 30, trend: 'declining' },
         { skill_category: 'reading', current_mastery: 90, trend: 'declining' },
         { skill_category: 'grammar', current_mastery: 50, trend: 'declining' },
+        // Since the evidence gate a group needs two skills (rows without total_events are not gated).
+        { skill_category: 'speaking', current_mastery: 30, trend: 'stable' },
+        { skill_category: 'listening', current_mastery: 90, trend: 'stable' },
       ],
       selfProfile: {
         learning_obstacles: ['Lack of time', 'Grammar'],
@@ -373,5 +376,45 @@ describe('shouldAutoApplyInitialWtPacing (Decision 5)', () => {
   });
   it('the applied value is then respected by resolvePromptPacing even when it equals 50 (flag false)', () => {
     expect(resolvePromptPacing({ dslm_pacing_mode: 50, last_pacing_set_manually: false, main_goal: 'IELTS exam' }, null)).toBe(50);
+  });
+});
+
+describe('computeStylePacing: mastery needs evidence (audit 2026-10-18)', () => {
+  const m = (skill: string, mastery: number, total_events?: number) =>
+    ({ skill_category: skill, skill_name: `ns.${skill}.x`, current_mastery: mastery, total_events, trend: 'stable' });
+
+  it('ignores input mastery built from single answers (one Welcome Test point per skill)', () => {
+    const r = run({ metrics: [m('reading', 100, 1), m('listening', 100, 1)] });
+    expect(r.pacing).toBe(50);
+    expect(r.reasoning.join(' ')).not.toMatch(/Input mastery/);
+  });
+
+  it('needs two skills with enough events before an input average steers pacing', () => {
+    expect(run({ metrics: [m('reading', 95, 5)] }).pacing).toBe(50);
+    const r = run({ metrics: [m('reading', 95, 5), m('listening', 90, 3)] });
+    expect(r.pacing).toBe(65);
+    expect(r.reasoning.join(' ')).toMatch(/Input mastery 93% > 80/);
+  });
+
+  it('keeps counting rows from callers that send no event count', () => {
+    const r = run({ metrics: [m('reading', 95), m('listening', 90)] });
+    expect(r.pacing).toBe(65);
+  });
+
+  it('applies the same gate to output mastery', () => {
+    expect(run({ metrics: [m('speaking', 10, 1), m('writing', 10, 1)] }).pacing).toBe(50);
+    expect(run({ metrics: [m('speaking', 10, 4), m('writing', 20, 4)] }).pacing).toBe(40);
+  });
+});
+
+describe('buildWeakAreasBlock: thin evidence is labelled', () => {
+  it('marks a mastery from one or two answers as tentative and leaves established ones alone', async () => {
+    const { buildWeakAreasBlock } = await import('../../../../supabase/functions/_shared/dslmPromptCore');
+    const out = buildWeakAreasBlock([
+      { skill_category: 'grammar', micro_skill: 'past_simple', current_mastery: 0, total_events: 1, last_event_at: new Date().toISOString() },
+      { skill_category: 'grammar', micro_skill: 'articles', current_mastery: 40, total_events: 6, last_event_at: new Date().toISOString() },
+    ]);
+    expect(out).toMatch(/past_simple: 0% \[[^\]]*based on 1 answer \(tentative\)/);
+    expect(out).not.toMatch(/articles[^\n]*tentative/);
   });
 });

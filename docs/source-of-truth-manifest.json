@@ -22,8 +22,8 @@
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 80,
-    "typedTables": 67,
-    "typedRpcs": 103,
+    "typedTables": 66,
+    "typedRpcs": 117,
     "migrationIndexes": 23
   },
   "routes": [
@@ -43091,7 +43091,6 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "calculate_test_results",
             "get_test_by_share_token",
             "get_test_context_by_share_token",
             "get_test_questions_by_share_token",
@@ -48737,8 +48736,7 @@
       {
         "name": "calculate_test_results",
         "callsites": [
-          "src/hooks/useStudentTests.tsx",
-          "src/hooks/useWelcomeTest.tsx"
+          "src/hooks/useStudentTests.tsx"
         ],
         "payloadFields": [
           "p_test_id"
@@ -49315,31 +49313,6 @@
   "database": {
     "source": "src/integrations/supabase/types.ts",
     "tables": [
-      {
-        "name": "_mig_parts",
-        "fields": [
-          {
-            "name": "chunk",
-            "type": "string | null",
-            "optional": false
-          },
-          {
-            "name": "i",
-            "type": "number",
-            "optional": false
-          },
-          {
-            "name": "mig",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "relationships": [],
-        "featureOwnership": {
-          "clientFiles": [],
-          "edgeFunctions": []
-        }
-      },
       {
         "name": "admin_activity_log",
         "fields": [
@@ -52036,6 +52009,21 @@
         "name": "homework_student_answers",
         "fields": [
           {
+            "name": "ai_eval_attempts",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "ai_eval_last_attempt_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "ai_eval_note",
+            "type": "string | null",
+            "optional": false
+          },
+          {
             "name": "ai_evaluation",
             "type": "Json | null",
             "optional": false
@@ -53011,6 +52999,16 @@
           {
             "name": "student_id",
             "type": "string",
+            "optional": false
+          },
+          {
+            "name": "superseded_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "superseded_by",
+            "type": "string | null",
             "optional": false
           },
           {
@@ -55840,6 +55838,17 @@
         "returns": "Json"
       },
       {
+        "name": "claim_homework_answer_ai_attempt",
+        "args": [
+          {
+            "name": "p_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
         "name": "claim_pending_ai_evaluations",
         "args": [
           {
@@ -55939,6 +55948,22 @@
         "returns": "boolean"
       },
       {
+        "name": "consume_token_internal",
+        "args": [
+          {
+            "name": "p_teacher_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
         "name": "create_mcp_token",
         "args": [
           {
@@ -55969,6 +55994,27 @@
           },
           {
             "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "number"
+      },
+      {
+        "name": "dslm_effective_mastery",
+        "args": [
+          {
+            "name": "p_last_event_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_mastery",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_now",
             "type": "string",
             "optional": false
           }
@@ -56272,6 +56318,22 @@
         "returns": "{ ai_response: string html_content: string id: string is_public: boolean public_level: string public_slug: string public_topic: string published_at: string title: string }[]"
       },
       {
+        "name": "get_student_dslm_state_vector",
+        "args": [
+          {
+            "name": "p_student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_teacher_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "get_student_homework_answers",
         "args": [
           {
@@ -56551,6 +56613,27 @@
         "returns": "undefined"
       },
       {
+        "name": "insert_homework_submission_notification_by_share_token",
+        "args": [
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "undefined"
+      },
+      {
         "name": "insert_public_booking_notification",
         "args": [
           {
@@ -56598,6 +56681,22 @@
         "returns": "boolean"
       },
       {
+        "name": "keep_ai_alternative_ratings",
+        "args": [
+          {
+            "name": "p_new",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_old",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "knowledge_entry_dslm_ratings",
         "args": [
           {
@@ -56607,6 +56706,17 @@
           }
         ],
         "returns": "Json"
+      },
+      {
+        "name": "list_homework_answers_needing_ai_evaluation",
+        "args": [
+          {
+            "name": "p_limit",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returns": "{ answers: Json audio_answers: Json exercise_index: number exercise_type: string homework_id: string id: string item_evaluations: Json last_saved_at: string student_email: string }[]"
       },
       {
         "name": "list_public_worksheets",
@@ -56760,7 +56870,44 @@
         "returns": "undefined"
       },
       {
+        "name": "mark_homework_answer_ai_not_evaluable",
+        "args": [
+          {
+            "name": "p_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_note",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returns": "undefined"
+      },
+      {
         "name": "mark_homework_completed",
+        "args": [
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_is_teacher",
+            "type": "boolean",
+            "optional": true
+          },
+          {
+            "name": "p_user_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
+        "name": "mark_homework_completed_internal",
         "args": [
           {
             "name": "p_homework_id",
@@ -56865,6 +57012,32 @@
         "returns": "boolean"
       },
       {
+        "name": "needs_ai_evaluation_by_share_token",
+        "args": [
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
         "name": "normalize_dslm_ratings",
         "args": [
           {
@@ -56928,6 +57101,52 @@
         "returns": "string"
       },
       {
+        "name": "queue_worksheet_ai_evaluation_by_share_token",
+        "args": [
+          {
+            "name": "p_answers",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_context",
+            "type": "Json",
+            "optional": true
+          },
+          {
+            "name": "p_english_level",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_exercise_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
+      },
+      {
         "name": "reactivate_user_account",
         "args": [
           {
@@ -56937,6 +57156,22 @@
           }
         ],
         "returns": "boolean"
+      },
+      {
+        "name": "reconcile_welcome_test_events",
+        "args": [
+          {
+            "name": "p_events",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_test_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
       },
       {
         "name": "revoke_mcp_token",
@@ -57459,6 +57694,17 @@
         "returns": "boolean"
       },
       {
+        "name": "supersede_previous_welcome_test_events",
+        "args": [
+          {
+            "name": "p_test_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "number"
+      },
+      {
         "name": "track_user_event",
         "args": [
           {
@@ -57630,6 +57876,22 @@
           }
         ],
         "returns": "string"
+      },
+      {
+        "name": "worksheet_answers_differ",
+        "args": [
+          {
+            "name": "p_new",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_old",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
       }
     ],
     "enums": [
@@ -57876,6 +58138,10 @@
         "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
       },
       {
+        "name": "calculate_test_results",
+        "migration": "supabase/migrations/20261018100000_calculate_test_results_owner_only.sql"
+      },
+      {
         "name": "claim_homework_answer_ai_attempt",
         "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
       },
@@ -57926,6 +58192,18 @@
       {
         "name": "delete_mark_done_evaluation",
         "migration": "supabase/migrations/20261015090200_mark_done_and_homework_mastery_fixes.sql"
+      },
+      {
+        "name": "dslm_effective_mastery",
+        "migration": "supabase/migrations/20261017134759_4942ac57-81e4-47df-a362-f032f608f5f0.sql"
+      },
+      {
+        "name": "dslm_effective_mastery",
+        "migration": "supabase/migrations/20261017134848_e57ec5ea-4827-4d2c-a99b-afe88e150d9a.sql"
+      },
+      {
+        "name": "dslm_effective_mastery",
+        "migration": "supabase/migrations/20261017135037_f8cf555a-7b86-47a5-a998-915463827528.sql"
       },
       {
         "name": "extract_micro_skill",
@@ -57986,6 +58264,14 @@
       {
         "name": "get_public_worksheet_by_slug",
         "migration": "supabase/migrations/20260809180315_754eca52-5bfe-4330-b4c4-27f58070b8f2.sql"
+      },
+      {
+        "name": "get_student_dslm_state_vector",
+        "migration": "supabase/migrations/20261017134759_4942ac57-81e4-47df-a362-f032f608f5f0.sql"
+      },
+      {
+        "name": "get_student_dslm_state_vector",
+        "migration": "supabase/migrations/20261017134848_e57ec5ea-4827-4d2c-a99b-afe88e150d9a.sql"
       },
       {
         "name": "get_student_homework_answers_by_share_token",
