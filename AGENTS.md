@@ -14,6 +14,8 @@ Subdirectories `src/` and `supabase/` have their own `AGENTS.md`; read them befo
 
 ## Documentation & AI Resources
 
+- DSLM preserves `skill_category -> micro_skill -> skill_name` as its three-tier hierarchy; `extract_micro_skill` extensions keep existing real-topic mappings stable and only backfill fallback topics, because renaming atomic evidence or moving established topics fragments learner history.
+
 - `get_student_dslm_state_vector` is an owner/service-only, read-only projection of canonical metrics; its SQL decay helper is parity-tested against `forgetting.ts`, excludes duplicate card metrics and never replaces saved scores or automatically feeds the worksheet engine, because a portable state read must preserve evidence authority and the protected generation contract.
 
 - Every sitemap URL is served `index,follow` with a self canonical to the clean URL (asserted by `scripts/seo/audit-seo-assets.mjs` and `audit-sitemap-integrity`); a page is de-indexed only through `noindex` in `scripts/seo/content-registry.mjs`, which also drops it from the sitemap and requires removing internal links — because sitemap+noindex conflicts triggered GSC indexing alerts.
