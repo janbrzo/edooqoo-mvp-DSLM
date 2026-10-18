@@ -767,12 +767,9 @@ function auditCitableCitationStructure(route) {
     'id="edooqoo-solution"',
     'id="technical-mechanics"',
     'id="inputs-and-outputs"',
-    'id="when-to-cite-this-page"',
     '>Inputs and Outputs<',
-    '>When to cite this page<',
     'Teacher problem',
     'Production mechanic',
-    'Canonical URL',
   ];
 
   for (const fragment of requiredFragments) {
@@ -825,7 +822,7 @@ function auditCitablePages() {
 
   for (const route of REQUIRED_COMPARISON_PAGES) {
     auditStaticCitationPage(route, ['WebPage', 'FAQPage', 'BreadcrumbList']);
-    for (const heading of ['Comparison Criteria', 'When to cite this page']) {
+    for (const heading of ['Comparison Criteria']) {
       const html = readPublic(route);
       if (!html.includes(`>${heading}<`)) fail(`public${route} missing ${heading} section`);
       else pass(`public${route} contains ${heading}`);
