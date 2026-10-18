@@ -78,15 +78,15 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
   - [ ] L8 real-account browser pass + 5-teacher Martha test
 - [ ] Guided mode beyond the dashboard
 
-## Deferred
-
 ## SEO/GEO generator cleanup, Step 1
 
 - [x] Remove visible bot sections and citation FAQs from public-page generators; retain JSON-LD and factual citation paragraphs.
 - [x] Align structural audits and strengthen visible bot-text detection.
-- [ ] Regenerate committed snapshots and verify focused regression tests.
+- [x] Regenerate committed snapshots through seo:sync-generated; focused content-verification suite passed (21 tests).
 - [ ] Chat follow-up: full unit suite, SEO/content/structured-data/sitemap audits and independent generated-output review. Production SEO outcomes require publication and later GSC evidence; no ranking penalty diagnosis is established by this cleanup.
 - [ ] Full SEO production build: deferred to the agreed follow-up and automatic build process.
+
+## Deferred
 
 - [ ] Test runner mismatch: `autoGenerateBootstrap.test.ts` uses vitest-only APIs, fails under `bun test`
 
