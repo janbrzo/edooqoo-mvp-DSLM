@@ -1,5 +1,7 @@
 # AGENTS.md — Technical Rules
 
+- AI comparison SEO pages are consolidated into five canonical targets (`/edooqoo-vs-chatgpt.html`, `/chatgpt-alternative-for-english-tutors.html`, `/ai-tools-for-private-english-tutors.html`, `/edooqoo-vs-twee.html`, `/edooqoo-vs-busyteacher.html`); never re-add thin per-tool variants, retire near-duplicates via `CONTENT_OVERRIDES` merge redirects — because 63 near-duplicate pages (containment 0.65-0.93) cannibalized each other in search.
+
 One rule per entry, with a one-line why. Replace an existing rule instead of adding a second one on the same topic. Product/UX decisions live in project memory (`mem://`) and `docs/ux/*-spec.md`, not here.
 
 Subdirectories `src/` and `supabase/` have their own `AGENTS.md`; read them before changing files there.

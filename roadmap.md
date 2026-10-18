@@ -106,3 +106,10 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Stage 1.2: canonical ratings at the event boundary, flashcard vocabulary evidence, knowledge classification updates, regression tests (869 passed; isolated SQL flow passed; authenticated browser verification unavailable for external Supabase)
 - [x] Stage 1.3: owner/service-only read-time state vector RPC, canonical metrics, parity-tested decay, 1056 tests passed; production student reads and <15 ms latency unverified because external Supabase testing has no authorized session (spec: docs/operational/pillar-1-stage-13.md)
 - [x] Stage 1.4: zero-regression baseline — SQL contract tests for Stages 1.1-1.3 in `dslmSqlBaseline.test.ts` + cross-cutting TS/parity guards in `pillar1Baseline.test.ts` (spec: `docs/operational/pillar-1-stage-14.md`); production state-vector reads and latency still unverified (external Supabase)
+
+## SEO/GEO Consolidation, Step 2
+
+- [x] Merged 63 near-duplicate pages (containment 0.65-0.93) into 5 canonical targets: /edooqoo-vs-chatgpt.html, /chatgpt-alternative-for-english-tutors.html, /ai-tools-for-private-english-tutors.html, /edooqoo-vs-twee.html, /edooqoo-vs-busyteacher.html; retired URLs 301 via CONTENT_OVERRIDES + meta-refresh stubs, dropped from sitemap, internal links pruned (Resources, GlobalFooter, citation mesh)
+- [x] Removed retired page specs from generators (generate-citable-pages, x1000-content-plan llmStaticSpecs + profession 'worksheet' variant, x1000-editorial-plan comparisonRows + professionTypes) and synced generate-ai-resources + audit-seo-assets expectations
+- [x] Verification: 1090 tests PASS, build OK, seo:audit OK, content:audit OK (Martha 128 routes, 0 warnings, 0 orphans), sitemap clean of retired URLs, 146 edge redirects
+- [ ] Blog near-duplicates (many posts at 0.85-0.94 containment): separate editorial decision, not part of this step
