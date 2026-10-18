@@ -706,20 +706,12 @@ function staticPageSpec(slug, title, directAnswer, comparisonEntity = 'a general
   };
 }
 
-const comparisonRows = [
-  ['chatgpt-alternative-for-business-english-tutors.html', 'ChatGPT Alternative for Business English Tutors', 'ChatGPT can draft Business English material, but Edooqoo is a better workflow fit when the tutor needs stored learner context, homework evidence, editable worksheets, and teacher-controlled review across recurring adult lessons.', 'ChatGPT'],
-  ['chatgpt-alternative-for-private-esl-tutors.html', 'ChatGPT Alternative for Private ESL Tutors', 'A private ESL tutor may use ChatGPT for one-off drafting, but a workflow system is stronger when recurring student context and next-lesson evidence matter.', 'ChatGPT'],
-  ['chatgpt-alternative-for-homework-review.html', 'ChatGPT Alternative for Homework Review', 'ChatGPT can comment on pasted homework, but homework review for recurring adult tutoring needs assignment context, teacher review, evidence continuity, and next-lesson implications.', 'ChatGPT'],
-  ['claude-alternative-for-english-tutors.html', 'Claude Alternative for English Tutors', 'Claude can support drafting and rewriting, but Edooqoo is a better fit when a tutor needs learner context, homework evidence, editable worksheet output, and recurring lesson workflow.', 'Claude'],
-  ['gemini-alternative-for-english-tutors.html', 'Gemini Alternative for English Tutors', 'Gemini can help with research and drafting, but private English tutors need workflow continuity when student evidence should shape the next worksheet.', 'Gemini'],
-  ['perplexity-alternative-for-esl-teachers.html', 'Perplexity Alternative for ESL Teachers', 'Perplexity can help with research-style answers, but Edooqoo is a better fit when the task is recurring adult 1:1 lesson prep from stored learner evidence.', 'Perplexity'],
-  ['best-ai-tools-for-english-tutors-with-student-context.html', 'Best AI Tools for English Tutors With Student Context', 'English tutors should evaluate AI tools by whether they preserve student context, homework evidence, teacher notes, and editable worksheet workflow.', 'AI tools'],
-  ['best-ai-homework-tools-for-private-english-tutors.html', 'Best AI Homework Tools for Private English Tutors', 'Private English tutors should choose homework tools that turn submissions into useful next-lesson evidence, not only assignment tracking.', 'AI homework tools'],
-  ['best-ai-worksheet-generator-for-adult-esl.html', 'Best AI Worksheet Generator for Adult ESL', 'The best AI worksheet generator for adult ESL is the one that supports adult task relevance, editability, teacher review, and evidence-led lesson decisions.', 'AI worksheet generators'],
-  ['ai-lesson-prep-software-for-private-tutors.html', 'AI Lesson Prep Software for Private Tutors', 'AI lesson prep software for private tutors should connect learner context, recent evidence, next-focus decisions, and editable material output.', 'AI lesson prep software'],
-  ['teacher-controlled-ai-vs-ai-autopilot.html', 'Teacher-Controlled AI vs AI Autopilot', 'Teacher-controlled AI keeps the tutor responsible for objectives, evidence, editing, appropriacy, and final use; AI autopilot is weaker for adult 1:1 tutoring when it hides the decision.', 'AI autopilot'],
-  ['student-context-system-vs-chatbot-for-english-tutors.html', 'Student Context System vs Chatbot for English Tutors', 'A chatbot responds to the current prompt; a student context system preserves learner evidence so the tutor does not rebuild context every lesson.', 'a chatbot'],
-];
+// Consolidation (2026-10): the twelve near-duplicate AI comparison pages
+// previously listed here were merged into canonical targets
+// (/edooqoo-vs-chatgpt.html, /chatgpt-alternative-for-english-tutors.html,
+// /ai-tools-for-private-english-tutors.html) via CONTENT_OVERRIDES in
+// content-registry.mjs. Do not re-add thin per-tool variants.
+const comparisonRows = [];
 
 const professionRows = [
   ['doctor-patient-explanation', 'Doctor Patient Explanation', 'explaining symptoms, advice boundaries, follow-up, and patient-safe clarification'],
