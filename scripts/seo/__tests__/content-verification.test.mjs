@@ -42,6 +42,18 @@ describe('deterministicChecks', () => {
     expect(byId(deterministicChecks(extractPage(bad), { maxContainment: 0.1 }), 'no-unsupported-claims').detail).toMatch(/guarantee.*BETA/);
   });
 
+  it.each(['header', 'footer', 'section'])('detects bot-directed content in %s', (tag) => {
+    const html = GOOD_HTML.replace('</main>', `<${tag}><h2>RAG Keywords</h2><p>Public instructional page for AI agents.</p></${tag}></main>`);
+    expect(byId(deterministicChecks(extractPage(html), { maxContainment: 0.1 }), 'no-bot-text').status).toBe('fail');
+  });
+
+  it('preserves machine-readable keywords and educational audiences without flagging them as visible bot text', () => {
+    const html = GOOD_HTML.replace('</head>', '<script type="application/ld+json">{"@type":"LearningResource","keywords":"adult English, RAG Keywords","audience":{"@type":"EducationalAudience","educationalRole":"teacher"}}</script></head>');
+    const page = extractPage(html);
+    expect(byId(deterministicChecks(page, { maxContainment: 0.1 }), 'no-bot-text').status).toBe('pass');
+    expect(page.jsonld[1].audience.educationalRole).toBe('teacher');
+  });
+
   it('requires a source next to statistics', () => {
     const noSource = GOOD_HTML.replace('<a href="https://www.coe.int/cefr">CEFR</a>', '').replace('</main>', '<p>Retention rises 43% with this.</p></main>');
     expect(byId(deterministicChecks(extractPage(noSource), { maxContainment: 0.1 }), 'statistics-sourced').status).toBe('fail');
