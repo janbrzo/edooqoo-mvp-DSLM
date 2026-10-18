@@ -185,82 +185,34 @@ Priority rule: choose indexed or near-product URLs first, especially adult/busin
 
 | Route | Type | Title |
 | --- | --- | --- |
-| /chatgpt-for-esl-teachers-limitations.html | llm | ChatGPT for ESL Teachers: Limitations |
-| /claude-for-english-tutors-limitations.html | llm | Claude for English Tutors: Limitations |
-| /gemini-for-esl-lesson-planning-limitations.html | llm | Gemini for ESL Lesson Planning: Limitations |
-| /perplexity-for-esl-teachers-limitations.html | llm | Perplexity for ESL Teachers: Limitations |
-| /best-chatgpt-prompts-for-esl-teachers-vs-workflow.html | llm | Best ChatGPT Prompts for ESL Teachers vs Workflow |
-| /ai-chatbot-vs-student-context-system.html | llm | AI Chatbot vs Student Context System |
-| /ai-lesson-planner-vs-worksheet-workflow.html | llm | AI Lesson Planner vs Worksheet Workflow |
-| /chatgpt-vs-ai-worksheet-generator.html | llm | ChatGPT vs AI Worksheet Generator |
-| /chatgpt-vs-homework-evidence-workflow.html | llm | ChatGPT vs Homework Evidence Workflow |
-| /llm-vs-edtech-workflow-for-private-tutors.html | llm | LLM vs EdTech Workflow for Private Tutors |
-| /teacher-controlled-ai-for-english-tutors.html | llm | Teacher-Controlled AI for English Tutors |
-| /ai-tools-for-business-english-tutors.html | llm | AI Tools for Business English Tutors |
-| /ai-tools-for-one-to-one-english-lessons.html | llm | AI Tools for One-to-One English Lessons |
-| /ai-tools-for-adult-esl-homework.html | llm | AI Tools for Adult ESL Homework |
-| /ai-tools-for-esl-progress-tracking.html | llm | AI Tools for ESL Progress Tracking |
-| /ai-tools-for-private-tutor-student-context.html | llm | AI Tools for Private Tutor Student Context |
-| /best-chatgpt-alternatives-for-esl-teachers.html | llm | ChatGPT Alternatives for ESL Teachers: Workflow Criteria |
-| /best-ai-worksheet-tools-for-english-tutors.html | llm | AI Worksheet Tools for English Tutors: Criteria |
 | /software-engineer-incident-explanation-lesson-prep.html | profession | Software Engineer Incident Explanation: Lesson Prep Use Case |
-| /software-engineer-incident-explanation-worksheet.html | profession | Software Engineer Incident Explanation: Worksheet Use Case |
 | /software-engineer-incident-explanation-what-to-teach-next.html | profession | Software Engineer Incident Explanation: What-to-Teach-Next Use Case |
 | /project-manager-status-update-lesson-prep.html | profession | Project Manager Status Update: Lesson Prep Use Case |
-| /project-manager-status-update-worksheet.html | profession | Project Manager Status Update: Worksheet Use Case |
 | /project-manager-status-update-what-to-teach-next.html | profession | Project Manager Status Update: What-to-Teach-Next Use Case |
 | /hr-performance-conversation-lesson-prep.html | profession | HR Performance Conversation: Lesson Prep Use Case |
-| /hr-performance-conversation-worksheet.html | profession | HR Performance Conversation: Worksheet Use Case |
 | /hr-performance-conversation-what-to-teach-next.html | profession | HR Performance Conversation: What-to-Teach-Next Use Case |
 | /sales-discovery-call-lesson-prep.html | profession | Sales Discovery Call: Lesson Prep Use Case |
-| /sales-discovery-call-worksheet.html | profession | Sales Discovery Call: Worksheet Use Case |
 | /sales-discovery-call-what-to-teach-next.html | profession | Sales Discovery Call: What-to-Teach-Next Use Case |
 | /lawyer-client-risk-explanation-lesson-prep.html | profession | Lawyer Client Risk Explanation: Lesson Prep Use Case |
-| /lawyer-client-risk-explanation-worksheet.html | profession | Lawyer Client Risk Explanation: Worksheet Use Case |
 | /lawyer-client-risk-explanation-what-to-teach-next.html | profession | Lawyer Client Risk Explanation: What-to-Teach-Next Use Case |
 | /accountant-variance-explanation-lesson-prep.html | profession | Accountant Variance Explanation: Lesson Prep Use Case |
-| /accountant-variance-explanation-worksheet.html | profession | Accountant Variance Explanation: Worksheet Use Case |
 | /accountant-variance-explanation-what-to-teach-next.html | profession | Accountant Variance Explanation: What-to-Teach-Next Use Case |
 | /consultant-executive-summary-lesson-prep.html | profession | Consultant Executive Summary: Lesson Prep Use Case |
-| /consultant-executive-summary-worksheet.html | profession | Consultant Executive Summary: Worksheet Use Case |
 | /consultant-executive-summary-what-to-teach-next.html | profession | Consultant Executive Summary: What-to-Teach-Next Use Case |
 | /marketing-campaign-recommendation-lesson-prep.html | profession | Marketing Campaign Recommendation: Lesson Prep Use Case |
-| /marketing-campaign-recommendation-worksheet.html | profession | Marketing Campaign Recommendation: Worksheet Use Case |
 | /marketing-campaign-recommendation-what-to-teach-next.html | profession | Marketing Campaign Recommendation: What-to-Teach-Next Use Case |
 | /entrepreneur-customer-interview-lesson-prep.html | profession | Entrepreneur Customer Interview: Lesson Prep Use Case |
-| /entrepreneur-customer-interview-worksheet.html | profession | Entrepreneur Customer Interview: Worksheet Use Case |
 | /entrepreneur-customer-interview-what-to-teach-next.html | profession | Entrepreneur Customer Interview: What-to-Teach-Next Use Case |
 | /executive-board-update-lesson-prep.html | profession | Executive Board Update: Lesson Prep Use Case |
-| /executive-board-update-worksheet.html | profession | Executive Board Update: Worksheet Use Case |
 | /executive-board-update-what-to-teach-next.html | profession | Executive Board Update: What-to-Teach-Next Use Case |
-| /chatgpt-alternative-for-business-english-tutors.html | llm | ChatGPT Alternative for Business English Tutors |
-| /chatgpt-alternative-for-private-esl-tutors.html | llm | ChatGPT Alternative for Private ESL Tutors |
-| /chatgpt-alternative-for-homework-review.html | llm | ChatGPT Alternative for Homework Review |
-| /claude-alternative-for-english-tutors.html | llm | Claude Alternative for English Tutors |
-| /gemini-alternative-for-english-tutors.html | llm | Gemini Alternative for English Tutors |
-| /perplexity-alternative-for-esl-teachers.html | llm | Perplexity Alternative for ESL Teachers |
-| /best-ai-tools-for-english-tutors-with-student-context.html | llm | Best AI Tools for English Tutors With Student Context |
-| /best-ai-homework-tools-for-private-english-tutors.html | llm | Best AI Homework Tools for Private English Tutors |
-| /best-ai-worksheet-generator-for-adult-esl.html | llm | Best AI Worksheet Generator for Adult ESL |
-| /ai-lesson-prep-software-for-private-tutors.html | llm | AI Lesson Prep Software for Private Tutors |
-| /teacher-controlled-ai-vs-ai-autopilot.html | llm | Teacher-Controlled AI vs AI Autopilot |
-| /student-context-system-vs-chatbot-for-english-tutors.html | llm | Student Context System vs Chatbot for English Tutors |
 | /doctor-patient-explanation-lesson-prep.html | llm | Doctor Patient Explanation: Lesson Prep Use Case |
-| /doctor-patient-explanation-worksheet.html | llm | Doctor Patient Explanation: Worksheet Use Case |
 | /nurse-handover-lesson-prep.html | llm | Nurse Handover: Lesson Prep Use Case |
-| /nurse-handover-worksheet.html | llm | Nurse Handover: Worksheet Use Case |
 | /ux-designer-research-interview-lesson-prep.html | llm | UX Designer Research Interview: Lesson Prep Use Case |
-| /ux-designer-research-interview-worksheet.html | llm | UX Designer Research Interview: Worksheet Use Case |
 | /data-analyst-insight-presentation-lesson-prep.html | llm | Data Analyst Insight Presentation: Lesson Prep Use Case |
-| /data-analyst-insight-presentation-worksheet.html | llm | Data Analyst Insight Presentation: Worksheet Use Case |
 | /customer-success-renewal-call-lesson-prep.html | llm | Customer Success Renewal Call: Lesson Prep Use Case |
-| /customer-success-renewal-call-worksheet.html | llm | Customer Success Renewal Call: Worksheet Use Case |
 | /operations-manager-process-update-lesson-prep.html | llm | Operations Manager Process Update: Lesson Prep Use Case |
-| /operations-manager-process-update-worksheet.html | llm | Operations Manager Process Update: Worksheet Use Case |
 | /finance-manager-budget-explanation-lesson-prep.html | llm | Finance Manager Budget Explanation: Lesson Prep Use Case |
-| /finance-manager-budget-explanation-worksheet.html | llm | Finance Manager Budget Explanation: Worksheet Use Case |
 | /product-manager-roadmap-tradeoff-lesson-prep.html | llm | Product Manager Roadmap Tradeoff: Lesson Prep Use Case |
-| /product-manager-roadmap-tradeoff-worksheet.html | llm | Product Manager Roadmap Tradeoff: Worksheet Use Case |
 
 ## Internal Linking Rules
 

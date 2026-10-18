@@ -9980,7 +9980,6 @@
       "userFacingText": [
         "1-Minute Prep",
         "1-Minute Prep for 1:1 English teachers",
-        "AI Chatbot vs Context",
         "About",
         "All Grammar",
         "All Resources",
@@ -9989,7 +9988,6 @@
         "CEFR Guide",
         "CEFR Level Test",
         "ChatGPT Alternative",
-        "ChatGPT Limitations",
         "Compare",
         "Conditionals",
         "Cookie Policy",
@@ -9997,7 +9995,9 @@
         "DSLM Progress Tracking",
         "ELT Glossary",
         "ESL Worksheets",
-        "Edooqoo"
+        "Edooqoo",
+        "Edooqoo. All rights reserved.",
+        "Exercise Types"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],

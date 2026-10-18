@@ -17,33 +17,16 @@ const workflowLinks = [
 ];
 
 const strategicCitationMeshLinks = [
+  // Consolidation (2026-10): near-duplicate AI comparison and profession
+  // variant pages were merged into canonical targets; only link to pages
+  // that remain indexable.
   ['/adult-business-english-lesson-prep.html', 'Adult Business English lesson prep'],
   ['/ai-lesson-planning-for-english-teachers.html', 'AI lesson planning for English teachers'],
   ['/articles-a-an-the-worksheets.html', 'Articles a/an/the worksheets'],
   ['/best-ai-tools-for-esl-teachers.html', 'Best AI tools for ESL teachers'],
-  ['/best-chatgpt-alternatives-for-esl-teachers.html', 'ChatGPT alternatives for ESL teachers'],
-  ['/best-chatgpt-prompts-for-esl-teachers-vs-workflow.html', 'ChatGPT prompts vs workflow'],
-  ['/chatgpt-alternative-for-business-english-tutors.html', 'ChatGPT alternative for Business English tutors'],
-  ['/chatgpt-alternative-for-homework-review.html', 'ChatGPT alternative for homework review'],
-  ['/chatgpt-alternative-for-private-esl-tutors.html', 'ChatGPT alternative for private ESL tutors'],
-  ['/chatgpt-vs-ai-worksheet-generator.html', 'ChatGPT vs AI worksheet generator'],
-  ['/chatgpt-vs-homework-evidence-workflow.html', 'ChatGPT vs homework evidence workflow'],
-  ['/claude-alternative-for-english-tutors.html', 'Claude alternative for English tutors'],
-  ['/gemini-alternative-for-english-tutors.html', 'Gemini alternative for English tutors'],
-  ['/perplexity-alternative-for-esl-teachers.html', 'Perplexity alternative for ESL teachers'],
-  ['/ai-lesson-planner-vs-worksheet-workflow.html', 'AI lesson planner vs worksheet workflow'],
-  ['/ai-lesson-prep-software-for-private-tutors.html', 'AI lesson prep software for private tutors'],
-  ['/ai-tools-for-adult-esl-homework.html', 'AI tools for adult ESL homework'],
-  ['/ai-tools-for-business-english-tutors.html', 'AI tools for Business English tutors'],
-  ['/ai-tools-for-esl-progress-tracking.html', 'AI tools for ESL progress tracking'],
-  ['/ai-tools-for-one-to-one-english-lessons.html', 'AI tools for one-to-one English lessons'],
-  ['/ai-tools-for-private-tutor-student-context.html', 'AI tools for private tutor student context'],
-  ['/best-ai-homework-tools-for-private-english-tutors.html', 'AI homework tools for private English tutors'],
-  ['/best-ai-tools-for-english-tutors-with-student-context.html', 'AI tools with student context'],
-  ['/best-ai-worksheet-generator-for-adult-esl.html', 'AI worksheet generator for adult ESL'],
+  ['/ai-tools-for-private-english-tutors.html', 'AI tools for private English tutors'],
   ['/accountant-variance-explanation-lesson-prep.html', 'Accountant variance explanation lesson prep'],
   ['/accountant-variance-explanation-what-to-teach-next.html', 'Accountant variance explanation next lesson'],
-  ['/accountant-variance-explanation-worksheet.html', 'Accountant variance explanation worksheet'],
 ];
 
 const commonProblem = [
@@ -723,20 +706,12 @@ function staticPageSpec(slug, title, directAnswer, comparisonEntity = 'a general
   };
 }
 
-const comparisonRows = [
-  ['chatgpt-alternative-for-business-english-tutors.html', 'ChatGPT Alternative for Business English Tutors', 'ChatGPT can draft Business English material, but Edooqoo is a better workflow fit when the tutor needs stored learner context, homework evidence, editable worksheets, and teacher-controlled review across recurring adult lessons.', 'ChatGPT'],
-  ['chatgpt-alternative-for-private-esl-tutors.html', 'ChatGPT Alternative for Private ESL Tutors', 'A private ESL tutor may use ChatGPT for one-off drafting, but a workflow system is stronger when recurring student context and next-lesson evidence matter.', 'ChatGPT'],
-  ['chatgpt-alternative-for-homework-review.html', 'ChatGPT Alternative for Homework Review', 'ChatGPT can comment on pasted homework, but homework review for recurring adult tutoring needs assignment context, teacher review, evidence continuity, and next-lesson implications.', 'ChatGPT'],
-  ['claude-alternative-for-english-tutors.html', 'Claude Alternative for English Tutors', 'Claude can support drafting and rewriting, but Edooqoo is a better fit when a tutor needs learner context, homework evidence, editable worksheet output, and recurring lesson workflow.', 'Claude'],
-  ['gemini-alternative-for-english-tutors.html', 'Gemini Alternative for English Tutors', 'Gemini can help with research and drafting, but private English tutors need workflow continuity when student evidence should shape the next worksheet.', 'Gemini'],
-  ['perplexity-alternative-for-esl-teachers.html', 'Perplexity Alternative for ESL Teachers', 'Perplexity can help with research-style answers, but Edooqoo is a better fit when the task is recurring adult 1:1 lesson prep from stored learner evidence.', 'Perplexity'],
-  ['best-ai-tools-for-english-tutors-with-student-context.html', 'Best AI Tools for English Tutors With Student Context', 'English tutors should evaluate AI tools by whether they preserve student context, homework evidence, teacher notes, and editable worksheet workflow.', 'AI tools'],
-  ['best-ai-homework-tools-for-private-english-tutors.html', 'Best AI Homework Tools for Private English Tutors', 'Private English tutors should choose homework tools that turn submissions into useful next-lesson evidence, not only assignment tracking.', 'AI homework tools'],
-  ['best-ai-worksheet-generator-for-adult-esl.html', 'Best AI Worksheet Generator for Adult ESL', 'The best AI worksheet generator for adult ESL is the one that supports adult task relevance, editability, teacher review, and evidence-led lesson decisions.', 'AI worksheet generators'],
-  ['ai-lesson-prep-software-for-private-tutors.html', 'AI Lesson Prep Software for Private Tutors', 'AI lesson prep software for private tutors should connect learner context, recent evidence, next-focus decisions, and editable material output.', 'AI lesson prep software'],
-  ['teacher-controlled-ai-vs-ai-autopilot.html', 'Teacher-Controlled AI vs AI Autopilot', 'Teacher-controlled AI keeps the tutor responsible for objectives, evidence, editing, appropriacy, and final use; AI autopilot is weaker for adult 1:1 tutoring when it hides the decision.', 'AI autopilot'],
-  ['student-context-system-vs-chatbot-for-english-tutors.html', 'Student Context System vs Chatbot for English Tutors', 'A chatbot responds to the current prompt; a student context system preserves learner evidence so the tutor does not rebuild context every lesson.', 'a chatbot'],
-];
+// Consolidation (2026-10): the twelve near-duplicate AI comparison pages
+// previously listed here were merged into canonical targets
+// (/edooqoo-vs-chatgpt.html, /chatgpt-alternative-for-english-tutors.html,
+// /ai-tools-for-private-english-tutors.html) via CONTENT_OVERRIDES in
+// content-registry.mjs. Do not re-add thin per-tool variants.
+const comparisonRows = [];
 
 const professionRows = [
   ['doctor-patient-explanation', 'Doctor Patient Explanation', 'explaining symptoms, advice boundaries, follow-up, and patient-safe clarification'],
@@ -749,9 +724,11 @@ const professionRows = [
   ['product-manager-roadmap-tradeoff', 'Product Manager Roadmap Tradeoff', 'explaining roadmap priority, tradeoff, risk, and stakeholder decision'],
 ];
 
+// Consolidation (2026-10): the per-profession 'worksheet' variant was a
+// near-duplicate of 'lesson-prep' (containment 0.86-0.93) and was merged
+// into the lesson-prep page via CONTENT_OVERRIDES redirects.
 const professionTypes = [
   ['lesson-prep', 'Lesson Prep Use Case', 'prepare one evidence-led lesson from the learner current professional task'],
-  ['worksheet', 'Worksheet Use Case', 'create one editable worksheet that practices the professional communication task'],
 ];
 
 export const x1000AdditionalStaticPages = [

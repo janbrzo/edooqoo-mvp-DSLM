@@ -1,6 +1,6 @@
 {
-  "auditedRoutes": 148,
-  "passedRoutes": 148,
+  "auditedRoutes": 128,
+  "passedRoutes": 128,
   "failedRoutes": 0,
   "warningCount": 0,
   "routes": [
@@ -965,112 +965,8 @@
       "errors": []
     },
     {
-      "route": "/chatgpt-alternative-for-business-english-tutors.html",
-      "file": "public/chatgpt-alternative-for-business-english-tutors.html",
-      "state": "hold",
-      "cluster": "Adult and Business English",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/chatgpt-alternative-for-private-esl-tutors.html",
-      "file": "public/chatgpt-alternative-for-private-esl-tutors.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/chatgpt-alternative-for-homework-review.html",
-      "file": "public/chatgpt-alternative-for-homework-review.html",
-      "state": "hold",
-      "cluster": "Homework and Retention",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/claude-alternative-for-english-tutors.html",
-      "file": "public/claude-alternative-for-english-tutors.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/gemini-alternative-for-english-tutors.html",
-      "file": "public/gemini-alternative-for-english-tutors.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/perplexity-alternative-for-esl-teachers.html",
-      "file": "public/perplexity-alternative-for-esl-teachers.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/best-ai-tools-for-english-tutors-with-student-context.html",
-      "file": "public/best-ai-tools-for-english-tutors-with-student-context.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/best-ai-homework-tools-for-private-english-tutors.html",
-      "file": "public/best-ai-homework-tools-for-private-english-tutors.html",
-      "state": "hold",
-      "cluster": "Homework and Retention",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/best-ai-worksheet-generator-for-adult-esl.html",
-      "file": "public/best-ai-worksheet-generator-for-adult-esl.html",
-      "state": "hold",
-      "cluster": "Adult and Business English",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/ai-lesson-prep-software-for-private-tutors.html",
-      "file": "public/ai-lesson-prep-software-for-private-tutors.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/teacher-controlled-ai-vs-ai-autopilot.html",
-      "file": "public/teacher-controlled-ai-vs-ai-autopilot.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/student-context-system-vs-chatbot-for-english-tutors.html",
-      "file": "public/student-context-system-vs-chatbot-for-english-tutors.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
       "route": "/doctor-patient-explanation-lesson-prep.html",
       "file": "public/doctor-patient-explanation-lesson-prep.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/doctor-patient-explanation-worksheet.html",
-      "file": "public/doctor-patient-explanation-worksheet.html",
       "state": "hold",
       "cluster": "Tutor Business and Tools",
       "pass": true,
@@ -1085,24 +981,8 @@
       "errors": []
     },
     {
-      "route": "/nurse-handover-worksheet.html",
-      "file": "public/nurse-handover-worksheet.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
       "route": "/ux-designer-research-interview-lesson-prep.html",
       "file": "public/ux-designer-research-interview-lesson-prep.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/ux-designer-research-interview-worksheet.html",
-      "file": "public/ux-designer-research-interview-worksheet.html",
       "state": "hold",
       "cluster": "Tutor Business and Tools",
       "pass": true,
@@ -1117,24 +997,8 @@
       "errors": []
     },
     {
-      "route": "/data-analyst-insight-presentation-worksheet.html",
-      "file": "public/data-analyst-insight-presentation-worksheet.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
       "route": "/customer-success-renewal-call-lesson-prep.html",
       "file": "public/customer-success-renewal-call-lesson-prep.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/customer-success-renewal-call-worksheet.html",
-      "file": "public/customer-success-renewal-call-worksheet.html",
       "state": "hold",
       "cluster": "Tutor Business and Tools",
       "pass": true,
@@ -1149,14 +1013,6 @@
       "errors": []
     },
     {
-      "route": "/operations-manager-process-update-worksheet.html",
-      "file": "public/operations-manager-process-update-worksheet.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
       "route": "/finance-manager-budget-explanation-lesson-prep.html",
       "file": "public/finance-manager-budget-explanation-lesson-prep.html",
       "state": "hold",
@@ -1165,24 +1021,8 @@
       "errors": []
     },
     {
-      "route": "/finance-manager-budget-explanation-worksheet.html",
-      "file": "public/finance-manager-budget-explanation-worksheet.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
       "route": "/product-manager-roadmap-tradeoff-lesson-prep.html",
       "file": "public/product-manager-roadmap-tradeoff-lesson-prep.html",
-      "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
-    },
-    {
-      "route": "/product-manager-roadmap-tradeoff-worksheet.html",
-      "file": "public/product-manager-roadmap-tradeoff-worksheet.html",
       "state": "hold",
       "cluster": "Tutor Business and Tools",
       "pass": true,

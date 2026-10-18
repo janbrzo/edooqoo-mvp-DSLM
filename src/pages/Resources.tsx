@@ -101,28 +101,16 @@ const Resources = () => {
     { title: "Business English Generator", description: "Worksheets for meetings, emails, negotiations.", href: "/business-english-worksheet-generator.html", badge: "Business" },
     { title: "Exam Preparation Worksheets", description: "Practice for Cambridge, IELTS, and TOEFL.", href: "/exam-preparation-worksheets-cambridge-ielts.html", badge: "Exams" },
     { title: "For Private Tutors", description: "AI tools designed for 1-on-1 English tutoring.", href: "/ai-tools-for-private-english-tutors.html", badge: "Tutors" },
-    { title: "For Language Schools", description: "Scale worksheet creation for your school.", href: "/worksheet-generator-for-language-schools.html", badge: "Schools" },
-    { title: "For Online ESL Teachers", description: "Tools for remote English teaching.", href: "/ai-tools-for-online-esl-teachers.html", badge: "Online" },
   ];
 
+  // Consolidation (2026-10): only canonical comparison pages are linked;
+  // retired per-tool variants redirect to these.
   const comparisons: ResourceCard[] = [
     { title: "Edooqoo vs ChatGPT", description: "Tutor workflow vs general-purpose AI drafting.", href: "/edooqoo-vs-chatgpt.html", badge: "Compare" },
-    { title: "Edooqoo vs Claude", description: "Stored learner context vs one-off AI assistance.", href: "/edooqoo-vs-claude.html", badge: "Compare" },
-    { title: "Edooqoo vs General AI", description: "Recurring 1:1 prep workflow vs generic chat tools.", href: "/edooqoo-vs-general-purpose-ai.html", badge: "Compare" },
-    { title: "Edooqoo vs Gemini", description: "Tutor workflow vs general AI drafting and research.", href: "/edooqoo-vs-gemini.html", badge: "Compare" },
-    { title: "Edooqoo vs Copilot", description: "English-tutor workflow vs general productivity AI.", href: "/edooqoo-vs-copilot.html", badge: "Compare" },
-    { title: "Edooqoo vs Perplexity", description: "Recurring lesson workflow vs answer research.", href: "/edooqoo-vs-perplexity.html", badge: "Compare" },
     { title: "ChatGPT Alternative for English Tutors", description: "When a tutor needs context, homework evidence, and review.", href: "/chatgpt-alternative-for-english-tutors.html", badge: "Guide" },
-    { title: "ChatGPT for ESL Teachers: Limitations", description: "Where prompts help and where tutor workflow context matters.", href: "/chatgpt-for-esl-teachers-limitations.html", badge: "LLM" },
-    { title: "AI Lesson Prep Tool vs Chatbot", description: "Structured prep workflow vs one-off prompt drafting.", href: "/ai-lesson-prep-tool-vs-chatbot.html", badge: "Guide" },
-    { title: "AI Chatbot vs Student Context System", description: "One-off drafting vs stored learner evidence.", href: "/ai-chatbot-vs-student-context-system.html", badge: "LLM" },
-    { title: "Teacher-Controlled AI", description: "How English tutors keep objectives, evidence, and review under teacher control.", href: "/teacher-controlled-ai-for-english-tutors.html", badge: "Guide" },
-    { title: "AI Worksheet Tools Criteria", description: "Evaluate worksheet tools by editability, task fit, evidence, and review.", href: "/best-ai-worksheet-tools-for-english-tutors.html", badge: "Criteria" },
-    { title: "AI Tools for Private Tutors", description: "Workflow criteria for adult 1:1 English tutors.", href: "/best-ai-tools-for-private-english-tutors.html", badge: "Criteria" },
-    { title: "Edooqoo vs ISLCollective", description: "AI-generated vs user-uploaded worksheets.", href: "/edooqoo-vs-islcollective.html", badge: "Compare" },
-    { title: "Edooqoo vs Liveworksheets", description: "AI generation vs manual interactive conversion.", href: "/edooqoo-vs-liveworksheets.html", badge: "Compare" },
+    { title: "AI Tools for Private Tutors", description: "Workflow criteria for adult 1:1 English tutors.", href: "/ai-tools-for-private-english-tutors.html", badge: "Criteria" },
     { title: "Edooqoo vs Twee", description: "Complete ecosystem vs quick text generation.", href: "/edooqoo-vs-twee.html", badge: "Compare" },
-    { title: "Edooqoo vs MagicSchool", description: "English-specific vs general K-12 AI.", href: "/edooqoo-vs-magicschool.html", badge: "Compare" },
+    { title: "Edooqoo vs BusyTeacher", description: "Generated material vs worksheet archive.", href: "/edooqoo-vs-busyteacher.html", badge: "Compare" },
   ];
 
   const guides: ResourceCard[] = [

@@ -140,20 +140,11 @@ const REQUIRED_CITATION_ARTICLES = [
   '/blog/public-esl-worksheet-gallery-quality-standards.html',
 ];
 
+// Consolidation (2026-10): only the three canonical comparison pages remain;
+// retired variants 301 to these via CONTENT_OVERRIDES in content-registry.mjs.
 const REQUIRED_COMPARISON_PAGES = [
   '/edooqoo-vs-chatgpt.html',
-  '/edooqoo-vs-claude.html',
-  '/edooqoo-vs-general-purpose-ai.html',
-  '/edooqoo-vs-gemini.html',
-  '/edooqoo-vs-copilot.html',
-  '/edooqoo-vs-perplexity.html',
   '/edooqoo-vs-twee.html',
-  '/edooqoo-vs-islcollective.html',
-  '/edooqoo-vs-liveworksheets.html',
-  '/edooqoo-vs-wordwall.html',
-  '/edooqoo-vs-quizlet.html',
-  '/edooqoo-vs-magicschool.html',
-  '/edooqoo-vs-kahoot.html',
   '/edooqoo-vs-busyteacher.html',
 ];
 
@@ -162,12 +153,8 @@ const REQUIRED_PROOF_PAGES = [
 ];
 
 const CLAIM_INTEGRITY_PAGES = [
-  '/ai-tools-for-online-esl-teachers.html',
   '/ai-tools-for-private-english-tutors.html',
   '/chatgpt-alternative-for-english-tutors.html',
-  '/ai-lesson-prep-tool-vs-chatbot.html',
-  '/best-ai-tools-for-private-english-tutors.html',
-  '/worksheet-generator-for-language-schools.html',
   ...REQUIRED_COMPARISON_PAGES,
   '/best-ai-tools-for-esl-teachers.html',
 ];

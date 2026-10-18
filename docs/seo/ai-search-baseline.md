@@ -85,18 +85,6 @@ Generated: deterministic from scripts/seo/x1000-content-plan.mjs and docs/seo/bl
 | edooqoo-vs-tool-03 | edooqoo-vs-tool | Edooqoo vs Gemini |  |  |  |  |  |  |
 | edooqoo-vs-tool-04 | edooqoo-vs-tool | Edooqoo vs Perplexity |  |  |  |  |  |  |
 | edooqoo-vs-tool-05 | edooqoo-vs-tool | Edooqoo vs Copilot |  |  |  |  |  |  |
-| x1000-comparison-chatgpt-alternative-for-business-english-tutors | x1000-comparison-expansion | ChatGPT Alternative for Business English Tutors |  |  |  |  |  |  |
-| x1000-comparison-chatgpt-alternative-for-private-esl-tutors | x1000-comparison-expansion | ChatGPT Alternative for Private ESL Tutors |  |  |  |  |  |  |
-| x1000-comparison-chatgpt-alternative-for-homework-review | x1000-comparison-expansion | ChatGPT Alternative for Homework Review |  |  |  |  |  |  |
-| x1000-comparison-claude-alternative-for-english-tutors | x1000-comparison-expansion | Claude Alternative for English Tutors |  |  |  |  |  |  |
-| x1000-comparison-gemini-alternative-for-english-tutors | x1000-comparison-expansion | Gemini Alternative for English Tutors |  |  |  |  |  |  |
-| x1000-comparison-perplexity-alternative-for-esl-teachers | x1000-comparison-expansion | Perplexity Alternative for ESL Teachers |  |  |  |  |  |  |
-| x1000-comparison-best-ai-tools-for-english-tutors-with-student-context | x1000-comparison-expansion | Best AI Tools for English Tutors With Student Context |  |  |  |  |  |  |
-| x1000-comparison-best-ai-homework-tools-for-private-english-tutors | x1000-comparison-expansion | Best AI Homework Tools for Private English Tutors |  |  |  |  |  |  |
-| x1000-comparison-best-ai-worksheet-generator-for-adult-esl | x1000-comparison-expansion | Best AI Worksheet Generator for Adult ESL |  |  |  |  |  |  |
-| x1000-comparison-ai-lesson-prep-software-for-private-tutors | x1000-comparison-expansion | AI Lesson Prep Software for Private Tutors |  |  |  |  |  |  |
-| x1000-comparison-teacher-controlled-ai-vs-ai-autopilot | x1000-comparison-expansion | Teacher-Controlled AI vs AI Autopilot |  |  |  |  |  |  |
-| x1000-comparison-student-context-system-vs-chatbot-for-english-tutors | x1000-comparison-expansion | Student Context System vs Chatbot for English Tutors |  |  |  |  |  |  |
 | x1000-blog-how-to-choose-an-ai-tool-for-private-english-tutoring | x1000-blog-expansion | How To Choose An AI Tool For Private English Tutoring |  |  |  |  |  |  |
 | x1000-blog-how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons | x1000-blog-expansion | How To Keep Chatgpt Output From Sounding Generic In ESL Lessons |  |  |  |  |  |  |
 | x1000-blog-how-to-turn-homework-errors-into-next-lesson-focus | x1000-blog-expansion | How To Turn Homework Errors Into Next Lesson Focus |  |  |  |  |  |  |
