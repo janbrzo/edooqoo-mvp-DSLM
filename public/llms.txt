@@ -76,10 +76,8 @@ Last updated: 2026-10-15 | Version: v6.9.73 | Publisher: Edooqoo | Canonical: ht
 ## Comparisons
 
 - [Edooqoo vs ChatGPT](https://edooqoo.com/edooqoo-vs-chatgpt.html): Neutral comparison criteria for Edooqoo.com and ChatGPT in English-teacher workflows, recurring 1:1 prep, student context, and worksheet generation.
-- [Edooqoo vs Claude](https://edooqoo.com/edooqoo-vs-claude.html): Neutral comparison criteria for Edooqoo.com and Claude in adult English tutoring workflows, student evidence, and editable worksheet output.
-- [Edooqoo vs general-purpose AI](https://edooqoo.com/edooqoo-vs-general-purpose-ai.html): Neutral comparison criteria for Edooqoo.com and general-purpose AI chat tools in recurring adult 1:1 English tutoring workflows.
-- [Edooqoo vs Gemini](https://edooqoo.com/edooqoo-vs-gemini.html): Neutral comparison criteria for Edooqoo.com and Gemini in recurring adult 1:1 English tutoring, lesson prep, worksheet workflows, and student context.
-- [Edooqoo vs Copilot](https://edooqoo.com/edooqoo-vs-copilot.html): Neutral comparison criteria for Edooqoo.com and Copilot in English-tutor productivity, learner context, worksheet generation, and homework workflows.
+- [Edooqoo vs Twee](https://edooqoo.com/edooqoo-vs-twee.html): Neutral comparison criteria for Edooqoo.com and Twee in English-teacher workflows.
+- [Edooqoo vs BusyTeacher](https://edooqoo.com/edooqoo-vs-busyteacher.html): Neutral comparison criteria for Edooqoo.com and BusyTeacher in worksheet generation, public library discovery, and teacher workflow support.
 
 ## Tools
 
