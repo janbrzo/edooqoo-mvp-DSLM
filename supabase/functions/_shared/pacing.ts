@@ -39,7 +39,17 @@ export interface PacingMetric {
   micro_skill?: string | null;
   current_mastery?: number | string | null;
   trend?: string | null;
+  /** Rated events behind current_mastery. Missing on rows from callers written before the evidence gate. */
+  total_events?: number | string | null;
 }
+
+/**
+ * A skill mastery steers pacing only with at least this many rated events behind it
+ * (a single 0/100 answer, e.g. from the Welcome Test, is not a mastery).
+ */
+export const MIN_PACING_EVIDENCE_EVENTS = 3;
+/** Minimum number of such skills in a group (input or output) before its average counts. */
+export const MIN_PACING_EVIDENCE_SKILLS = 2;
 
 /** Welcome Test profile signals, from real `student_learning_profiles` columns only. */
 export interface PacingProfileSignals {
@@ -191,8 +201,16 @@ export function computeStylePacing(input: StylePacingInput): StylePacingResult {
   const isOutput = (m: PacingMetric) => /speak|writ|product/i.test(text(m));
   const isInput = (m: PacingMetric) => /read|listen|recept/i.test(text(m));
   const avg = (xs: number[]) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
-  const outAvg = avg(arr.filter(isOutput).map((m) => Number(m.current_mastery) || 0));
-  const inAvg = avg(arr.filter(isInput).map((m) => Number(m.current_mastery) || 0));
+  // Only skills with enough rated events, and only groups with enough such skills.
+  // A row without total_events (older caller) is not gated.
+  const hasEvidence = (m: PacingMetric) =>
+    m.total_events === undefined || m.total_events === null || Number(m.total_events) >= MIN_PACING_EVIDENCE_EVENTS;
+  const groupAvg = (pick: (m: PacingMetric) => boolean): number | null => {
+    const xs = arr.filter((m) => pick(m) && hasEvidence(m)).map((m) => Number(m.current_mastery) || 0);
+    return xs.length >= MIN_PACING_EVIDENCE_SKILLS ? avg(xs) : null;
+  };
+  const outAvg = groupAvg(isOutput);
+  const inAvg = groupAvg(isInput);
   if (outAvg !== null && outAvg < 40) { p -= 10; reasoning.push(`Output mastery ${Math.round(outAvg)}% < 40 → −10 (more input)`); }
   if (inAvg !== null && inAvg > 80) { p += 15; reasoning.push(`Input mastery ${Math.round(inAvg)}% > 80 → +15 (more output)`); }
 

@@ -185,7 +185,11 @@ export function buildWeakAreasBlock(metrics: any[], limit = 10): string {
     const tag = w === 'AUTHORITATIVE' ? '⚡ AUTHORITATIVE' : w === 'STALE' ? '(STALE: re-test)' : '';
     const trend = m.trend === 'declining' ? ', declining' : m.trend === 'improving' ? ', improving' : '';
     const cat = `${m.skill_category || 'general'}/${m.micro_skill || m.skill_name || 'general'}`;
-    return `- ${cat}: ${m.current_mastery || 0}% [${daysAgoLabel(seenAt)}${trend}] ${tag}`.trim();
+    // One or two rated answers are a hint, not a mastery: say so, so the plan does not treat them as established.
+    const events = Number(m.total_events);
+    const thin = Number.isFinite(events) && events > 0 && events < 3
+      ? `, based on ${events} answer${events === 1 ? '' : 's'} (tentative)` : '';
+    return `- ${cat}: ${m.current_mastery || 0}% [${daysAgoLabel(seenAt)}${trend}${thin}] ${tag}`.trim();
   }).join('\n  ');
 }
 
