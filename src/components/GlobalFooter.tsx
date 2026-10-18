@@ -99,37 +99,20 @@ const GlobalFooter = () => {
             <h3 className="font-semibold text-foreground mb-3 text-sm">For Teachers</h3>
             <ul className="space-y-2 text-sm">
               <li><FooterLink href="/ai-tools-for-private-english-tutors.html">Private Tutors</FooterLink></li>
-              <li><FooterLink href="/worksheet-generator-for-language-schools.html">Language Schools</FooterLink></li>
-              <li><FooterLink href="/ai-tools-for-online-esl-teachers.html">Online ESL Teachers</FooterLink></li>
               <li><FooterLink href="/business-english-worksheet-generator.html">Business English</FooterLink></li>
               <li><FooterLink href="/english-worksheets-for-corporate-training.html">Corporate Training</FooterLink></li>
             </ul>
           </div>
 
-          {/* Column 5: Compare (restored v6.9.22: all .html files exist) */}
+          {/* Column 5: Compare (consolidation 2026-10: canonical pages only; retired variants 301 to these) */}
           <div>
             <h3 className="font-semibold text-foreground mb-3 text-sm">Compare</h3>
             <ul className="space-y-2 text-sm">
               <li><FooterLink href="/edooqoo-vs-chatgpt.html">vs ChatGPT</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-claude.html">vs Claude</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-general-purpose-ai.html">vs General AI</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-gemini.html">vs Gemini</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-copilot.html">vs Copilot</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-perplexity.html">vs Perplexity</FooterLink></li>
               <li><FooterLink href="/chatgpt-alternative-for-english-tutors.html">ChatGPT Alternative</FooterLink></li>
-              <li><FooterLink href="/chatgpt-for-esl-teachers-limitations.html">ChatGPT Limitations</FooterLink></li>
-              <li><FooterLink href="/ai-chatbot-vs-student-context-system.html">AI Chatbot vs Context</FooterLink></li>
-              <li><FooterLink href="/teacher-controlled-ai-for-english-tutors.html">Teacher-Controlled AI</FooterLink></li>
-              <li><FooterLink href="/best-ai-worksheet-tools-for-english-tutors.html">Worksheet Tool Criteria</FooterLink></li>
-              <li><FooterLink href="/best-ai-tools-for-private-english-tutors.html">Private Tutor AI Tools</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-islcollective.html">vs ISLCollective</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-liveworksheets.html">vs Liveworksheets</FooterLink></li>
+              <li><FooterLink href="/ai-tools-for-private-english-tutors.html">Private Tutor AI Tools</FooterLink></li>
               <li><FooterLink href="/edooqoo-vs-twee.html">vs Twee</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-magicschool.html">vs MagicSchool</FooterLink></li>
               <li><FooterLink href="/edooqoo-vs-busyteacher.html">vs BusyTeacher</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-kahoot.html">vs Kahoot</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-quizlet.html">vs Quizlet</FooterLink></li>
-              <li><FooterLink href="/edooqoo-vs-wordwall.html">vs Wordwall</FooterLink></li>
             </ul>
           </div>
         </div>
