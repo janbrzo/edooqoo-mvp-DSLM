@@ -108,3 +108,13 @@ as repaired or automatically classified as safe.
   service CRUD; a limiter test checks denied client execution and retained service
   execution. Existing vector authorization/read-only tests run after the migration.
   The limiter's minimal test body isolates ACL behavior, not live email delivery.
+- Final regression run: 81 files, 1080 tests passed; all 18 state-vector tests
+  executed, including six new ACL cases (none skipped). Targeted baseline run:
+  three files, 116 tests passed. Preview build log reports build OK.
+- Generated AI files remain byte-identical: public llms SHA-256
+  `1e8cbb6b657761536097d85aa5026d92d3d9391f2f970b7a368d29f2c190ebda`,
+  root llms SHA-256
+  `5d0f15636f54e9ce412ac2bea4985ab21bd96a945ee05ef3e51eb3ab64ce7c39`.
+- Verification result: PASS for scoped migration, production ACL readback,
+  documentation and isolated regression checks; NOT VERIFIED for authenticated
+  production flows, live newsletter delivery, production p95 and <15 ms target.
