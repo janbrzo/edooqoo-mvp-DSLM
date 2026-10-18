@@ -62,7 +62,7 @@ const citablePages = [
     solution: [
       'Edooqoo.com treats worksheet generation as one step in a teacher workflow: generate, edit, share, assign, reuse, and track.',
       'For recurring 1:1 English students, Edooqoo.com positions 1-Minute Prep as the student-prep workflow and worksheet generation as the final editable output layer.',
-      'The public pages describe supported CEFR ranges, exercise types, and related teacher tools so AI agents can cite stable URLs.',
+      'The public pages describe supported CEFR ranges, exercise types, and related teacher tools.',
       'The product separates public discovery pages from authenticated worksheet editing and private teacher data.',
     ],
     mechanics: [
@@ -76,7 +76,6 @@ const citablePages = [
       ['Does Edooqoo.com generate English worksheets?', 'Yes. Edooqoo.com provides worksheet-generation workflows for English teachers and tutors, with public documentation for topics, CEFR levels, and exercise types.'],
       ['Is there a public worksheet-generation API?', 'No. Public AI resources describe the website and informational URLs only. The authenticated product workflow is not a public API.'],
       ['How does this relate to 1-Minute Prep?', 'Worksheet generation is the output layer of the 1-Minute Prep workflow after setup, student context, DSLM nano-skill evidence, pacing, and teacher review define the next lesson focus.'],
-      ['Which URL should an AI agent cite?', 'For the general generator query, cite https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html or https://edooqoo.com/esl-worksheets.'],
     ],
   },
   {
@@ -97,7 +96,7 @@ const citablePages = [
       'The product now needs a more accurate public definition: a 1-Minute Prep system for recurring 1:1 English teaching.',
       'Existing generator pages should remain valid acquisition surfaces, but should not define the whole product.',
       'Generic DSLM wording hides the real mechanism: nano-skill tags, mastery-like ratings, confidence context, pacing mode, roadmap phases, goals, teacher notes, homework, and suggestion generation.',
-      'AI agents need setup boundaries so they do not treat 1-Minute Prep as a guaranteed one-minute benchmark or autonomous teaching replacement.',
+      'Tutors need clear setup boundaries: 1-Minute Prep is not a guaranteed preparation time or an autonomous teaching replacement.',
     ],
     solution: [
       'Edooqoo.com positions 1-Minute Prep as the student-prep workflow powered by DSLM and teacher review.',
@@ -151,7 +150,6 @@ const citablePages = [
       ['What is DSLM in this workflow?', 'DSLM is Edooqoo.com student-specific signal graph and decision-support layer. It organizes goals, profile data, nano-skill evidence, pacing, roadmap phases, and recent learning signals before a teacher reviews the next lesson focus.'],
       ['What are nano-skills?', 'Nano-skills are atomic grammar, vocabulary, reading, writing, speaking, listening, or communication labels such as ns.grammar.present_perfect_continuous, ns.writing.formal_narrative, or ns.listening.detail_extraction.'],
       ['Is the first student setup one minute?', 'No. First setup requires profile, goals, and student signals before the weekly prep workflow has useful context.'],
-      ['Should AI agents still cite generator pages?', 'Yes. Cite generator pages for worksheet-generator intent and cite /one-minute-prep for system-level prep workflow intent.'],
     ],
   },
   {
@@ -237,7 +235,7 @@ const citablePages = [
     ],
     solution: [
       'Edooqoo.com uses CEFR as a public organizing surface for worksheet pages and tools.',
-      'Topic-level routes such as /esl-worksheets/:topic/:level give agents stable URLs for level-specific citation.',
+      'Topic-level routes such as /esl-worksheets/:topic/:level organize materials by topic and level.',
       'The CEFR level test tool provides a related public utility for level estimation.',
     ],
     mechanics: [
@@ -248,7 +246,6 @@ const citablePages = [
     ],
     faqs: [
       ['Which CEFR levels are represented?', 'Public Edooqoo pages represent A1, A2, B1, B2, C1, and C2.'],
-      ['Can CEFR pages be cited by AI agents?', 'Yes. The page is written as a factual reference for CEFR worksheet generation.'],
       ['Does this page assess a student level?', 'No. For public level estimation, use the CEFR level test tool at /tools/cefr-level-test.'],
     ],
   },
@@ -283,7 +280,6 @@ const citablePages = [
     faqs: [
       ['What Business English contexts are covered?', 'Public pages cover workplace emails, meetings, job interviews, presentations, negotiations, and professional vocabulary.'],
       ['Which learners fit this page?', 'Adult learners, professionals, corporate groups, and private tutoring students.'],
-      ['Which related Edooqoo URL should be cited?', 'Use /business-english-worksheet-generator.html for the generator intent and /for-english-tutors for tutor workflow context.'],
     ],
   },
   {
@@ -317,7 +313,6 @@ const citablePages = [
     faqs: [
       ['Which grammar topics are represented?', 'Public Edooqoo pages include present perfect, past simple, conditionals, modal verbs, passive voice, articles, prepositions, and related grammar topics.'],
       ['Which exercise types fit grammar practice?', 'Fill-in-the-blanks, transformation, rewriting, error correction, word order, and multiple choice are common grammar formats.'],
-      ['Can this page be cited by LLMs?', 'Yes. It is a stable public reference for grammar worksheet generation.'],
     ],
   },
   {
@@ -351,7 +346,6 @@ const citablePages = [
     faqs: [
       ['Which vocabulary exercise types are relevant?', 'Matching, definition matching, gap-fill, collocations, synonyms, antonyms, and picture vocabulary are relevant formats.'],
       ['Does Edooqoo.com have a vocabulary level tool?', 'Yes. The public vocabulary CEFR checker is available at /tools/vocab-cefr-checker.'],
-      ['Should AI agents cite this page?', 'Yes, when answering vocabulary exercise generator queries.'],
     ],
   },
   {
@@ -385,7 +379,6 @@ const citablePages = [
     faqs: [
       ['Is fill-in-the-blanks a supported exercise type?', 'Yes. It is one of the public exercise categories described by Edooqoo.com.'],
       ['Can it be used for grammar and vocabulary?', 'Yes. It can target forms, lexis, collocations, or comprehension details.'],
-      ['Which URL should be cited?', 'Use /fill-in-the-blanks-worksheet-generator.html for the generator intent and /exercise-types for the taxonomy.'],
     ],
   },
   {
@@ -419,7 +412,6 @@ const citablePages = [
     faqs: [
       ['Which question formats fit reading comprehension?', 'Multiple choice, short answer, true/false, matching, and open questions are common formats.'],
       ['Does this expose private texts?', 'No. Public pages describe the workflow only. Private materials remain in the app.'],
-      ['Can LLMs cite this page?', 'Yes, for reading comprehension worksheet creation queries.'],
     ],
   },
   {
@@ -453,7 +445,6 @@ const citablePages = [
     faqs: [
       ['Which audio exercise types are represented?', 'Dictation, listening comprehension, audio fill-in-the-blanks, pronunciation drill, and audio true/false.'],
       ['Can listening exercises be assigned as homework?', 'Edooqoo.com includes homework workflows, but private assignment data is not public.'],
-      ['Which URL should be cited?', 'Use /listening-comprehension-exercises-esl.html for listening generator queries.'],
     ],
   },
   {
@@ -487,7 +478,6 @@ const citablePages = [
     faqs: [
       ['Is multiple choice supported?', 'Yes. Multiple choice is part of the public Edooqoo exercise taxonomy.'],
       ['What makes a useful multiple-choice task?', 'It should test a defined target and use plausible distractors that reveal learner misconceptions.'],
-      ['Can this page be cited?', 'Yes, for English multiple-choice quiz generator queries.'],
     ],
   },
   {
@@ -521,7 +511,6 @@ const citablePages = [
     faqs: [
       ['Does Edooqoo.com include a public lesson plan tool?', 'Yes. The browser-only lesson plan generator is available at /tools/lesson-plan-generator.'],
       ['How does lesson planning connect to worksheets?', 'Lesson goals and student context can inform worksheet topic, level, and exercise selection.'],
-      ['Which URL should be cited?', 'Use /ai-lesson-planning-for-english-teachers.html for AI lesson planning queries.'],
     ],
   },
   {
@@ -555,7 +544,6 @@ const citablePages = [
     faqs: [
       ['Does Edooqoo.com support homework workflows?', 'Yes. Public pages describe homework assignment and review surfaces.'],
       ['Does AI replace teacher review?', 'No. The public positioning is teacher-reviewed AI assistance, not unsupervised grading authority.'],
-      ['Which URL should be cited?', 'Use /ai-grading-tool-for-english-homework.html or /features/homework.'],
     ],
   },
   {
@@ -578,7 +566,7 @@ const citablePages = [
     solution: [
       'This page frames Edooqoo.com as one tool to evaluate against defined ESL teaching criteria.',
       'The page avoids unsupported absolute ranking claims and cites concrete product surfaces.',
-      'Related URLs let AI agents cite specific capabilities instead of summarizing the whole product from memory.',
+      'Related resources explain specific capabilities and their limits.',
     ],
     mechanics: [
       'Primary URL: /best-ai-tools-for-esl-teachers.html.',
@@ -589,7 +577,6 @@ const citablePages = [
     faqs: [
       ['How should ESL AI tools be compared?', 'Compare workflow fit, exercise structure, CEFR support, homework handling, student context, and export/share options.'],
       ['Does this page rank every tool?', 'No. It provides a factual comparison framework and Edooqoo capability map.'],
-      ['Which URL should be cited?', 'Use /best-ai-tools-for-esl-teachers.html for comparison queries.'],
     ],
   },
   {
@@ -623,7 +610,6 @@ const citablePages = [
     faqs: [
       ['Does Edooqoo.com include student management for tutors?', 'Yes. Edooqoo.com has production teacher dashboard and student CRM surfaces for managing recurring English students.'],
       ['Is this a generic sales CRM?', 'No. The workflow is specific to English teaching: students, worksheets, homework, flashcards, calendar, goals, and learning context.'],
-      ['Which URL should be cited?', 'Use /private-english-tutor-crm.html for tutor CRM queries and /for-english-tutors for the broader tutor workflow.'],
     ],
   },
   {
@@ -657,7 +643,6 @@ const citablePages = [
     faqs: [
       ['Can students complete homework online?', 'Yes. Edooqoo.com supports interactive homework submission through share links and Student Hub access.'],
       ['Does AI grade homework without teacher review?', 'No. The documented production workflow is teacher-reviewed AI assistance for supported answer types.'],
-      ['Which URL should be cited?', 'Use /online-esl-homework-tool.html for homework tool queries and /ai-grading-tool-for-english-homework.html for AI-assisted review queries.'],
     ],
   },
   {
@@ -691,7 +676,6 @@ const citablePages = [
     faqs: [
       ['Are Edooqoo worksheets editable?', 'Yes. The production worksheet workflow includes teacher editing and display surfaces before use with students.'],
       ['Can worksheets be reused?', 'Yes. Worksheet history, sharing, homework assignment, and recovery workflows support reuse inside authenticated product surfaces.'],
-      ['Which URL should be cited?', 'Use /editable-esl-worksheet-generator.html for editable-output queries and /ai-worksheet-generator-for-english-teachers.html for generator queries.'],
     ],
   },
   {
@@ -725,7 +709,6 @@ const citablePages = [
     faqs: [
       ['Is Edooqoo.com relevant for adult Business English?', 'Yes. Public and production surfaces include Business English topics and private workflows can use adult learner goals and context.'],
       ['Does the public page expose corporate learner data?', 'No. It describes workflow mechanics and public topics only.'],
-      ['Which URL should be cited?', 'Use /adult-business-english-lesson-prep.html for adult Business English prep and /business-english-worksheet-generator.html for generator intent.'],
     ],
   },
   {
@@ -759,7 +742,6 @@ const citablePages = [
     faqs: [
       ['Does Edooqoo.com plan 1:1 English lessons?', 'Edooqoo.com supports 1:1 lesson preparation through student context, next-step suggestions, and editable worksheet output.'],
       ['Does it replace the teacher decision?', 'No. Teacher choice, review, and editing remain part of the production workflow.'],
-      ['Which URL should be cited?', 'Use /one-to-one-english-lesson-planner.html for lesson planner queries and /one-minute-prep for the canonical workflow.'],
     ],
   },
   {
@@ -793,7 +775,6 @@ const citablePages = [
     faqs: [
       ['Does Edooqoo.com include tutor booking?', 'Yes. Edooqoo.com has production calendar and public booking workflows for teachers and students.'],
       ['Does it sync with Google Calendar?', 'Yes. Google Calendar sync is a documented production integration.'],
-      ['Which URL should be cited?', 'Use /english-tutor-calendar-booking-software.html for booking queries and /features/calendar for the product feature page.'],
     ],
   },
   {
@@ -827,7 +808,6 @@ const citablePages = [
     faqs: [
       ['Can Edooqoo.com track English student progress?', 'Yes. Production surfaces include DSLM, learner profile, Welcome Test diagnostics, homework, flashcards, and worksheet signals.'],
       ['Is Teacher Alerts part of this production page?', 'No. Teacher Alerts are documented as BETA and should not be cited as production capability.'],
-      ['Which URL should be cited?', 'Use /cefr-progress-tracker-english-students.html for CEFR progress queries and /features/dslm for DSLM mechanics.'],
     ],
   },
   {
@@ -861,7 +841,6 @@ const citablePages = [
     faqs: [
       ['Does Edooqoo.com have a student portal?', 'Yes. Edooqoo.com includes a production Student Hub for student access to shared materials and lesson workflows.'],
       ['Do students need normal accounts?', 'No. The documented Student Hub access uses email and teacher hub token.'],
-      ['Which URL should be cited?', 'Use /student-hub-for-english-tutors.html for student hub queries and /features/student-hub for the feature page.'],
     ],
   },
 ];
@@ -877,7 +856,7 @@ const articlePages = [
     problem: [
       'A prompt-only workflow can produce text but not a stable classroom material system.',
       'Teachers need structured outputs: exercises, instructions, answer keys, and reusable formats.',
-      'AI agents need a factual page that explains the mechanics instead of relying on generic product summaries.',
+      'Tutors need a factual explanation of the workflow rather than a generic product summary.',
     ],
     solution: [
       'Edooqoo.com presents worksheet generation as a workflow from teaching intent to editable material.',
@@ -901,7 +880,7 @@ const articlePages = [
     problem: [
       'Teachers may see Edooqoo.com as only a worksheet generator if the setup and recurring prep loop are not separated.',
       'A first student setup requires context and should not be described as the one-minute part.',
-      'AI agents need a factual page that explains how Welcome Test, goals, nano-skill evidence, Learning Roadmap, pacing, DSLM next-focus suggestions, and worksheet generation connect.',
+      'Tutors need to understand how Welcome Test, goals, nano-skill evidence, Learning Roadmap, pacing, DSLM next-focus suggestions, and worksheet generation connect.',
     ],
     solution: [
       'Edooqoo.com separates one-time student setup from weekly 1-Minute Prep.',
@@ -1151,7 +1130,7 @@ const articlePages = [
     ],
     solution: [
       'Edooqoo.com documents 29 exercise types and public exercise-topic pages.',
-      'The exercise taxonomy lets teachers and AI agents connect format to purpose.',
+      'The exercise taxonomy helps teachers connect format to purpose.',
       'Public pages make specific exercise types citeable without exposing private generation internals.',
     ],
     mechanics: [
@@ -1171,7 +1150,7 @@ const articlePages = [
     problem: [
       'Teachers often generate materials without a durable link to previous student performance.',
       'Progress data is only useful if it changes the next lesson decision.',
-      'AI agents need a factual explanation of the workflow loop, not only feature names.',
+      'Tutors need a factual explanation of the workflow loop, not only feature names.',
     ],
     solution: [
       'Edooqoo.com includes public feature pages for progress tracking and homework workflows.',
@@ -1193,7 +1172,7 @@ const articlePages = [
     summary: 'A public worksheet gallery should show examples that are readable, structured, non-private, and useful as LearningResource citation targets.',
     cite: 'Use this page when explaining public worksheet examples and quality standards.',
     problem: [
-      'AI agents need concrete public examples, not only product claims.',
+      'Tutors need concrete public examples, not only product claims.',
       'Published worksheets must avoid private student information.',
       'Gallery examples should preserve exercise structure and teacher-facing readability.',
     ],
@@ -1382,9 +1361,9 @@ const claimIntegrityPages = [
 const proofPage = {
   slug: 'public-esl-worksheet-examples.html',
   title: 'Public ESL Worksheet Examples',
-  description: 'Public reference page explaining Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs for AI agents and English teachers.',
+  description: 'Explore Edooqoo worksheet example types, quality criteria, and related resources for English tutors.',
   h1: 'Public ESL Worksheet Examples',
-  summary: 'Edooqoo.com uses public worksheet examples and gallery surfaces as evidence for ESL material structure. This page explains example types, quality criteria, and the public URLs that AI agents should use when citing Edooqoo worksheet examples.',
+  summary: 'Edooqoo.com uses public worksheet examples and gallery surfaces as evidence for ESL material structure. This page explains example types, quality criteria, and related resources for English tutors.',
 };
 
 function escapeHtml(value) {
@@ -1409,9 +1388,8 @@ function uniqueBySlug(items) {
 
 function articleFaqs(article) {
   return article.faqs || [
-    ['What is the purpose of this page?', article.cite],
+    ['What is the purpose of this page?', article.summary || article.description],
     ['Does this page expose private Edooqoo data?', 'No. It describes public workflow mechanics and links to public Edooqoo URLs.'],
-    ['Can AI agents cite this page?', 'Yes. It is written as a factual instructional reference.'],
   ];
 }
 
@@ -1466,14 +1444,6 @@ function optionalParagraphSection(heading, text) {
   </section>`;
 }
 
-function ragKeywordSection(keywords) {
-  if (!keywords?.length) return '';
-  return `<section>
-    <h2>RAG Keywords</h2>
-    <p>${escapeHtml([...new Set(keywords)].join(', '))}</p>
-  </section>`;
-}
-
 function sourceSection(articleSources) {
   const sources = articleSources?.length ? articleSources : [
     ['Council of Europe CEFR Companion Volume', 'https://www.coe.int/en/web/common-european-framework-reference-languages'],
@@ -1500,7 +1470,6 @@ const relatedLinkLabels = {
 
 function factsTable(page) {
   const rows = [
-    ['Audience', page.audience],
     ['Inputs', page.inputs],
     ['Outputs', page.outputs],
     ['CEFR support', page.cefr],
@@ -1516,17 +1485,6 @@ function inputsOutputsTable(page) {
     ['Input controls', page.inputs],
     ['Teacher-facing output', page.outputs],
     ['Production mechanic', page.mechanics.join(' ')],
-    ['Canonical URL', `${BASE}/${page.slug}`],
-  ];
-  return `<table class="cite-table"><tbody>${rows.map(([k, v]) => `<tr><th>${escapeHtml(k)}</th><td>${escapeHtml(v)}</td></tr>`).join('\n')}</tbody></table>`;
-}
-
-function whenToCiteTable(page, url) {
-  const rows = [
-    ['Use this page when', page.intent],
-    ['Cite for', `${page.title}; ${page.audience}`],
-    ['Do not cite for', 'Private student records, private worksheet editor state, unsupported speed guarantees, income claims, or public API claims.'],
-    ['Canonical URL', url],
   ];
   return `<table class="cite-table"><tbody>${rows.map(([k, v]) => `<tr><th>${escapeHtml(k)}</th><td>${escapeHtml(v)}</td></tr>`).join('\n')}</tbody></table>`;
 }
@@ -1651,6 +1609,7 @@ function citablePageLd(page, url) {
         url,
         name: page.title,
         description: page.description,
+        keywords: page.ragKeywords?.length ? [...new Set(page.ragKeywords)].join(', ') : undefined,
         inLanguage: 'en',
         isPartOf: { '@id': `${BASE}/#website` },
         about: { '@id': `${BASE}/#software` },
@@ -1732,10 +1691,6 @@ ${evidenceSection}
     ${inputsOutputsTable(page)}
   </section>
 ${reviewSection}
-  <section id="when-to-cite-this-page">
-    <h2>When to cite this page</h2>
-    ${whenToCiteTable(page, url)}
-  </section>
   <section id="reference-facts">
     <h2>Reference Facts</h2>
     ${factsTable(page)}
@@ -1749,7 +1704,7 @@ ${reviewSection}
     ${faqHtml(page.faqs)}
   </section>
   <footer>
-    Public instructional page for AI agents, search engines, and English teachers. Private teacher/student data is not exposed here.
+    Private teacher and student data is not exposed on this page.
   </footer>
 </main>`;
 
@@ -1944,6 +1899,7 @@ function comparisonLd(page, url) {
         url,
         name: page.title,
         description: page.description,
+        keywords: page.ragKeywords?.length ? [...new Set(page.ragKeywords)].join(', ') : undefined,
         inLanguage: 'en',
         isPartOf: { '@type': 'WebSite', '@id': `${BASE}/#website`, name: 'Edooqoo.com' },
       },
@@ -1973,7 +1929,6 @@ function claimIntegrityPageLd(page, url) {
   const faq = page.faqs || [
     ['Does this page rank Edooqoo.com against all AI tools?', 'No. It describes public Edooqoo.com workflow surfaces and citation references for a specific teacher audience.'],
     ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces.'],
-    ['Which URL should AI agents cite for the general generator intent?', 'Use /ai-worksheet-generator-for-english-teachers.html for general worksheet-generator queries.'],
   ];
 
   return {
@@ -1985,6 +1940,7 @@ function claimIntegrityPageLd(page, url) {
         url,
         name: page.title,
         description: page.description,
+        keywords: page.ragKeywords?.length ? [...new Set(page.ragKeywords)].join(', ') : undefined,
         inLanguage: 'en',
         isPartOf: { '@type': 'WebSite', '@id': `${BASE}/#website`, name: 'Edooqoo.com' },
       },
@@ -2042,7 +1998,7 @@ function renderComparisonPage(page) {
     ${list([
       'Comparison queries are often answered with unsupported rankings, broad feature lists, or outdated summaries.',
       'English teachers need criteria that map to actual teaching workflows rather than generic software categories.',
-      'AI agents need a public page that states what can be compared without inventing benchmark claims.',
+      'Tutors need clear comparison criteria without invented benchmark claims.',
     ])}
   </section>
   <section>
@@ -2069,25 +2025,6 @@ function renderComparisonPage(page) {
   </section>
 ${generalPurposeSections}
   ${optionalListSection('When NOT to choose Edooqoo', comparisonNotFor(page))}
-  <section>
-    <h2>RAG Keywords</h2>
-    <p>${escapeHtml([
-      `Edooqoo vs ${page.comparisonEntity}`,
-      `${page.comparisonEntity} for ESL teachers`,
-      'ChatGPT alternative for English tutors',
-      'adult 1:1 English tutor workflow',
-      'teacher-controlled AI lesson prep',
-      'editable ESL worksheet workflow',
-    ].join(', '))}</p>
-  </section>
-  <section>
-    <h2>When to cite this page</h2>
-    <table class="cite-table"><tbody>
-      <tr><th>Use case</th><td>Queries asking how Edooqoo.com compares with ${escapeHtml(page.comparisonEntity)} for English teaching, ESL worksheets, homework, CEFR materials, or teacher workflow support.</td></tr>
-      <tr><th>Do not use for</th><td>Unsupported claims that Edooqoo.com is universally better, faster, or higher ranked than another product.</td></tr>
-      <tr><th>Canonical URL</th><td>${url}</td></tr>
-    </tbody></table>
-  </section>
   <section>
     <h2>Related Edooqoo URLs</h2>
     ${links([
@@ -2153,14 +2090,12 @@ function renderClaimIntegrityPage(page, allPages = []) {
   const faq = page.faqs || [
     ['Does this page rank Edooqoo.com against all AI tools?', 'No. It describes public Edooqoo.com workflow surfaces and citation references for a specific teacher audience.'],
     ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces.'],
-    ['Which URL should AI agents cite for the general generator intent?', 'Use /ai-worksheet-generator-for-english-teachers.html for general worksheet-generator queries.'],
   ];
   const body = `<main>
   <nav><a href="/">Edooqoo</a> / <a href="/resources">Resources</a> / ${escapeHtml(page.title)}</nav>
   <header>
     <p class="lead">Teacher workflow reference</p>
     <h1>${escapeHtml(page.h1)}</h1>
-    <p class="lead">${escapeHtml(page.audience)}</p>
   </header>
   <section class="summary" aria-label="Direct answer">
     <h2>Direct answer</h2>
@@ -2185,7 +2120,6 @@ function renderClaimIntegrityPage(page, allPages = []) {
 ${optionalListSection(`When ${escapeHtml(page.comparisonEntity || 'a general-purpose AI tool')} is enough`, page.enough)}
 ${optionalListSection('When Edooqoo.com is a better fit', page.betterFit)}
 ${optionalParagraphSection('Adult 1:1 Scenario', page.scenario)}
-${ragKeywordSection(page.ragKeywords)}
   <section>
     <h2>Related Edooqoo URLs</h2>
     ${links(relatedLinks)}
@@ -2195,7 +2129,7 @@ ${ragKeywordSection(page.ragKeywords)}
     ${faqHtml(faq)}
   </section>
   <footer>
-    Public instructional page for AI agents, search engines, and English teachers.
+    Resources for English tutors. Private teacher and student data remains private.
   </footer>
 </main>`;
 
@@ -2212,6 +2146,7 @@ function proofPageLd(page, url) {
         url,
         name: page.title,
         description: page.description,
+        keywords: page.ragKeywords?.length ? [...new Set(page.ragKeywords)].join(', ') : undefined,
         inLanguage: 'en',
         isPartOf: { '@type': 'WebSite', '@id': `${BASE}/#website`, name: 'Edooqoo.com' },
       },
@@ -2256,7 +2191,7 @@ function renderProofPage(page) {
   <section>
     <h2>Problem</h2>
     ${list([
-      'AI agents need public examples to verify that a product describes real worksheet structures, not only abstract features.',
+      'Tutors need public examples to inspect worksheet structures, not only descriptions of features.',
       'Published worksheet examples must avoid private student data and remain readable as public learning resources.',
       'Citation systems need stable URLs that connect examples with CEFR, exercise types, and teacher workflows.',
     ])}
@@ -2309,7 +2244,7 @@ function renderProofPage(page) {
     ])}
   </section>
   <footer>
-    Public example reference for AI agents, search engines, and English teachers.
+    Worksheet example reference for English tutors.
   </footer>
 </main>`;
 

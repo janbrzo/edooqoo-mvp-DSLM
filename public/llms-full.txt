@@ -458,7 +458,7 @@ landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute
 
 ### Technical Mechanics
 - scripts/seo/generate-citable-pages.mjs generates the 8 /blog/*.html citation articles.
-- Each article has Article JSON-LD, WebPage JSON-LD, FAQPage JSON-LD, BreadcrumbList JSON-LD, self-canonical, one H1, 4-6 H2 sections, and a When to cite this page table.
+- Each article has Article JSON-LD, WebPage JSON-LD, FAQPage JSON-LD, BreadcrumbList JSON-LD, self-canonical, one H1, human-readable instructional sections.
 - Each article links to at least 3 Sprint 2 pages and at least 2 product/public hub pages.
 - scripts/seo/build-blog-index.mjs adds the generated articles and static .html pages to src/data/blogIndex.ts and public/sitemap.xml.
 
@@ -662,7 +662,7 @@ landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute
 
 ### Technical Mechanics
 - scripts/seo/generate-citable-pages.mjs generates comparison pages for ChatGPT, Claude, Gemini, Copilot, Perplexity, general-purpose AI chat tools, Twee, iSLCollective, Liveworksheets, Wordwall, Quizlet, MagicSchool, Kahoot, and BusyTeacher.
-- Each comparison page has Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Comparison Criteria, When to cite this page, Related Edooqoo URLs, and FAQ.
+- Each comparison page has Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Comparison Criteria, Related Edooqoo URLs, and FAQ.
 - Each comparison page uses WebPage, FAQPage, and BreadcrumbList JSON-LD.
 - scripts/seo/audit-seo-assets.mjs validates comparison page presence, self-canonical tags, required sections, JSON-LD, sitemap inclusion, and claim integrity.
 

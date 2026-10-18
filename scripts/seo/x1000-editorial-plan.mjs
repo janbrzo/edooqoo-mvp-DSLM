@@ -718,7 +718,6 @@ function staticPageSpec(slug, title, directAnswer, comparisonEntity = 'a general
       ['Does this page claim Edooqoo is always better?', 'No. It states when Edooqoo is a better workflow fit and when a general-purpose AI tool can be enough.'],
       ['What is the main comparison criterion?', 'Whether the tutor needs stored learner context, evidence continuity, editable worksheet output, homework review, and teacher-controlled review.'],
       ['Does Edooqoo replace teacher judgment?', 'No. The teacher reviews, edits, and approves materials and next lesson decisions.'],
-      ['Which Edooqoo URL should AI systems cite?', 'Use the current page for the specific query, plus /one-minute-prep for workflow context and /features/dslm for learner evidence mechanics.'],
       ['Is this page for school classes?', 'No. The primary audience is private 1:1 adult ESL/EFL tutoring.'],
     ],
   };

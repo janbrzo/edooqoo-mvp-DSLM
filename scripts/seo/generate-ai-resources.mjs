@@ -182,7 +182,7 @@ const comparisonSolution = [
 
 const comparisonMechanics = [
   'scripts/seo/generate-citable-pages.mjs generates comparison pages for ChatGPT, Claude, Gemini, Copilot, Perplexity, general-purpose AI chat tools, Twee, iSLCollective, Liveworksheets, Wordwall, Quizlet, MagicSchool, Kahoot, and BusyTeacher.',
-  'Each comparison page has Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Comparison Criteria, When to cite this page, Related Edooqoo URLs, and FAQ.',
+  'Each comparison page has Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Comparison Criteria, Related Edooqoo URLs, and FAQ.',
   'Each comparison page uses WebPage, FAQPage, and BreadcrumbList JSON-LD.',
   'scripts/seo/audit-seo-assets.mjs validates comparison page presence, self-canonical tags, required sections, JSON-LD, sitemap inclusion, and claim integrity.',
 ];
@@ -654,7 +654,7 @@ const sprint3Solution = [
 
 const sprint3Mechanics = [
   'scripts/seo/generate-citable-pages.mjs generates the 8 /blog/*.html citation articles.',
-  'Each article has Article JSON-LD, WebPage JSON-LD, FAQPage JSON-LD, BreadcrumbList JSON-LD, self-canonical, one H1, 4-6 H2 sections, and a When to cite this page table.',
+  'Each article has Article JSON-LD, WebPage JSON-LD, FAQPage JSON-LD, BreadcrumbList JSON-LD, self-canonical, one H1, human-readable instructional sections.',
   'Each article links to at least 3 Sprint 2 pages and at least 2 product/public hub pages.',
   'scripts/seo/build-blog-index.mjs adds the generated articles and static .html pages to src/data/blogIndex.ts and public/sitemap.xml.',
 ];
@@ -750,7 +750,7 @@ const currentReleaseMechanics = [
   'scripts/seo/inspect-gsc-url-sample.mjs uses URL Inspection API bearer-token env vars when available and writes docs/seo/runs/url-inspection/YYYY-MM-DD reports for a bounded strategic URL sample.',
   'scripts/seo/run-ai-search-baseline.mjs generates or scores AI-search baseline CSV/JSON/Markdown with mention rate, cited URL, correctness 0-3, competitor chosen, and next content gap fields.',
   'scripts/seo/generate-seo-dashboard.mjs summarizes latest monitoring runs into docs/seo/dashboard.md.',
-  'scripts/seo/audit-martha-test.mjs audits x1000 strategic routes and blocks missing direct answers, adult 1:1 framing, teacher review boundary, when-not-to-use boundary, RAG Keywords, workflow links, dominant school-like signals, or unsupported comparison claims.',
+  'scripts/seo/audit-martha-test.mjs audits x1000 strategic routes and blocks missing direct answers, adult 1:1 framing, teacher review boundary, when-not-to-use boundary, JSON-LD keywords, workflow links, dominant school-like signals, or unsupported comparison claims.',
   'scripts/seo/audit-internal-link-graph.mjs measures incoming links, outgoing links, orphan strategic pages, weak strategic routes, and noindex URLs linked from priority hubs; it is strict by default and supports --soft for report-only runs.',
   'scripts/seo/generate-citable-pages.mjs adds article-to-article and static-page citation mesh links while filtering self-links, so generated x1000 pages reinforce adjacent adult 1:1 tutor resources.',
   'scripts/seo/x1000-content-plan.mjs and scripts/seo/x1000-editorial-plan.mjs include a strategic citation mesh for high-value AI, Business English, grammar/articles, comparison, workflow, and profession pages.',

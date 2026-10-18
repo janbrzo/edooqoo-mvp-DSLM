@@ -18,7 +18,8 @@ export const LINKS_FAIL_ABOVE = 15;
 export const BOT_TEXT_PATTERNS = [
   [/when to cite this page/i, 'visible "When to cite this page" block'],
   [/primary audience[^.]{0,80}(ai agents|search systems)/i, 'visible "Primary audience: AI agents" block'],
-  [/(^|\n)\s*RAG Keywords\b/i, 'visible "RAG Keywords" block'],
+  [/\bRAG Keywords\b/i, 'visible "RAG Keywords" block'],
+  [/\bAI agents\b/i, 'visible text addressed to AI agents'],
   [/for (ai|llm) (agents|crawlers|systems) (reading|citing|only)/i, 'text addressed to AI agents'],
 ];
 
@@ -76,6 +77,8 @@ export function extractPage(html) {
   const body = (html.match(/<body[\s\S]*<\/body>/i) || [html])[0]
     .replace(/<(script|style|nav|footer|header|aside|noscript)\b[\s\S]*?<\/\1>/gi, ' ');
   const text = stripTags(body);
+  const botText = stripTags((html.match(/<body[\s\S]*<\/body>/i) || [html])[0]
+    .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, ' '));
 
   return {
     title,
@@ -86,6 +89,7 @@ export function extractPage(html) {
     internalLinks,
     externalLinks: [...new Set(externalLinks)],
     text,
+    botText,
     words: (text.match(/[A-Za-z0-9']+/g) || []).length,
   };
 }
@@ -123,7 +127,7 @@ export function deterministicChecks(page, ctx = {}) {
     add('uniqueness', 'fail', 'no uniqueness measurement; run npm run seo:audit-uniqueness first');
   }
 
-  const bot = BOT_TEXT_PATTERNS.filter(([pattern]) => pattern.test(page.text)).map(([, label]) => label);
+  const bot = BOT_TEXT_PATTERNS.filter(([pattern]) => pattern.test(page.botText ?? page.text)).map(([, label]) => label);
   add('no-bot-text', bot.length ? 'fail' : 'pass', bot.join('; '));
 
   const claims = CLAIM_PATTERNS
