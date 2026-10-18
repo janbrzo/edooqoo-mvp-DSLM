@@ -724,9 +724,11 @@ const professionRows = [
   ['product-manager-roadmap-tradeoff', 'Product Manager Roadmap Tradeoff', 'explaining roadmap priority, tradeoff, risk, and stakeholder decision'],
 ];
 
+// Consolidation (2026-10): the per-profession 'worksheet' variant was a
+// near-duplicate of 'lesson-prep' (containment 0.86-0.93) and was merged
+// into the lesson-prep page via CONTENT_OVERRIDES redirects.
 const professionTypes = [
   ['lesson-prep', 'Lesson Prep Use Case', 'prepare one evidence-led lesson from the learner current professional task'],
-  ['worksheet', 'Worksheet Use Case', 'create one editable worksheet that practices the professional communication task'],
 ];
 
 export const x1000AdditionalStaticPages = [
