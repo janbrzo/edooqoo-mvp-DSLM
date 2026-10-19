@@ -1351,7 +1351,9 @@ function meshLinks(currentRoute, items, routeFor, labelFor, radius = 6) {
   const links = [];
   for (let offset = 1; offset <= radius; offset += 1) {
     const next = items[(index + offset) % items.length];
-    const previous = items[(index - offset + items.length) % items.length];
+    // JS modulo keeps the sign of the dividend; normalize so small filtered
+    // pools (length < radius) never produce a negative index.
+    const previous = items[(((index - offset) % items.length) + items.length) % items.length];
     links.push([routeFor(next), labelFor(next)]);
     links.push([routeFor(previous), labelFor(previous)]);
   }
