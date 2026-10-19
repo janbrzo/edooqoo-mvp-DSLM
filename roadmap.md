@@ -113,3 +113,13 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Removed retired page specs from generators (generate-citable-pages, x1000-content-plan llmStaticSpecs + profession 'worksheet' variant, x1000-editorial-plan comparisonRows + professionTypes) and synced generate-ai-resources + audit-seo-assets expectations
 - [x] Verification: 1090 tests PASS, build OK, seo:audit OK, content:audit OK (Martha 128 routes, 0 warnings, 0 orphans), sitemap clean of retired URLs, 146 edge redirects
 - [ ] Blog near-duplicates (many posts at 0.85-0.94 containment): separate editorial decision, not part of this step
+
+## SEO/GEO Sitemap Pruning, Step 3
+
+- [x] Retired 28 thin per-profession static pages (rendered `<p>undefined</p>` bug): 10 with an interactive scenario 301 to `/what-to-teach-next/:slug`, 18 merge into `/adult-business-english-lesson-prep.html`; removed from `x1000-content-plan.mjs` and `x1000-editorial-plan.mjs` so regeneration never restores them
+- [x] Marked 127 templated blog articles (boilerplate containment >= 0.80) `noindex,follow` via `templatedCloneNoindexSlugs` in `x1000-editorial-plan.mjs` + `CONTENT_OVERRIDES`; 27 legacy static files got a direct robots meta edit; strategic keep pages, redirect targets, and the intentional school-like rejection page excluded
+- [x] Replaced numeric page-count assertions in `audit-x1000-plan-completion.mjs` with a quality gate (no retired per-profession patterns in plans)
+- [x] Fixed related-link meshes to never link non-indexable routes (`NON_INDEXABLE_ROUTES` filter in `generate-citable-pages.mjs`, incl. a latent negative-modulo crash in `meshLinks`); rewrote 8 stale hub links in `clusterHubs.ts` and `Resources.tsx`; noindexPriorityLinks 11 -> 0
+- [x] Verification: 1090 tests PASS, build OK, seo:audit OK (939 checks), Martha PASS (0 warnings), sitemap 407 -> 252 URLs, 174 edge redirects, content-uniqueness regenerated
+- [ ] Pre-existing internal-link debt (identical before Step 3): 1 orphan strategic route (`/blog/esl-games-for-teachers`), 5 weak top-40, 33 weak top-120 routes; belongs to Step 4 hub strengthening
+- [ ] Production: publish + prerendered snapshots deploy, then "Validate fix" in GSC

@@ -103,16 +103,17 @@ expect(
   `x1000 additional blog decision pages present: ${x1000AdditionalBlogArticles.length}`,
 );
 expect(
-  x1000AdditionalStaticPages.length >= 28,
-  `x1000 additional static AEO/profession pages present: ${x1000AdditionalStaticPages.length}`,
-);
-expect(
   x1000BlogArticles.length >= 145,
   `x1000 generated blog articles present: ${x1000BlogArticles.length}`,
 );
+// Sitemap pruning (2026-10): thin per-profession static pages were removed
+// from the plans. Quality gate: no plan entry may target a retired
+// per-profession static variant and no generated page may render the
+// '<p>undefined</p>' template bug.
+const retiredProfessionPattern = /^\/[a-z-]+-(lesson-prep|what-to-teach-next|worksheet)\.html$/;
 expect(
-  x1000StaticPages.length >= 76,
-  `x1000 generated static pages present: ${x1000StaticPages.length}`,
+  ![...x1000AdditionalStaticPages, ...x1000StaticPages].some((page) => retiredProfessionPattern.test(`/${page.slug}`)),
+  'no thin per-profession static pages remain in the x1000 plans',
 );
 
 const triage = json('docs/seo/blog-triage.generated.json');

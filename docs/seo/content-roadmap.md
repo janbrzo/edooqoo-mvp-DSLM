@@ -25,9 +25,9 @@ Generated: deterministic from scripts/seo/x1000-content-plan.mjs and docs/seo/bl
 ## Current Triage Counts
 
 - Total articles: 343
-- promote-or-refresh: 237
+- promote-or-refresh: 133
+- noindex-keep-accessible: 122
 - merge-redirect-or-noindex: 82
-- noindex-keep-accessible: 18
 - promote-rewrite-now: 6
 
 ## Sprint 2: Six Pillar Rewrites
@@ -56,101 +56,101 @@ Priority rule: choose indexed or near-product URLs first, especially adult/busin
 
 | Route | Words | Reason |
 | --- | --- | --- |
-| /blog/academic-language-functions-clil.html | 804 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/academic-vocabulary-teaching-strategies.html | 805 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/accent-coaching-techniques-esl.html | 807 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/accent-reduction-activities-esl.html | 812 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/action-research-esl-teachers.html | 814 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adapting-task-difficulty-for-one-adult-english-learner.html | 769 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html | 788 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adult-business-english-homework-feedback-loop.html | 820 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adult-esl-student-profile-lesson-planning.html | 820 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adult-learner-autonomy-in-private-english-lessons.html | 761 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adult-learner-performance-evidence-beyond-tests.html | 772 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html | 762 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html | 771 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adult-professional-task-projects-in-english-coaching.html | 766 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/adult-vocabulary-retrieval-practice-not-games.html | 749 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/ai-generated-listening-exercises-esl.html | 819 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/ai-homework-grading-for-english-teachers.html | 827 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/ai-powered-differentiation-esl.html | 801 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/ai-tools-for-english-teachers-2026.html | 818 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html | 824 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-esl-student-profile-lesson-planning.html | 819 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/best-apps-learning-english-2026.html | 736 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/best-lesson-prep-tool-for-english-tutors.html | 824 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/business-english-material-generation-workflow.html | 816 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/can-ai-plan-one-to-one-english-lesson.html | 826 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cefr-aligned-worksheet-generation-workflow.html | 814 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cloze-test-design-esl.html | 707 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/communicative-language-teaching-activities.html | 866 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/connected-speech-teaching-activities.html | 752 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/current-events-esl-lessons.html | 768 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/debate-activities-english-class.html | 661 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/diagnostic-testing-english-learners.html | 876 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/english-homework-ai-grading-workflow.html | 810 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/english-tutor-material-organization-workflow.html | 812 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/error-correction-techniques-esl.html | 738 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/esl-exercise-type-selection-guide.html | 786 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/extensive-reading-programs-esl.html | 809 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/fill-in-the-blanks-exercises-best-practices.html | 742 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/five-minute-filler-activities-esl.html | 466 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/formative-assessment-english-teaching.html | 807 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 
 ### Batch 2
 
 | Route | Words | Reason |
 | --- | --- | --- |
-| /blog/art-based-language-activities-esl.html | 814 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/authentic-listening-materials-esl.html | 819 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/best-apps-learning-english-2026.html | 736 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/best-lesson-prep-tool-for-english-tutors.html | 831 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/best-workflow-for-private-english-tutors.html | 829 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/between-session-homework-evidence-for-private-english-tutors.html | 765 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/bilingual-education-models-comparison.html | 808 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/bottom-up-top-down-listening-esl.html | 824 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/building-esl-teaching-portfolio.html | 816 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/business-english-material-generation-workflow.html | 816 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/cambridge-exam-preparation-tips-teachers.html | 813 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/can-ai-plan-one-to-one-english-lesson.html | 826 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/cefr-aligned-worksheet-generation-workflow.html | 816 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/cefr-evidence-for-private-english-lessons.html | 818 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/clil-methodology-complete-guide.html | 813 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/cloze-test-design-esl.html | 705 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/collaborative-writing-activities-esl.html | 807 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/communicative-language-teaching-activities.html | 870 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/connected-speech-teaching-activities.html | 757 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/consciousness-raising-grammar-tasks.html | 805 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/holiday-themed-esl-activities.html | 261 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/homework-mistakes-next-english-lesson.html | 813 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/how-english-tutors-track-what-to-teach-next.html | 830 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html | 838 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/how-to-assess-english-level-cefr.html | 652 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/how-to-avoid-school-like-esl-materials-for-adults.html | 780 | Intentional adult 1:1 page that rejects school-like materials; school-like language is the object of critique, not the framing. |
+| /blog/how-to-create-grammar-worksheets-with-ai.html | 714 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/how-to-plan-english-lessons-effectively.html | 824 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/how-to-teach-english-grammar-effectively.html | 1401 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/how-to-teach-english-pronunciation.html | 1015 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/how-to-teach-speaking-esl.html | 1166 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/how-to-teach-writing-esl-students.html | 1028 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/ielts-preparation-worksheets-guide.html | 881 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/intrinsic-motivation-language-learning.html | 341 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/ipa-phonetic-alphabet-esl-teaching.html | 638 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/item-analysis-english-tests.html | 553 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/journal-writing-esl-students.html | 568 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/krashen-hypotheses-esl-teaching.html | 457 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/learning-pacing-scientific-vs-pragmatic-esl.html | 817 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/lesson-sequencing-scaffolding-curriculum.html | 1391 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 
 ### Batch 3
 
 | Route | Words | Reason |
 | --- | --- | --- |
-| /blog/contrastive-analysis-language-teaching.html | 808 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/cooperative-learning-structures-esl.html | 805 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/corpus-linguistics-esl-teaching.html | 807 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/course-evaluation-esl-programs.html | 807 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/cpd-planning-esl-teachers.html | 811 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/creating-authentic-materials-esl.html | 808 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/creating-english-tests-guide.html | 816 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/creating-interactive-worksheets-online.html | 812 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/creative-writing-activities-esl.html | 813 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/critical-period-hypothesis-language.html | 807 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/cross-cultural-communication-activities.html | 816 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/culturally-responsive-teaching-esl.html | 814 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/current-events-esl-lessons.html | 767 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/data-driven-learning-esl-corpora.html | 814 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/debate-activities-english-class.html | 667 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/designing-english-midterm-final-exams.html | 820 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/diagnostic-testing-english-learners.html | 886 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/dictation-for-adult-listening-accuracy-evidence.html | 786 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/dictogloss-technique-esl-teaching.html | 809 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/digital-homework-tools-esl-teachers.html | 819 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/lexical-approach-language-teaching.html | 804 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/managing-large-esl-classes.html | 550 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/materials-design-principles-elt.html | 1360 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/motivating-reluctant-esl-learners.html | 410 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/needs-analysis-esl-students.html | 1391 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/pair-work-activities-esl.html | 719 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/peer-editing-workshops-esl.html | 571 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/peer-feedback-activities-english.html | 674 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/personalized-learning-english-teaching.html | 1334 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/portfolio-assessment-esl-writing.html | 544 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/process-writing-approach-esl.html | 787 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/public-esl-worksheet-gallery-quality-standards.html | 416 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/reading-comprehension-activities-english.html | 1159 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/role-play-activities-esl.html | 638 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/rubrics-for-english-teachers.html | 638 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/scaffolding-strategies-english-learners.html | 1130 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/self-assessment-strategies-esl.html | 612 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/self-directed-learning-esl.html | 405 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/setting-up-freelance-esl-business.html | 1354 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/spaced-repetition-vocabulary-learning.html | 1368 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 
 ### Batch 4
 
 | Route | Words | Reason |
 | --- | --- | --- |
-| /blog/digital-resource-curation-esl.html | 815 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/discussion-questions-esl-topics.html | 810 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/editable-ai-worksheets-for-adult-english-learners.html | 831 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/emi-english-medium-instruction-guide.html | 810 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/end-of-term-activities-esl.html | 817 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/energy-management-esl-lessons.html | 814 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/english-for-specific-purposes-guide.html | 822 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/english-homework-ai-grading-workflow.html | 811 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/english-tutor-material-organization-workflow.html | 815 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/english-tutor-workflow-after-a-live-lesson.html | 825 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/error-correction-techniques-esl.html | 738 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/esl-exercise-type-selection-guide.html | 798 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/extensive-reading-programs-esl.html | 815 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/fill-in-the-blanks-exercises-best-practices.html | 745 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/first-adult-one-to-one-english-lesson-evidence-capture.html | 781 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/five-minute-filler-activities-esl.html | 466 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/formative-assessment-english-teaching.html | 805 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/from-lesson-evidence-to-next-lesson-plan.html | 820 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/from-student-goals-to-worksheet.html | 812 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/gender-inclusive-language-esl.html | 818 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/storytelling-activities-esl.html | 807 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/student-progress-to-worksheet-feedback-loop.html | 819 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/substitute-teacher-esl-lesson-plans.html | 377 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/syllabus-design-esl-courses.html | 537 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/task-based-language-teaching-worksheets.html | 1354 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teacher-burnout-prevention-esl.html | 1327 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-articles-esl-guide.html | 632 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-aviation-english.html | 511 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-business-english-guide.html | 1339 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-cleft-sentences-english.html | 257 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-collocations-esl.html | 804 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-conditionals-esl-guide.html | 845 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-ellipsis-substitution-english.html | 294 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-email-writing-esl.html | 328 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-english-hospitality-tourism.html | 410 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-english-immigrants-refugees.html | 575 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-english-intonation-stress.html | 735 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-english-it-professionals.html | 425 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-english-one-to-one.html | 3171 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/teaching-english-online-complete-guide.html | 1365 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 
 ## Sprint 5A: 24 New Blog Decision Pages
 
@@ -185,34 +185,6 @@ Priority rule: choose indexed or near-product URLs first, especially adult/busin
 
 | Route | Type | Title |
 | --- | --- | --- |
-| /software-engineer-incident-explanation-lesson-prep.html | profession | Software Engineer Incident Explanation: Lesson Prep Use Case |
-| /software-engineer-incident-explanation-what-to-teach-next.html | profession | Software Engineer Incident Explanation: What-to-Teach-Next Use Case |
-| /project-manager-status-update-lesson-prep.html | profession | Project Manager Status Update: Lesson Prep Use Case |
-| /project-manager-status-update-what-to-teach-next.html | profession | Project Manager Status Update: What-to-Teach-Next Use Case |
-| /hr-performance-conversation-lesson-prep.html | profession | HR Performance Conversation: Lesson Prep Use Case |
-| /hr-performance-conversation-what-to-teach-next.html | profession | HR Performance Conversation: What-to-Teach-Next Use Case |
-| /sales-discovery-call-lesson-prep.html | profession | Sales Discovery Call: Lesson Prep Use Case |
-| /sales-discovery-call-what-to-teach-next.html | profession | Sales Discovery Call: What-to-Teach-Next Use Case |
-| /lawyer-client-risk-explanation-lesson-prep.html | profession | Lawyer Client Risk Explanation: Lesson Prep Use Case |
-| /lawyer-client-risk-explanation-what-to-teach-next.html | profession | Lawyer Client Risk Explanation: What-to-Teach-Next Use Case |
-| /accountant-variance-explanation-lesson-prep.html | profession | Accountant Variance Explanation: Lesson Prep Use Case |
-| /accountant-variance-explanation-what-to-teach-next.html | profession | Accountant Variance Explanation: What-to-Teach-Next Use Case |
-| /consultant-executive-summary-lesson-prep.html | profession | Consultant Executive Summary: Lesson Prep Use Case |
-| /consultant-executive-summary-what-to-teach-next.html | profession | Consultant Executive Summary: What-to-Teach-Next Use Case |
-| /marketing-campaign-recommendation-lesson-prep.html | profession | Marketing Campaign Recommendation: Lesson Prep Use Case |
-| /marketing-campaign-recommendation-what-to-teach-next.html | profession | Marketing Campaign Recommendation: What-to-Teach-Next Use Case |
-| /entrepreneur-customer-interview-lesson-prep.html | profession | Entrepreneur Customer Interview: Lesson Prep Use Case |
-| /entrepreneur-customer-interview-what-to-teach-next.html | profession | Entrepreneur Customer Interview: What-to-Teach-Next Use Case |
-| /executive-board-update-lesson-prep.html | profession | Executive Board Update: Lesson Prep Use Case |
-| /executive-board-update-what-to-teach-next.html | profession | Executive Board Update: What-to-Teach-Next Use Case |
-| /doctor-patient-explanation-lesson-prep.html | llm | Doctor Patient Explanation: Lesson Prep Use Case |
-| /nurse-handover-lesson-prep.html | llm | Nurse Handover: Lesson Prep Use Case |
-| /ux-designer-research-interview-lesson-prep.html | llm | UX Designer Research Interview: Lesson Prep Use Case |
-| /data-analyst-insight-presentation-lesson-prep.html | llm | Data Analyst Insight Presentation: Lesson Prep Use Case |
-| /customer-success-renewal-call-lesson-prep.html | llm | Customer Success Renewal Call: Lesson Prep Use Case |
-| /operations-manager-process-update-lesson-prep.html | llm | Operations Manager Process Update: Lesson Prep Use Case |
-| /finance-manager-budget-explanation-lesson-prep.html | llm | Finance Manager Budget Explanation: Lesson Prep Use Case |
-| /product-manager-roadmap-tradeoff-lesson-prep.html | llm | Product Manager Roadmap Tradeoff: Lesson Prep Use Case |
 
 ## Internal Linking Rules
 

@@ -292,6 +292,116 @@ export const ARTICLE_DETAIL_OVERRIDES = {
   },
 };
 
+// Sitemap pruning (2026-10): templated articles whose rendered text shares
+// more than 80% of its shingles with the shared boilerplate (containment >= 0.80
+// in docs/seo/content-uniqueness.generated.json) are marked noindex,follow and
+// dropped from the sitemap. Strategic keep pages, redirect targets, and the
+// intentional school-like rejection page are excluded on purpose.
+export const templatedCloneNoindexSlugs = new Set([
+  'academic-language-functions-clil.html',
+  'academic-vocabulary-teaching-strategies.html',
+  'accent-coaching-techniques-esl.html',
+  'accent-reduction-activities-esl.html',
+  'action-research-esl-teachers.html',
+  'adapting-task-difficulty-for-one-adult-english-learner.html',
+  'adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html',
+  'adult-business-english-homework-feedback-loop.html',
+  'adult-learner-autonomy-in-private-english-lessons.html',
+  'adult-learner-performance-evidence-beyond-tests.html',
+  'adult-one-to-one-accessibility-adaptations-for-english-lessons.html',
+  'adult-one-to-one-neurodivergent-english-lesson-adaptations.html',
+  'adult-professional-task-projects-in-english-coaching.html',
+  'adult-vocabulary-retrieval-practice-not-games.html',
+  'ai-generated-listening-exercises-esl.html',
+  'ai-homework-grading-for-english-teachers.html',
+  'ai-powered-differentiation-esl.html',
+  'ai-tools-for-english-teachers-2026.html',
+  'ai-worksheet-generator-vs-lesson-planning-chatbot.html',
+  'art-based-language-activities-esl.html',
+  'authentic-listening-materials-esl.html',
+  'best-workflow-for-private-english-tutors.html',
+  'between-session-homework-evidence-for-private-english-tutors.html',
+  'bilingual-education-models-comparison.html',
+  'bottom-up-top-down-listening-esl.html',
+  'building-esl-teaching-portfolio.html',
+  'cambridge-exam-preparation-tips-teachers.html',
+  'cefr-evidence-for-private-english-lessons.html',
+  'clil-methodology-complete-guide.html',
+  'collaborative-writing-activities-esl.html',
+  'consciousness-raising-grammar-tasks.html',
+  'contrastive-analysis-language-teaching.html',
+  'cooperative-learning-structures-esl.html',
+  'corpus-linguistics-esl-teaching.html',
+  'course-evaluation-esl-programs.html',
+  'cpd-planning-esl-teachers.html',
+  'creating-authentic-materials-esl.html',
+  'creating-english-tests-guide.html',
+  'creating-interactive-worksheets-online.html',
+  'creative-writing-activities-esl.html',
+  'critical-period-hypothesis-language.html',
+  'cross-cultural-communication-activities.html',
+  'culturally-responsive-teaching-esl.html',
+  'data-driven-learning-esl-corpora.html',
+  'designing-english-midterm-final-exams.html',
+  'dictation-for-adult-listening-accuracy-evidence.html',
+  'dictogloss-technique-esl-teaching.html',
+  'digital-homework-tools-esl-teachers.html',
+  'digital-resource-curation-esl.html',
+  'discussion-questions-esl-topics.html',
+  'editable-ai-worksheets-for-adult-english-learners.html',
+  'emi-english-medium-instruction-guide.html',
+  'end-of-term-activities-esl.html',
+  'energy-management-esl-lessons.html',
+  'english-for-specific-purposes-guide.html',
+  'english-tutor-workflow-after-a-live-lesson.html',
+  'first-adult-one-to-one-english-lesson-evidence-capture.html',
+  'from-lesson-evidence-to-next-lesson-plan.html',
+  'from-student-goals-to-worksheet.html',
+  'gender-inclusive-language-esl.html',
+  'growth-mindset-language-learning.html',
+  'homework-before-lesson-workflow-for-adult-english-tutors.html',
+  'how-private-english-tutors-use-ai-safely.html',
+  'how-to-avoid-generic-ai-lesson-plans-for-adults.html',
+  'how-to-build-an-adult-esl-lesson-from-real-work-tasks.html',
+  'how-to-build-student-context-for-english-tutoring.html',
+  'how-to-choose-an-ai-tool-for-private-english-tutoring.html',
+  'how-to-create-business-english-homework-that-gets-completed.html',
+  'how-to-design-one-to-one-english-lessons-for-professionals.html',
+  'how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons.html',
+  'how-to-plan-a-recurring-english-student-learning-loop.html',
+  'how-to-plan-next-lesson-from-homework-mistakes.html',
+  'how-to-prepare-business-english-lesson-in-one-minute.html',
+  'how-to-reduce-lesson-prep-time-for-private-english-tutors.html',
+  'how-to-review-ai-generated-esl-worksheets-before-teaching.html',
+  'how-to-review-homework-before-next-english-lesson.html',
+  'how-to-track-adult-english-student-progress.html',
+  'how-to-track-progress-without-school-like-tests.html',
+  'how-to-turn-homework-errors-into-next-lesson-focus.html',
+  'how-to-turn-student-notes-into-esl-worksheets.html',
+  'how-to-use-ai-without-losing-teacher-control.html',
+  'how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html',
+  'how-to-use-student-context-in-ai-worksheet-generation.html',
+  'information-gap-tasks-for-adult-workplace-communication.html',
+  'input-output-evidence-in-adult-one-to-one-english-lessons.html',
+  'intercultural-communication-for-adult-professional-english.html',
+  'low-friction-review-loops-for-adult-english-learners.html',
+  'managing-lesson-focus-in-one-to-one-adult-english-lessons.html',
+  'motivation-theories-language-learning.html',
+  'private-english-tutor-homework-workflow.html',
+  'private-english-tutor-tool-stack.html',
+  'role-play-for-adult-workplace-english-practice.html',
+  'teacher-controlled-ai-lesson-prep.html',
+  'teaching-listening-strategies-esl.html',
+  'transitioning-between-tasks-in-adult-one-to-one-english-lessons.html',
+  'tutor-workflow-system-vs-lms-for-private-english-lessons.html',
+  'what-to-teach-after-a-speaking-lesson.html',
+  'what-to-teach-after-a-writing-homework.html',
+  'why-chatgpt-is-not-enough-for-recurring-english-tutoring.html',
+  'why-generic-esl-worksheets-fail-adult-learners.html',
+]);
+
+export const templatedCloneNoindexRoutes = [...templatedCloneNoindexSlugs].map((slug) => `/blog/${slug}`);
+
 function articleSpec({
   slug,
   title: explicitTitle,
@@ -310,6 +420,7 @@ function articleSpec({
   works = commonWorks,
   notEnough = commonNotEnough,
 }) {
+  noindex = noindex || templatedCloneNoindexSlugs.has(slug);
   const slugKey = slug.replace(/\.html$/, '');
   const detail = ARTICLE_DETAIL_OVERRIDES[slugKey] || {};
   // A hand-written entry that supplies its own problem/solution is "bespoke": the shared
@@ -713,34 +824,14 @@ function staticPageSpec(slug, title, directAnswer, comparisonEntity = 'a general
 // content-registry.mjs. Do not re-add thin per-tool variants.
 const comparisonRows = [];
 
-const professionRows = [
-  ['doctor-patient-explanation', 'Doctor Patient Explanation', 'explaining symptoms, advice boundaries, follow-up, and patient-safe clarification'],
-  ['nurse-handover', 'Nurse Handover', 'summarizing patient status, risk, action, and escalation clearly'],
-  ['ux-designer-research-interview', 'UX Designer Research Interview', 'asking neutral research questions and summarizing user evidence'],
-  ['data-analyst-insight-presentation', 'Data Analyst Insight Presentation', 'presenting insight, evidence, limitation, and recommendation'],
-  ['customer-success-renewal-call', 'Customer Success Renewal Call', 'discussing value, risk, objection, and next step in a renewal conversation'],
-  ['operations-manager-process-update', 'Operations Manager Process Update', 'explaining process change, impact, owner, and deadline'],
-  ['finance-manager-budget-explanation', 'Finance Manager Budget Explanation', 'explaining budget variance, tradeoff, forecast, and decision request'],
-  ['product-manager-roadmap-tradeoff', 'Product Manager Roadmap Tradeoff', 'explaining roadmap priority, tradeoff, risk, and stakeholder decision'],
-];
-
-// Consolidation (2026-10): the per-profession 'worksheet' variant was a
-// near-duplicate of 'lesson-prep' (containment 0.86-0.93) and was merged
-// into the lesson-prep page via CONTENT_OVERRIDES redirects.
-const professionTypes = [
-  ['lesson-prep', 'Lesson Prep Use Case', 'prepare one evidence-led lesson from the learner current professional task'],
-];
+// Sitemap pruning (2026-10): the eight per-profession 'lesson-prep' pages were
+// thin templates with a rendered '<p>undefined</p>' bug and no interactive SPA
+// counterpart. They are no longer generated; their URLs merge into
+// /adult-business-english-lesson-prep.html via CONTENT_OVERRIDES redirects.
+// Do not re-add thin per-profession static variants.
 
 export const x1000AdditionalStaticPages = [
   ...comparisonRows.map(([slug, title, directAnswer, entity]) => staticPageSpec(slug, title, directAnswer, entity)),
-  ...professionRows.flatMap(([baseSlug, label, scenario]) =>
-    professionTypes.map(([suffix, suffixTitle, decision]) => staticPageSpec(
-      `${baseSlug}-${suffix}.html`,
-      `${label}: ${suffixTitle}`,
-      `For ${label.toLowerCase()}, the tutor should ${decision}. The useful target is the learner real professional performance: ${scenario}.`,
-      'a generic AI chatbot',
-    ))
-  ),
 ];
 
 export const x1000EditorialBlogArticles = [

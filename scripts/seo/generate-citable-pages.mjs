@@ -8,6 +8,7 @@ import {
 } from './x1000-content-plan.mjs';
 import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
 import { SEO_TITLE_OVERRIDES } from './x1000-editorial-plan.mjs';
+import { getRoutingDecisions } from './content-registry.mjs';
 
 /** Hand-written SEO titles never take the brand suffix; they are already keyword-complete. */
 const CURATED_SEO_TITLES = new Set(Object.values(SEO_TITLE_OVERRIDES));
@@ -17,6 +18,15 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.join(ROOT, 'public');
 const BLOG = path.join(PUBLIC, 'blog');
 const BASE = 'https://edooqoo.com';
+// Routes that 301, 410, or carry noindex must never appear in related-link
+// meshes: priority hubs linking to them wastes crawl budget (audit:
+// internal-link-graph noindexPriorityLinks).
+const ROUTING_DECISIONS = getRoutingDecisions({ root: ROOT });
+const NON_INDEXABLE_ROUTES = new Set([
+  ...Object.keys(ROUTING_DECISIONS.redirects),
+  ...ROUTING_DECISIONS.gone,
+  ...ROUTING_DECISIONS.noindex,
+]);
 const DATE = '2026-05-24';
 const UPDATED_DATE = '2026-06-15';
 const AUTHOR_URL = `${BASE}/authors/jan-brzostowski`;
@@ -1341,7 +1351,9 @@ function meshLinks(currentRoute, items, routeFor, labelFor, radius = 6) {
   const links = [];
   for (let offset = 1; offset <= radius; offset += 1) {
     const next = items[(index + offset) % items.length];
-    const previous = items[(index - offset + items.length) % items.length];
+    // JS modulo keeps the sign of the dividend; normalize so small filtered
+    // pools (length < radius) never produce a negative index.
+    const previous = items[(((index - offset) % items.length) + items.length) % items.length];
     links.push([routeFor(next), labelFor(next)]);
     links.push([routeFor(previous), labelFor(previous)]);
   }
@@ -1697,7 +1709,7 @@ function renderArticle(article, allArticles = []) {
   const sprintLinks = normalizeArticleLinks(article);
   const articleMeshLinks = meshLinks(
     `/blog/${article.slug}`,
-    allArticles.filter((item) => !item.noindex),
+    allArticles.filter((item) => !item.noindex && !NON_INDEXABLE_ROUTES.has(`/blog/${item.slug}`)),
     (item) => `/blog/${item.slug}`,
     (item) => titleForLink(item),
   );
@@ -1705,6 +1717,7 @@ function renderArticle(article, allArticles = []) {
   // workflow articles chosen by rotation so inbound links spread evenly instead of every page
   // linking to every other, one ring neighbour for crawl continuity, and three product anchors.
   const strategicPool = allArticles.filter((item) => !item.noindex && item.slug !== article.slug
+    && !NON_INDEXABLE_ROUTES.has(`/blog/${item.slug}`)
     && /one-minute|homework|what-to-teach|ai-|workflow|student-context|worksheet|chatgpt|alternative/.test(`/blog/${item.slug}`));
   const articleIndex = Math.max(0, allArticles.findIndex((item) => item.slug === article.slug));
   const strategicPicks = strategicPool.length
@@ -1993,7 +2006,7 @@ function renderClaimIntegrityPage(page, allPages = []) {
   ];
   const staticMeshLinks = meshLinks(
     `/${page.slug}`,
-    allPages,
+    allPages.filter((item) => !NON_INDEXABLE_ROUTES.has(`/${item.slug}`)),
     (item) => `/${item.slug}`,
     (item) => titleForLink(item),
   );

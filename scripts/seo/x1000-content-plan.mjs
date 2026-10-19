@@ -431,43 +431,15 @@ export const x1000LlmStaticPages = llmStaticSpecs.map(([slug, title, directAnswe
   staticPageSpec({ slug, title, directAnswer, comparisonEntity })
 );
 
-const professionCases = [
-  ['software-engineer-incident-explanation', 'software engineer incident explanation', 'explaining an incident, cause, mitigation, and next action to a technical or non-technical stakeholder'],
-  ['project-manager-status-update', 'project manager status update', 'giving a concise status update with blocker, owner, risk, and next date'],
-  ['hr-performance-conversation', 'HR performance conversation', 'holding a careful performance conversation with evidence, tone control, and next steps'],
-  ['sales-discovery-call', 'sales discovery call', 'asking discovery questions, summarizing pain, and confirming next action'],
-  ['lawyer-client-risk-explanation', 'lawyer client risk explanation', 'explaining client risk with hedging, consequences, and clear options'],
-  ['accountant-variance-explanation', 'accountant variance explanation', 'explaining a variance, cause, business impact, and corrective action'],
-  ['consultant-executive-summary', 'consultant executive summary', 'summarizing findings, recommendation, rationale, and decision request'],
-  ['marketing-campaign-recommendation', 'marketing campaign recommendation', 'recommending a campaign action with evidence, tradeoff, and expected next step'],
-  ['entrepreneur-customer-interview', 'entrepreneur customer interview', 'asking customer interview questions and summarizing insight without leading the respondent'],
-  ['executive-board-update', 'executive board update', 'presenting a board update with priority, risk, decision, and follow-up'],
-];
-
-// Consolidation (2026-10): the per-profession 'worksheet' variant was a
-// near-duplicate of 'lesson-prep' (containment 0.86-0.93) and was merged
-// into the lesson-prep page via CONTENT_OVERRIDES redirects.
-const professionPageTypes = [
-  ['lesson-prep', 'Lesson Prep Use Case', 'prepare the next lesson from the learner current professional task and recent evidence'],
-  ['what-to-teach-next', 'What-to-Teach-Next Use Case', 'choose whether to repair, continue, or advance the professional communication target'],
-];
-
-export const x1000ProfessionStaticPages = professionCases.flatMap(([baseSlug, label, scenario]) =>
-  professionPageTypes.map(([suffix, suffixTitle, decision]) =>
-    staticPageSpec({
-      slug: `${baseSlug}-${suffix}.html`,
-      title: `${label.replace(/\b\w/g, (char) => char.toUpperCase())}: ${suffixTitle}`,
-      directAnswer: `For a ${label}, the tutor should ${decision}. The useful target is the learner real professional performance: ${scenario}.`,
-      comparisonEntity: 'a generic AI chatbot',
-      scenario,
-      pageType: 'profession',
-    })
-  )
-);
+// Sitemap pruning (2026-10): the per-profession 'lesson-prep' and
+// 'what-to-teach-next' static pages were thin templates with a rendered
+// '<p>undefined</p>' bug; the ten professions with an interactive scenario now
+// 301 to /what-to-teach-next/:slug and the rest merge into
+// /adult-business-english-lesson-prep.html via CONTENT_OVERRIDES redirects.
+// Do not re-add thin per-profession static variants.
 
 export const x1000StaticPages = [
   ...x1000LlmStaticPages,
-  ...x1000ProfessionStaticPages,
   ...x1000EditorialStaticPages,
 ];
 

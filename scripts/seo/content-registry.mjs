@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 import { getDecisionContentRoutes } from './decision-content.mjs';
-import { legacyEditorialDecisions } from './x1000-editorial-plan.mjs';
+import { legacyEditorialDecisions, templatedCloneNoindexRoutes } from './x1000-editorial-plan.mjs';
 
 const GSC_404_REPAIR_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), 'gsc-404-repair.json');
 const gsc404Redirects = JSON.parse(fs.readFileSync(GSC_404_REPAIR_PATH, 'utf8')).redirects;
@@ -443,8 +443,44 @@ export const CONTENT_OVERRIDES = {
     cluster: 'Tutor Business and Tools',
     reason: 'Consolidation: near-duplicate AI worksheet-tool comparison merged into the canonical Edooqoo vs Twee page.',
   },
+  // Sitemap pruning (2026-10): thin per-profession static pages
+  // ('worksheet', 'lesson-prep', 'what-to-teach-next' variants) carried a
+  // rendered '<p>undefined</p>' bug and near-duplicate boilerplate. The ten
+  // professions with an interactive scenario now 301 to
+  // /what-to-teach-next/:slug; the remaining eight merge into the adult
+  // lesson-prep hub. The static pages are no longer generated.
+  ...Object.fromEntries(Object.entries({
+    'accountant-variance-explanation': 'accountant-variance-call',
+    'consultant-executive-summary': 'consultant-executive-summary',
+    'entrepreneur-customer-interview': 'entrepreneur-customer-interview',
+    'executive-board-update': 'project-manager-status-update',
+    'hr-performance-conversation': 'hr-performance-conversation',
+    'lawyer-client-risk-explanation': 'lawyer-client-explanation',
+    'marketing-campaign-recommendation': 'marketing-campaign-recommendation',
+    'project-manager-status-update': 'project-manager-status-update',
+    'sales-discovery-call': 'sales-discovery-call',
+    'software-engineer-incident-explanation': 'software-engineer-incident-explanation',
+  }).flatMap(([base, spaSlug]) => [
+    [`/${base}-worksheet.html`, {
+      state: 'merge',
+      redirectTo: `/what-to-teach-next/${spaSlug}`,
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin per-profession worksheet page replaced by the interactive what-to-teach-next scenario.',
+    }],
+    [`/${base}-lesson-prep.html`, {
+      state: 'merge',
+      redirectTo: `/what-to-teach-next/${spaSlug}`,
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin per-profession lesson-prep page replaced by the interactive what-to-teach-next scenario.',
+    }],
+    [`/${base}-what-to-teach-next.html`, {
+      state: 'merge',
+      redirectTo: `/what-to-teach-next/${spaSlug}`,
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin static profession page replaced by the interactive what-to-teach-next scenario.',
+    }],
+  ])),
   ...Object.fromEntries([
-    // Per-profession 'worksheet' variants -> their 'lesson-prep' counterpart.
     'doctor-patient-explanation',
     'nurse-handover',
     'ux-designer-research-interview',
@@ -453,22 +489,20 @@ export const CONTENT_OVERRIDES = {
     'operations-manager-process-update',
     'finance-manager-budget-explanation',
     'product-manager-roadmap-tradeoff',
-    'software-engineer-incident-explanation',
-    'project-manager-status-update',
-    'hr-performance-conversation',
-    'sales-discovery-call',
-    'lawyer-client-risk-explanation',
-    'accountant-variance-explanation',
-    'consultant-executive-summary',
-    'marketing-campaign-recommendation',
-    'entrepreneur-customer-interview',
-    'executive-board-update',
-  ].map((base) => [`/${base}-worksheet.html`, {
-    state: 'merge',
-    redirectTo: `/${base}-lesson-prep.html`,
-    cluster: 'Adult and Business English',
-    reason: 'Consolidation: per-profession worksheet variant was a near-duplicate of the lesson-prep page; merged into it.',
-  }])),
+  ].flatMap((base) => [
+    [`/${base}-worksheet.html`, {
+      state: 'merge',
+      redirectTo: '/adult-business-english-lesson-prep.html',
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin per-profession worksheet page merged into the adult lesson-prep hub.',
+    }],
+    [`/${base}-lesson-prep.html`, {
+      state: 'merge',
+      redirectTo: '/adult-business-english-lesson-prep.html',
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin per-profession lesson-prep page merged into the adult lesson-prep hub.',
+    }],
+  ])),
   ...Object.fromEntries(legacyEditorialDecisions.map((decision) => {
     const base = {
       cluster: 'Adult and Business English',
@@ -492,6 +526,52 @@ export const CONTENT_OVERRIDES = {
       state: 'keep',
     }];
   })),
+  // Sitemap pruning (2026-10): templated blog articles whose rendered text
+  // shares >= 0.80 of its shingles with the shared boilerplate are
+  // noindex,follow and leave the sitemap. Strategic keep pages, redirect
+  // targets, and the intentional school-like rejection page are excluded.
+  // Placed after legacyEditorialDecisions so a rewrite-same-url keep decision
+  // can still win by being overridden here only for measured clones.
+  ...Object.fromEntries(templatedCloneNoindexRoutes.map((route) => [route, {
+    state: 'noindex',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Sitemap pruning: templated article with boilerplate containment >= 0.80; kept accessible, excluded from index and sitemap.',
+  }])),
+  // 27 legacy static blog files not owned by any generator get the same
+  // treatment via a direct robots meta edit in their HTML.
+  ...Object.fromEntries([
+    'improvisation-activities-esl',
+    'interlanguage-fossilization-esl',
+    'mentoring-new-esl-teachers',
+    'peer-observation-esl-teachers',
+    'phonemic-awareness-activities-esl',
+    'phrasal-verbs-teaching-strategies',
+    'podcast-based-listening-lessons-esl',
+    'readers-theatre-esl-activities',
+    'reflective-practice-language-teaching',
+    'screen-free-tech-activities-esl',
+    'selecting-esl-textbooks-guide',
+    'supplementing-coursebooks-activities',
+    'teaching-abstract-vocabulary-esl',
+    'teaching-aspect-english-grammar',
+    'teaching-determiners-quantifiers-esl',
+    'teaching-listening-for-gist-detail',
+    'teaching-literacy-young-esl-learners',
+    'teaching-modality-english-esl',
+    'teaching-note-taking-from-lectures',
+    'teaching-relative-clauses-esl',
+    'teaching-rhythm-english-speech',
+    'teaching-weak-forms-english',
+    'teaching-word-families-morphology-esl',
+    'teaching-word-stress-patterns-esl',
+    'using-chatbots-language-practice',
+    'using-comics-graphic-novels-esl',
+    'vocabulary-notebook-strategies-esl',
+  ].map((slug) => [`/blog/${slug}.html`, {
+    state: 'noindex',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Sitemap pruning: legacy templated article with boilerplate containment >= 0.80; kept accessible, excluded from index and sitemap.',
+  }])),
   ...Object.fromEntries(Object.entries(gsc404Redirects).map(([route, redirectTo]) => [route, {
     state: 'merge',
     redirectTo,
