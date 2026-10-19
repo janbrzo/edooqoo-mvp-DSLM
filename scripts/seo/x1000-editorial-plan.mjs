@@ -420,6 +420,7 @@ function articleSpec({
   works = commonWorks,
   notEnough = commonNotEnough,
 }) {
+  noindex = noindex || templatedCloneNoindexSlugs.has(slug);
   const slugKey = slug.replace(/\.html$/, '');
   const detail = ARTICLE_DETAIL_OVERRIDES[slugKey] || {};
   // A hand-written entry that supplies its own problem/solution is "bespoke": the shared
