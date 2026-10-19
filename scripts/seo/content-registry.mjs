@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 import { getDecisionContentRoutes } from './decision-content.mjs';
-import { legacyEditorialDecisions } from './x1000-editorial-plan.mjs';
+import { legacyEditorialDecisions, templatedCloneNoindexRoutes } from './x1000-editorial-plan.mjs';
 
 const GSC_404_REPAIR_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), 'gsc-404-repair.json');
 const gsc404Redirects = JSON.parse(fs.readFileSync(GSC_404_REPAIR_PATH, 'utf8')).redirects;
