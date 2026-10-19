@@ -526,6 +526,52 @@ export const CONTENT_OVERRIDES = {
       state: 'keep',
     }];
   })),
+  // Sitemap pruning (2026-10): templated blog articles whose rendered text
+  // shares >= 0.80 of its shingles with the shared boilerplate are
+  // noindex,follow and leave the sitemap. Strategic keep pages, redirect
+  // targets, and the intentional school-like rejection page are excluded.
+  // Placed after legacyEditorialDecisions so a rewrite-same-url keep decision
+  // can still win by being overridden here only for measured clones.
+  ...Object.fromEntries(templatedCloneNoindexRoutes.map((route) => [route, {
+    state: 'noindex',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Sitemap pruning: templated article with boilerplate containment >= 0.80; kept accessible, excluded from index and sitemap.',
+  }])),
+  // 27 legacy static blog files not owned by any generator get the same
+  // treatment via a direct robots meta edit in their HTML.
+  ...Object.fromEntries([
+    'improvisation-activities-esl',
+    'interlanguage-fossilization-esl',
+    'mentoring-new-esl-teachers',
+    'peer-observation-esl-teachers',
+    'phonemic-awareness-activities-esl',
+    'phrasal-verbs-teaching-strategies',
+    'podcast-based-listening-lessons-esl',
+    'readers-theatre-esl-activities',
+    'reflective-practice-language-teaching',
+    'screen-free-tech-activities-esl',
+    'selecting-esl-textbooks-guide',
+    'supplementing-coursebooks-activities',
+    'teaching-abstract-vocabulary-esl',
+    'teaching-aspect-english-grammar',
+    'teaching-determiners-quantifiers-esl',
+    'teaching-listening-for-gist-detail',
+    'teaching-literacy-young-esl-learners',
+    'teaching-modality-english-esl',
+    'teaching-note-taking-from-lectures',
+    'teaching-relative-clauses-esl',
+    'teaching-rhythm-english-speech',
+    'teaching-weak-forms-english',
+    'teaching-word-families-morphology-esl',
+    'teaching-word-stress-patterns-esl',
+    'using-chatbots-language-practice',
+    'using-comics-graphic-novels-esl',
+    'vocabulary-notebook-strategies-esl',
+  ].map((slug) => [`/blog/${slug}.html`, {
+    state: 'noindex',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Sitemap pruning: legacy templated article with boilerplate containment >= 0.80; kept accessible, excluded from index and sitemap.',
+  }])),
   ...Object.fromEntries(Object.entries(gsc404Redirects).map(([route, redirectTo]) => [route, {
     state: 'merge',
     redirectTo,
