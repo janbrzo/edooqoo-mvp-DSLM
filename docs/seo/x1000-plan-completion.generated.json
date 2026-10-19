@@ -29,18 +29,18 @@
     "legacy noindex routes present: 17",
     "x1000 refresh articles present: 81",
     "x1000 additional blog decision pages present: 12",
-    "x1000 additional static AEO/profession pages present: 28",
     "x1000 generated blog articles present: 167",
-    "x1000 generated static pages present: 76",
+    "no thin per-profession static pages remain in the x1000 plans",
     "blog triage has zero unresolved rewrite-to-adult-1to1 items",
     "school-like rejection page is classified as intentional adult 1:1 content",
     "internal link graph has zero orphan strategic top-120 routes",
-    "internal link graph has zero weak top-40 strategic routes",
-    "internal link graph has zero weak top-120 strategic routes",
-    "internal link graph has zero noindex priority hub links"
+    "internal link graph has zero weak top-40 strategic routes"
   ],
   "warn": [
     "live routing still reports 11 failures; this requires Cloudflare Worker deployment/binding, not more content edits"
   ],
-  "fail": []
+  "fail": [
+    "internal link graph has 22 weak top-120 strategic routes",
+    "internal link graph has 19 noindex priority hub links"
+  ]
 }
