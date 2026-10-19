@@ -443,8 +443,44 @@ export const CONTENT_OVERRIDES = {
     cluster: 'Tutor Business and Tools',
     reason: 'Consolidation: near-duplicate AI worksheet-tool comparison merged into the canonical Edooqoo vs Twee page.',
   },
+  // Sitemap pruning (2026-10): thin per-profession static pages
+  // ('worksheet', 'lesson-prep', 'what-to-teach-next' variants) carried a
+  // rendered '<p>undefined</p>' bug and near-duplicate boilerplate. The ten
+  // professions with an interactive scenario now 301 to
+  // /what-to-teach-next/:slug; the remaining eight merge into the adult
+  // lesson-prep hub. The static pages are no longer generated.
+  ...Object.fromEntries(Object.entries({
+    'accountant-variance-explanation': 'accountant-variance-call',
+    'consultant-executive-summary': 'consultant-executive-summary',
+    'entrepreneur-customer-interview': 'entrepreneur-customer-interview',
+    'executive-board-update': 'project-manager-status-update',
+    'hr-performance-conversation': 'hr-performance-conversation',
+    'lawyer-client-risk-explanation': 'lawyer-client-explanation',
+    'marketing-campaign-recommendation': 'marketing-campaign-recommendation',
+    'project-manager-status-update': 'project-manager-status-update',
+    'sales-discovery-call': 'sales-discovery-call',
+    'software-engineer-incident-explanation': 'software-engineer-incident-explanation',
+  }).flatMap(([base, spaSlug]) => [
+    [`/${base}-worksheet.html`, {
+      state: 'merge',
+      redirectTo: `/what-to-teach-next/${spaSlug}`,
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin per-profession worksheet page replaced by the interactive what-to-teach-next scenario.',
+    }],
+    [`/${base}-lesson-prep.html`, {
+      state: 'merge',
+      redirectTo: `/what-to-teach-next/${spaSlug}`,
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin per-profession lesson-prep page replaced by the interactive what-to-teach-next scenario.',
+    }],
+    [`/${base}-what-to-teach-next.html`, {
+      state: 'merge',
+      redirectTo: `/what-to-teach-next/${spaSlug}`,
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin static profession page replaced by the interactive what-to-teach-next scenario.',
+    }],
+  ])),
   ...Object.fromEntries([
-    // Per-profession 'worksheet' variants -> their 'lesson-prep' counterpart.
     'doctor-patient-explanation',
     'nurse-handover',
     'ux-designer-research-interview',
@@ -453,22 +489,20 @@ export const CONTENT_OVERRIDES = {
     'operations-manager-process-update',
     'finance-manager-budget-explanation',
     'product-manager-roadmap-tradeoff',
-    'software-engineer-incident-explanation',
-    'project-manager-status-update',
-    'hr-performance-conversation',
-    'sales-discovery-call',
-    'lawyer-client-risk-explanation',
-    'accountant-variance-explanation',
-    'consultant-executive-summary',
-    'marketing-campaign-recommendation',
-    'entrepreneur-customer-interview',
-    'executive-board-update',
-  ].map((base) => [`/${base}-worksheet.html`, {
-    state: 'merge',
-    redirectTo: `/${base}-lesson-prep.html`,
-    cluster: 'Adult and Business English',
-    reason: 'Consolidation: per-profession worksheet variant was a near-duplicate of the lesson-prep page; merged into it.',
-  }])),
+  ].flatMap((base) => [
+    [`/${base}-worksheet.html`, {
+      state: 'merge',
+      redirectTo: '/adult-business-english-lesson-prep.html',
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin per-profession worksheet page merged into the adult lesson-prep hub.',
+    }],
+    [`/${base}-lesson-prep.html`, {
+      state: 'merge',
+      redirectTo: '/adult-business-english-lesson-prep.html',
+      cluster: 'Adult and Business English',
+      reason: 'Sitemap pruning: thin per-profession lesson-prep page merged into the adult lesson-prep hub.',
+    }],
+  ])),
   ...Object.fromEntries(legacyEditorialDecisions.map((decision) => {
     const base = {
       cluster: 'Adult and Business English',
