@@ -178,7 +178,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
         use: 'Intelligibility-first activity set',
         why: 'Targets impact on meetings, not accent erasure.',
         where: 'Accent reduction activities',
-        whereHref: '/blog/accent-reduction-activities-esl.html',
+        whereHref: '/blog/how-to-teach-english-pronunciation.html',
       },
     ],
     problems: [
@@ -195,7 +195,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
     spokes: [
       { label: 'Teaching stress and intonation to adults', href: '/blog/teaching-english-intonation-stress.html', note: 'Ten drills covering word stress, sentence stress and intonation contours.' },
       { label: 'Minimal pairs sorted by the learner\'s L1', href: '/blog/teaching-minimal-pairs-esl.html', note: 'Which contrasts to train for each first language, and which to leave alone.' },
-      { label: 'Accent reduction activities for professionals', href: '/blog/accent-reduction-activities-esl.html', note: 'Intelligibility-first activities for working adults.' },
+      { label: 'How to teach English pronunciation', href: '/blog/how-to-teach-english-pronunciation.html', note: 'Intelligibility-first pronunciation work for working adults.' },
       { label: 'How to teach English pronunciation', href: '/blog/how-to-teach-english-pronunciation.html', note: 'The overall sequence: diagnose, isolate, drill, transfer.' },
       { label: 'Teaching connected speech', href: '/blog/connected-speech-teaching-activities.html', note: 'Linking, elision and assimilation for learners who cannot follow natural speech.' },
       { label: 'Teaching collocations', href: '/blog/teaching-collocations-esl.html', note: 'Chunking that makes stress patterns and fluency easier to hold.' },
@@ -369,7 +369,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
       { title: 'Next focus, already argued', body: 'The system proposes the next objective with the evidence behind it, so you decide in seconds rather than reconstruct.' },
     ],
     spokes: [
-      { label: 'Digital homework tools for ESL tutors compared', href: '/blog/digital-homework-tools-esl-teachers.html', note: 'Assignment, submission, correction and evidence tracking, with trade-offs.' },
+      { label: 'English homework AI grading workflow', href: '/blog/english-homework-ai-grading-workflow.html', note: 'Assignment, submission, correction and evidence tracking, with trade-offs.' },
       { label: 'Writing student progress reports', href: '/blog/writing-student-progress-reports-esl.html', note: 'Reports built from recorded evidence rather than impressions.' },
       { label: 'AI-assisted homework grading workflow', href: '/blog/english-homework-ai-grading-workflow.html', note: 'Where automation helps and where the tutor must stay in the loop.' },
       { label: 'How long lesson prep should actually take', href: '/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html', note: 'Benchmarks for prep time per student and where it leaks.' },
