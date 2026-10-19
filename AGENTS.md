@@ -1,6 +1,7 @@
 # AGENTS.md — Technical Rules
 
 - AI comparison SEO pages are consolidated into five canonical targets (`/edooqoo-vs-chatgpt.html`, `/chatgpt-alternative-for-english-tutors.html`, `/ai-tools-for-private-english-tutors.html`, `/edooqoo-vs-twee.html`, `/edooqoo-vs-busyteacher.html`); never re-add thin per-tool variants, retire near-duplicates via `CONTENT_OVERRIDES` merge redirects — because 63 near-duplicate pages (containment 0.65-0.93) cannibalized each other in search.
+- Thin per-profession static SEO pages (`*-lesson-prep.html`, `*-what-to-teach-next.html`, `*-worksheet.html`) and templated blog articles with boilerplate containment >= 0.80 are retired (301 to `/what-to-teach-next/:slug` or the adult lesson-prep hub) or `noindex,follow` via `templatedCloneNoindexSlugs`; never re-add them to generators, and never link non-indexable routes from related-link meshes or priority hubs — because they carried a rendered `<p>undefined</p>` bug, cannibalized the interactive scenarios, and burned crawl budget (sitemap 407 -> 252 URLs).
 
 One rule per entry, with a one-line why. Replace an existing rule instead of adding a second one on the same topic. Product/UX decisions live in project memory (`mem://`) and `docs/ux/*-spec.md`, not here.
 
