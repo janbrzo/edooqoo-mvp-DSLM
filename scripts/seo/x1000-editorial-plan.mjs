@@ -824,34 +824,14 @@ function staticPageSpec(slug, title, directAnswer, comparisonEntity = 'a general
 // content-registry.mjs. Do not re-add thin per-tool variants.
 const comparisonRows = [];
 
-const professionRows = [
-  ['doctor-patient-explanation', 'Doctor Patient Explanation', 'explaining symptoms, advice boundaries, follow-up, and patient-safe clarification'],
-  ['nurse-handover', 'Nurse Handover', 'summarizing patient status, risk, action, and escalation clearly'],
-  ['ux-designer-research-interview', 'UX Designer Research Interview', 'asking neutral research questions and summarizing user evidence'],
-  ['data-analyst-insight-presentation', 'Data Analyst Insight Presentation', 'presenting insight, evidence, limitation, and recommendation'],
-  ['customer-success-renewal-call', 'Customer Success Renewal Call', 'discussing value, risk, objection, and next step in a renewal conversation'],
-  ['operations-manager-process-update', 'Operations Manager Process Update', 'explaining process change, impact, owner, and deadline'],
-  ['finance-manager-budget-explanation', 'Finance Manager Budget Explanation', 'explaining budget variance, tradeoff, forecast, and decision request'],
-  ['product-manager-roadmap-tradeoff', 'Product Manager Roadmap Tradeoff', 'explaining roadmap priority, tradeoff, risk, and stakeholder decision'],
-];
-
-// Consolidation (2026-10): the per-profession 'worksheet' variant was a
-// near-duplicate of 'lesson-prep' (containment 0.86-0.93) and was merged
-// into the lesson-prep page via CONTENT_OVERRIDES redirects.
-const professionTypes = [
-  ['lesson-prep', 'Lesson Prep Use Case', 'prepare one evidence-led lesson from the learner current professional task'],
-];
+// Sitemap pruning (2026-10): the eight per-profession 'lesson-prep' pages were
+// thin templates with a rendered '<p>undefined</p>' bug and no interactive SPA
+// counterpart. They are no longer generated; their URLs merge into
+// /adult-business-english-lesson-prep.html via CONTENT_OVERRIDES redirects.
+// Do not re-add thin per-profession static variants.
 
 export const x1000AdditionalStaticPages = [
   ...comparisonRows.map(([slug, title, directAnswer, entity]) => staticPageSpec(slug, title, directAnswer, entity)),
-  ...professionRows.flatMap(([baseSlug, label, scenario]) =>
-    professionTypes.map(([suffix, suffixTitle, decision]) => staticPageSpec(
-      `${baseSlug}-${suffix}.html`,
-      `${label}: ${suffixTitle}`,
-      `For ${label.toLowerCase()}, the tutor should ${decision}. The useful target is the learner real professional performance: ${scenario}.`,
-      'a generic AI chatbot',
-    ))
-  ),
 ];
 
 export const x1000EditorialBlogArticles = [
