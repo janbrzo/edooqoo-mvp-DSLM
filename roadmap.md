@@ -121,10 +121,10 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Replaced numeric page-count assertions in `audit-x1000-plan-completion.mjs` with a quality gate (no retired per-profession patterns in plans)
 - [x] Fixed related-link meshes to never link non-indexable routes (`NON_INDEXABLE_ROUTES` filter in `generate-citable-pages.mjs`, incl. a latent negative-modulo crash in `meshLinks`); rewrote 8 stale hub links in `clusterHubs.ts` and `Resources.tsx`; noindexPriorityLinks 11 -> 0
 - [x] Verification: 1090 tests PASS, build OK, seo:audit OK (939 checks), Martha PASS (0 warnings), sitemap 407 -> 252 URLs, 174 edge redirects, content-uniqueness regenerated
-- [ ] Pre-existing internal-link debt (identical before Step 3): 1 orphan strategic route (`/blog/esl-games-for-teachers`), 5 weak top-40, 33 weak top-120 routes; belongs to Step 4 hub strengthening
+- [x] Pre-existing internal-link debt (identical before Step 3): 1 orphan strategic route (`/blog/esl-games-for-teachers`), 5 weak top-40, 33 weak top-120 routes; resolved in Step 4, Phase 4.1.
 - [ ] Production: publish + prerendered snapshots deploy, then "Validate fix" in GSC
 
 ## SEO/GEO Hub Strengthening, Step 4
 
-- [ ] Phase 4.1: connect `/blog/esl-games-for-teachers` from Toolkit, Resources and Exercise Design Hub; strengthen five weak top-40 routes and strategic article rotation; regenerate affected output and verify the existing internal-link thresholds.
+- [x] Phase 4.1: connected `/blog/esl-games-for-teachers` from Toolkit, Resources and Exercise Design Hub; strengthened five weak top-40 routes and all 33 weak top-120 routes through registry-filtered topic rotation (at most three additional links per donor, existing recommendations preserved). Synced generated output and refreshed five SPA snapshot bodies; second sync left public/AI outputs byte-identical. Verification: 1098 tests passed, content:audit and SEO/metadata/structured-data audits passed; graph orphan=0, weakTop40=0, weakTop120=0, noindexPriority=0; sitemap remains 252 URLs. Three live navigation paths verified without page errors. Production publication and GSC outcomes are not verified.
 - Phases 4.2-4.4 are outside this implementation request; editorial noindex decisions, tool/gallery enhancements and broader documentation changes remain deferred.
