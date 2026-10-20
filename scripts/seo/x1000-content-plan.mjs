@@ -2,6 +2,7 @@ import {
   x1000EditorialAiSearchPrompts,
   x1000EditorialBlogArticles,
   x1000EditorialStaticPages,
+  templatedCloneNoindexSlugs,
 } from './x1000-editorial-plan.mjs';
 
 const coreWorkflowLinks = [
@@ -88,6 +89,9 @@ function articleSpec({
     faqs,
     cluster,
     priority,
+    // Measured templated clones must render noindex,follow here too; otherwise the
+    // registry drops them from the sitemap while the HTML still says index.
+    noindex: templatedCloneNoindexSlugs.has(slug),
   };
 }
 
@@ -450,7 +454,7 @@ export const x1000BlogArticles = [
 ];
 
 export const x1000AiResourceArticles = [
-  ...x1000DecisionBlogArticles,
+  ...x1000DecisionBlogArticles.filter((article) => !article.noindex),
   ...x1000PillarBlogArticles.filter((article) => ![
     'one-minute-prep-workflow-for-esl-tutors.html',
     'ai-worksheet-generator-mechanics-for-esl-teachers.html',
