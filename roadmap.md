@@ -123,3 +123,8 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Verification: 1090 tests PASS, build OK, seo:audit OK (939 checks), Martha PASS (0 warnings), sitemap 407 -> 252 URLs, 174 edge redirects, content-uniqueness regenerated
 - [ ] Pre-existing internal-link debt (identical before Step 3): 1 orphan strategic route (`/blog/esl-games-for-teachers`), 5 weak top-40, 33 weak top-120 routes; belongs to Step 4 hub strengthening
 - [ ] Production: publish + prerendered snapshots deploy, then "Validate fix" in GSC
+
+## SEO/GEO Hub Strengthening, Step 4
+
+- [ ] Phase 4.1: connect `/blog/esl-games-for-teachers` from Toolkit, Resources and Exercise Design Hub; strengthen five weak top-40 routes and strategic article rotation; regenerate affected output and verify the existing internal-link thresholds.
+- Phases 4.2-4.4 are outside this implementation request; editorial noindex decisions, tool/gallery enhancements and broader documentation changes remain deferred.
