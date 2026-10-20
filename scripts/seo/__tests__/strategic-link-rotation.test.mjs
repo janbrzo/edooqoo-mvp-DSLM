@@ -55,6 +55,28 @@ describe('strategic link allocation', () => {
       .toThrow('Insufficient topic-matched link capacity');
   });
 
+  it('fills saturated capacity while preserving unique targets per donor', () => {
+    const targets = Array.from({ length: 6 }, (_, i) => [
+      `/blog/english-target-${i}.html`, 'English task', 'planning', 3,
+    ]);
+    const allocation = allocateStrategicLinks(sources,
+      new Set([...sources.map((source) => source.route), ...targets.map(([route]) => route)]), targets);
+    expect([...allocation.values()].map((links) => links.length)).toEqual([3, 3, 3, 3, 3, 3]);
+    for (const [target] of targets) {
+      expect([...allocation.values()].filter((links) => links.some(([route]) => route === target)))
+        .toHaveLength(3);
+    }
+  });
+
+  it('fails when eligible link requests exceed the bounded donor capacity', () => {
+    const targets = Array.from({ length: 4 }, (_, i) => [
+      `/blog/english-target-${i}.html`, 'English task', 'planning', 1,
+    ]);
+    expect(() => allocateStrategicLinks([sources[0]],
+      new Set([sources[0].route, ...targets.map(([route]) => route)]), targets))
+      .toThrow('Insufficient topic-matched link capacity');
+  });
+
   it('keeps every phase 4.1 orphan and weak-route destination in the targeted rotation', () => {
     const targets = new Set(STRATEGIC_LINK_DESTINATIONS.map(([route]) => route));
     expect(targets.has('/blog/esl-games-for-teachers')).toBe(true);
