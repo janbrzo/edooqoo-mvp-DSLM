@@ -1680,6 +1680,13 @@ TECHNICAL MECHANICS:
 - Site-wide equity: hub links added to `workflowLinks` (`scripts/seo/x1000-editorial-plan.mjs`) and
   `productLinks` (`scripts/seo/generate-citable-pages.mjs`), raising incoming links per hub above the
   top-40 threshold (internal link audit: weakTop40=0, weakTop120=0, orphan=0).
+- Additional strategic destinations: `scripts/seo/strategic-link-rotation.mjs` supplies a fixed,
+  editorially grouped destination list to the citable article generator. Its pure allocator uses
+  only indexable registry routes, excludes self and existing links, assigns distinct topic-matched
+  donors, and adds at most three recommendations per article without displacing existing links.
+  Insufficient relevant donor capacity fails generation; the internal-link audit still requires
+  ten distinct incoming sources for top-40 routes and five for top-120 routes. This public-content
+  module does not read private student evidence or alter DSLM or worksheet generation.
 - AI discovery: `## Topic Hubs` section emitted into `public/llms.txt` by `scripts/seo/generate-ai-resources.mjs`.
 - CI guard: `scripts/seo/audit-cluster-hubs.mjs` (`npm run seo:audit-cluster-hubs`) validates routes,
   manifest registration, citation block, spoke existence, backlink presence, and title/description limits.

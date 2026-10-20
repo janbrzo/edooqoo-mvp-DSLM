@@ -126,6 +126,8 @@ const Resources = () => {
   ];
 
   const blogArticles: ResourceCard[] = [
+    { title: "ESL Games for Adult Lessons", description: "Choose speaking games with a clear language goal for adult 1:1 lessons.", href: "/blog/esl-games-for-teachers", badge: "Activities" },
+    { title: "Task-Based English Worksheets", description: "Build a lesson around a real communication task and an observable outcome.", href: "/blog/task-based-language-teaching-worksheets.html", badge: "Planning" },
     { title: "How to Create Grammar Worksheets with AI", description: "Step-by-step guide with CEFR grammar topics.", href: "/blog/how-to-create-grammar-worksheets-with-ai.html", badge: "Blog" },
     { title: "10 Vocabulary Teaching Strategies", description: "ESL vocabulary strategies with AI examples.", href: "/blog/vocabulary-teaching-strategies-esl.html", badge: "Blog" },
     { title: "15 Reading Comprehension Activities", description: "Activities from A1 to C2 for English classes.", href: "/blog/reading-comprehension-activities-english.html", badge: "Blog" },
