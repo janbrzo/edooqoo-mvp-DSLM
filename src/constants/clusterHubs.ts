@@ -112,6 +112,9 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
       { label: 'What an adult English placement test should include', href: '/blog/what-should-adult-english-placement-test-include.html', note: 'The components that matter for working adults, and the ones that waste the lesson.' },
       { label: 'Formative assessment in English teaching', href: '/blog/formative-assessment-english-teaching.html', note: 'Collecting level evidence inside normal lessons instead of re-testing.' },
       { label: 'CEFR-aligned worksheet generation workflow', href: '/blog/cefr-aligned-worksheet-generation-workflow.html', note: 'From a CEFR result to material at the right level in one pass.' },
+      { label: 'A1 beginner English worksheets', href: '/a1-beginner-english-worksheets.html', note: 'Choose short, supported tasks after an A1 diagnostic.' },
+      { label: 'A2 elementary English worksheets', href: '/a2-elementary-english-worksheets.html', note: 'Turn an A2 result into practical everyday communication tasks.' },
+      { label: 'IELTS preparation worksheets', href: '/blog/ielts-preparation-worksheets-guide.html', note: 'Separate an adult learner\'s exam practice needs from their general level.' },
     ],
     faqs: [
       {
@@ -287,6 +290,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
       { label: 'Modal verbs worksheets and exercise types', href: '/modal-verbs-worksheets-esl.html', note: 'Eight ready formats for a notoriously slippery area.' },
       { label: 'Choosing the right ESL exercise type', href: '/blog/esl-exercise-type-selection-guide.html', note: 'Matching format to the gap you are trying to see.' },
       { label: 'Task-based language teaching worksheets', href: '/blog/task-based-language-teaching-worksheets.html', note: 'Designing tasks with an outcome, not just a form focus.' },
+      { label: 'ESL games for adult English lessons', href: '/blog/esl-games-for-teachers', note: 'Choose an activity that makes a specific communication skill observable.' },
       { label: 'All 29 exercise types', href: '/exercise-types', note: 'The full catalogue with CEFR fit and use cases.' },
     ],
     faqs: [
@@ -373,6 +377,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
       { label: 'Writing student progress reports', href: '/blog/writing-student-progress-reports-esl.html', note: 'Reports built from recorded evidence rather than impressions.' },
       { label: 'AI-assisted homework grading workflow', href: '/blog/english-homework-ai-grading-workflow.html', note: 'Where automation helps and where the tutor must stay in the loop.' },
       { label: 'How long lesson prep should actually take', href: '/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html', note: 'Benchmarks for prep time per student and where it leaks.' },
+      { label: 'AI lesson planning for English teachers', href: '/ai-lesson-planning-for-english-teachers.html', note: 'Use AI drafting after choosing the learner\'s objective and review the result.' },
       { label: 'Homework workflow in Edooqoo', href: '/features/homework', note: 'Assigning exercises, deadlines, submissions and review.' },
       { label: 'Calendar and public booking', href: '/features/calendar', note: 'Booking page, calendar sync and lesson records.' },
       { label: 'What Should I Teach Next?', href: '/what-to-teach-next', note: 'The decision layer: evidence in, next objective out.' },
