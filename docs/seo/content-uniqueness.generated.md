@@ -8,16 +8,16 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Metric | Value |
 |---|---:|
-| Indexable static pages analysed | 263 |
-| Templated (maxContainment >= 0.5) | 62 (24%) |
-| Near-duplicate (maxContainment >= 0.8) | 31 (12%) |
-| Templated pages listed in sitemap.xml | 52 |
+| Indexable static pages analysed | 254 |
+| Templated (maxContainment >= 0.5) | 52 (20%) |
+| Near-duplicate (maxContainment >= 0.8) | 21 (8%) |
+| Templated pages listed in sitemap.xml | 51 |
 
 ## By section
 
 | Section | Indexable pages | Templated >= 0.5 | Near-duplicate >= 0.8 |
 |---|---:|---:|---:|
-| /blog | 128 | 39 (30%) | 27 |
+| /blog | 119 | 29 (24%) | 17 |
 | / (root pages) | 93 | 7 (8%) | 0 |
 | /what-to-teach-next | 12 | 0 (0%) | 0 |
 | /esl-worksheets | 8 | 8 (100%) | 2 |
@@ -47,20 +47,10 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /blog/formative-assessment-english-teaching.html | 0.911 | 0.086 | 736 | /blog/cefr-aligned-worksheet-generation-workflow.html |
 | /blog/adult-esl-student-profile-lesson-planning.html | 0.906 | 0.072 | 745 | /blog/homework-mistakes-next-english-lesson.html |
 | /blog/how-to-plan-english-lessons-effectively.html | 0.905 | 0.066 | 745 | /blog/can-ai-plan-one-to-one-english-lesson.html |
-| /blog/what-to-teach-after-a-speaking-lesson.html | 0.896 | 0.104 | 711 | /blog/what-to-teach-after-a-writing-homework.html |
 | /esl-worksheets/business-email/b1-intermediate | 0.895 | 0.105 | 511 | /esl-worksheets/business-email/b2-upper-intermediate |
 | /esl-worksheets/business-email/b2-upper-intermediate | 0.893 | 0.046 | 512 | /esl-worksheets/business-email/b1-intermediate |
-| /blog/what-to-teach-after-a-writing-homework.html | 0.89 | 0.11 | 722 | /blog/what-to-teach-after-a-speaking-lesson.html |
-| /blog/how-to-avoid-school-like-esl-materials-for-adults.html | 0.884 | 0.115 | 721 | /blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html |
-| /blog/private-english-tutor-homework-workflow.html | 0.884 | 0.116 | 709 | /blog/teacher-controlled-ai-lesson-prep.html |
-| /blog/why-generic-esl-worksheets-fail-adult-learners.html | 0.884 | 0.114 | 715 | /blog/how-to-avoid-school-like-esl-materials-for-adults.html |
-| /blog/how-to-track-adult-english-student-progress.html | 0.882 | 0.115 | 721 | /blog/teacher-controlled-ai-lesson-prep.html |
-| /blog/teacher-controlled-ai-lesson-prep.html | 0.878 | 0.103 | 726 | /blog/how-to-track-adult-english-student-progress.html |
-| /blog/how-to-turn-student-notes-into-esl-worksheets.html | 0.872 | 0.126 | 735 | /blog/what-to-teach-after-a-speaking-lesson.html |
-| /blog/why-chatgpt-is-not-enough-for-recurring-english-tutoring.html | 0.872 | 0.127 | 738 | /blog/how-to-track-adult-english-student-progress.html |
 | /worksheets/collocations-match/meetings | 0.866 | 0.134 | 439 | /worksheets/error-correction/meetings |
 | /worksheets/error-correction/meetings | 0.866 | 0.016 | 439 | /worksheets/collocations-match/meetings |
-| /blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html | 0.853 | 0.147 | 766 | /blog/how-to-avoid-school-like-esl-materials-for-adults.html |
 | /blog/esl-exercise-type-selection-guide.html | 0.852 | 0.129 | 724 | /blog/can-ai-plan-one-to-one-english-lesson.html |
 | /blog/process-writing-approach-esl.html | 0.843 | 0.154 | 711 | /blog/best-lesson-prep-tool-for-english-tutors.html |
 | /glossary | 0.791 | 0.209 | 1242 | /glossary.html |
@@ -72,6 +62,16 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /esl-worksheets/phrasal-verbs/c1-advanced | 0.717 | 0.281 | 501 | /esl-worksheets/news-media/c1-advanced |
 | /esl-worksheets/travel-vocabulary/a2-elementary | 0.714 | 0.286 | 507 | /esl-worksheets/weather/a2-elementary |
 | /esl-worksheets/weather/a2-elementary | 0.71 | 0.29 | 510 | /esl-worksheets/travel-vocabulary/a2-elementary |
+| /esl-worksheets/collocations/c1-advanced | 0.7 | 0.3 | 510 | /esl-worksheets/news-media/c1-advanced |
+| /english-for/hr-professionals | 0.672 | 0.323 | 446 | /english-for/sales-reps |
+| /esl-worksheets/news-media/c1-advanced | 0.669 | 0.329 | 536 | /esl-worksheets/phrasal-verbs/c1-advanced |
+| /esl-worksheets/environment/b2-upper-intermediate | 0.66 | 0.312 | 513 | /esl-worksheets/business-email/b2-upper-intermediate |
+| /english-for/sales-reps | 0.658 | 0.339 | 455 | /english-for/hr-professionals |
+| /ai-tools-for-private-english-tutors.html | 0.648 | 0.306 | 336 | /chatgpt-alternative-for-english-tutors.html |
+| /worksheets/error-correction/business-email | 0.633 | 0.13 | 446 | /worksheets/error-correction/present-perfect |
+| /chatgpt-alternative-for-english-tutors.html | 0.628 | 0.325 | 362 | /ai-tools-for-private-english-tutors.html |
+| /worksheets/error-correction/present-perfect | 0.621 | 0.357 | 455 | /worksheets/error-correction/business-email |
+| /english-for/software-engineers | 0.598 | 0.402 | 455 | /english-for/hr-professionals |
 
 ## How to read this
 

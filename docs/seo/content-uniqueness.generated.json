@@ -246,7 +246,7 @@
       "inSitemap": true,
       "maxContainment": 0.125,
       "uniqueShare": 0.845,
-      "nearest": "/blog/how-to-turn-student-notes-into-esl-worksheets.html"
+      "nearest": "/blog/one-minute-prep-workflow-for-esl-tutors.html"
     },
     {
       "route": "/blog/diagnostic-testing-english-learners.html",
@@ -406,9 +406,9 @@
       "section": "/blog",
       "words": 721,
       "inSitemap": true,
-      "maxContainment": 0.884,
-      "uniqueShare": 0.115,
-      "nearest": "/blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html"
+      "maxContainment": 0.414,
+      "uniqueShare": 0.461,
+      "nearest": "/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html"
     },
     {
       "route": "/blog/how-to-create-grammar-worksheets-with-ai.html",
@@ -463,33 +463,6 @@
       "maxContainment": 0.021,
       "uniqueShare": 0.979,
       "nearest": "/ai-lesson-planning-for-english-teachers.html"
-    },
-    {
-      "route": "/blog/how-to-track-adult-english-student-progress.html",
-      "section": "/blog",
-      "words": 721,
-      "inSitemap": false,
-      "maxContainment": 0.882,
-      "uniqueShare": 0.115,
-      "nearest": "/blog/teacher-controlled-ai-lesson-prep.html"
-    },
-    {
-      "route": "/blog/how-to-turn-student-notes-into-esl-worksheets.html",
-      "section": "/blog",
-      "words": 735,
-      "inSitemap": false,
-      "maxContainment": 0.872,
-      "uniqueShare": 0.126,
-      "nearest": "/blog/what-to-teach-after-a-speaking-lesson.html"
-    },
-    {
-      "route": "/blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html",
-      "section": "/blog",
-      "words": 766,
-      "inSitemap": false,
-      "maxContainment": 0.853,
-      "uniqueShare": 0.147,
-      "nearest": "/blog/how-to-avoid-school-like-esl-materials-for-adults.html"
     },
     {
       "route": "/blog/ielts-preparation-worksheets-guide.html",
@@ -622,9 +595,9 @@
       "section": "/blog",
       "words": 906,
       "inSitemap": true,
-      "maxContainment": 0.346,
+      "maxContainment": 0.343,
       "uniqueShare": 0.642,
-      "nearest": "/blog/how-to-turn-student-notes-into-esl-worksheets.html"
+      "nearest": "/blog/effective-esl-homework-strategies.html"
     },
     {
       "route": "/blog/pair-work-activities-esl.html",
@@ -670,15 +643,6 @@
       "maxContainment": 0.034,
       "uniqueShare": 0.966,
       "nearest": "/ai-worksheet-generator-for-english-teachers.html"
-    },
-    {
-      "route": "/blog/private-english-tutor-homework-workflow.html",
-      "section": "/blog",
-      "words": 709,
-      "inSitemap": false,
-      "maxContainment": 0.884,
-      "uniqueShare": 0.116,
-      "nearest": "/blog/teacher-controlled-ai-lesson-prep.html"
     },
     {
       "route": "/blog/process-writing-approach-esl.html",
@@ -832,15 +796,6 @@
       "maxContainment": 0.518,
       "uniqueShare": 0.48,
       "nearest": "/blog/lesson-sequencing-scaffolding-curriculum.html"
-    },
-    {
-      "route": "/blog/teacher-controlled-ai-lesson-prep.html",
-      "section": "/blog",
-      "words": 726,
-      "inSitemap": false,
-      "maxContainment": 0.878,
-      "uniqueShare": 0.103,
-      "nearest": "/blog/how-to-track-adult-english-student-progress.html"
     },
     {
       "route": "/blog/teaching-articles-esl-guide.html",
@@ -1162,9 +1117,9 @@
       "section": "/blog",
       "words": 863,
       "inSitemap": true,
-      "maxContainment": 0.361,
+      "maxContainment": 0.352,
       "uniqueShare": 0.634,
-      "nearest": "/blog/how-to-track-adult-english-student-progress.html"
+      "nearest": "/blog/ai-lesson-planning-strategies.html"
     },
     {
       "route": "/blog/using-films-english-teaching.html",
@@ -1230,49 +1185,13 @@
       "nearest": "/blog/teaching-english-one-to-one.html"
     },
     {
-      "route": "/blog/what-to-teach-after-a-speaking-lesson.html",
-      "section": "/blog",
-      "words": 711,
-      "inSitemap": false,
-      "maxContainment": 0.896,
-      "uniqueShare": 0.104,
-      "nearest": "/blog/what-to-teach-after-a-writing-homework.html"
-    },
-    {
-      "route": "/blog/what-to-teach-after-a-writing-homework.html",
-      "section": "/blog",
-      "words": 722,
-      "inSitemap": false,
-      "maxContainment": 0.89,
-      "uniqueShare": 0.11,
-      "nearest": "/blog/what-to-teach-after-a-speaking-lesson.html"
-    },
-    {
       "route": "/blog/what-to-teach-next-private-english-student.html",
       "section": "/blog",
       "words": 846,
       "inSitemap": true,
       "maxContainment": 0.374,
-      "uniqueShare": 0.62,
+      "uniqueShare": 0.624,
       "nearest": "/blog/ai-lesson-planning-strategies.html"
-    },
-    {
-      "route": "/blog/why-chatgpt-is-not-enough-for-recurring-english-tutoring.html",
-      "section": "/blog",
-      "words": 738,
-      "inSitemap": false,
-      "maxContainment": 0.872,
-      "uniqueShare": 0.127,
-      "nearest": "/blog/how-to-track-adult-english-student-progress.html"
-    },
-    {
-      "route": "/blog/why-generic-esl-worksheets-fail-adult-learners.html",
-      "section": "/blog",
-      "words": 715,
-      "inSitemap": false,
-      "maxContainment": 0.884,
-      "uniqueShare": 0.114,
-      "nearest": "/blog/how-to-avoid-school-like-esl-materials-for-adults.html"
     },
     {
       "route": "/blog/word-formation-exercises-english.html",
@@ -1568,7 +1487,7 @@
       "words": 842,
       "inSitemap": true,
       "maxContainment": 0.006,
-      "uniqueShare": 0.984,
+      "uniqueShare": 0.986,
       "nearest": "/cefr-assessment"
     },
     {
