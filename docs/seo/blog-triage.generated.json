@@ -3,8 +3,8 @@
   "totalArticles": 343,
   "counts": {
     "promote-rewrite-now": 6,
-    "promote-or-refresh": 133,
-    "noindex-keep-accessible": 122,
+    "promote-or-refresh": 110,
+    "noindex-keep-accessible": 145,
     "merge-redirect-or-noindex": 82
   },
   "priorityRewriteSlugs": [
@@ -171,31 +171,6 @@
       ]
     },
     {
-      "route": "/blog/adult-business-english-homework-feedback-loop.html",
-      "slug": "adult-business-english-homework-feedback-loop.html",
-      "title": "Adult Business English Homework: Setup and Common Mistakes",
-      "description": "Adult Business English Homework Feedback Loop. Build the exercise for your student level.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 808,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "Homework evidence and retention",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "English homework review",
-        "adult ESL tutor",
-        "homework evidence",
-        "private English tutor"
-      ]
-    },
-    {
       "route": "/blog/adult-esl-student-profile-lesson-planning.html",
       "slug": "adult-esl-student-profile-lesson-planning.html",
       "title": "Adult ESL Student Profile Lesson Planning: Tutor Playbook",
@@ -214,31 +189,6 @@
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html",
-      "slug": "ai-worksheet-generator-vs-lesson-planning-chatbot.html",
-      "title": "AI Worksheet Generator Vs Lesson: Adult Learner Guide",
-      "description": "AI Worksheet Generator Vs Lesson Planning Chatbot. Turn it into an editable task for your next lesson.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 813,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "AI worksheet generator",
-        "EFL tutor workflow",
-        "ESL worksheet workflow",
         "adult ESL tutor",
         "private English tutor"
       ]
@@ -281,29 +231,6 @@
       "strategicCluster": "Adult and professional English",
       "rewriteStage": "stage-4-refresh-candidate",
       "canonicalDecision": "keep self-canonical and strengthen internal links",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/best-workflow-for-private-english-tutors.html",
-      "slug": "best-workflow-for-private-english-tutors.html",
-      "title": "Best Workflow For Private English Tutors: Tutor Playbook",
-      "description": "Best Workflow For Private English Tutors. Generate a matching worksheet in one minute.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 807,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
       "marthaTestScore": 96,
       "ragKeywords": [
         "1:1 English lesson prep",
@@ -380,31 +307,6 @@
         "CEFR worksheet planning",
         "EFL tutor workflow",
         "ESL worksheet workflow",
-        "adult ESL tutor",
-        "adult learner level evidence",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/cefr-evidence-for-private-english-lessons.html",
-      "slug": "cefr-evidence-for-private-english-lessons.html",
-      "title": "CEFR Evidence For Private English Lessons: What Works in 1:1",
-      "description": "CEFR Evidence For Private English Lessons. Turn it into an editable task for your next lesson.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 816,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "CEFR and learner evidence",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 88,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "CEFR worksheet planning",
-        "EFL tutor workflow",
         "adult ESL tutor",
         "adult learner level evidence",
         "private English tutor"
@@ -549,31 +451,6 @@
       ]
     },
     {
-      "route": "/blog/editable-ai-worksheets-for-adult-english-learners.html",
-      "slug": "editable-ai-worksheets-for-adult-english-learners.html",
-      "title": "Editable AI Worksheets For Adult: A Tutor's Checklist",
-      "description": "Editable AI Worksheets For Adult English Learners. Build the exercise for your student level.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 813,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "AI worksheet generator",
-        "EFL tutor workflow",
-        "ESL worksheet workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
       "route": "/blog/english-homework-ai-grading-workflow.html",
       "slug": "english-homework-ai-grading-workflow.html",
       "title": "English Homework AI Grading Workflow: A Tutor's Checklist",
@@ -613,29 +490,6 @@
       "strategicCluster": "LLM vs tutor workflow",
       "rewriteStage": "stage-4-refresh-candidate",
       "canonicalDecision": "keep self-canonical and strengthen internal links",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/english-tutor-workflow-after-a-live-lesson.html",
-      "slug": "english-tutor-workflow-after-a-live-lesson.html",
-      "title": "English Tutor Workflow After A Live Lesson: Tutor Playbook",
-      "description": "English Tutor Workflow After A Live Lesson. Prepare the follow-up homework in one click.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 819,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
       "marthaTestScore": 96,
       "ragKeywords": [
         "1:1 English lesson prep",
@@ -787,54 +641,6 @@
       ]
     },
     {
-      "route": "/blog/from-lesson-evidence-to-next-lesson-plan.html",
-      "slug": "from-lesson-evidence-to-next-lesson-plan.html",
-      "title": "From Lesson Evidence To Next Lesson Plan: Tutor Playbook",
-      "description": "From Lesson Evidence To Next Lesson Plan. Turn it into an editable task for your next lesson.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 818,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "What to teach next",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 88,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/from-student-goals-to-worksheet.html",
-      "slug": "from-student-goals-to-worksheet.html",
-      "title": "From Student Goals To Worksheet: Adult Learner Guide",
-      "description": "A working approach to From Student Goals To Worksheet for recurring adult learners, plus the traps to avoid. Prepare the follow-up homework in one click.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 806,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "Homework evidence and retention",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 84,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "AI worksheet generator",
-        "EFL tutor workflow",
-        "ESL worksheet workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
       "route": "/blog/holiday-themed-esl-activities.html",
       "slug": "holiday-themed-esl-activities.html",
       "title": "Holiday-Themed ESL Activities and Worksheets",
@@ -931,29 +737,6 @@
       ]
     },
     {
-      "route": "/blog/how-private-english-tutors-use-ai-safely.html",
-      "slug": "how-private-english-tutors-use-ai-safely.html",
-      "title": "How Private English Tutors Use AI Safely: Tutor Playbook",
-      "description": "How Private English Tutors Use AI Safely. Build the exercise for your student level.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 820,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
       "route": "/blog/how-to-assess-english-level-cefr.html",
       "slug": "how-to-assess-english-level-cefr.html",
       "title": "How To Assess English Level CEFR: What Works in 1:1",
@@ -994,29 +777,6 @@
       "rewriteStage": "stage-4-refresh-candidate",
       "canonicalDecision": "keep self-canonical and strengthen internal links",
       "marthaTestScore": 61,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/how-to-build-student-context-for-english-tutoring.html",
-      "slug": "how-to-build-student-context-for-english-tutoring.html",
-      "title": "How To Build Student Context For English: Tutor Playbook",
-      "description": "How To Build Student Context For English Tutoring. Generate a matching worksheet in one minute.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 823,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "One-to-One Lesson Planning",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -1069,102 +829,6 @@
         "1:1 English lesson prep",
         "EFL tutor workflow",
         "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/how-to-plan-next-lesson-from-homework-mistakes.html",
-      "slug": "how-to-plan-next-lesson-from-homework-mistakes.html",
-      "title": "How To Plan Next Lesson From Homework: A Tutor's Checklist",
-      "description": "How To Plan Next Lesson From Homework Mistakes. Generate a matching worksheet in one minute.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 821,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "Homework evidence and retention",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "English homework review",
-        "adult ESL tutor",
-        "homework evidence",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/how-to-prepare-business-english-lesson-in-one-minute.html",
-      "slug": "how-to-prepare-business-english-lesson-in-one-minute.html",
-      "title": "How To Prepare Business English Lesson: What Works in 1:1",
-      "description": "How To Prepare Business English Lesson In One Minute. Build the exercise for your student level.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 829,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "Adult and professional English",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/how-to-reduce-lesson-prep-time-for-private-english-tutors.html",
-      "slug": "how-to-reduce-lesson-prep-time-for-private-english-tutors.html",
-      "title": "How To Reduce Lesson Prep Time For Private: Tutor Playbook",
-      "description": "How To Reduce Lesson Prep Time For Private English Tutors. Generate a matching worksheet in one minute.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 834,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "One-to-One Lesson Planning",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/how-to-review-homework-before-next-english-lesson.html",
-      "slug": "how-to-review-homework-before-next-english-lesson.html",
-      "title": "How To Review Homework Before Next: Adult Learner Guide",
-      "description": "How To Review Homework Before Next English Lesson. Generate a matching worksheet in one minute.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 817,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "Homework evidence and retention",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "English homework review",
-        "adult ESL tutor",
-        "homework evidence",
         "private English tutor"
       ]
     },
@@ -1253,77 +917,6 @@
       "rewriteStage": "stage-4-refresh-candidate",
       "canonicalDecision": "keep self-canonical and strengthen internal links",
       "marthaTestScore": 84,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/how-to-track-adult-english-student-progress.html",
-      "slug": "how-to-track-adult-english-student-progress.html",
-      "title": "How to Track Adult English Student Progress",
-      "description": "How to Track Adult English Student Progress: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 779,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/how-to-turn-student-notes-into-esl-worksheets.html",
-      "slug": "how-to-turn-student-notes-into-esl-worksheets.html",
-      "title": "How to Turn Student Notes Into ESL Worksheets",
-      "description": "How to Turn Student Notes Into ESL Worksheets: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 798,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "AI worksheet generator",
-        "EFL tutor workflow",
-        "ESL worksheet workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html",
-      "slug": "how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html",
-      "title": "How to Use ChatGPT for ESL Lesson Prep Without Losing Context",
-      "description": "How to Use ChatGPT for ESL Lesson Prep Without Losing Context: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 847,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -1748,31 +1341,6 @@
       ]
     },
     {
-      "route": "/blog/private-english-tutor-homework-workflow.html",
-      "slug": "private-english-tutor-homework-workflow.html",
-      "title": "Private English Tutor Homework Workflow",
-      "description": "Private English Tutor Homework Workflow: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 766,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "English homework review",
-        "adult ESL tutor",
-        "homework evidence",
-        "private English tutor"
-      ]
-    },
-    {
       "route": "/blog/process-writing-approach-esl.html",
       "slug": "process-writing-approach-esl.html",
       "title": "Adult Writing Improvement From Draft Evidence to Next",
@@ -2139,29 +1707,6 @@
       "rewriteStage": "stage-4-refresh-candidate",
       "canonicalDecision": "keep self-canonical and strengthen internal links",
       "marthaTestScore": 92,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/teacher-controlled-ai-lesson-prep.html",
-      "slug": "teacher-controlled-ai-lesson-prep.html",
-      "title": "Teacher-Controlled AI Lesson Prep",
-      "description": "Teacher-Controlled AI Lesson Prep: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 762,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -3142,102 +2687,6 @@
       ]
     },
     {
-      "route": "/blog/what-to-teach-after-a-speaking-lesson.html",
-      "slug": "what-to-teach-after-a-speaking-lesson.html",
-      "title": "What to Teach After a Speaking Lesson",
-      "description": "What to Teach After a Speaking Lesson: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 766,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/what-to-teach-after-a-writing-homework.html",
-      "slug": "what-to-teach-after-a-writing-homework.html",
-      "title": "What to Teach After a Writing Homework",
-      "description": "What to Teach After a Writing Homework: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 783,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "English homework review",
-        "adult ESL tutor",
-        "homework evidence",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/why-chatgpt-is-not-enough-for-recurring-english-tutoring.html",
-      "slug": "why-chatgpt-is-not-enough-for-recurring-english-tutoring.html",
-      "title": "Why ChatGPT Is Not Enough for Recurring English Tutoring",
-      "description": "Why ChatGPT Is Not Enough for Recurring English Tutoring: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 797,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/why-generic-esl-worksheets-fail-adult-learners.html",
-      "slug": "why-generic-esl-worksheets-fail-adult-learners.html",
-      "title": "Why Generic ESL Worksheets Fail Adult Learners",
-      "description": "Why Generic ESL Worksheets Fail Adult Learners: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
-      "cluster": "One-to-One Lesson Planning",
-      "state": "noindex",
-      "indexable": false,
-      "words": 776,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep excluded from sitemap",
-      "marthaTestScore": 96,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "AI worksheet generator",
-        "EFL tutor workflow",
-        "ESL worksheet workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
       "route": "/blog/word-formation-exercises-english.html",
       "slug": "word-formation-exercises-english.html",
       "title": "Word Formation Exercises: 60 Prefix &amp; Suffix Prompts",
@@ -3466,6 +2915,31 @@
         "1:1 English lesson prep",
         "EFL tutor workflow",
         "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/adult-business-english-homework-feedback-loop.html",
+      "slug": "adult-business-english-homework-feedback-loop.html",
+      "title": "Adult Business English Homework: Setup and Common Mistakes",
+      "description": "Adult Business English Homework Feedback Loop. Build the exercise for your student level.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 808,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "Homework evidence and retention",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "English homework review",
+        "adult ESL tutor",
+        "homework evidence",
         "private English tutor"
       ]
     },
@@ -3775,6 +3249,31 @@
       ]
     },
     {
+      "route": "/blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html",
+      "slug": "ai-worksheet-generator-vs-lesson-planning-chatbot.html",
+      "title": "AI Worksheet Generator Vs Lesson: Adult Learner Guide",
+      "description": "AI Worksheet Generator Vs Lesson Planning Chatbot. Turn it into an editable task for your next lesson.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 813,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/alternative-assessment-esl-classroom.html",
       "slug": "alternative-assessment-esl-classroom.html",
       "title": "Moved",
@@ -3859,6 +3358,29 @@
       "rewriteStage": "stage-3-noindex-legacy",
       "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
       "marthaTestScore": 82,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/best-workflow-for-private-english-tutors.html",
+      "slug": "best-workflow-for-private-english-tutors.html",
+      "title": "Best Workflow For Private English Tutors: Tutor Playbook",
+      "description": "Best Workflow For Private English Tutors. Generate a matching worksheet in one minute.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 807,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -3980,6 +3502,31 @@
         "1:1 English lesson prep",
         "EFL tutor workflow",
         "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/cefr-evidence-for-private-english-lessons.html",
+      "slug": "cefr-evidence-for-private-english-lessons.html",
+      "title": "CEFR Evidence For Private English Lessons: What Works in 1:1",
+      "description": "CEFR Evidence For Private English Lessons. Turn it into an editable task for your next lesson.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 816,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "CEFR and learner evidence",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 82,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "CEFR worksheet planning",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "adult learner level evidence",
         "private English tutor"
       ]
     },
@@ -4793,6 +4340,31 @@
       ]
     },
     {
+      "route": "/blog/editable-ai-worksheets-for-adult-english-learners.html",
+      "slug": "editable-ai-worksheets-for-adult-english-learners.html",
+      "title": "Editable AI Worksheets For Adult: A Tutor's Checklist",
+      "description": "Editable AI Worksheets For Adult English Learners. Build the exercise for your student level.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 813,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/eliciting-techniques-esl-teaching.html",
       "slug": "eliciting-techniques-esl-teaching.html",
       "title": "Moved",
@@ -4946,6 +4518,29 @@
       "rewriteStage": "stage-3-noindex-legacy",
       "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
       "marthaTestScore": 55,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/english-tutor-workflow-after-a-live-lesson.html",
+      "slug": "english-tutor-workflow-after-a-live-lesson.html",
+      "title": "English Tutor Workflow After A Live Lesson: Tutor Playbook",
+      "description": "English Tutor Workflow After A Live Lesson. Prepare the follow-up homework in one click.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 819,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -5137,6 +4732,54 @@
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/from-lesson-evidence-to-next-lesson-plan.html",
+      "slug": "from-lesson-evidence-to-next-lesson-plan.html",
+      "title": "From Lesson Evidence To Next Lesson Plan: Tutor Playbook",
+      "description": "From Lesson Evidence To Next Lesson Plan. Turn it into an editable task for your next lesson.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 818,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "What to teach next",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 82,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/from-student-goals-to-worksheet.html",
+      "slug": "from-student-goals-to-worksheet.html",
+      "title": "From Student Goals To Worksheet: Adult Learner Guide",
+      "description": "A working approach to From Student Goals To Worksheet for recurring adult learners, plus the traps to avoid. Prepare the follow-up homework in one click.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 806,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "Homework evidence and retention",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 78,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
         "adult ESL tutor",
         "private English tutor"
       ]
@@ -5376,6 +5019,29 @@
       ]
     },
     {
+      "route": "/blog/how-private-english-tutors-use-ai-safely.html",
+      "slug": "how-private-english-tutors-use-ai-safely.html",
+      "title": "How Private English Tutors Use AI Safely: Tutor Playbook",
+      "description": "How Private English Tutors Use AI Safely. Build the exercise for your student level.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 820,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html",
       "slug": "how-to-avoid-generic-ai-lesson-plans-for-adults.html",
       "title": "How To Avoid Generic AI Lesson Plans For: Tutor Playbook",
@@ -5414,6 +5080,29 @@
       "rewriteStage": "stage-3-noindex-legacy",
       "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
       "marthaTestScore": 82,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-build-student-context-for-english-tutoring.html",
+      "slug": "how-to-build-student-context-for-english-tutoring.html",
+      "title": "How To Build Student Context For English: Tutor Playbook",
+      "description": "How To Build Student Context For English Tutoring. Generate a matching worksheet in one minute.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 823,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "One-to-One Lesson Planning",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -5564,6 +5253,77 @@
       ]
     },
     {
+      "route": "/blog/how-to-plan-next-lesson-from-homework-mistakes.html",
+      "slug": "how-to-plan-next-lesson-from-homework-mistakes.html",
+      "title": "How To Plan Next Lesson From Homework: A Tutor's Checklist",
+      "description": "How To Plan Next Lesson From Homework Mistakes. Generate a matching worksheet in one minute.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 821,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "Homework evidence and retention",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "English homework review",
+        "adult ESL tutor",
+        "homework evidence",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-prepare-business-english-lesson-in-one-minute.html",
+      "slug": "how-to-prepare-business-english-lesson-in-one-minute.html",
+      "title": "How To Prepare Business English Lesson: What Works in 1:1",
+      "description": "How To Prepare Business English Lesson In One Minute. Build the exercise for your student level.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 829,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-reduce-lesson-prep-time-for-private-english-tutors.html",
+      "slug": "how-to-reduce-lesson-prep-time-for-private-english-tutors.html",
+      "title": "How To Reduce Lesson Prep Time For Private: Tutor Playbook",
+      "description": "How To Reduce Lesson Prep Time For Private English Tutors. Generate a matching worksheet in one minute.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 834,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "One-to-One Lesson Planning",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/how-to-review-ai-generated-esl-worksheets-before-teaching.html",
       "slug": "how-to-review-ai-generated-esl-worksheets-before-teaching.html",
       "title": "How To Review AI Generated ESL: How to Run It With Adults",
@@ -5585,6 +5345,31 @@
         "EFL tutor workflow",
         "ESL worksheet workflow",
         "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-review-homework-before-next-english-lesson.html",
+      "slug": "how-to-review-homework-before-next-english-lesson.html",
+      "title": "How To Review Homework Before Next: Adult Learner Guide",
+      "description": "How To Review Homework Before Next English Lesson. Generate a matching worksheet in one minute.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 817,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "Homework evidence and retention",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "English homework review",
+        "adult ESL tutor",
+        "homework evidence",
         "private English tutor"
       ]
     },
@@ -5627,6 +5412,29 @@
       "rewriteStage": "stage-3-merge-redirect-or-noindex",
       "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
       "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-track-adult-english-student-progress.html",
+      "slug": "how-to-track-adult-english-student-progress.html",
+      "title": "How to Track Adult English Student Progress",
+      "description": "How to Track Adult English Student Progress: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 779,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -5683,6 +5491,31 @@
       ]
     },
     {
+      "route": "/blog/how-to-turn-student-notes-into-esl-worksheets.html",
+      "slug": "how-to-turn-student-notes-into-esl-worksheets.html",
+      "title": "How to Turn Student Notes Into ESL Worksheets",
+      "description": "How to Turn Student Notes Into ESL Worksheets: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 798,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/how-to-use-ai-without-losing-teacher-control.html",
       "slug": "how-to-use-ai-without-losing-teacher-control.html",
       "title": "How To Use AI Without Losing Teacher Control: Tutor Playbook",
@@ -5691,6 +5524,29 @@
       "state": "noindex",
       "indexable": false,
       "words": 800,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html",
+      "slug": "how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html",
+      "title": "How to Use ChatGPT for ESL Lesson Prep Without Losing Context",
+      "description": "How to Use ChatGPT for ESL Lesson Prep Without Losing Context: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 847,
       "action": "noindex-keep-accessible",
       "priority": 4,
       "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
@@ -6429,6 +6285,31 @@
       ]
     },
     {
+      "route": "/blog/private-english-tutor-homework-workflow.html",
+      "slug": "private-english-tutor-homework-workflow.html",
+      "title": "Private English Tutor Homework Workflow",
+      "description": "Private English Tutor Homework Workflow: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 766,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "English homework review",
+        "adult ESL tutor",
+        "homework evidence",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/private-english-tutor-tool-stack.html",
       "slug": "private-english-tutor-tool-stack.html",
       "title": "Private English Tutor Tool Stack",
@@ -6793,6 +6674,29 @@
       "rewriteStage": "stage-3-noindex-legacy",
       "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
       "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teacher-controlled-ai-lesson-prep.html",
+      "slug": "teacher-controlled-ai-lesson-prep.html",
+      "title": "Teacher-Controlled AI Lesson Prep",
+      "description": "Teacher-Controlled AI Lesson Prep: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 762,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -8017,6 +7921,102 @@
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/what-to-teach-after-a-speaking-lesson.html",
+      "slug": "what-to-teach-after-a-speaking-lesson.html",
+      "title": "What to Teach After a Speaking Lesson",
+      "description": "What to Teach After a Speaking Lesson: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 766,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/what-to-teach-after-a-writing-homework.html",
+      "slug": "what-to-teach-after-a-writing-homework.html",
+      "title": "What to Teach After a Writing Homework",
+      "description": "What to Teach After a Writing Homework: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 783,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "English homework review",
+        "adult ESL tutor",
+        "homework evidence",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/why-chatgpt-is-not-enough-for-recurring-english-tutoring.html",
+      "slug": "why-chatgpt-is-not-enough-for-recurring-english-tutoring.html",
+      "title": "Why ChatGPT Is Not Enough for Recurring English Tutoring",
+      "description": "Why ChatGPT Is Not Enough for Recurring English Tutoring: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 797,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/why-generic-esl-worksheets-fail-adult-learners.html",
+      "slug": "why-generic-esl-worksheets-fail-adult-learners.html",
+      "title": "Why Generic ESL Worksheets Fail Adult Learners",
+      "description": "Why Generic ESL Worksheets Fail Adult Learners: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+      "cluster": "One-to-One Lesson Planning",
+      "state": "noindex",
+      "indexable": false,
+      "words": 776,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
         "adult ESL tutor",
         "private English tutor"
       ]

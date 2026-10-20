@@ -127,4 +127,6 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 ## SEO/GEO Hub Strengthening, Step 4
 
 - [x] Phase 4.1: connected `/blog/esl-games-for-teachers` from Toolkit, Resources and Exercise Design Hub; strengthened five weak top-40 routes and all 33 weak top-120 routes through registry-filtered topic rotation (at most three additional links per donor, existing recommendations preserved). Synced generated output and refreshed five SPA snapshot bodies; second sync left public/AI outputs byte-identical. Verification: 1098 tests passed, content:audit and SEO/metadata/structured-data audits passed; graph orphan=0, weakTop40=0, weakTop120=0, noindexPriority=0; sitemap remains 252 URLs. Three live navigation paths verified without page errors. Production publication and GSC outcomes are not verified.
-- Phases 4.2-4.4 are outside this implementation request; editorial noindex decisions, tool/gallery enhancements and broader documentation changes remain deferred.
+- [x] Phase 4.2: all 17 unlisted blog pages with containment >= 0.85 are strategic (`STRATEGIC_BLOG_SLUGS`, required citation articles) or 301 targets, so none were noindexed; fixed 9 listed clones from `x1000-content-plan.mjs` that rendered indexable HTML despite registry noindex (now `noindex,follow`, removed from AI resources), guarded by `templated-clone-noindex.test.mjs`.
+- [ ] Strategic pages with containment 0.85-0.94 need page-specific editorial rewrites (not noindex); awaiting editorial decision.
+- Phases 4.3-4.4 remain deferred.

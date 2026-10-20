@@ -8,17 +8,17 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Metric | Value |
 |---|---:|
-| Indexable static pages analysed | 471 |
-| Templated (maxContainment >= 0.5) | 268 (57%) |
-| Near-duplicate (maxContainment >= 0.8) | 235 (50%) |
-| Templated pages listed in sitemap.xml | 268 |
+| Indexable static pages analysed | 254 |
+| Templated (maxContainment >= 0.5) | 52 (20%) |
+| Near-duplicate (maxContainment >= 0.8) | 21 (8%) |
+| Templated pages listed in sitemap.xml | 51 |
 
 ## By section
 
 | Section | Indexable pages | Templated >= 0.5 | Near-duplicate >= 0.8 |
 |---|---:|---:|---:|
-| /blog | 247 | 156 (63%) | 145 |
-| / (root pages) | 182 | 96 (53%) | 86 |
+| /blog | 119 | 29 (24%) | 17 |
+| / (root pages) | 93 | 7 (8%) | 0 |
 | /what-to-teach-next | 12 | 0 (0%) | 0 |
 | /esl-worksheets | 8 | 8 (100%) | 2 |
 | /features | 7 | 0 (0%) | 0 |
@@ -32,46 +32,46 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Route | maxContainment | uniqueShare | Words | Nearest page |
 |---|---:|---:|---:|---|
-| /blog/bilingual-education-models-comparison.html | 0.945 | 0.055 | 727 | /blog/art-based-language-activities-esl.html |
-| /blog/accent-coaching-techniques-esl.html | 0.944 | 0.05 | 733 | /blog/adult-business-english-homework-feedback-loop.html |
-| /blog/building-esl-teaching-portfolio.html | 0.943 | 0.057 | 736 | /blog/adult-business-english-homework-feedback-loop.html |
-| /blog/consciousness-raising-grammar-tasks.html | 0.942 | 0.058 | 733 | /blog/how-to-plan-english-lessons-effectively.html |
-| /blog/contrastive-analysis-language-teaching.html | 0.942 | 0.053 | 732 | /blog/best-workflow-for-private-english-tutors.html |
-| /blog/extensive-reading-programs-esl.html | 0.942 | 0.053 | 733 | /blog/learning-pacing-scientific-vs-pragmatic-esl.html |
-| /blog/academic-vocabulary-teaching-strategies.html | 0.941 | 0.055 | 731 | /blog/emi-english-medium-instruction-guide.html |
-| /blog/gender-inclusive-language-esl.html | 0.941 | 0.054 | 737 | /blog/english-for-specific-purposes-guide.html |
-| /blog/english-tutor-material-organization-workflow.html | 0.94 | 0.052 | 734 | /blog/dictogloss-technique-esl-teaching.html |
-| /blog/creating-interactive-worksheets-online.html | 0.939 | 0.055 | 727 | /blog/homework-mistakes-next-english-lesson.html |
-| /blog/emi-english-medium-instruction-guide.html | 0.939 | 0.058 | 732 | /blog/academic-vocabulary-teaching-strategies.html |
-| /blog/english-for-specific-purposes-guide.html | 0.939 | 0.057 | 740 | /blog/gender-inclusive-language-esl.html |
-| /blog/art-based-language-activities-esl.html | 0.938 | 0.056 | 734 | /blog/bilingual-education-models-comparison.html |
-| /blog/course-evaluation-esl-programs.html | 0.938 | 0.062 | 732 | /blog/clil-methodology-complete-guide.html |
+| /blog/extensive-reading-programs-esl.html | 0.942 | 0.055 | 733 | /blog/learning-pacing-scientific-vs-pragmatic-esl.html |
 | /blog/learning-pacing-scientific-vs-pragmatic-esl.html | 0.938 | 0.062 | 737 | /blog/extensive-reading-programs-esl.html |
-| /blog/adult-business-english-homework-feedback-loop.html | 0.937 | 0.054 | 742 | /blog/building-esl-teaching-portfolio.html |
-| /blog/best-workflow-for-private-english-tutors.html | 0.936 | 0.047 | 740 | /blog/contrastive-analysis-language-teaching.html |
-| /blog/corpus-linguistics-esl-teaching.html | 0.936 | 0.054 | 739 | /blog/data-driven-learning-esl-corpora.html |
-| /blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html | 0.935 | 0.061 | 731 | /blog/ai-tools-for-english-teachers-2026.html |
-| /blog/clil-methodology-complete-guide.html | 0.935 | 0.059 | 736 | /blog/course-evaluation-esl-programs.html |
-| /blog/energy-management-esl-lessons.html | 0.935 | 0.062 | 731 | /blog/formative-assessment-english-teaching.html |
-| /blog/how-to-build-student-context-for-english-tutoring.html | 0.935 | 0.062 | 736 | /blog/how-to-plan-english-lessons-effectively.html |
-| /blog/how-to-use-ai-without-losing-teacher-control.html | 0.935 | 0.061 | 716 | /blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html |
-| /blog/student-progress-to-worksheet-feedback-loop.html | 0.935 | 0.059 | 738 | /blog/editable-ai-worksheets-for-adult-english-learners.html |
-| /blog/data-driven-learning-esl-corpora.html | 0.934 | 0.066 | 740 | /blog/corpus-linguistics-esl-teaching.html |
-| /blog/dictogloss-technique-esl-teaching.html | 0.933 | 0.053 | 738 | /blog/english-tutor-material-organization-workflow.html |
-| /blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html | 0.933 | 0.065 | 719 | /blog/how-to-use-ai-without-losing-teacher-control.html |
-| /blog/how-to-plan-english-lessons-effectively.html | 0.933 | 0.053 | 745 | /blog/consciousness-raising-grammar-tasks.html |
-| /blog/discussion-questions-esl-topics.html | 0.932 | 0.057 | 726 | /blog/academic-language-functions-clil.html |
-| /blog/how-private-english-tutors-use-ai-safely.html | 0.932 | 0.065 | 747 | /blog/accent-coaching-techniques-esl.html |
-| /blog/critical-period-hypothesis-language.html | 0.931 | 0.055 | 730 | /blog/art-based-language-activities-esl.html |
-| /blog/cross-cultural-communication-activities.html | 0.931 | 0.056 | 735 | /blog/ai-generated-listening-exercises-esl.html |
-| /blog/editable-ai-worksheets-for-adult-english-learners.html | 0.931 | 0.067 | 743 | /blog/student-progress-to-worksheet-feedback-loop.html |
-| /blog/from-lesson-evidence-to-next-lesson-plan.html | 0.931 | 0.066 | 735 | /blog/designing-english-midterm-final-exams.html |
-| /blog/best-lesson-prep-tool-for-english-tutors.html | 0.93 | 0.057 | 733 | /blog/business-english-material-generation-workflow.html |
-| /blog/formative-assessment-english-teaching.html | 0.93 | 0.059 | 736 | /blog/energy-management-esl-lessons.html |
-| /blog/ai-generated-listening-exercises-esl.html | 0.928 | 0.056 | 739 | /blog/cross-cultural-communication-activities.html |
-| /blog/can-ai-plan-one-to-one-english-lesson.html | 0.928 | 0.068 | 740 | /blog/growth-mindset-language-learning.html |
-| /blog/collaborative-writing-activities-esl.html | 0.928 | 0.049 | 730 | /blog/how-to-plan-next-lesson-from-homework-mistakes.html |
-| /blog/cooperative-learning-structures-esl.html | 0.928 | 0.053 | 738 | /blog/consciousness-raising-grammar-tasks.html |
+| /blog/student-progress-to-worksheet-feedback-loop.html | 0.934 | 0.065 | 738 | /blog/cefr-aligned-worksheet-generation-workflow.html |
+| /blog/best-lesson-prep-tool-for-english-tutors.html | 0.93 | 0.07 | 733 | /blog/business-english-material-generation-workflow.html |
+| /blog/english-tutor-material-organization-workflow.html | 0.928 | 0.068 | 734 | /blog/cefr-aligned-worksheet-generation-workflow.html |
+| /blog/how-english-tutors-track-what-to-teach-next.html | 0.928 | 0.068 | 738 | /blog/english-homework-ai-grading-workflow.html |
+| /blog/cefr-aligned-worksheet-generation-workflow.html | 0.922 | 0.067 | 745 | /blog/student-progress-to-worksheet-feedback-loop.html |
+| /blog/business-english-material-generation-workflow.html | 0.918 | 0.057 | 738 | /blog/best-lesson-prep-tool-for-english-tutors.html |
+| /blog/homework-mistakes-next-english-lesson.html | 0.915 | 0.059 | 738 | /blog/adult-esl-student-profile-lesson-planning.html |
+| /blog/can-ai-plan-one-to-one-english-lesson.html | 0.914 | 0.069 | 740 | /blog/how-to-plan-english-lessons-effectively.html |
+| /blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html | 0.912 | 0.076 | 745 | /blog/cefr-aligned-worksheet-generation-workflow.html |
+| /blog/english-homework-ai-grading-workflow.html | 0.911 | 0.068 | 745 | /blog/how-english-tutors-track-what-to-teach-next.html |
+| /blog/formative-assessment-english-teaching.html | 0.911 | 0.086 | 736 | /blog/cefr-aligned-worksheet-generation-workflow.html |
+| /blog/adult-esl-student-profile-lesson-planning.html | 0.906 | 0.072 | 745 | /blog/homework-mistakes-next-english-lesson.html |
+| /blog/how-to-plan-english-lessons-effectively.html | 0.905 | 0.066 | 745 | /blog/can-ai-plan-one-to-one-english-lesson.html |
+| /esl-worksheets/business-email/b1-intermediate | 0.895 | 0.105 | 511 | /esl-worksheets/business-email/b2-upper-intermediate |
+| /esl-worksheets/business-email/b2-upper-intermediate | 0.893 | 0.046 | 512 | /esl-worksheets/business-email/b1-intermediate |
+| /worksheets/collocations-match/meetings | 0.866 | 0.134 | 439 | /worksheets/error-correction/meetings |
+| /worksheets/error-correction/meetings | 0.866 | 0.016 | 439 | /worksheets/collocations-match/meetings |
+| /blog/esl-exercise-type-selection-guide.html | 0.852 | 0.129 | 724 | /blog/can-ai-plan-one-to-one-english-lesson.html |
+| /blog/process-writing-approach-esl.html | 0.843 | 0.154 | 711 | /blog/best-lesson-prep-tool-for-english-tutors.html |
+| /glossary | 0.791 | 0.209 | 1242 | /glossary.html |
+| /edooqoo-vs-twee.html | 0.789 | 0.193 | 661 | /edooqoo-vs-busyteacher.html |
+| /edooqoo-vs-busyteacher.html | 0.778 | 0.179 | 668 | /edooqoo-vs-twee.html |
+| /glossary.html | 0.765 | 0.22 | 1283 | /glossary |
+| /blog/think-pair-share-esl-variations.html | 0.737 | 0.22 | 434 | /blog/krashen-hypotheses-esl-teaching.html |
+| /blog/krashen-hypotheses-esl-teaching.html | 0.727 | 0.214 | 439 | /blog/think-pair-share-esl-variations.html |
+| /esl-worksheets/phrasal-verbs/c1-advanced | 0.717 | 0.281 | 501 | /esl-worksheets/news-media/c1-advanced |
+| /esl-worksheets/travel-vocabulary/a2-elementary | 0.714 | 0.286 | 507 | /esl-worksheets/weather/a2-elementary |
+| /esl-worksheets/weather/a2-elementary | 0.71 | 0.29 | 510 | /esl-worksheets/travel-vocabulary/a2-elementary |
+| /esl-worksheets/collocations/c1-advanced | 0.7 | 0.3 | 510 | /esl-worksheets/news-media/c1-advanced |
+| /english-for/hr-professionals | 0.672 | 0.323 | 446 | /english-for/sales-reps |
+| /esl-worksheets/news-media/c1-advanced | 0.669 | 0.329 | 536 | /esl-worksheets/phrasal-verbs/c1-advanced |
+| /esl-worksheets/environment/b2-upper-intermediate | 0.66 | 0.312 | 513 | /esl-worksheets/business-email/b2-upper-intermediate |
+| /english-for/sales-reps | 0.658 | 0.339 | 455 | /english-for/hr-professionals |
+| /ai-tools-for-private-english-tutors.html | 0.648 | 0.306 | 336 | /chatgpt-alternative-for-english-tutors.html |
+| /worksheets/error-correction/business-email | 0.633 | 0.13 | 446 | /worksheets/error-correction/present-perfect |
+| /chatgpt-alternative-for-english-tutors.html | 0.628 | 0.325 | 362 | /ai-tools-for-private-english-tutors.html |
+| /worksheets/error-correction/present-perfect | 0.621 | 0.357 | 455 | /worksheets/error-correction/business-email |
+| /english-for/software-engineers | 0.598 | 0.402 | 455 | /english-for/hr-professionals |
 
 ## How to read this
 
