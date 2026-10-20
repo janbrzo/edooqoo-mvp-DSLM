@@ -19,6 +19,8 @@ Subdirectories `src/` and `supabase/` have their own `AGENTS.md`; read them befo
 
 - Public HTML generators must not render bot-directed citation instructions or keyword sections; keep valid JSON-LD keywords/audiences, factual citation paragraphs and dedicated AI resources, because human-facing pages and machine-readable discovery have separate contracts.
 
+- Additional strategic article links are allocated by `scripts/seo/strategic-link-rotation.mjs` to registry-indexable, topic-matched destinations, with at most three new distinct targets per donor; preserve existing recommendations and the graph audit's 10/5 thresholds, because replacing a narrow rotation can silently orphan previously covered pages.
+
 - DSLM preserves `skill_category -> micro_skill -> skill_name` as its three-tier hierarchy; `extract_micro_skill` extensions keep existing real-topic mappings stable and only backfill fallback topics, because renaming atomic evidence or moving established topics fragments learner history.
 
 - `get_student_dslm_state_vector` is an owner/service-only, read-only projection of canonical metrics; its SQL decay helper is parity-tested against `forgetting.ts`, excludes duplicate card metrics and never replaces saved scores or automatically feeds the worksheet engine, because a portable state read must preserve evidence authority and the protected generation contract.

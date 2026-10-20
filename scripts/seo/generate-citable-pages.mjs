@@ -8,7 +8,8 @@ import {
 } from './x1000-content-plan.mjs';
 import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
 import { SEO_TITLE_OVERRIDES } from './x1000-editorial-plan.mjs';
-import { getRoutingDecisions } from './content-registry.mjs';
+import { getContentRegistry, getRoutingDecisions } from './content-registry.mjs';
+import { allocateStrategicLinks } from './strategic-link-rotation.mjs';
 
 /** Hand-written SEO titles never take the brand suffix; they are already keyword-complete. */
 const CURATED_SEO_TITLES = new Set(Object.values(SEO_TITLE_OVERRIDES));
@@ -1703,9 +1704,7 @@ function articleLd(article, url) {
   };
 }
 
-function renderArticle(article, allArticles = []) {
-  const url = `${BASE}/blog/${article.slug}`;
-  const summary = article.summary || article.directAnswer || article.description;
+function relatedReadingForArticle(article, allArticles) {
   const sprintLinks = normalizeArticleLinks(article);
   const articleMeshLinks = meshLinks(
     `/blog/${article.slug}`,
@@ -1724,7 +1723,7 @@ function renderArticle(article, allArticles = []) {
     ? [0, 1, 2].map((k) => strategicPool[(articleIndex * 3 + k) % strategicPool.length])
       .map((item) => [`/blog/${item.slug}`, titleForLink(item)])
     : [];
-  const relatedReadingLinks = [
+  return [
     ...sprintLinks.slice(0, 3),
     ...strategicPicks,
     ...articleMeshLinks.slice(0, 1),
@@ -1732,6 +1731,14 @@ function renderArticle(article, allArticles = []) {
     ['/features/homework', 'Homework evidence workflow'],
     ['/what-to-teach-next', 'What Should I Teach Next?'],
   ].filter((item, index, all) => all.findIndex((other) => other[0] === item[0]) === index).slice(0, 10);
+}
+
+function renderArticle(article, allArticles = [], strategicLinks = []) {
+  const url = `${BASE}/blog/${article.slug}`;
+  const summary = article.summary || article.directAnswer || article.description;
+  const relatedReadingLinks = [...relatedReadingForArticle(article, allArticles), ...strategicLinks]
+    .filter(([route]) => route !== `/blog/${article.slug}` && !NON_INDEXABLE_ROUTES.has(route))
+    .filter((item, index, all) => all.findIndex((other) => other[0] === item[0]) === index);
   const faq = articleFaqs(article);
   const extraSectionHtml = (article.extraSections ?? []).map((section) => `<section>
     <h2>${escapeHtml(section.heading)}</h2>
@@ -2191,13 +2198,25 @@ async function main() {
   await fs.mkdir(BLOG, { recursive: true });
   const generatedArticlePages = uniqueBySlug([...articlePages, ...x1000BlogArticles]);
   const generatedClaimIntegrityPages = uniqueBySlug([...claimIntegrityPages, ...x1000StaticPages]);
+  const eligibleRoutes = new Set(getContentRegistry({ root: ROOT })
+    .filter((entry) => entry.indexable && !entry.redirectTo)
+    .map((entry) => entry.route));
+  const strategicLinks = allocateStrategicLinks(
+    generatedArticlePages.filter((article) => !article.noindex).map((article) => ({
+      route: `/blog/${article.slug}`,
+      existingLinks: relatedReadingForArticle(article, generatedArticlePages),
+    })),
+    eligibleRoutes,
+  );
 
   for (const page of citablePages) {
     await fs.writeFile(path.join(PUBLIC, page.slug), renderCitablePage(page), 'utf8');
   }
 
   for (const article of generatedArticlePages) {
-    await fs.writeFile(path.join(BLOG, article.slug), renderArticle(article, generatedArticlePages), 'utf8');
+    await fs.writeFile(path.join(BLOG, article.slug), renderArticle(
+      article, generatedArticlePages, strategicLinks.get(`/blog/${article.slug}`) || [],
+    ), 'utf8');
   }
 
   for (const page of comparisonPages) {
