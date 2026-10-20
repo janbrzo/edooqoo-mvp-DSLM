@@ -18,7 +18,7 @@
       "type": "spa-route",
       "state": "hold",
       "incoming": 162,
-      "outgoing": 49
+      "outgoing": 52
     },
     {
       "route": "/chatgpt-alternative-for-english-tutors.html",
@@ -39,7 +39,7 @@
       "type": "spa-route",
       "state": "hold",
       "incoming": 144,
-      "outgoing": 50
+      "outgoing": 51
     },
     {
       "route": "/features/dslm",
@@ -81,7 +81,7 @@
       "type": "spa-route",
       "state": "keep",
       "incoming": 143,
-      "outgoing": 84
+      "outgoing": 86
     },
     {
       "route": "/teaching-english-pronunciation",
@@ -95,7 +95,7 @@
       "type": "spa-route",
       "state": "hold",
       "incoming": 25,
-      "outgoing": 50
+      "outgoing": 51
     },
     {
       "route": "/what-to-teach-next",
@@ -199,7 +199,7 @@
       "route": "/blog/ielts-preparation-worksheets-guide.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 10,
+      "incoming": 11,
       "outgoing": 15
     },
     {
@@ -227,7 +227,7 @@
       "route": "/blog/task-based-language-teaching-worksheets.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 10,
+      "incoming": 12,
       "outgoing": 9
     },
     {
@@ -248,14 +248,14 @@
       "route": "/a1-beginner-english-worksheets.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 10,
+      "incoming": 11,
       "outgoing": 11
     },
     {
       "route": "/a2-elementary-english-worksheets.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 10,
+      "incoming": 11,
       "outgoing": 12
     },
     {
@@ -276,7 +276,7 @@
       "route": "/ai-lesson-planning-for-english-teachers.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 10,
+      "incoming": 11,
       "outgoing": 18
     },
     {
@@ -409,7 +409,7 @@
       "route": "/blog/esl-games-for-teachers",
       "type": "blog",
       "state": "hold",
-      "incoming": 5,
+      "incoming": 8,
       "outgoing": 46
     },
     {
