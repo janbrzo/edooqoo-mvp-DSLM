@@ -93,7 +93,7 @@ Priority rule: choose indexed or near-product URLs first, especially adult/busin
 | /blog/how-to-teach-english-pronunciation.html | 1015 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/how-to-teach-speaking-esl.html | 1166 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/how-to-teach-writing-esl-students.html | 1028 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/ielts-preparation-worksheets-guide.html | 881 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/ielts-preparation-worksheets-guide.html | 889 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/intrinsic-motivation-language-learning.html | 341 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/ipa-phonetic-alphabet-esl-teaching.html | 638 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/item-analysis-english-tests.html | 553 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
