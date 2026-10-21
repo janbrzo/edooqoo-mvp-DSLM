@@ -17,8 +17,8 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 396,
-    "hookModules": 96,
+    "componentModules": 397,
+    "hookModules": 97,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 80,
@@ -8221,7 +8221,9 @@
       "userFacingText": [
         "Back to gallery",
         "Browse other worksheets",
+        "Decide the next lesson",
         "Edooqoo's DSLM workflow turns your student's goals into a tailored worksheet, fully editable, with audio, images and AI-grading built in. Free to start, no credit card.",
+        "Free teaching tools",
         "From idea to a teacher-reviewed worksheet workflow",
         "Loading…",
         "Preview mode.",
@@ -8231,12 +8233,12 @@
         "This worksheet is no longer public",
         "This worksheet may have been unpublished by its author.",
         "Try 1-Minute Prep free",
+        "Use the learner's observed performance to choose the next objective. A worksheet's CEFR label does not establish mastery.",
+        "What should follow this worksheet?",
         "Worksheet content unavailable in preview format.",
         "Worksheet no longer public | Edooqoo",
         "Worksheet not found",
-        "sign up free",
-        "to generate or open this worksheet interactively.",
-        "← Gallery"
+        "sign up free"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -8418,15 +8420,19 @@
         ", ongoing exercise results, and teacher notes. DSLM organizes available context so the worksheet output can align with the next teacher-approved focus, see",
         "Adult ESL students pay $30–80 per lesson and they audit value lesson by lesson. The moment a worksheet feels school-like, cartoon clipart, drills about Susan and her dog, vocabulary about playgrounds, they mentally check out. They booked you because they need English for a promotion, a visa interview, or a meeting next week. Static worksheet libraries cannot deliver that context. The same fill-in-the-blank on the present perfect goes to a 17-year-old high schooler and a 45-year-old M&A lawyer.",
         "After generation, every worksheet has a permanent shareable link. Send it to the student before the lesson, use it live on screen-share, or assign specific exercises as homework with deadlines. Objective tasks can be auto-checked. Open-answer exercises can use AI-assisted evaluation for teacher review and adjustment.",
+        "Choose the objective before the worksheet",
         "DSLM",
         "Edooqoo's worksheet generator takes the student profile, their job, their goals, their identified weak skills from the placement test, and produces a worksheet that references their actual world. A banker drilling the present perfect gets sentences about quarterly reports and client onboarding. A software engineer drilling the same grammar point gets sentences about deployments and code reviews. The grammar focus is identical; the content is theirs.",
         "Every worksheet generation can use four data points: CEFR level, lesson topic, grammar focus, and the student's Learning Profile. The Learning Profile is built from the 49-question",
         "How the AI personalization layer works",
+        "Next Lesson Decision Tool",
         "Pricing for ESL worksheet generation",
         "The Free plan includes 2 worksheets and unlimited students, enough to test the generator with one student. Side-Gig ($9/month) gives 15 worksheets per month, suitable for a tutor with 5-10 weekly students. Full-Time (from $19/month) gives 30-90 worksheets per month for full-time teachers. Every plan includes all 29 exercise types, AI-assisted homework review, flashcards with SM-2 spaced repetition, and the Student Hub portal. See full",
+        "Use the",
         "Welcome Test",
         "Why generic ESL worksheets fail adult learners",
-        "pricing"
+        "pricing",
+        "to choose Repair, Continue or Advance from observed teaching evidence. Then select the exercise format and review the material before sharing it."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -8948,9 +8954,14 @@
       },
       "storage": [],
       "userFacingText": [
-        "Four browser-based tools built with Martha (10 yrs ESL). No login, no installs, no data leaves your device.",
+        "CEFR assessment",
+        "Exercise design",
         "Free Tools for English Teachers",
-        "Free Tools for English Teachers | Edooqoo"
+        "Free Tools for English Teachers | Edooqoo",
+        "Next lesson decisions, CEFR level testing, lesson planning and vocabulary checking for adult one-to-one English lessons. No account required.",
+        "Pronunciation",
+        "Teaching reference hubs",
+        "Tutor operations"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -9036,7 +9047,7 @@
         {
           "value": "result",
           "setter": "setResult",
-          "initial": "() => ( location.search ? decideNextLesson(parseDecisionInput(location.search)) : null )"
+          "initial": "() => ( hasSharedEvidence ? decideNextLesson(parseDecisionInput(location.search)) : null )"
         },
         {
           "value": "copyStatus",
@@ -9063,6 +9074,8 @@
       "userFacingText": [
         "Advance",
         "Breadcrumb",
+        "Browse published worksheet examples",
+        "Compare worked teaching scenarios",
         "Continue",
         "Decide the next lesson",
         "Decision",
@@ -9073,14 +9086,12 @@
         "Local decision tool for adult 1:1 tutors",
         "Next Lesson Decision Tool",
         "Next lesson objective",
+        "Next lesson resources",
+        "Plan the lesson stages",
         "Repair",
         "Runs locally. No AI, account, student name, email, notes, or worksheet-generation call.",
-        "The link contains only the seven selected teaching categories. It cannot contain student notes or identity data.",
-        "Tools",
-        "Use after accurate independent performance with no established recurring target error.",
-        "Use when evidence is incomplete, control is partial, or success still depends on prompts.",
-        "Use when the previous objective was not mastered or a recurring error blocks the communication goal.",
-        "What Should I Teach Next?"
+        "Student learning model in Edooqoo",
+        "The link contains only the seven selected teaching categories. It cannot contain student notes or identity data."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -23001,6 +23012,41 @@
       }
     },
     {
+      "path": "src/components/gallery/PublicGalleryExamples.tsx",
+      "domain": "gallery",
+      "purpose": "Implements Public Gallery Examples behavior in the gallery domain.",
+      "exports": [
+        "PublicGalleryExamples"
+      ],
+      "props": [],
+      "state": [],
+      "hooks": [
+        "usePublicGalleryExamples"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Browse public gallery",
+        "Loading published examples…",
+        "Published examples are temporarily unavailable.",
+        "Published worksheet examples",
+        "Retry",
+        "These examples are not currently listed in the public gallery.",
+        "View original exercises"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/generation/ActiveGenerationMiniPanel.tsx",
       "domain": "generation",
       "purpose": "Implements Active Generation Mini Panel behavior in the generation domain.",
@@ -25872,6 +25918,10 @@
       },
       "storage": [],
       "userFacingText": [
+        "All free teaching tools",
+        "Choose Repair, Continue or Advance",
+        "Choose the next objective from observed accuracy, independent use and recurring errors. A worksheet level alone is not evidence that a learner has mastered it.",
+        "From task evidence to the next lesson",
         "Reference pages in this cluster",
         "Situation",
         "What to use",
@@ -42005,6 +42055,54 @@
         }
       },
       {
+        "path": "src/hooks/usePublicGalleryExamples.ts",
+        "domain": "state",
+        "purpose": "Implements use Public Gallery Examples behavior in the state domain.",
+        "exports": [
+          "usePublicGalleryExamples"
+        ],
+        "props": [],
+        "state": [
+          {
+            "value": "state",
+            "setter": "setState",
+            "initial": "{ status: 'deferred', items: [] }"
+          },
+          {
+            "value": "attempt",
+            "setter": "setAttempt",
+            "initial": "0"
+          }
+        ],
+        "hooks": [
+          "useEffect",
+          "useState"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": [
+            "${url}/rest/v1/rpc/list_public_worksheets"
+          ]
+        },
+        "storage": [
+          {
+            "storage": "localStorage",
+            "operation": "getItem",
+            "key": "edooqoo_demo_mode",
+            "file": "src/hooks/usePublicGalleryExamples.ts"
+          }
+        ],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
         "path": "src/hooks/useScrollAnimation.ts",
         "domain": "state",
         "purpose": "Implements use Scroll Animation behavior in the state domain.",
@@ -44245,6 +44343,7 @@
         "files": [
           "src/components/calendar/SlotDetailModal.tsx",
           "src/components/worksheet/WorksheetContent.tsx",
+          "src/hooks/usePublicGalleryExamples.ts",
           "src/hooks/useWorksheetAutosave.ts",
           "src/hooks/useWtSignalFeedback.ts"
         ]
@@ -59432,6 +59531,7 @@
         "name": "VITE_SUPABASE_PUBLISHABLE_KEY",
         "callsites": [
           "src/hooks/useInteractiveSharedWorksheet.tsx",
+          "src/hooks/usePublicGalleryExamples.ts",
           "src/lib/edgeFunctionHeaders.ts",
           "src/utils/promptFormatter.ts"
         ]
@@ -59440,6 +59540,7 @@
         "name": "VITE_SUPABASE_URL",
         "callsites": [
           "src/hooks/useInteractiveSharedWorksheet.tsx",
+          "src/hooks/usePublicGalleryExamples.ts",
           "src/services/worksheetStreamService.ts",
           "src/utils/promptFormatter.ts"
         ]
