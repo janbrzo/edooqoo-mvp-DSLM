@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import SeoLandingLayout from '@/components/seo/SeoLandingLayout';
+import PublicGalleryExamples from '@/components/gallery/PublicGalleryExamples';
 
 const collectionLd = {
   '@context': 'https://schema.org',
@@ -19,6 +20,7 @@ const EslWorksheets = () => (
       extraJsonLd: collectionLd,
     }}
     h1="ESL Worksheets: AI-Generated for Adult Learners"
+    secondaryCta={{ label: 'Free teaching tools', to: '/tools' }}
     lead="Edooqoo creates personalized ESL worksheets for adult learners through a structured teacher workflow: 29 exercise types, CEFR A1 through C2 labels, Business English, IELTS, conversation, grammar, and vocabulary."
     problems={[
       'Static PDF libraries (esl-brains, teach-this, Daves ESL Cafe) give you the same generic worksheet every adult learner sees, zero personalization to a banker preparing for an IELTS interview vs. a software engineer needing meeting English.',
@@ -45,6 +47,9 @@ const EslWorksheets = () => (
     ]}
     body={
       <>
+        <PublicGalleryExamples />
+        <h2 className="text-xl font-bold text-foreground">Choose the objective before the worksheet</h2>
+        <p>Use the <Link to="/tools/what-should-i-teach-next" className="text-primary hover:underline">Next Lesson Decision Tool</Link> to choose Repair, Continue or Advance from observed teaching evidence. Then select the exercise format and review the material before sharing it.</p>
         <h2 className="text-xl font-bold text-foreground mt-0">Why generic ESL worksheets fail adult learners</h2>
         <p>Adult ESL students pay $30–80 per lesson and they audit value lesson by lesson. The moment a worksheet feels school-like, cartoon clipart, drills about Susan and her dog, vocabulary about playgrounds, they mentally check out. They booked you because they need English for a promotion, a visa interview, or a meeting next week. Static worksheet libraries cannot deliver that context. The same fill-in-the-blank on the present perfect goes to a 17-year-old high schooler and a 45-year-old M&A lawyer.</p>
         <p>Edooqoo's worksheet generator takes the student profile, their job, their goals, their identified weak skills from the placement test, and produces a worksheet that references their actual world. A banker drilling the present perfect gets sentences about quarterly reports and client onboarding. A software engineer drilling the same grammar point gets sentences about deployments and code reviews. The grammar focus is identical; the content is theirs.</p>

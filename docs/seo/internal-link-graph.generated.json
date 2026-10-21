@@ -17,8 +17,8 @@
       "route": "/cefr-assessment",
       "type": "spa-route",
       "state": "hold",
-      "incoming": 162,
-      "outgoing": 52
+      "incoming": 163,
+      "outgoing": 53
     },
     {
       "route": "/chatgpt-alternative-for-english-tutors.html",
@@ -38,8 +38,8 @@
       "route": "/esl-exercise-design",
       "type": "spa-route",
       "state": "hold",
-      "incoming": 144,
-      "outgoing": 51
+      "incoming": 145,
+      "outgoing": 53
     },
     {
       "route": "/features/dslm",
@@ -59,7 +59,7 @@
       "route": "/gallery",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 36,
+      "incoming": 39,
       "outgoing": 47
     },
     {
@@ -87,14 +87,14 @@
       "route": "/teaching-english-pronunciation",
       "type": "spa-route",
       "state": "hold",
-      "incoming": 162,
-      "outgoing": 50
+      "incoming": 163,
+      "outgoing": 51
     },
     {
       "route": "/tutor-operations",
       "type": "spa-route",
       "state": "hold",
-      "incoming": 25,
+      "incoming": 26,
       "outgoing": 51
     },
     {

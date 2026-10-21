@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { PageSeo } from '@/components/seo/PageSeo';
+import PublicGalleryExamples from '@/components/gallery/PublicGalleryExamples';
 
 const TOOLS = [
   {
@@ -33,7 +34,7 @@ const ToolsIndex: React.FC = () => (
   <div className="min-h-screen bg-background">
     <PageSeo
       title="Free Tools for English Teachers | Edooqoo"
-      description="Free English teaching tools: CEFR level test, ESL lesson plan generator, CEFR vocabulary checker. No sign-up, runs in your browser."
+      description="Four free English tutor tools: next lesson decisions, CEFR level test, lesson plan generator and vocabulary checker. No sign-up required."
       path="/tools"
       jsonLd={{
         '@context': 'https://schema.org',
@@ -50,7 +51,7 @@ const ToolsIndex: React.FC = () => (
       <header className="mb-10">
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Free Tools for English Teachers</h1>
         <p className="text-lg text-muted-foreground">
-          Four browser-based tools built with Martha (10 yrs ESL). No login, no installs, no data leaves your device.
+          Next lesson decisions, CEFR level testing, lesson planning and vocabulary checking for adult one-to-one English lessons. No account required.
         </p>
       </header>
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -61,6 +62,16 @@ const ToolsIndex: React.FC = () => (
           </li>
         ))}
       </ul>
+      <section className="mt-10 border-t pt-8">
+        <h2 className="text-2xl font-bold text-foreground">Teaching reference hubs</h2>
+        <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-primary">
+          <li><Link to="/cefr-assessment" className="hover:underline">CEFR assessment</Link></li>
+          <li><Link to="/teaching-english-pronunciation" className="hover:underline">Pronunciation</Link></li>
+          <li><Link to="/esl-exercise-design" className="hover:underline">Exercise design</Link></li>
+          <li><Link to="/tutor-operations" className="hover:underline">Tutor operations</Link></li>
+        </ul>
+      </section>
+      <PublicGalleryExamples />
     </article>
   </div>
 );

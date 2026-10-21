@@ -5,6 +5,8 @@ import { PageSeo } from '@/components/seo/PageSeo';
 import GalleryExerciseRenderer from '@/components/gallery/GalleryExerciseRenderer';
 import PublicTopNav from '@/components/public/PublicTopNav';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
+import { Button } from '@/components/ui/button';
+import { publicDecisionPath } from '@/lib/gallery/publicExamples';
 
 interface PublicWorksheetRow {
   id: string;
@@ -137,6 +139,17 @@ const PublicGalleryWorksheetPage: React.FC = () => {
         ) : (
           <p className="text-muted-foreground">Worksheet content unavailable in preview format.</p>
         )}
+
+        <section className="mt-10 border-t pt-8">
+          <h2 className="text-xl font-bold text-foreground">What should follow this worksheet?</h2>
+          <p className="mt-2 text-sm text-muted-foreground">Use the learner's observed performance to choose the next objective. A worksheet's CEFR label does not establish mastery.</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button asChild variant="outline" className="h-auto whitespace-normal py-3 text-center">
+              <Link to={publicDecisionPath(worksheet.public_level)}>Decide the next lesson</Link>
+            </Button>
+            <Button asChild variant="link"><Link to="/tools">Free teaching tools</Link></Button>
+          </div>
+        </section>
 
         <div className="mt-10 rounded-lg border bg-primary/5 p-6 text-center">
           <h2 className="text-xl font-bold mb-2">From idea to a teacher-reviewed worksheet workflow</h2>
