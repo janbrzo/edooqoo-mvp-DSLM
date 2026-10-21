@@ -3,8 +3,8 @@
  *
  * Two separate dimensions:
  *   - STYLE pacing (`students.dslm_pacing_mode`): Scientific (0) to Pragmatic (100).
- *     Computed by `computeStylePacing` (recalculate-pacing) and, at prompt time when
- *     the teacher kept the default 50, by `autoPacingIndex`.
+ *     Computed by `computeStylePacing` (recalculate-pacing and, at prompt time for a
+ *     student whose pacing was never set, `computeStylePacingForStudent`).
  *   - INTENSITY: the Welcome Test Learning Path Score (comfort / guided /
  *     accelerated / target). It drives phase count/length and homework load and
  *     NEVER changes the style pacing number. Computed by `computeIntensity`.
@@ -17,6 +17,9 @@ export function clampPacing(n: number, min = 0, max = 100): number {
 }
 
 const DAY_MS = 86400000;
+
+/** `students.dslm_pacing_mode` column default (read from production, D11); new students are inserted with it. */
+export const DEFAULT_PACING_MODE = 50;
 
 // ---------------------------------------------------------------------------
 // Style pacing (recalculate-pacing)
@@ -387,27 +390,126 @@ export function autoPacingIndex(student: PromptPacingStudent, weeksUntilDeadline
 }
 
 /**
- * Prompt-time pacing: a stored non-default value (anything but 50) is respected
- * exactly; otherwise `autoPacingIndex`.
+ * Pacing for a generation prompt (decision D11).
+ *
+ * - `last_pacing_set_manually` true or false: someone set the value (the teacher,
+ *   recalculate-pacing apply, an accepted proposal, the one-off D11 apply): the
+ *   stored value is used exactly, even when it is 50.
+ * - flag null (never set; the column default is NULL since 20261021090000):
+ *   `computed` (the result of `computeStylePacing`, see `computeStylePacingForStudent`)
+ *   when the caller has it, else `autoPacingIndex` as the last resort when the
+ *   inputs could not be loaded.
+ * - flag not selected at all (undefined): the old rule (any value other than 50
+ *   counts as set), with `computed` replacing the auto rule.
  */
-/**
- * Pacing for a generation prompt. The stored value is used whenever it was
- * set by someone (the teacher, recalculate-pacing, an accepted proposal),
- * which `last_pacing_set_manually` records as true/false; it may be exactly 50.
- * Only a value nobody set (flag null, e.g. a new student's initial default)
- * falls back to the auto rule. When the flag was not selected at all, the old
- * rule (any value other than 50 counts as set) is kept.
- */
-export function resolvePromptPacing(student: PromptPacingStudent, weeksUntilDeadline: number | null): number {
+export function resolvePromptPacing(
+  student: PromptPacingStudent,
+  weeksUntilDeadline: number | null,
+  computed?: number | null,
+): number {
   const stored = student?.dslm_pacing_mode;
   const hasStored = typeof stored === 'number' && Number.isFinite(stored);
   const flag = student?.last_pacing_set_manually;
+  const fallback = () => (typeof computed === 'number' && Number.isFinite(computed)
+    ? clampPacing(computed, 0, 100)
+    : autoPacingIndex(student, weeksUntilDeadline));
   if (flag === undefined) {
     if (hasStored && stored !== 50) return clampPacing(stored as number, 0, 100);
-    return autoPacingIndex(student, weeksUntilDeadline);
+    return fallback();
   }
   if (hasStored && typeof flag === 'boolean') return clampPacing(stored as number, 0, 100);
-  return autoPacingIndex(student, weeksUntilDeadline);
+  return fallback();
+}
+
+// ---------------------------------------------------------------------------
+// Style pacing inputs (shared by recalculate-pacing and the generators)
+// ---------------------------------------------------------------------------
+
+export interface StylePacingForStudent {
+  style: StylePacingResult;
+  profile: LearningProfileForPacing | null;
+  /** Non-fatal read problems, for logging. */
+  warnings: string[];
+}
+
+/**
+ * Loads metrics (last 30 days by `last_event_at`), active goals, the Welcome Test
+ * profile and the Self-Profile and runs `computeStylePacing`. The single place
+ * where style pacing inputs are read, so recalculate-pacing and the prompt-time
+ * fallback for never-set students cannot drift. Never throws on read errors
+ * (they become warnings and a weaker input); `profile` may be passed when the
+ * caller already loaded it.
+ */
+export async function computeStylePacingForStudent(
+  supabase: any,
+  student: PacingStudent,
+  studentId: string,
+  teacherId: string,
+  opts: { profile?: LearningProfileForPacing | null; now?: Date | number } = {},
+): Promise<StylePacingForStudent> {
+  const now = opts.now ?? Date.now();
+  const warnings: string[] = [];
+
+  const { data: metrics } = await supabase
+    .from('student_skill_metrics')
+    .select('*')
+    .eq('student_id', studentId)
+    .gte('last_event_at', new Date(toMs(now) - 30 * DAY_MS).toISOString())
+    .order('last_event_at', { ascending: false })
+    .limit(200);
+
+  // Deadline-First Override scans ALL active goals (main + supporting +
+  // additional) and the legacy students.main_goal_target_date.
+  const { data: progressGoals, error: gErr } = await supabase
+    .from('student_progress_goals')
+    .select('goal_type, target_date, title, is_achieved, archived_at, deleted_at')
+    .eq('student_id', studentId).eq('teacher_id', teacherId)
+    .is('deleted_at', null).is('archived_at', null).eq('is_achieved', false);
+  if (gErr) warnings.push(`goals read failed: ${gErr.message}`);
+
+  let profile: LearningProfileForPacing | null;
+  if (opts.profile !== undefined) {
+    profile = opts.profile;
+  } else {
+    const loaded = await loadLearningProfileForPacing(supabase, studentId, teacherId);
+    if (loaded.error) warnings.push(`learning profile read failed: ${loaded.error}`);
+    profile = loaded.profile;
+  }
+
+  const { data: selfEntries, error: spErr } = await supabase
+    .from('student_knowledge_entries')
+    .select('metadata, content')
+    .eq('student_id', studentId).eq('teacher_id', teacherId)
+    .eq('category', 'Self-Profile').is('deleted_at', null);
+  if (spErr) warnings.push(`self-profile read failed: ${spErr.message}`);
+
+  const style = computeStylePacing({
+    student,
+    goals: (progressGoals || []) as PacingGoal[],
+    metrics: (Array.isArray(metrics) ? metrics : []) as PacingMetric[],
+    profile,
+    selfProfile: selfProfileFromEntries((selfEntries || []) as any[]),
+    now,
+  });
+  return { style, profile, warnings };
+}
+
+// ---------------------------------------------------------------------------
+// Pacing proposals: expiry (decision D11)
+// ---------------------------------------------------------------------------
+
+/** A pending pacing proposal older than this many days is expired (hidden, superseded by the next check). */
+export const PACING_PROPOSAL_MAX_AGE_DAYS = 14;
+
+export function isPacingProposalExpired(
+  createdAt: string | null | undefined,
+  now: Date | number = Date.now(),
+  maxAgeDays: number = PACING_PROPOSAL_MAX_AGE_DAYS,
+): boolean {
+  if (!createdAt) return false;
+  const t = new Date(createdAt).getTime();
+  if (!Number.isFinite(t)) return false;
+  return toMs(now) - t > maxAgeDays * DAY_MS;
 }
 
 // ---------------------------------------------------------------------------

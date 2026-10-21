@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { toast } from 'sonner';
 import { devWarn } from '@/utils/logger';
+import { PACING_PROPOSAL_MAX_AGE_DAYS, isPacingProposalExpired } from '../../supabase/functions/_shared/pacing';
 
 export interface PacingProposal {
   id: string;
@@ -47,7 +48,8 @@ export const usePacingProposals = (studentId?: string) => {
       if (error) throw error;
 
       // Best-effort join with student names
-      const rows = (data || []) as PacingProposal[];
+      // Proposals older than PACING_PROPOSAL_MAX_AGE_DAYS are expired (D11).
+      const rows = ((data || []) as PacingProposal[]).filter((r) => !isPacingProposalExpired(r.created_at));
       const ids = Array.from(new Set(rows.map(r => r.student_id)));
       if (ids.length) {
         const { data: students } = await supabase
@@ -74,22 +76,35 @@ export const usePacingProposals = (studentId?: string) => {
 
   const accept = async (proposal: PacingProposal) => {
     try {
-      const { error: uErr } = await supabase
-        .from('students')
-        // false = computed value (accepted proposal), not dragged by the teacher; marks it as set.
-        .update({ dslm_pacing_mode: proposal.proposed_pacing, last_pacing_set_manually: false } as any)
-        .eq('id', proposal.student_id)
-        .eq('teacher_id', teacherId!);
-      if (uErr) throw uErr;
+      if (isPacingProposalExpired(proposal.created_at)) {
+        toast.error('Proposal expired', { description: `Proposals older than ${PACING_PROPOSAL_MAX_AGE_DAYS} days are recalculated by the next check.` });
+        window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
+        return;
+      }
+      // D11: the stored proposed value may be stale (goals, metrics and the Welcome Test
+      // moved on). Accepting recomputes it with recalculate-pacing (apply mode: writes the
+      // value and last_pacing_set_manually = false) instead of applying the old number.
+      const { data: res, error: rErr } = await supabase.functions.invoke('recalculate-pacing', {
+        body: { studentId: proposal.student_id, teacherId, mode: 'apply', triggerType: 'proposal_accepted' },
+      });
+      if (rErr) throw rErr;
+      const fresh = Number((res as any)?.pacingMode);
+      if (!Number.isFinite(fresh)) throw new Error('Pacing could not be recalculated');
 
       const { error: pErr } = await (supabase as any)
         .from('pacing_proposals')
-        .update({ status: 'accepted', decided_at: new Date().toISOString(), decided_by: teacherId })
+        .update({
+          status: 'accepted',
+          decided_at: new Date().toISOString(),
+          decided_by: teacherId,
+          proposed_pacing: fresh,
+          trigger_details: { ...(proposal.trigger_details || {}), originally_proposed: proposal.proposed_pacing },
+        })
         .eq('id', proposal.id);
       if (pErr) throw pErr;
 
-      toast.success(`Pacing updated to ${proposal.proposed_pacing}/100`, {
-        description: `${proposal.student_name || 'Student'}: ${proposal.current_pacing} → ${proposal.proposed_pacing}`,
+      toast.success(`Pacing updated to ${fresh}/100`, {
+        description: `${proposal.student_name || 'Student'}: ${proposal.current_pacing} → ${fresh}`,
       });
       window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
     } catch (e: any) {

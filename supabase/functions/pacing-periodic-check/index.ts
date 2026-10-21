@@ -1,10 +1,13 @@
 // pacing-periodic-check: v4.9
 // Cron-triggered. For every active student whose last_pacing_recalc_at is
 // older than 30 days (or NULL), invoke recalculate-pacing in 'proposal' mode
-// with triggerType='periodic_30d'.
+// with triggerType='periodic_30d'. Pending proposals older than
+// PACING_PROPOSAL_MAX_AGE_DAYS (14) are expired first (status 'superseded'): the
+// UI also hides them, and accepting a proposal recomputes the value (D11).
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { hasValidCronSecret } from "../_shared/cronAuth.ts";
+import { PACING_PROPOSAL_MAX_AGE_DAYS } from "../_shared/pacing.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,6 +33,14 @@ serve(async (req) => {
       });
     }
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    const expiryCutoff = new Date(Date.now() - PACING_PROPOSAL_MAX_AGE_DAYS * 86400000).toISOString();
+    const { error: expErr } = await supabase
+      .from('pacing_proposals')
+      .update({ status: 'superseded', decided_at: new Date().toISOString() })
+      .eq('status', 'pending')
+      .lt('created_at', expiryCutoff);
+    if (expErr) console.warn('pacing proposal expiry failed', expErr.message);
 
     const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
 

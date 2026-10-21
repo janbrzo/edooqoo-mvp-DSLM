@@ -36,7 +36,9 @@ describe('skill metric recency uses the time of the evidence', () => {
   const read = (p: string) => readFileSync(join(__dirname, `../../../supabase/functions/${p}`), 'utf8');
 
   it('the weak-area block ages a skill by last_event_at, not by updated_at', () => {
-    expect(read('_shared/dslmPromptCore.ts')).toMatch(/m\.last_event_at \|\| m\.updated_at/);
+    const core = read('_shared/dslmPromptCore.ts');
+    expect(core).toMatch(/r\.last_event_at/);
+    expect(core).not.toMatch(/\b(m|r|row)\.updated_at/);
   });
 
   it('planners and pacing read last_event_at', () => {

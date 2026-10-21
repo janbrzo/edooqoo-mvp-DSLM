@@ -16,6 +16,10 @@
 //       trigger_details.reason 'welcome_test_initial_auto' (previous values kept
 //       there so the teacher can undo); later retakes keep the approval flow.
 //
+// v9 (D11): inputs are loaded by computeStylePacingForStudent (shared with the generators).
+//       Accepting a proposal in the UI calls this function in 'apply' mode, so the
+//       value is recomputed instead of taking the stored old one.
+//
 // Body: { studentId, teacherId, mode?, triggerType?, triggerDetails? }
 // Output: { pacingMode, reasoning, intensity, mode, proposalId?, skipped?: boolean }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -23,9 +27,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import {
   computeIntensity,
-  computeStylePacing,
-  loadLearningProfileForPacing,
-  selfProfileFromEntries,
+  computeStylePacingForStudent,
   shouldAutoApplyInitialWtPacing,
   WT_INITIAL_AUTO_REASON,
 } from "../_shared/pacing.ts";
@@ -65,45 +67,14 @@ serve(async (req) => {
       .from('students').select('*').eq('id', studentId).eq('teacher_id', teacherId).single();
     if (sErr || !student) throw new Error('Student not found');
 
-    const { data: metrics } = await supabase
-      .from('student_skill_metrics' as any)
-      .select('*')
-      .eq('student_id', studentId)
-      .gte('last_event_at', new Date(Date.now() - 30 * 86400000).toISOString())
-      .order('last_event_at', { ascending: false })
-      .limit(200);
-
-    // v6.3 Deadline-First Override scans ALL active goals (main + supporting +
-    // additional) and the legacy students.main_goal_target_date.
-    const { data: progressGoals, error: gErr } = await supabase
-      .from('student_progress_goals')
-      .select('goal_type, target_date, title, is_achieved, archived_at, deleted_at')
-      .eq('student_id', studentId).eq('teacher_id', teacherId)
-      .is('deleted_at', null).is('archived_at', null).eq('is_achieved', false);
-    if (gErr) console.warn('[recalculate-pacing] goals read failed', gErr.message);
-
-    // Welcome Test profile: real columns only (level_confidence, anxiety_level,
-    // error_attitude, weekly_study_time, learning_path with raw_answers fallback).
-    const { profile, error: profileErr } = await loadLearningProfileForPacing(supabase, studentId, teacherId);
-    if (profileErr) console.warn('[recalculate-pacing] learning profile read failed', profileErr);
-
-    // Self-Profile signals (Student Hub "Tell us about yourself")
-    const { data: selfEntries, error: spErr } = await supabase
-      .from('student_knowledge_entries')
-      .select('metadata, content')
-      .eq('student_id', studentId).eq('teacher_id', teacherId)
-      .eq('category', 'Self-Profile').is('deleted_at', null);
-    if (spErr) console.warn('[recalculate-pacing] self-profile read failed', spErr.message);
-
+    // Metrics (by last_event_at), active goals, Welcome Test profile and Self-Profile
+    // are read by the shared helper, the same one the generators use for students
+    // whose pacing was never set (decision D11).
     const now = Date.now();
-    const style = computeStylePacing({
-      student: student as any,
-      goals: (progressGoals || []) as any[],
-      metrics: (Array.isArray(metrics) ? metrics : []) as any[],
-      profile,
-      selfProfile: selfProfileFromEntries((selfEntries || []) as any[]),
-      now,
-    });
+    const { style, profile, warnings } = await computeStylePacingForStudent(
+      supabase, student as any, studentId, teacherId, { now },
+    );
+    for (const w of warnings) console.warn('[recalculate-pacing]', w);
     const pacingMode = style.pacing;
     const reasoning = style.reasoning;
     const intensity = computeIntensity(profile?.learning_path ?? null, style.deadlineDays);
