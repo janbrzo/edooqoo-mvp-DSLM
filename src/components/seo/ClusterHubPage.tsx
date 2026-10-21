@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import SeoLandingLayout from '@/components/seo/SeoLandingLayout';
 import type { ClusterHub } from '@/constants/clusterHubs';
+import PublicGalleryExamples from '@/components/gallery/PublicGalleryExamples';
+import { Button } from '@/components/ui/button';
 
 /**
  * Sprint 3 (Faza 3): shared renderer for the four topical cluster hubs.
@@ -47,7 +49,7 @@ const ClusterHubPage: React.FC<{ hub: ClusterHub }> = ({ hub }) => {
       h1={hub.h1}
       lead={hub.lead}
       primaryCta={{ label: hub.toolCtaLabel, to: `${hub.tool}?src=hub-${hub.id}` }}
-      secondaryCta={{ label: 'See 29 exercise types', to: '/exercise-types' }}
+      secondaryCta={{ label: 'Browse free teaching tools', to: '/tools' }}
       problems={hub.problems}
       solutionHeading={hub.solutionHeading}
       solutions={hub.solutions}
@@ -116,6 +118,17 @@ const ClusterHubPage: React.FC<{ hub: ClusterHub }> = ({ hub }) => {
               {hub.toolCtaLabel}
             </Link>
           </p>
+          <h2 className="text-xl font-bold text-foreground">From task evidence to the next lesson</h2>
+          <p>Choose the next objective from observed accuracy, independent use and recurring errors. A worksheet level alone is not evidence that a learner has mastered it.</p>
+          <div className="not-prose flex flex-wrap gap-3">
+            <Button asChild variant="outline" className="h-auto whitespace-normal py-3 text-center">
+              <Link to="/tools/what-should-i-teach-next">Choose Repair, Continue or Advance</Link>
+            </Button>
+            <Button asChild variant="link" className="h-auto whitespace-normal py-3 text-center">
+              <Link to="/tools">All free teaching tools</Link>
+            </Button>
+          </div>
+          {hub.id === 'exercise-design' && <PublicGalleryExamples />}
         </>
       }
     />

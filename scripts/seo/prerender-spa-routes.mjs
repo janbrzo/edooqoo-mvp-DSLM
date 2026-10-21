@@ -103,6 +103,7 @@ function escapeHtmlAttribute(value) {
 // so the one-off repair script can apply the exact same transformation.
 
 function normalizeSnapshotHtml(html, route) {
+  html = html.replace(/\sdata-seo-prerender(?:="[^"]*")?/g, '');
   html = dedupeHeadMeta(html);
   const canonical = route === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${route}`;
   const title = html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() || 'Edooqoo';
@@ -424,6 +425,11 @@ async function main() {
       page.on('request', (request) => {
         if (['image', 'media', 'font'].includes(request.resourceType())) request.abort();
         else request.continue();
+      });
+      await page.evaluateOnNewDocument(() => {
+        const mark = () => document.documentElement?.setAttribute('data-seo-prerender', 'true');
+        mark();
+        document.addEventListener('DOMContentLoaded', mark, { once: true });
       });
       const resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
       if (!resp || !resp.ok()) {

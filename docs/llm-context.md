@@ -1688,6 +1688,15 @@ TECHNICAL MECHANICS:
   ten distinct incoming sources for top-40 routes and five for top-120 routes. This public-content
   module does not read private student evidence or alter DSLM or worksheet generation.
 - AI discovery: `## Topic Hubs` section emitted into `public/llms.txt` by `scripts/seo/generate-ai-resources.mjs`.
+- Public tool navigation: all four hubs expose `/tools` and the local Next Lesson Decision Tool;
+  `/tools` links back to the hubs. Exercise Design, ESL Worksheets and Tools show reviewed Gallery
+  source links from `PublicGalleryExamples`, revalidated on mount through publication-filtered
+  metadata with anonymous credentials. Prerender disables that read and never saves worksheet bodies.
+  Gallery detail links pass only an exact supported CEFR band to the decision tool; mixed bands
+  pass nothing, and level-only links do not generate a recommendation before evidence is entered.
+  Direct exercise embedding is not implemented: author reuse permission and a bounded public
+  content RPC that excludes unpublished worksheets are required first. Private DSLM metrics and
+  the worksheet engine are unchanged.
 - CI guard: `scripts/seo/audit-cluster-hubs.mjs` (`npm run seo:audit-cluster-hubs`) validates routes,
   manifest registration, citation block, spoke existence, backlink presence, and title/description limits.
   Wired into `.github/workflows/seo-integrity.yml` and both `build:seo` scripts.
