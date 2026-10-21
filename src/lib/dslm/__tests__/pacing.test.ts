@@ -6,6 +6,10 @@ import {
   intensityPromptLines,
   loadLearningProfileForPacing,
   resolvePromptPacing,
+  computeStylePacingForStudent,
+  isPacingProposalExpired,
+  PACING_PROPOSAL_MAX_AGE_DAYS,
+  DEFAULT_PACING_MODE,
   selfProfileFromEntries,
   shouldAutoApplyInitialWtPacing,
   capacityOfLearningPath,
@@ -414,7 +418,55 @@ describe('buildWeakAreasBlock: thin evidence is labelled', () => {
       { skill_category: 'grammar', micro_skill: 'past_simple', current_mastery: 0, total_events: 1, last_event_at: new Date().toISOString() },
       { skill_category: 'grammar', micro_skill: 'articles', current_mastery: 40, total_events: 6, last_event_at: new Date().toISOString() },
     ]);
-    expect(out).toMatch(/past_simple: 0% \[[^\]]*based on 1 answer \(tentative\)/);
+    expect(out).toMatch(/past simple: 0% \[1 event[^\]]*\] \(single observation, tentative\)/);
     expect(out).not.toMatch(/articles[^\n]*tentative/);
+  });
+});
+
+describe('D11: never-set pacing uses computeStylePacing, proposals expire', () => {
+  it('a never-set student (flag null) takes the computed style value over the stored default', () => {
+    expect(resolvePromptPacing({ dslm_pacing_mode: 50, last_pacing_set_manually: null, main_goal: 'IELTS' }, null, 65)).toBe(65);
+    expect(resolvePromptPacing({ dslm_pacing_mode: 50, last_pacing_set_manually: null }, null, 150)).toBe(100);
+  });
+  it('a set value (flag true or false) still wins over the computed one', () => {
+    expect(resolvePromptPacing({ dslm_pacing_mode: 50, last_pacing_set_manually: false }, null, 80)).toBe(50);
+    expect(resolvePromptPacing({ dslm_pacing_mode: 20, last_pacing_set_manually: true }, null, 80)).toBe(20);
+  });
+  it('without a computed value the auto rule is the last resort', () => {
+    expect(resolvePromptPacing({ dslm_pacing_mode: 50, last_pacing_set_manually: null, main_goal: 'IELTS' }, null, null)).toBe(20);
+  });
+  it('new students are inserted with the column default', () => {
+    expect(DEFAULT_PACING_MODE).toBe(50);
+  });
+
+  it('computeStylePacingForStudent equals computeStylePacing on the same inputs', async () => {
+    const tables: Record<string, any[]> = {
+      student_skill_metrics: [],
+      student_progress_goals: [{ title: 'IELTS exam', target_date: inDays(20) }],
+      student_knowledge_entries: [],
+    };
+    const client: any = {
+      from: (t: string) => {
+        const chain: any = {
+          select: () => chain, eq: () => chain, is: () => chain, gte: () => chain, order: () => chain,
+          limit: async () => ({ data: tables[t], error: null }),
+          then: (res: any) => res({ data: tables[t], error: null }),
+        };
+        return chain;
+      },
+    };
+    const student = { main_goal: 'IELTS', english_level: 'B1' };
+    const got = await computeStylePacingForStudent(client, student, 's1', 't1', { profile: null, now: NOW });
+    const direct = computeStylePacing({ student, goals: tables.student_progress_goals, metrics: [], profile: null, selfProfile: {}, now: NOW });
+    expect(got.style.pacing).toBe(direct.pacing);
+    expect(got.warnings).toEqual([]);
+  });
+
+  it('a pending proposal expires after 14 days', () => {
+    expect(PACING_PROPOSAL_MAX_AGE_DAYS).toBe(14);
+    expect(isPacingProposalExpired(inDays(-13), NOW)).toBe(false);
+    expect(isPacingProposalExpired(inDays(-15), NOW)).toBe(true);
+    expect(isPacingProposalExpired(null, NOW)).toBe(false);
+    expect(isPacingProposalExpired('garbage', NOW)).toBe(false);
   });
 });

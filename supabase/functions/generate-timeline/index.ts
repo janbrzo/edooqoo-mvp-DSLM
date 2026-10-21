@@ -25,7 +25,9 @@ import { WORKSHEET_HISTORY_COLUMNS, toWorksheetHistoryRows } from "../_shared/wo
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { withEffectiveMastery } from "../_shared/forgetting.ts";
-import { computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
+import { computeIntensity, intensityPromptLines, loadLearningProfileForPacing, computeStylePacingForStudent } from "../_shared/pacing.ts";
+import { resolveDeadline, overduePromptText, deadlineReminder, goalsForPrompt } from "../_shared/deadline.ts";
+import { buildWeakSkillsSnapshot } from "../_shared/planSignals.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -73,15 +75,15 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Fetch context
-    const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, phaseRes, excludeRes, existingStepsRes, learningProfileRes] = await Promise.all([
-      supabase.from('students').select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap').eq('id', studentId).eq('teacher_id', teacherId).single(),
-      supabase.from('student_skill_metrics').select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at, last_event_at')
-        .eq('student_id', studentId).eq('teacher_id', teacherId).order('current_mastery', { ascending: true }).limit(60),
+    const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, phaseRes, excludeRes, existingStepsRes, learningProfileRes, wtProfileRes] = await Promise.all([
+      supabase.from('students').select('name, english_level, native_language, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap').eq('id', studentId).eq('teacher_id', teacherId).single(),
+      supabase.from('student_skill_metrics').select('skill_name, skill_category, micro_skill, current_mastery, total_events, trend, updated_at, last_event_at')
+        .eq('student_id', studentId).eq('teacher_id', teacherId).not('skill_name', 'like', 'flashcard:%').order('current_mastery', { ascending: true }).order('last_event_at', { ascending: false }).limit(60),
       supabase.from('student_knowledge_entries').select('content, category, created_at')
         .eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null).is('is_outdated', false)
         .order('created_at', { ascending: false }).limit(15),
-      supabase.from('student_progress_goals').select('title, description, goal_type, is_achieved, target_date')
-        .eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null).eq('is_achieved', false),
+      supabase.from('student_progress_goals').select('id, title, description, goal_type, is_achieved, target_date')
+        .eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null).is('archived_at', null).eq('is_achieved', false),
       supabase.from('worksheets').select(WORKSHEET_HISTORY_COLUMNS).eq('student_id', studentId).eq('teacher_id', teacherId)
         .is('deleted_at', null).order('created_at', { ascending: false }).limit(10),
       finalMode === 'phase_steps' && phaseId
@@ -100,6 +102,10 @@ serve(async (req) => {
         .order('sequence_number', { ascending: true }).limit(20),
       // Welcome Test Learning Path (intensity); tolerant of a missing row/column.
       loadLearningProfileForPacing(supabase, studentId, teacherId),
+      // Welcome Test profile text for the student profile block (interests, activities, summary).
+      supabase.from('student_learning_profiles')
+        .select('estimated_level, level_confidence, interest_topics, preferred_activities, ai_summary, updated_at, created_at')
+        .eq('student_id', studentId).eq('teacher_id', teacherId).maybeSingle(),
     ]);
 
     const student = studentRes.data;
@@ -109,6 +115,8 @@ serve(async (req) => {
       });
     }
 
+    // A failed read must not look like "no evidence" or "no goals" in the prompt.
+    if (metricsRes.error || goalsRes.error) throw new Error(`DSLM data read failed: ${(metricsRes.error || goalsRes.error)!.message}`);
     // D9: forgetting applied at read time; weakest (lowest effective mastery) first.
     const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
@@ -119,15 +127,26 @@ serve(async (req) => {
       .map((r: any) => r.suggested_topic).filter(Boolean).join(', ');
     const existingSteps = ((existingStepsRes as any)?.data) || [];
 
-    // Compute weeks until deadline for pacing
-    let weeksUntilDeadline: number | null = null;
-    if ((student as any).main_goal_target_date) {
-      const target = new Date((student as any).main_goal_target_date).getTime();
-      const days = Math.max(0, Math.round((target - Date.now()) / 86400000));
-      weeksUntilDeadline = Math.max(1, Math.round(days / 7));
-    }
+    // One deadline definition for both generators (audit B9): an overdue date is not "1 week".
+    const deadline = resolveDeadline(student as any, goals as any[]);
+    const weeksUntilDeadline = deadline.weeksUntilDeadline;
+    const reminder = deadlineReminder(deadline);
+    if (wtProfileRes?.error) console.warn('[generate-timeline] welcome test profile read failed', wtProfileRes.error);
+    const wtRow: any = wtProfileRes?.data || null;
+    (student as any).learning_profile = wtRow ? { ...wtRow, updated_at: wtRow.updated_at ?? wtRow.created_at } : null;
 
-    const pacing = computePacingIndex(student as any, weeksUntilDeadline);
+    // Never-set pacing (flag NULL): compute the style once, reusing the loaded profile (decision D11).
+    let computedStyle: number | null = null;
+    if ((student as any).last_pacing_set_manually == null) {
+      try {
+        const res = await computeStylePacingForStudent(supabase, student as any, studentId, teacherId, { profile: learningProfileRes.profile });
+        computedStyle = res.style.pacing;
+        for (const w of res.warnings) console.warn('[generate-timeline]', w);
+      } catch (e) {
+        console.warn('[generate-timeline] style pacing failed, using fallback', e);
+      }
+    }
+    const pacing = computePacingIndex(student as any, weeksUntilDeadline, computedStyle);
     const pLabel = pacingLabel(pacing);
 
     // v6.9.15c: trim per-section limits to keep prompt compact for batch (count>1)
@@ -141,13 +160,14 @@ serve(async (req) => {
     const studentProfile = buildStudentProfileBlock(student as any, pacing, intensityPromptLines(intensity));
     const weakBlock = buildWeakAreasBlock(metrics, 8);
     const knowledgeBlock = buildKnowledgeBlock(knowledge, 6);
-    const goalsBlock = buildGoalsBlock(goals);
+    const goalsBlock = buildGoalsBlock(goalsForPrompt(goals as any[]));
     const worksheetHistory = buildWorksheetHistoryBlock(recentWorksheets, 8);
     const existingStepsBlock = buildExistingStepsBlock(existingSteps, 10);
     const exerciseRules = getAdaptiveExerciseRules(pacing);
 
-    const mainDeadline = (student as any).main_goal_target_date
-      ? `\n- Main Goal Deadline: ${(student as any).main_goal_target_date} (~${weeksUntilDeadline} weeks away)` : '';
+    const mainDeadline = (weeksUntilDeadline !== null && deadline.date
+      ? `\n- ${deadline.source === 'student.main_goal_target_date' ? 'Main Goal Deadline' : 'Earliest goal deadline'}: ${deadline.date} (~${weeksUntilDeadline} weeks away)` : '')
+      + overduePromptText(deadline);
 
     // Build mode-specific prompt
     let modeBrief = '';
@@ -180,7 +200,7 @@ COMPLEMENTARITY RULE: New steps must EXTEND this queue logically, fill skill gap
 WEAK AREAS (recency-weighted: RECENT SIGNALS CARRY MORE AUTHORITY):
   ${weakBlock}
 
-RECENCY RULE: Skill metrics updated within the last 7 days are AUTHORITATIVE. Signals older than 30 days are STALE, treat as hypotheses to verify, not facts.
+RECENCY RULE: follow the confidence tag on each line. AUTHORITATIVE lines are reliable; RECENT lines are good evidence; single observations and STALE lines are hypotheses to verify, not facts.
 
 GOALS (deadline-pressured ones determine pacing):
 ${goalsBlock}
@@ -405,6 +425,11 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
       pacing_index: pacing,
       pacing_label: pLabel,
       weeks_until_deadline: weeksUntilDeadline,
+      deadline_source: deadline.source,
+      deadline_overdue: deadline.overdue,
+      deadline_overdue_items: deadline.overdue ? deadline.overdueDeadlines : null,
+      // D14 / 9.6: weak skills this plan was generated from, to check later whether it helped.
+      weak_skills_snapshot: buildWeakSkillsSnapshot(metrics),
       existing_steps_count: existingSteps.length,
       metrics_count: metrics.length,
       goals_count: goals.length,
@@ -424,7 +449,7 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
     console.log('generate-timeline:', finalMode, 'returned', suggestions.length, 'suggestions');
 
     return new Response(
-      JSON.stringify({ suggestions, generationContext, mode: finalMode, phaseId }),
+      JSON.stringify({ suggestions, generationContext, mode: finalMode, phaseId, deadlineReminder: reminder }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

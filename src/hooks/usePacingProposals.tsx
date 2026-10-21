@@ -4,11 +4,12 @@
  * Manages pending pacing proposals for the current teacher.
  * Used by PacingProposalsBell (header) + PacingProposalCard (Pathway sidebar).
  */
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { toast } from 'sonner';
 import { devWarn } from '@/utils/logger';
+import { PACING_PROPOSAL_MAX_AGE_DAYS, isPacingProposalExpired } from '../../supabase/functions/_shared/pacing';
 
 export interface PacingProposal {
   id: string;
@@ -47,7 +48,8 @@ export const usePacingProposals = (studentId?: string) => {
       if (error) throw error;
 
       // Best-effort join with student names
-      const rows = (data || []) as PacingProposal[];
+      // Proposals older than PACING_PROPOSAL_MAX_AGE_DAYS are expired (D11).
+      const rows = ((data || []) as PacingProposal[]).filter((r) => !isPacingProposalExpired(r.created_at));
       const ids = Array.from(new Set(rows.map(r => r.student_id)));
       if (ids.length) {
         const { data: students } = await supabase
@@ -72,28 +74,68 @@ export const usePacingProposals = (studentId?: string) => {
     return () => window.removeEventListener('pacingProposalChanged', handler);
   }, [fetch]);
 
+  const accepting = useRef(new Set<string>());
+
   const accept = async (proposal: PacingProposal) => {
+    if (accepting.current.has(proposal.id)) return;
+    accepting.current.add(proposal.id);
+    let claimed = false;
     try {
-      const { error: uErr } = await supabase
-        .from('students')
-        // false = computed value (accepted proposal), not dragged by the teacher; marks it as set.
-        .update({ dslm_pacing_mode: proposal.proposed_pacing, last_pacing_set_manually: false } as any)
-        .eq('id', proposal.student_id)
-        .eq('teacher_id', teacherId!);
-      if (uErr) throw uErr;
+      if (isPacingProposalExpired(proposal.created_at)) {
+        toast.error('Proposal expired', { description: `Proposals older than ${PACING_PROPOSAL_MAX_AGE_DAYS} days are replaced by a fresh one at the next check.` });
+        window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
+        return;
+      }
+      // Claim the proposal first: only a still pending row can be accepted, so a stale tab
+      // or a second click cannot overwrite a decision made elsewhere.
+      const { data: claimedRows, error: cErr } = await (supabase as any)
+        .from('pacing_proposals')
+        .update({ status: 'accepted', decided_at: new Date().toISOString(), decided_by: teacherId })
+        .eq('id', proposal.id)
+        .eq('status', 'pending')
+        .select('id');
+      if (cErr) throw cErr;
+      if (!claimedRows || claimedRows.length === 0) {
+        toast.message('Proposal already handled', { description: 'It was accepted, dismissed or replaced elsewhere.' });
+        window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
+        return;
+      }
+      claimed = true;
+
+      // D11: the stored proposed value may be stale (goals, metrics and the Welcome Test
+      // moved on). Accepting recomputes it with recalculate-pacing (apply mode: writes the
+      // value and last_pacing_set_manually = false) instead of applying the old number.
+      const { data: res, error: rErr } = await supabase.functions.invoke('recalculate-pacing', {
+        body: { studentId: proposal.student_id, teacherId, mode: 'apply', triggerType: 'proposal_accepted' },
+      });
+      if (rErr) throw rErr;
+      const fresh = Number((res as any)?.pacingMode);
+      if (!Number.isFinite(fresh)) throw new Error('Pacing could not be recalculated');
 
       const { error: pErr } = await (supabase as any)
         .from('pacing_proposals')
-        .update({ status: 'accepted', decided_at: new Date().toISOString(), decided_by: teacherId })
+        .update({
+          proposed_pacing: fresh,
+          trigger_details: { ...(proposal.trigger_details || {}), originally_proposed: proposal.proposed_pacing },
+        })
         .eq('id', proposal.id);
-      if (pErr) throw pErr;
+      if (pErr) devWarn('[usePacingProposals] could not store the fresh value on the proposal', pErr);
 
-      toast.success(`Pacing updated to ${proposal.proposed_pacing}/100`, {
-        description: `${proposal.student_name || 'Student'}: ${proposal.current_pacing} → ${proposal.proposed_pacing}`,
+      toast.success(`Pacing updated to ${fresh}/100`, {
+        description: `${proposal.student_name || 'Student'}: ${proposal.current_pacing} → ${fresh}`,
       });
       window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
     } catch (e: any) {
+      if (claimed) {
+        // The recompute failed after the claim: give the proposal back.
+        await (supabase as any).from('pacing_proposals')
+          .update({ status: 'pending', decided_at: null, decided_by: null })
+          .eq('id', proposal.id).eq('status', 'accepted');
+        window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
+      }
       toast.error('Failed to accept', { description: e?.message || 'Unknown error' });
+    } finally {
+      accepting.current.delete(proposal.id);
     }
   };
 

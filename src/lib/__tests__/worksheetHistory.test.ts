@@ -36,13 +36,19 @@ describe('skill metric recency uses the time of the evidence', () => {
   const read = (p: string) => readFileSync(join(__dirname, `../../../supabase/functions/${p}`), 'utf8');
 
   it('the weak-area block ages a skill by last_event_at, not by updated_at', () => {
-    expect(read('_shared/dslmPromptCore.ts')).toMatch(/m\.last_event_at \|\| m\.updated_at/);
+    const core = read('_shared/dslmPromptCore.ts');
+    expect(core).toMatch(/r\.last_event_at/);
+    expect(core).not.toMatch(/\b(m|r|row)\.updated_at/);
   });
 
   it('planners and pacing read last_event_at', () => {
     expect(read('generate-timeline/index.ts')).toMatch(/updated_at, last_event_at/);
     expect(read('generate-curriculum-phases/index.ts')).toMatch(/updated_at, last_event_at/);
-    const pacing = read('recalculate-pacing/index.ts');
+    expect(read('generate-timeline/index.ts')).toMatch(/total_events/);
+    expect(read('generate-curriculum-phases/index.ts')).toMatch(/total_events/);
+    // Style pacing inputs are read by one shared helper (recalculate-pacing and the generators use it).
+    expect(read('recalculate-pacing/index.ts')).toMatch(/computeStylePacingForStudent/);
+    const pacing = read('_shared/pacing.ts');
     expect(pacing).toMatch(/\.gte\('last_event_at'/);
     expect(pacing).not.toMatch(/\.gte\('updated_at'/);
   });

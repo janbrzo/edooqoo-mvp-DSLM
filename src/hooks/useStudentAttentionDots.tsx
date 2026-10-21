@@ -5,6 +5,7 @@
 //
 // This hook stays read-only and reuses existing tables; it does NOT mutate
 // curriculum, worksheet generation, or any other educational data path.
+import { PACING_PROPOSAL_MAX_AGE_DAYS } from '../../supabase/functions/_shared/pacing';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { isHomeworkAwaitingReview } from '@/lib/homework/reviewState';
@@ -40,7 +41,8 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
             .select('id, goal_type, source, accepted_at, archived_at, is_achieved, deleted_at')
             .eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null),
           supabase.from('pacing_proposals')
-            .select('id, status').eq('student_id', studentId).eq('teacher_id', teacherId).eq('status', 'pending'),
+            .select('id, status').eq('student_id', studentId).eq('teacher_id', teacherId).eq('status', 'pending')
+            .gte('created_at', new Date(Date.now() - PACING_PROPOSAL_MAX_AGE_DAYS * 86400000).toISOString()),
           supabase.from('student_learning_profiles')
             .select('estimated_level, updated_at').eq('student_id', studentId)
             .not('estimated_level', 'is', null).order('updated_at', { ascending: false }).limit(1),
