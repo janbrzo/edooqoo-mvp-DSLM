@@ -15,161 +15,30 @@ import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { WORKSHEET_HISTORY_COLUMNS, toWorksheetHistoryRows } from "../_shared/worksheetHistory.ts";
 import { withEffectiveMastery } from "../_shared/forgetting.ts";
-import { resolvePromptPacing, computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
+import { computeIntensity, intensityPromptLines, loadLearningProfileForPacing, computeStylePacingForStudent } from "../_shared/pacing.ts";
+import {
+  computePacingIndex,
+  pacingLabel,
+  buildScientificPrinciplesBlock,
+  buildStudentProfileBlock,
+  buildWeakAreasBlock,
+  buildKnowledgeBlock,
+  buildWorksheetHistoryBlock,
+  buildGoalsBlock,
+  buildExistingPhasesBlock,
+} from "../_shared/dslmPromptCore.ts";
+import { fitPhasesToDeadline, rebaseFromWeek } from "../_shared/phaseFit.ts";
+import { resolveDeadline, overduePromptText, deadlineReminder, goalsForPrompt } from "../_shared/deadline.ts";
+import { buildWeakSkillsSnapshot } from "../_shared/planSignals.ts";
 
-// v6.9.13: helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
-// Iteration 5: prompt-time pacing comes from the shared ../_shared/pacing.ts
-// (same rule as generate-timeline): the stored value counts whenever someone set it.
-function computePacingIndex(student: any, weeksUntilDeadline: number | null): number {
-  return resolvePromptPacing(student, weeksUntilDeadline);
-}
-function pacingLabel(p: number): string {
-  if (p >= 75) return 'Pragmatic';
-  if (p >= 55) return 'Balanced-Pragmatic';
-  if (p >= 45) return 'Balanced';
-  if (p >= 25) return 'Balanced-Scientific';
-  return 'Scientific';
-}
-function buildScientificPrinciplesBlock(level: string, pacing: number): string {
-  return `LEARNING SCIENCE FRAMEWORK (level=${level || 'unknown'}, pacing=${pacing}/100):
-- Apply Task-Based Language Teaching (TBLT): every phase frames a real adult outcome.
-- Spaced retrieval across phases; weak skills resurface in later phases under new tasks.
-- Pragmatic mode = front-load the deadline-blocking outcome; Scientific mode = solidify foundations first.`;
-}
-function buildStudentProfileBlock(student: any, _pacing: number): string {
-  return `STUDENT PROFILE:
-- Name: ${student?.name || 'Unknown'}
-- Level: ${student?.english_level || 'unknown'}
-- Main goal: ${student?.main_goal || 'not set'}`;
-}
-function buildWeakAreasBlock(metrics: any[], limit: number): string {
-  if (!metrics?.length) return '(no skill metrics yet)';
-  return metrics.slice(0, limit).map((m: any) => {
-    const seenAt = m.last_event_at || m.updated_at;
-    const age = seenAt ? Math.round((Date.now() - new Date(seenAt).getTime()) / (1000*60*60*24)) : null;
-    return `- ${m.skill_category || ''}/${m.micro_skill || m.skill_name}: mastery=${m.current_mastery}, trend=${m.trend || 'flat'}${age !== null ? `, ${age}d old` : ''}`;
-  }).join('\n  ');
-}
-function buildKnowledgeBlock(notes: any[], limit: number): string {
-  if (!notes?.length) return '(no notes)';
-  return notes.slice(0, limit).map((n: any) => `- [${n.category || 'general'}] ${String(n.content || '').slice(0, 200)}`).join('\n  ');
-}
-function buildWorksheetHistoryBlock(ws: any[], limit: number): string {
-  if (!ws?.length) return '(no prior worksheets)';
-  return ws.slice(0, limit).map((w: any) => `- ${w.topic} (${new Date(w.created_at).toISOString().slice(0,10)})`).join('\n  ');
-}
-function buildGoalsBlock(goals: any[]): string {
-  if (!goals?.length) return '(no active goals)';
-  return goals.map((g: any) => {
-    const dl = g.target_date ? ` [DEADLINE: ${g.target_date}]` : '';
-    return `- (${g.goal_type || 'goal'}) ${g.title}${dl}${g.description ? `, ${g.description}` : ''}`;
-  }).join('\n');
-}
-function buildExistingPhasesBlock(phases: any[]): string {
-  if (!phases?.length) return '(none: fresh roadmap)';
-  return phases.map((p: any) =>
-    `- #${p.sequence_number} [${p.status}] "${p.title}" weeks ${p.estimated_weeks_start || '?'}-${p.estimated_weeks_end || '?'} focus=[${(p.focus_areas || []).join(', ')}]`
-  ).join('\n');
-}
+// Iteration 9: prompt helpers (profile, weak areas, goals, knowledge, history, phases,
+// pacing) come from ../_shared/dslmPromptCore.ts, the same blocks generate-timeline uses.
+// The deadline-fit safety net lives in ../_shared/phaseFit.ts (unit-tested).
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-/**
- * v6.9.13: Server-side safety net.
- * Forces sum of phase weeks to fit within targetWeeks. Idempotent.
- * Rules:
- *   - Phases keep their order.
- *   - Each phase has minWeeks=2 (or floor(targetWeeks/phaseCount) if smaller).
- *   - Remaining weeks distributed proportionally to AI's original durations.
- *   - Output: contiguous integer ranges starting at week 1, no gaps, no overlaps.
- */
-function fitPhasesToDeadline(
-  phases: any[],
-  targetWeeks: number | null,
-  startingWeek: number = 1,
-): { phases: any[]; adjusted: boolean } {
-  if (!targetWeeks || !Array.isArray(phases) || phases.length === 0) {
-    return { phases, adjusted: false };
-  }
-  const n = phases.length;
-  const minWeeks = Math.max(1, Math.min(2, Math.floor(targetWeeks / n) || 1));
-  if (minWeeks * n > targetWeeks) {
-    // Cannot honor min, distribute as evenly as possible (every phase = 1 week up to budget)
-    let cursor = Math.max(1, startingWeek);
-    const lastWeek = cursor + targetWeeks - 1;
-    const out = phases.map((p, i) => {
-      const end = i === n - 1 ? lastWeek : Math.min(lastWeek, cursor);
-      const fixed = { ...p, estimated_weeks_start: cursor, estimated_weeks_end: end };
-      cursor = end + 1;
-      return fixed;
-    });
-    return { phases: out, adjusted: true };
-  }
-
-  // 1. Read AI durations (fallback = 4)
-  const aiDur = phases.map((p) => {
-    const s = Number.isInteger(p.estimated_weeks_start) ? p.estimated_weeks_start : null;
-    const e = Number.isInteger(p.estimated_weeks_end) ? p.estimated_weeks_end : null;
-    return s !== null && e !== null && e >= s ? (e - s + 1) : 4;
-  });
-  const aiSum = aiDur.reduce((a, b) => a + b, 0);
-
-  let durations: number[];
-  if (aiSum <= targetWeeks) {
-    // AI already fits, keep as-is, just renormalize to contiguous ranges from week 1.
-    durations = aiDur.map((d) => Math.max(minWeeks, d));
-    const sum0 = durations.reduce((a, b) => a + b, 0);
-    if (sum0 > targetWeeks) {
-      // bumping to minWeeks pushed past budget, fall through to scaling
-      durations = aiDur;
-    } else {
-      // Distribute leftover slack to last phase
-      const leftover = targetWeeks - sum0;
-      durations[durations.length - 1] += leftover;
-      return { phases: rebaseFromWeek(phases, durations, startingWeek), adjusted: aiSum !== targetWeeks };
-    }
-  }
-
-  // 2. Scale proportionally so sum == targetWeeks, respecting minWeeks
-  const scalable = targetWeeks - minWeeks * n;
-  const aiScalable = Math.max(1, aiSum - minWeeks * n);
-  durations = aiDur.map((d) => {
-    const extra = Math.max(0, d - minWeeks);
-    return minWeeks + Math.floor((extra * scalable) / aiScalable);
-  });
-  // Fix rounding drift, push to last phase
-  let drift = targetWeeks - durations.reduce((a, b) => a + b, 0);
-  durations[durations.length - 1] += drift;
-  // Guard against negatives from drift
-  if (durations[durations.length - 1] < minWeeks) {
-    durations[durations.length - 1] = minWeeks;
-    // re-normalize: scale down longest until sum matches
-    while (durations.reduce((a, b) => a + b, 0) > targetWeeks) {
-      const maxIdx = durations.indexOf(Math.max(...durations));
-      if (durations[maxIdx] <= minWeeks) break;
-      durations[maxIdx] -= 1;
-    }
-  }
-
-  return { phases: rebaseFromWeek(phases, durations, startingWeek), adjusted: true };
-}
-
-function rebase(phases: any[], durations: number[]): any[] {
-  return rebaseFromWeek(phases, durations, 1);
-}
-
-function rebaseFromWeek(phases: any[], durations: number[], startingWeek: number): any[] {
-  let cursor = Math.max(1, Number.isInteger(startingWeek) ? startingWeek : 1);
-  return phases.map((p, i) => {
-    const start = cursor;
-    const end = cursor + durations[i] - 1;
-    cursor = end + 1;
-    return { ...p, estimated_weeks_start: start, estimated_weeks_end: end };
-  });
-}
 
 const normalizePhaseStatus = (status: any): string =>
   String(status ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
@@ -293,23 +162,24 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Fetch context in parallel
-    const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, existingPhasesRes, learningProfileRes] = await Promise.all([
+    const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, existingPhasesRes, learningProfileRes, wtProfileRes] = await Promise.all([
       supabase
         .from('students')
-        .select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap')
+        .select('name, english_level, native_language, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap')
         .eq('id', studentId)
         .eq('teacher_id', teacherId)
         .single(),
       supabase
         .from('student_skill_metrics')
-        .select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at, last_event_at')
+        .select('skill_name, skill_category, micro_skill, current_mastery, total_events, trend, updated_at, last_event_at')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
+        .not('skill_name', 'like', 'flashcard:%')
         .order('current_mastery', { ascending: true })
         .limit(80),
       supabase
         .from('student_knowledge_entries')
-        .select('content, category')
+        .select('content, category, created_at')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .is('deleted_at', null)
@@ -318,10 +188,11 @@ serve(async (req) => {
         .limit(15),
       supabase
         .from('student_progress_goals')
-        .select('title, description, goal_type, is_achieved, target_date')
+        .select('id, title, description, goal_type, is_achieved, target_date')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .is('deleted_at', null)
+        .is('archived_at', null)
         .eq('is_achieved', false),
       supabase
         .from('worksheets')
@@ -340,6 +211,13 @@ serve(async (req) => {
         .order('sequence_number', { ascending: true }),
       // Welcome Test Learning Path (intensity); tolerant of a missing row/column.
       loadLearningProfileForPacing(supabase, studentId, teacherId),
+      // Welcome Test profile text for the student profile block (interests, activities, summary).
+      supabase
+        .from('student_learning_profiles')
+        .select('estimated_level, level_confidence, interest_topics, preferred_activities, ai_summary, updated_at, created_at')
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .maybeSingle(),
     ]);
 
     const student = studentRes.data;
@@ -398,34 +276,30 @@ serve(async (req) => {
     const keptSuggestionIds: string[] = keptSuggestionRows.map((row: any) => row.id);
     const keptSuggestionBindingMap = suggestionBindingMap(keptSuggestionRows);
 
-    // Compute weeks until deadline
-    let weeksUntilDeadline: number | null = null;
-    let deadlineSource: 'student.main_goal_target_date' | 'goal.target_date' | 'fallback_no_deadline' = 'fallback_no_deadline';
-    if (student.main_goal_target_date) {
-      const target = new Date(student.main_goal_target_date).getTime();
-      const today = Date.now();
-      const days = Math.max(0, Math.round((target - today) / (1000 * 60 * 60 * 24)));
-      weeksUntilDeadline = Math.max(1, Math.round(days / 7));
-      deadlineSource = 'student.main_goal_target_date';
-    }
-    // v6.9.14: fallback to earliest non-achieved goal.target_date
-    if (weeksUntilDeadline === null) {
-      const goalTimes = (goals || [])
-        .filter((g: any) => g.target_date && !g.is_achieved)
-        .map((g: any) => new Date(g.target_date).getTime())
-        .filter((t: number) => Number.isFinite(t) && t > Date.now());
-      if (goalTimes.length > 0) {
-        const earliest = Math.min(...goalTimes);
-        const days = Math.max(0, Math.round((earliest - Date.now()) / 86400000));
-        weeksUntilDeadline = Math.max(1, Math.round(days / 7));
-        deadlineSource = 'goal.target_date';
-      }
-    }
+    // One deadline definition for both generators (audit B9): an overdue date is not "1 week".
+    const deadline = resolveDeadline(student as any, goals as any[]);
+    const weeksUntilDeadline = deadline.weeksUntilDeadline;
+    const deadlineSource = deadline.source;
+    const reminder = deadlineReminder(deadline);
+    if (wtProfileRes?.error) console.warn('[generate-curriculum-phases] welcome test profile read failed', wtProfileRes.error);
+    const wtRow: any = wtProfileRes?.data || null;
+    (student as any).learning_profile = wtRow ? { ...wtRow, updated_at: wtRow.updated_at ?? wtRow.created_at } : null;
 
     const hasLessons = worksheets.length > 0;
 
-    // Pacing index (Scientific 0 ↔ Pragmatic 100). Auto-compute if teacher kept default 50.
-    const pacing = computePacingIndex(student as any, weeksUntilDeadline);
+    // Pacing index (Scientific 0 <-> Pragmatic 100). Never-set pacing (flag NULL): compute the style
+    // once, reusing the loaded profile (decision D11); a stored value is used as is.
+    let computedStyle: number | null = null;
+    if ((student as any).last_pacing_set_manually == null) {
+      try {
+        const res = await computeStylePacingForStudent(supabase, student as any, studentId, teacherId, { profile: learningProfileRes.profile });
+        computedStyle = res.style.pacing;
+        for (const w of res.warnings) console.warn('[generate-curriculum-phases]', w);
+      } catch (e) {
+        console.warn('[generate-curriculum-phases] style pacing failed, using fallback', e);
+      }
+    }
+    const pacing = computePacingIndex(student as any, weeksUntilDeadline, computedStyle);
     const pLabel = pacingLabel(pacing);
 
     // v6.9.41 P6: guided overrides take precedence over auto-fit heuristics.
@@ -481,12 +355,22 @@ serve(async (req) => {
       learningProfileRes.profile?.learning_path ?? null,
       weeksUntilDeadline !== null ? weeksUntilDeadline * 7 : null,
     );
-    const studentProfile = buildStudentProfileBlock(student as any, pacing) + intensityPromptLines(intensity);
+    // This generator IS the roadmap: the shared "Roadmap influence" line must not say IGNORED here.
+    const studentProfile = buildStudentProfileBlock(
+      { ...(student as any), dslm_use_roadmap: true },
+      pacing,
+      intensityPromptLines(intensity)
+        + `\n- Deadline: ${weeksUntilDeadline !== null && deadline.date ? `${weeksUntilDeadline} weeks from now (${deadline.date})` : 'open-ended'}`
+        + `\n- Has prior lessons: ${hasLessons ? 'YES' : 'NO'}`
+        + overduePromptText(deadline),
+    );
     const weakBlock = buildWeakAreasBlock(metrics, 12);
     const knowledgeBlock = buildKnowledgeBlock(knowledge, 10);
-    const goalsBlock = focusedGoals.length > 0
-      ? `PRIORITY GOALS (teacher-selected: these MUST drive phase design):\n${buildGoalsBlock(focusedGoals)}\n\nOther active goals (context only, do not let them dominate):\n${buildGoalsBlock(goals.filter((g: any) => !focusedGoalIds.includes((g as any).id)))}`
-      : buildGoalsBlock(goals);
+    const promptGoals = goalsForPrompt(goals as any[]);
+    const promptFocusedGoals = focusedGoals.length > 0 ? goalsForPrompt(focusedGoals as any[]) : [];
+    const goalsBlock = promptFocusedGoals.length > 0
+      ? `PRIORITY GOALS (teacher-selected: these MUST drive phase design):\n${buildGoalsBlock(promptFocusedGoals)}\n\nOther active goals (context only, do not let them dominate):\n${buildGoalsBlock(promptGoals.filter((g: any) => !focusedGoalIds.includes((g as any).id)))}`
+      : buildGoalsBlock(promptGoals);
     const worksheetHistory = buildWorksheetHistoryBlock(worksheets, 10);
     const existingPlan = buildExistingPhasesBlock(existingPhases);
 
@@ -514,8 +398,6 @@ SUM=13 ✓ (NOT 16, NOT 20)\n`
 ${scientificFramework}
 
 ${studentProfile}
-- Deadline: ${student.main_goal_target_date ? `${weeksUntilDeadline} weeks from now (${student.main_goal_target_date})` : 'open-ended'}
-- Has prior lessons: ${hasLessons ? 'YES' : 'NO'}
 ${deadlineConstraintBlock}
 EXISTING ROADMAP PHASES (build COMPLEMENTARILY: never duplicate, never contradict):
 ${existingPlan}
@@ -529,7 +411,7 @@ COMPLEMENTARITY RULES:
 WEAK AREAS (recency-weighted: RECENT SIGNALS CARRY MORE AUTHORITY than older ones):
   ${weakBlock}
 
-RECENCY RULE: Skill metrics updated within the last 7 days are AUTHORITATIVE. Signals older than 30 days are STALE, treat them as hypotheses to verify, not facts.
+RECENCY RULE: follow the confidence tag on each line. AUTHORITATIVE lines are reliable; RECENT lines are good evidence; single observations and STALE lines are hypotheses to verify, not facts.
 
 GOALS (deadline-pressured ones determine pacing):
 ${goalsBlock}
@@ -721,6 +603,10 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
       target_total_weeks: remainingBudget,
       deadline_fit_adjusted: fit.adjusted,
       deadline_source: deadlineSource,
+      deadline_overdue: deadline.overdue,
+      deadline_overdue_items: deadline.overdue ? deadline.overdueDeadlines : null,
+      // D14 / 9.6: weak skills this plan was generated from, to check later whether it helped.
+      weak_skills_snapshot: buildWeakSkillsSnapshot(metrics),
       phase_count: phases.length,
       pacing_index: pacing,
       pacing_label: pLabel,
@@ -905,7 +791,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     }
 
     return new Response(
-      JSON.stringify({ phases: inserted, generationContext }),
+      JSON.stringify({ phases: inserted, generationContext, deadlineReminder: reminder }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

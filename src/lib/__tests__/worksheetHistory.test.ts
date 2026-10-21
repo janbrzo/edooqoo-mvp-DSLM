@@ -44,7 +44,11 @@ describe('skill metric recency uses the time of the evidence', () => {
   it('planners and pacing read last_event_at', () => {
     expect(read('generate-timeline/index.ts')).toMatch(/updated_at, last_event_at/);
     expect(read('generate-curriculum-phases/index.ts')).toMatch(/updated_at, last_event_at/);
-    const pacing = read('recalculate-pacing/index.ts');
+    expect(read('generate-timeline/index.ts')).toMatch(/total_events/);
+    expect(read('generate-curriculum-phases/index.ts')).toMatch(/total_events/);
+    // Style pacing inputs are read by one shared helper (recalculate-pacing and the generators use it).
+    expect(read('recalculate-pacing/index.ts')).toMatch(/computeStylePacingForStudent/);
+    const pacing = read('_shared/pacing.ts');
     expect(pacing).toMatch(/\.gte\('last_event_at'/);
     expect(pacing).not.toMatch(/\.gte\('updated_at'/);
   });

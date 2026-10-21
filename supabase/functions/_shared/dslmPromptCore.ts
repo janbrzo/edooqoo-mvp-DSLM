@@ -65,9 +65,10 @@ export function pacingLabel(p: number): PacingLabel {
  */
 export function computePacingIndex(
   student: StudentProfileLite,
-  weeksUntilDeadline: number | null
+  weeksUntilDeadline: number | null,
+  computed?: number | null,
 ): number {
-  return resolvePromptPacing(student, weeksUntilDeadline);
+  return resolvePromptPacing(student, weeksUntilDeadline, computed);
 }
 
 export { autoPacingIndex, resolvePromptPacing };
