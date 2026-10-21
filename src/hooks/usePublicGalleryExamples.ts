@@ -3,19 +3,25 @@ import { selectPublishedExamples, type PublishedExample } from '@/lib/gallery/pu
 import { devWarn } from '@/utils/logger';
 
 type ExampleState = {
-  status: 'loading' | 'ready' | 'empty' | 'error';
+  status: 'deferred' | 'loading' | 'ready' | 'empty' | 'error';
   items: PublishedExample[];
 };
 
 export function usePublicGalleryExamples() {
-  const [state, setState] = useState<ExampleState>({ status: 'loading', items: [] });
+  const [state, setState] = useState<ExampleState>({ status: 'deferred', items: [] });
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     // Public worksheet content must never be copied into permanent SEO snapshots.
     if (document.documentElement.hasAttribute('data-seo-prerender')) return;
-    if (localStorage.getItem('edooqoo_demo_mode') === 'true') {
-      setState({ status: 'empty', items: [] });
+    try {
+      if (localStorage.getItem('edooqoo_demo_mode') === 'true') {
+        setState({ status: 'empty', items: [] });
+        return;
+      }
+    } catch {
+      // Fail closed when the demo/read-only status cannot be established.
+      setState({ status: 'error', items: [] });
       return;
     }
     const controller = new AbortController();

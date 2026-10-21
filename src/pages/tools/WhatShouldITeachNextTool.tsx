@@ -15,6 +15,7 @@ import {
   RECURRING_ERRORS,
   UPCOMING_SITUATIONS,
   decideNextLesson,
+  hasSharedDecisionEvidence,
   parseDecisionInput,
   serializeDecisionInput,
   type DecisionInput,
@@ -68,8 +69,7 @@ const WhatShouldITeachNextTool: React.FC = () => {
   const location = useLocation();
   const { trackEvent } = useEventTracking();
   const startedRef = useRef(false);
-  const hasSharedEvidence = ['mastery', 'independence', 'recurringError', 'homework']
-    .some((key) => new URLSearchParams(location.search).has(key));
+  const hasSharedEvidence = hasSharedDecisionEvidence(location.search);
   const [input, setInput] = useState<DecisionInput>(() => {
     try {
       return location.search ? parseDecisionInput(location.search) : DEFAULT_DECISION_INPUT;

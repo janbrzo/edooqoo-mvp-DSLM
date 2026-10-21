@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PUBLIC_GALLERY_EXAMPLES, publicDecisionPath, selectPublishedExamples } from '../gallery/publicExamples';
-import { DEFAULT_DECISION_INPUT, parseDecisionInput } from '../decisionTool/decisionRules.mjs';
+import { DEFAULT_DECISION_INPUT, hasSharedDecisionEvidence, parseDecisionInput } from '../decisionTool/decisionRules.mjs';
 
 describe('Public gallery source selection', () => {
   const publishedRow = {
@@ -39,5 +39,11 @@ describe('Public worksheet to next lesson link', () => {
   it('rejects free text and personal data in the link', () => {
     expect(publicDecisionPath('B2&studentName=Private')).toBe('/tools/what-should-i-teach-next');
     expect(publicDecisionPath(null)).toBe('/tools/what-should-i-teach-next');
+  });
+
+  it('does not auto-decide from level, source, identity or invalid evidence parameters', () => {
+    expect(hasSharedDecisionEvidence('?level=A2&src=gallery')).toBe(false);
+    expect(hasSharedDecisionEvidence('?studentName=Private&mastery=invalid')).toBe(false);
+    expect(hasSharedDecisionEvidence('?mastery=secure&independence=independent')).toBe(true);
   });
 });

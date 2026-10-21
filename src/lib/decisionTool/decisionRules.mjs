@@ -166,3 +166,12 @@ export function parseDecisionInput(search) {
   }
   return validateInput(candidate);
 }
+
+/** Source or level context alone is not observed teaching evidence. */
+export function hasSharedDecisionEvidence(search) {
+  const params = new URLSearchParams(search);
+  return ['mastery', 'independence', 'recurringError', 'homework'].some((key) => {
+    const value = params.get(key);
+    return value !== null && OPTION_SETS[key].has(value);
+  });
+}
