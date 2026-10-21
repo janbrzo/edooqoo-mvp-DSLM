@@ -41809,6 +41809,7 @@
           "useAuthUser",
           "useCallback",
           "useEffect",
+          "useRef",
           "useState"
         ],
         "actions": [],
@@ -41819,7 +41820,9 @@
             "students"
           ],
           "rpcs": [],
-          "edgeFunctions": [],
+          "edgeFunctions": [
+            "recalculate-pacing"
+          ],
           "fetchTargets": []
         },
         "storage": [],
@@ -45930,6 +45933,7 @@
         ],
         "visibleResponseFields": [
           "cleanupFailed",
+          "deadlineReminder",
           "detachRestoreFailed",
           "error",
           "expected_kept_ids",
@@ -45946,6 +45950,7 @@
             "dslm_curriculum_phases",
             "future_worksheet_suggestions",
             "student_knowledge_entries",
+            "student_learning_profiles",
             "student_progress_goals",
             "student_skill_metrics",
             "students",
@@ -46053,6 +46058,7 @@
         ],
         "visibleResponseFields": [
           "count",
+          "deadlineReminder",
           "detail",
           "error",
           "generationContext",
@@ -46068,6 +46074,7 @@
             "dslm_curriculum_phases",
             "future_worksheet_suggestions",
             "student_knowledge_entries",
+            "student_learning_profiles",
             "student_progress_goals",
             "student_skill_metrics",
             "students",
@@ -46614,6 +46621,7 @@
         ],
         "dataDependencies": {
           "tables": [
+            "pacing_proposals",
             "students"
           ],
           "rpcs": [],
@@ -46826,8 +46834,6 @@
         "dataDependencies": {
           "tables": [
             "pacing_proposals",
-            "student_knowledge_entries",
-            "student_progress_goals",
             "students"
           ],
           "rpcs": [],
@@ -48442,6 +48448,7 @@
         "name": "recalculate-pacing",
         "callsites": [
           "src/components/dslm/PacingModeSlider.tsx",
+          "src/hooks/usePacingProposals.tsx",
           "src/hooks/useStudentProgress.tsx",
           "src/hooks/useStudents.tsx"
         ],
@@ -52636,6 +52643,7 @@
           ],
           "edgeFunctions": [
             "loop-pacing-aggregator",
+            "pacing-periodic-check",
             "recalculate-pacing"
           ]
         }
@@ -53352,7 +53360,6 @@
             "generate-curriculum-phases",
             "generate-timeline",
             "get-student-self-profile",
-            "recalculate-pacing",
             "update-student-self-profile"
           ]
         }
@@ -53773,6 +53780,8 @@
             "src/hooks/useWelcomeTestHistory.tsx"
           ],
           "edgeFunctions": [
+            "generate-curriculum-phases",
+            "generate-timeline",
             "process-welcome-test"
           ]
         }
@@ -53905,8 +53914,7 @@
           "edgeFunctions": [
             "generate-curriculum-phases",
             "generate-timeline",
-            "process-welcome-test",
-            "recalculate-pacing"
+            "process-welcome-test"
           ]
         }
       },

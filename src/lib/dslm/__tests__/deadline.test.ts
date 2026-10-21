@@ -51,7 +51,7 @@ describe('resolveDeadline', () => {
     const late = resolveDeadline({ main_goal_target_date: plusDays(-1) }, [], NOW);
     expect(overduePromptText(late)).toMatch(/DEADLINE PASSED/);
     expect(deadlineReminder(late)?.message).toMatch(/passed 1 day ago/);
-    expect(overduePromptText(late) + deadlineReminder(late)!.message).not.toMatch(/—/);
+    expect(overduePromptText(late) + deadlineReminder(late)!.message).not.toMatch(/\u2014/);
   });
   it('goalsForPrompt hides an overdue date from the [DEADLINE] marker', () => {
     const out = goalsForPrompt([{ title: 'x', target_date: plusDays(-4), description: 'd' }, { title: 'y', target_date: plusDays(4) }], NOW);

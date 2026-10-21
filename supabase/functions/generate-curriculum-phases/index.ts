@@ -176,6 +176,7 @@ serve(async (req) => {
         .eq('teacher_id', teacherId)
         .not('skill_name', 'like', 'flashcard:%')
         .order('current_mastery', { ascending: true })
+        .order('last_event_at', { ascending: false })
         .limit(80),
       supabase
         .from('student_knowledge_entries')
@@ -229,6 +230,8 @@ serve(async (req) => {
     }
 
     // D9: forgetting applied at read time; weakest (lowest effective mastery) first.
+    // A failed read must not look like "no evidence" or "no goals" in the prompt.
+    if (metricsRes.error || goalsRes.error) throw new Error(`DSLM data read failed: ${(metricsRes.error || goalsRes.error)!.message}`);
     const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];

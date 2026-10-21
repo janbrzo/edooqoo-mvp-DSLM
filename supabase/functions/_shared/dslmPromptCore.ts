@@ -410,7 +410,10 @@ export function buildExistingPhasesBlock(phases: any[]): string {
       ? `: focus: [${p.focus_areas.join(', ')}]`
       : '';
     const desc = p.description ? `, ${p.description.slice(0, 100)}` : '';
-    return `[seq ${p.sequence_number}, status=${p.status}] "${p.title}"${focus}${desc}`;
+    const weeks = p.estimated_weeks_start != null || p.estimated_weeks_end != null
+      ? ` weeks ${p.estimated_weeks_start ?? '?'}-${p.estimated_weeks_end ?? '?'}`
+      : '';
+    return `[seq ${p.sequence_number}, status=${p.status}] "${p.title}"${weeks}${focus}${desc}`;
   }).join('\n');
 }
 

@@ -35,11 +35,12 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const expiryCutoff = new Date(Date.now() - PACING_PROPOSAL_MAX_AGE_DAYS * 86400000).toISOString();
-    const { error: expErr } = await supabase
+    const { data: expired, error: expErr } = await supabase
       .from('pacing_proposals')
       .update({ status: 'superseded', decided_at: new Date().toISOString() })
       .eq('status', 'pending')
-      .lt('created_at', expiryCutoff);
+      .lt('created_at', expiryCutoff)
+      .select('student_id, teacher_id');
     if (expErr) console.warn('pacing proposal expiry failed', expErr.message);
 
     const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
@@ -52,8 +53,16 @@ serve(async (req) => {
       .limit(500);
     if (error) throw error;
 
+    // A student whose pending proposal just expired gets a fresh one in this run,
+    // so the teacher is never left with nothing to act on until the 30 day check.
+    const known = new Set((students || []).map((s: any) => s.id));
+    const refresh = [...new Map((expired || []).map((e: any) => [e.student_id, e])).values()]
+      .filter((e: any) => !known.has(e.student_id))
+      .map((e: any) => ({ id: e.student_id, teacher_id: e.teacher_id, last_pacing_recalc_at: null }));
+    const toCheck = [...(students || []), ...refresh];
+
     let triggered = 0;
-    for (const s of students || []) {
+    for (const s of toCheck) {
       try {
         await supabase.functions.invoke('recalculate-pacing', {
           body: {
@@ -70,7 +79,7 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ checked: students?.length ?? 0, triggered }), {
+    return new Response(JSON.stringify({ checked: toCheck.length, triggered }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {

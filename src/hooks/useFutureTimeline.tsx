@@ -166,6 +166,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       if (response.error) throw response.error;
       const rawSuggestions = response.data?.suggestions || [];
       const generationContext = response.data?.generationContext || {};
+      if (response.data?.deadlineReminder?.message) toast.warning(response.data.deadlineReminder.message);
       // v6.9.15a: warn when AI returned fewer than requested (truncation / partial).
       if (generationContext?.warning && rawSuggestions.length > 0 && rawSuggestions.length < requestedCount) {
         toast.info(`AI returned only ${rawSuggestions.length}/${requestedCount} steps (${generationContext.warning}). Try a smaller count for full output.`);
@@ -360,6 +361,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       if (response.error) throw response.error;
       const raw = response.data?.suggestions || [];
       const generationContext = response.data?.generationContext || {};
+      if (response.data?.deadlineReminder?.message) toast.warning(response.data.deadlineReminder.message);
       if (raw.length === 0) {
         toast.info('AI returned no replacement; original removed.');
         await fetchSuggestions();
