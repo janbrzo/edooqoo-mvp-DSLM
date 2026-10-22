@@ -7,11 +7,14 @@
  *  - external sources only if they support the sentence they are attached to.
  * Pages must reach `verified` in `npm run seo:verify-content` before they get any quality label.
  */
+import { STRATEGIC_BOILERPLATE_REWRITES } from './strategic-boilerplate-rewrites.mjs';
+
 const CEFR = ['Council of Europe: CEFR Companion Volume', 'https://www.coe.int/en/web/common-european-framework-reference-languages'];
 const RETRIEVAL = ['Roediger and Karpicke: Test-Enhanced Learning (2006)', 'https://doi.org/10.1111/j.1467-9280.2006.01693.x'];
 const FORMATIVE = ['Black and Wiliam: Assessment and Classroom Learning (1998)', 'https://doi.org/10.1080/0969595980050102'];
 
 export const ARTICLE_REWRITES = {
+  ...STRATEGIC_BOILERPLATE_REWRITES,
   'diagnostic-testing-english-learners': {
     h1: 'Diagnostic Testing for Adult English Learners',
     updated: '2026-10-05',

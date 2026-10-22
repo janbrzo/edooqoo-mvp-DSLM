@@ -18,6 +18,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { STRATEGIC_BOILERPLATE_REWRITE_SLUGS } from './strategic-boilerplate-rewrites.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PUBLIC_DIR = path.join(ROOT, 'public');
@@ -29,6 +30,9 @@ const SHINGLE = 8;
 const TEMPLATED = 0.5;
 const NEAR_DUPLICATE = 0.8;
 const STRICT = process.argv.includes('--strict');
+// Step 1 gate: the 17 rewritten strategic articles must stay indexable and below the
+// near-duplicate threshold; other sections stay report-only.
+const STRATEGIC_GATE = process.argv.includes('--strategic-gate');
 
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -179,4 +183,19 @@ fs.writeFileSync(REPORT_JSON, `${JSON.stringify({ shingleSize: SHINGLE, threshol
 
 console.log(`[content-uniqueness] ${rows.length} indexable pages, ${templated.length} templated (>=${TEMPLATED}), ${nearDuplicates.length} near-duplicate (>=${NEAR_DUPLICATE}).`);
 console.log(`[content-uniqueness] report: ${path.relative(ROOT, REPORT_MD)}`);
+if (STRATEGIC_GATE) {
+  const byRoute = new Map(rows.map((row) => [row.route, row]));
+  const gateFailures = STRATEGIC_BOILERPLATE_REWRITE_SLUGS.flatMap((slug) => {
+    const row = byRoute.get(`/blog/${slug}`);
+    if (!row) return [`/blog/${slug}: not measured as an indexable page`];
+    return row.maxContainment >= NEAR_DUPLICATE
+      ? [`/blog/${slug}: maxContainment ${row.maxContainment} >= ${NEAR_DUPLICATE} (nearest ${row.nearest})`]
+      : [];
+  });
+  if (gateFailures.length) {
+    console.error(`[content-uniqueness] strategic gate FAIL\n- ${gateFailures.join('\n- ')}`);
+    process.exit(1);
+  }
+  console.log(`[content-uniqueness] strategic gate PASS ${STRATEGIC_BOILERPLATE_REWRITE_SLUGS.length} rewritten articles below ${NEAR_DUPLICATE}`);
+}
 if (STRICT && templated.length > 0) process.exit(1);
