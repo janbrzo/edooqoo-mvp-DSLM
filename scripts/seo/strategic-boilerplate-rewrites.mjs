@@ -23,6 +23,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['extensive reading adult learners', 'graded reading for professionals', 'reading fluency between lessons'],
     sources: [FOUR_STRANDS],
+    summary: 'Easy texts, learner-chosen topics and a spoken retell turn home reading into usable language.',
     directAnswer:
       'Extensive reading works for a busy adult when the texts are easy enough to read quickly, close to what they already care about, and followed by a short spoken retell in the next lesson. The tutor chooses the level, the learner chooses the topic, and the lesson checks what language moved from the page into speech.',
     problem: [
@@ -39,6 +40,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Collect three phrases the learner liked and turn them into review cards, so reading feeds vocabulary instead of competing with it.',
     ],
     mechanics: [
+      'The tutor reviews each retell and decides whether the text level should change.',
       'Edooqoo does not supply a reading library; the tutor uses texts the learner can access legally.',
       'Phrases from the retell can go into a flashcard set that the student reviews with spaced repetition, and the tutor can see that review.',
     ],
@@ -70,6 +72,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['learning pace adult English', 'spacing and retention', 'lesson pacing private tutor'],
     sources: [DUNLOSKY, RETRIEVAL],
+    summary: 'Let delayed recall, not the syllabus, decide when a recurring adult learner is ready for new input.',
     directAnswer:
       'Pace a recurring adult learner by retention, not by the syllabus: introduce new language only as fast as last week\'s language survives a delayed check. Research on spacing tells you to return to material after a gap; the learner\'s calendar tells you how large that gap can realistically be.',
     problem: [
@@ -86,6 +89,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Treat a cancelled week as spacing and open the following lesson with retrieval, not a recap lecture.',
     ],
     mechanics: [
+      'The teacher reviews every pacing proposal before it changes the plan.',
       'Edooqoo flashcards schedule review with spaced repetition, and skill mastery shown to the teacher fades with time since the last evidence, so old results are not read as current.',
       'Pacing suggestions in the learning plan are proposals the teacher accepts or edits.',
     ],
@@ -117,6 +121,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['progress to worksheet', 'choose exercise from evidence', 'feedback loop adult tutor'],
     sources: [FORMATIVE],
+    summary: "Name the learner's stage with one form and let that stage pick the next exercise format.",
     directAnswer:
       'Let the type of progress signal choose the worksheet format. A learner who recognises a form but cannot produce it needs controlled production; one who produces it slowly needs timed or repeated use; one who uses it in drills but not in speech needs a transfer task in their own context.',
     problem: [
@@ -133,6 +138,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Keep one review item from the previous stage so a regression is visible.',
     ],
     mechanics: [
+      'The tutor reviews the suggested format and changes it when the stage reading is wrong.',
       'Edooqoo records results from worksheets, homework and live work per skill, and the teacher sees which skills are strong, weak or due for review.',
       'Suggested next worksheets from the learning plan are drafts; the tutor can change the exercise selection before generating.',
     ],
@@ -164,6 +170,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['lesson prep tool English tutor', 'evaluate tutor software', 'recurring lesson preparation'],
     sources: [FORMATIVE],
+    summary: 'Test prep tools over four real lessons and compare context recovery, edit effort and continuity.',
     directAnswer:
       'Judge a lesson prep tool across four consecutive lessons with one real learner, not by its first generated worksheet. Count how long it takes to recover where the learner is, how much you edit before using the material, and whether lesson three is easier to prepare than lesson one.',
     problem: [
@@ -180,6 +187,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Keep the tool only if preparation time falls across the four lessons while your edits stay small.',
     ],
     mechanics: [
+      'Whatever you choose, the tutor reviews each draft before a learner sees it.',
       'In Edooqoo, student context, homework results, notes and earlier worksheets stay attached to the student, and new worksheets are editable before sharing or export.',
       'Any tool you test should leave the final teaching decision with you; Edooqoo suggestions are drafts the tutor approves.',
     ],
@@ -211,6 +219,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['organise ESL materials', 'tutor resource system', 'reuse lesson materials'],
     sources: [RETRIEVAL],
+    summary: 'File materials by learner and planned return date so reuse and review happen on purpose.',
     directAnswer:
       'Organise materials by learner and by next use, not by topic folders. For each item, keep three facts: who it was for, what the learner did with it, and when it should come back. A folder system answers "where is it"; a learner system answers "what should this student see next".',
     problem: [
@@ -227,6 +236,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Delete or archive what you would not use again; a smaller library gets used.',
     ],
     mechanics: [
+      'The teacher reviews the keep, review or retire tag at the end of each lesson.',
       'In Edooqoo, worksheets, homework, flashcard sets and notes are listed per student, with deleted items kept separately so they can be restored.',
       'A worksheet can be duplicated and edited for another learner instead of starting from zero.',
     ],
@@ -258,6 +268,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['track next lesson focus', 'tutor lesson notes system', 'what to teach next tracking'],
     sources: [FORMATIVE],
+    summary: 'Five comparable lines after each lesson are enough to choose the next focus with confidence.',
     directAnswer:
       'Track five short facts after every lesson: the current goal, one thing the learner did alone for the first time, the most costly gap, one item due for delayed recall, and the next real event they face. Choose the next lesson by asking which of those five has changed.',
     problem: [
@@ -274,6 +285,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Put the next real event at the top; if it is close, it overrides the other lines.',
     ],
     mechanics: [
+      'The tutor reviews the suggested next lesson against the latest five-line note.',
       'Edooqoo keeps teacher notes, homework results and lesson history on a student timeline, and the Prep view shows the next suggested lesson the tutor can accept or change.',
       'Notes can be captured quickly and classified in the background, so the tutor does not need a strict format to save them.',
     ],
@@ -305,6 +317,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['CEFR aligned worksheet', 'CEFR descriptors task design', 'level appropriate exercises'],
     sources: [CEFR],
+    summary: 'Level the input, the support and the expected output separately against a CEFR descriptor.',
     directAnswer:
       'A CEFR-aligned worksheet targets what a learner can do with language at a level, not a label attached to the person. Choose the descriptor for the task you want, set support around it, and check the output against that descriptor. One learner may need B2 reading tasks and B1 speaking tasks in the same week.',
     problem: [
@@ -321,6 +334,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Record the level per skill, so the next worksheet is set by the skill it trains.',
     ],
     mechanics: [
+      'The teacher reviews the generated items for level fit before sharing them.',
       'The Edooqoo worksheet form takes a CEFR level group (A1/A2, B1/B2, C1/C2) with the topic, goal and grammar focus, and the generated worksheet stays editable.',
       'The free CEFR level test on Edooqoo is an anonymous self-check, not a certified level.',
     ],
@@ -352,6 +366,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['business English materials', 'workplace English worksheet', 'generate business English tasks'],
     sources: [CEFR],
+    summary: 'A one-line brief naming role, audience, purpose and consequence keeps business material specific.',
     directAnswer:
       'Generate Business English material from one action the learner must perform: who they speak to, what is at stake, and what register the situation requires. A worksheet about "meetings" is generic; a worksheet about telling a client a delivery is late, without losing the account, is teaching.',
     problem: [
@@ -368,6 +383,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Finish with a task the learner performs in the lesson, then keep the draft only if it fits their real situation.',
     ],
     mechanics: [
+      'The tutor reviews every draft for register and removes anything confidential.',
       'The Edooqoo worksheet form accepts lesson topic, goal, grammar focus, level and language style, and can attach a student so the draft reflects their stored context.',
       'The tutor edits the draft before sharing it as an interactive worksheet or exporting it.',
     ],
@@ -399,6 +415,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['homework mistakes next lesson', 'ESL homework error analysis', 'adult learner homework feedback'],
     sources: [FORMATIVE, RETRIEVAL],
+    summary: 'Classify homework errors into slips, instruction problems, retrieval failures and real gaps before planning.',
     directAnswer:
       'Sort homework errors before you react to them. Separate one-off slips, misunderstood instructions, retrieval failures on known language, and genuine gaps; only recurring gaps that matter for the learner\'s goal should become the next lesson focus. The rest get a quick note, a recall item or nothing.',
     problem: [
@@ -417,6 +434,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Tell the learner how their homework changed the plan, so the work has a visible consequence.',
     ],
     mechanics: [
+      'The teacher reviews flagged answers before results count as evidence.',
       'In Edooqoo, homework is answered through a link, closed items are checked against the key, and uncertain text answers are flagged for teacher review instead of being marked wrong.',
       'Submitted homework waiting for review appears to the teacher, and reviewed results feed the student\'s skill record that later lessons use.',
     ],
@@ -448,6 +466,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['can AI plan English lesson', 'AI lesson planning limits', 'teacher review AI lesson'],
     sources: [CEFR],
+    summary: 'AI drafts materials from a clear brief; diagnosis, appropriacy and live adaptation stay human.',
     directAnswer:
       'AI can draft the parts of a one-to-one lesson that follow from a clear brief: texts, exercises, answer keys and role cards. It cannot decide what this learner needs next, judge whether a scenario is appropriate for them, or adapt when the learner surprises you in the lesson. Those decisions stay with the tutor.',
     problem: [
@@ -464,6 +483,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'After the lesson, note what the draft got wrong so the next brief improves.',
     ],
     mechanics: [
+      'The tutor reviews keys, tone and level in every AI draft.',
       'Edooqoo generates editable worksheets from a brief and can use the attached student\'s stored context; learning plan suggestions are proposals the teacher approves, edits or dismisses.',
       'Nothing is sent to a learner until the tutor shares it.',
     ],
@@ -495,6 +515,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['lesson prep time English tutor', 'reduce lesson preparation', 'tutor prep benchmark'],
     sources: [FORMATIVE],
+    summary: 'Measure four parts of preparation and cut searching and formatting before deciding and checking.',
     directAnswer:
       'For a recurring learner whose context you already hold, focused preparation can often fit into 5 to 15 minutes; a new learner, a technical field or a high-stakes event needs more. Measure where the minutes go, then cut searching and formatting before you cut thinking about the learner.',
     problem: [
@@ -511,6 +532,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Batch preparation for similar learners and keep longer slots only for new or high-stakes sessions.',
     ],
     mechanics: [
+      'The teacher reviews each worksheet even when the rest of prep gets shorter.',
       'Edooqoo aims at short recurring prep once student context exists: the Prep view shows recent evidence and a suggested next lesson, and the tutor edits a generated worksheet before use.',
       'The first setup of a new student takes longer; the short loop applies to later lessons.',
     ],
@@ -542,6 +564,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['AI homework grading English', 'AI feedback open answers', 'teacher review AI scores'],
     sources: [FORMATIVE],
+    summary: 'The answer key decides closed items, AI gives a first reading of open answers, the tutor decides.',
     directAnswer:
       'Use AI on English homework as a first reader, not a final judge. Closed items are checked against the answer key; open answers get an AI score and comment that the tutor reads before the learner sees a result. The tutor overrides any score that does not match what the learner meant or what the task asked.',
     problem: [
@@ -558,6 +581,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Share the reviewed result with a short human comment pointing to the next lesson.',
     ],
     mechanics: [
+      'The tutor reviews low AI scores and a sample of high ones before releasing results.',
       'In Edooqoo, closed items are scored by the key; AI may raise a typed answer the key marked wrong when it is a valid alternative, but never lowers a key-correct score.',
       'Uncertain text matches are flagged for teacher review, and AI results on open answers are signals the teacher sees and can correct.',
     ],
@@ -589,6 +613,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['formative assessment English', 'assessment for learning adult ESL', 'feedback loop one-to-one'],
     sources: [FORMATIVE, RETRIEVAL],
+    summary: 'Evidence, one actionable comment and an immediate second attempt form the core loop of a lesson.',
     directAnswer:
       'Formative assessment in a one-to-one lesson is a short loop: get a piece of evidence, give feedback the learner can act on immediately, and let them try again before the lesson ends. If the second attempt is not better, the feedback or the task needs to change, not the learner.',
     problem: [
@@ -607,6 +632,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Share the comparison with the learner, so they see their own progress.',
     ],
     mechanics: [
+      'The teacher reviews the first and second attempts side by side before choosing the next lesson.',
       'Edooqoo worksheets can be completed interactively and checked in the lesson, and results from worksheets, homework and live work are recorded for the student so later lessons can use them.',
       'The tutor can mark an exercise as done in the lesson and adjust the recorded result.',
     ],
@@ -638,6 +664,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['adult ESL student profile', 'learner profile lesson planning', 'student context English tutor'],
     sources: [CEFR],
+    summary: 'Keep stable context apart from fresh evidence, and store only what changes lesson decisions.',
     directAnswer:
       'An adult learner profile should hold only what changes your lesson decisions: the real goal and its date, situations where English is used, constraints on time and study, the level per skill, and recent evidence. Keep stable context separate from changing evidence, and leave out personal details that do not affect teaching.',
     problem: [
@@ -656,6 +683,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Remove anything you would not want to explain to the learner if they asked why you stored it.',
     ],
     mechanics: [
+      'The tutor reviews the profile fields regularly and deletes those no longer used.',
       'Edooqoo stores student details, goals and teacher notes, along with Welcome Test results and skill records; older skill results are shown as fading so they are not mistaken for current evidence.',
       'The profile is private to the teacher account and is used when the tutor attaches the student to a worksheet.',
     ],
@@ -687,6 +715,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['plan English lessons', 'adult lesson planning sequence', 'one-to-one lesson structure'],
     sources: [FOUR_STRANDS, CEFR],
+    summary: 'Plan backwards from one observable outcome and close each lesson with the task that proves it.',
     directAnswer:
       'Plan an adult lesson backwards from one thing the learner should be able to do at the end. Choose the evidence that will show it, then build a sequence from recall of earlier work to supported practice to independent use, and close with a check that decides the next lesson.',
     problem: [
@@ -704,6 +733,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Close with the evidence task and one sentence on what the next lesson will build on.',
     ],
     mechanics: [
+      'The teacher reviews any suggested objective against evidence before building the lesson.',
       'Edooqoo shows the next suggested lesson and recent evidence for each student, and worksheets can be generated for the chosen objective and edited before use.',
       'The plan remains the tutor\'s; suggestions can be accepted, changed or ignored.',
     ],
@@ -735,6 +765,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['ESL exercise types', 'choose exercise format', 'gap fill vs open questions'],
     sources: [RETRIEVAL],
+    summary: 'Each exercise format answers a different question about the learner, so pick the question first.',
     directAnswer:
       'Choose the exercise type by the question you want answered about the learner. Matching and multiple choice show whether they recognise a form; gap fill and transformation show supported production; error correction shows noticing; open questions, role cards and short writing show independent use.',
     problem: [
@@ -751,6 +782,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Follow a recognition task with at least one production task before concluding anything.',
     ],
     mechanics: [
+      'The tutor reviews the exercise selection before generating the worksheet.',
       'Edooqoo offers many exercise types, and the tutor can select them manually, randomly or from suggestions when creating a worksheet.',
       'Closed types are scored by the key; open types can receive AI-assisted evaluation the teacher reviews.',
     ],
@@ -782,6 +814,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
     updated: '2026-10-22',
     keywords: ['process writing ESL', 'adult writing drafts feedback', 'revision English writing'],
     sources: [FORMATIVE],
+    summary: 'Read each draft as its reader would, ask for one change, and only then work on accuracy.',
     directAnswer:
       'Treat each draft as evidence for one revision decision. Read the first draft for the biggest issue for the reader, such as structure, tone or clarity, give feedback on that alone, and ask for a second draft. Correct grammar in detail only once the text does its job.',
     problem: [
@@ -798,6 +831,7 @@ export const STRATEGIC_BOILERPLATE_REWRITES = {
       'Compare draft one and the final version together and name what improved.',
     ],
     mechanics: [
+      'The teacher reviews AI comments on drafts and gives the final feedback.',
       'In Edooqoo, writing tasks can be set as homework or open questions in a worksheet; AI-assisted evaluation of open answers is a signal for the teacher, who gives the final feedback.',
       'Error patterns from writing can be turned into a follow-up worksheet the tutor edits before sharing.',
     ],
