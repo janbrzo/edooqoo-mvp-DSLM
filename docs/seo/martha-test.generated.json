@@ -1,7 +1,7 @@
 {
   "auditedRoutes": 29,
-  "passedRoutes": 29,
-  "failedRoutes": 0,
+  "passedRoutes": 15,
+  "failedRoutes": 14,
   "warningCount": 0,
   "routes": [
     {
@@ -17,8 +17,10 @@
       "file": "public/blog/process-writing-approach-esl.html",
       "state": "keep",
       "cluster": "Adult and Business English",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/lexical-approach-language-teaching.html",
@@ -33,40 +35,50 @@
       "file": "public/blog/adult-esl-student-profile-lesson-planning.html",
       "state": "keep",
       "cluster": "Student Evidence and Progress",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/best-lesson-prep-tool-for-english-tutors.html",
       "file": "public/blog/best-lesson-prep-tool-for-english-tutors.html",
       "state": "keep",
       "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/business-english-material-generation-workflow.html",
       "file": "public/blog/business-english-material-generation-workflow.html",
       "state": "keep",
       "cluster": "Adult and Business English",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/can-ai-plan-one-to-one-english-lesson.html",
       "file": "public/blog/can-ai-plan-one-to-one-english-lesson.html",
       "state": "keep",
       "cluster": "One-to-One Lesson Planning",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/cefr-aligned-worksheet-generation-workflow.html",
       "file": "public/blog/cefr-aligned-worksheet-generation-workflow.html",
       "state": "keep",
       "cluster": "Student Evidence and Progress",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/english-homework-ai-grading-workflow.html",
@@ -81,8 +93,10 @@
       "file": "public/blog/english-tutor-material-organization-workflow.html",
       "state": "keep",
       "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/homework-mistakes-next-english-lesson.html",
@@ -97,16 +111,20 @@
       "file": "public/blog/how-english-tutors-track-what-to-teach-next.html",
       "state": "keep",
       "cluster": "Student Evidence and Progress",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
       "file": "public/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
       "state": "keep",
       "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/how-to-assess-english-level-cefr.html",
@@ -129,8 +147,10 @@
       "file": "public/blog/how-to-plan-english-lessons-effectively.html",
       "state": "keep",
       "cluster": "One-to-One Lesson Planning",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/fill-in-the-blanks-exercises-best-practices.html",
@@ -145,8 +165,10 @@
       "file": "public/blog/formative-assessment-english-teaching.html",
       "state": "keep",
       "cluster": "Student Evidence and Progress",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/error-correction-techniques-esl.html",
@@ -193,24 +215,30 @@
       "file": "public/blog/extensive-reading-programs-esl.html",
       "state": "hold",
       "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
       "file": "public/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
       "state": "keep",
       "cluster": "What Should I Teach Next?",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/student-progress-to-worksheet-feedback-loop.html",
       "file": "public/blog/student-progress-to-worksheet-feedback-loop.html",
       "state": "keep",
       "cluster": "What Should I Teach Next?",
-      "pass": true,
-      "errors": []
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/best-apps-learning-english-2026.html",
