@@ -1,67 +1,72 @@
-# Faza M8 (szczegółowo) — domknięcie Student Workspace: sprzątanie kodu, dokumentacja, pamięć
+# Krok 1 z 4: Likwidacja klonów boilerplate w 17 strategicznych artykułach bloga
 
-## Średnie klocki M0–M8 (zapisane jako punkt odniesienia)
+## Werdykt konsylium
 
-| Faza | Zakres | Status |
-|---|---|---|
-| M0 | docs/ux/student-workspace-spec.md + roadmap | zrobione |
-| M1 | workspaceTabs.ts + testy aliasów | zrobione |
-| M2 | EntityRow + MeetingLinkField | zrobione |
-| M3 | Header, Snapshot, Settings menu | zrobione |
-| M4 | PrepTab | zrobione |
-| M5 | Timeline | zrobione |
-| M6 | Library | zrobione |
-| M7 | 4 zakładki, resolver, lazy | zrobione (M7.1–M7.12) |
-| M8 | sprzątanie + dokumentacja + pamięć | częściowo (poniżej) |
+17 indeksowanych artykułów bloga ma `maxContainment` 0.843–0.942 (8-word shingles, `docs/seo/content-uniqueness.generated.json`). Wspólna przyczyna: domyślne `commonProblem`, `commonSolution`, `commonMechanics`, `workflowFocus` i fallbackowe FAQ w `scripts/seo/x1000-editorial-plan.mjs`, renderowane przez `renderArticle()` w `scripts/seo/generate-citable-pages.mjs`. Wszystkie 17 to strony strategiczne (`STRATEGIC_BLOG_SLUGS`) lub cele 301, więc **nie noindex, nie redirect**. Naprawa: własny materiał źródłowy per URL w `ARTICLE_REWRITES` (istniejący mechanizm `bespoke` wyłącza wtedy boilerplate). Zero zmian w URL-ach, canonicalach, sitemapie, registry i grafie linków.
 
-## Co o M8 wiadomo dziś (sprawdzone przed planem)
+## Zakres: 17 URL-i
 
-Część M8 już weszła wcześniej (poprawki telefonu w górnym pasku, porządki w adresach, usunięte dwa nieużywane fragmenty strony ucznia). Zostało to, co w oryginalnym opisie M8 było „papierowe”, oraz trzy konkretne nieścisłości, które znalazłem:
+| # | Slug | Containment | Własna oś redakcyjna | Evidence w przykładzie |
+|---|---|---:|---|---|
+| 1 | extensive-reading-programs-esl | 0.942 | dobór tekstu i transfer czytania do pracy | retell, reuse leksyki, difficulty fit |
+| 2 | learning-pacing-scientific-vs-pragmatic-esl | 0.938 | tempo jako decyzja obciążenia i retencji | spacing, nieudany recall, deadline |
+| 3 | student-progress-to-worksheet-feedback-loop | 0.934 | sygnał postępu → jeden format ćwiczenia | wzorzec mastery, typ błędu |
+| 4 | best-lesson-prep-tool-for-english-tutors | 0.930 | ocena narzędzia w cyklu 4 lekcji | odtwarzanie kontekstu, koszt edycji |
+| 5 | english-tutor-material-organization-workflow | 0.928 | materiały wokół ucznia, nie folderów | źródło, ponowne użycie |
+| 6 | how-english-tutors-track-what-to-teach-next | 0.928 | minimalny rejestr sygnałów | cel, blokująca luka, samodzielny sukces |
+| 7 | cefr-aligned-worksheet-generation-workflow | 0.922 | CEFR jako poziom zadania, nie etykieta osoby | deskryptor, wsparcie, output |
+| 8 | business-english-material-generation-workflow | 0.918 | materiał pod konkretne działanie biznesowe | rola, odbiorca, konsekwencja, rejestr |
+| 9 | homework-mistakes-next-english-lesson | 0.915 | triage błędów zadania domowego | slip vs luka vs źle zrozumiane zadanie |
+| 10 | can-ai-plan-one-to-one-english-lesson | 0.914 | granica draft AI vs decyzja lektora | cel, stosowność, punkt review |
+| 11 | how-long-should-private-english-tutors-spend-on-lesson-prep | 0.912 | pomiar i redukcja tarcia przygotowania | retrieval, adaptacja, review |
+| 12 | english-homework-ai-grading-workflow | 0.911 | AI jako sygnał do review, nie ocena końcowa | klucz, odpowiedź niepewna |
+| 13 | formative-assessment-english-teaching | 0.911 | mikro-pętla evidence → feedback → retry | exit evidence, re-check |
+| 14 | adult-esl-student-profile-lesson-planning | 0.906 | minimalny profil i prywatność | stały kontekst vs bieżąca obserwacja |
+| 15 | how-to-plan-english-lessons-effectively | 0.905 | sekwencja od celu do transferu | outcome, scaffolding, delayed check |
+| 16 | esl-exercise-type-selection-guide | 0.852 | format jako test hipotezy | recognition, controlled, transfer |
+| 17 | process-writing-approach-esl | 0.843 | draft jako dowód następnej interwencji | cel rewizji, odbiorca, zmieniony draft |
 
-1. **Kod:** żaden plik w folderze komponentów ucznia nie jest dziś osierocony (sprawdzone skryptem). Strona ucznia ma 907 linii i dokładnie 4 sekcje zakładek (prep, timeline, library, model). Nie ma więc wielkiego „martwego kodu” do wycięcia — zostaje drobny przegląd nieużywanych importów i stanów.
-2. **Dokumentacja dla AI (llm-context):** jest wpis o poprawkach M8 (v6.9.112), ale **brak jednego wpisu opisującego cały nowy układ 4 zakładek** (v6.9.111). Dodatkowo starszy wpis (linia ~1870) twierdzi, że skrót „przejdź do ucznia” prowadzi do `?tab=dslm` — to już nieprawda (dziś `?tab=prep`).
-3. **Pamięć projektu:** notatka „Quick Add Note from Overview” opisuje zakładkę Overview, której już nie ma. Brak notatki o nowym układzie strony ucznia, więc przyszła sesja mogłaby „przywrócić” stare zakładki.
+Uwaga: część slugów (np. 4, 6, 9, 10, 11, 14) jest też generowana przez `generate-strategic-content.mjs` z dokumentu źródłowego. W Fazie A ustalamy dla każdego sluga, który generator zapisuje plik ostatni (`seo:sync-generated` uruchamia `generate-citable-pages` dwukrotnie), i rewrite trafia do właściwego źródła. Jeśli właścicielem jest generator strategiczny, unikalną treść dodajemy w jego źródle, nie w `ARTICLE_REWRITES`.
 
-## Małe klocki
+## Fazy wdrożenia (tryb Build)
 
-### M8.1 — Przegląd nieużywanego kodu na stronie ucznia (bez zmian wyglądu)
-- Uruchomić `bunx eslint src/pages/StudentPage.tsx src/components/student src/lib/students` i usunąć wyłącznie: nieużywane importy, nieużywane zmienne stanu, nieużywane propsy przekazywane do lazy zakładek.
-- Sprawdzić hooki importowane tylko przez stronę ucznia (`useDeletedWorksheets`, `useStudentKnowledge` itd.) — zostają, jeśli są używane; nic nie przenosimy.
-- Zakaz: zmiana logiki, przenoszenie plików, dotykanie silnika arkuszy, stare narzędzia (Homework, Tests, Calendar, Flashcards) zostają nietknięte.
-- Weryfikacja: tsgo czyste, 227/227 testów, zrzut 4 zakładek na koncie +44 identyczny jak w M7.12.
+### Faza A: kontrakt i mapa własności
+1. Stała `STRATEGIC_BOILERPLATE_REWRITE_SLUGS` (17 pozycji) w `scripts/seo/article-rewrites.mjs`, eksportowana dla testów i audytu.
+2. Dla każdego sluga potwierdzić generator-właściciel i ścieżkę renderowania (bespoke vs strategic markdown).
 
-### M8.2 — Wpis RAG „v6.9.111 Student Workspace” w docs/llm-context.md
-Nowa sekcja w formacie wymaganym (PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS), treść:
-- PROBLEM: 7 widocznych + 4 ukryte zakładki, przygotowanie lekcji rozproszone.
-- SOLUTION: 4 zakładki prep | timeline | library | model; Prep ładowany od razu, reszta leniwie; stare linki `?tab=` działają na stałe przez aliasy.
-- MECHANICS: `workspaceTabs.ts` (resolveTab, resolveWorkspaceParams, buildWorkspaceParams, TAB_ALIASES — 12 aliasów, PRESERVED_PARAMS), `prepPlan.ts`, `timelineEvents.ts`, `libraryItems.ts`, komponenty prep/timeline/library, `StudentHeaderBar`, `StudentSnapshotPanel`, `StudentSettingsMenu`, deep linki `set=` i `testId=`, brak zmian w bazie i silniku arkuszy.
-- 15 słów kluczowych.
-- Poprawić starą linię ~1870: `studentPrepPath()` zwraca `/student/:id?tab=prep`.
+### Faza B: 17 własnych wpisów źródłowych
+Każdy wpis: `h1`, `updated`, unikalne `keywords`, `directAnswer`, 3–5 `problem`, 4–6 `solution`, `mechanics` (tylko fakty PRODUCTION z `docs/llm-context.md`), `works`, `notEnough`, `tutorDecision`, `example` oznaczony „Constructed example”, 3–5 `faqs` specyficznych dla intencji, `sources` tylko gdy wspierają konkretne zdanie.
+Zasady: Martha Standard (dorośli 1:1, realny cel komunikacyjny, zero dzieci/klas/zabaw), bez wymyślonych statystyk, klientów, cytatów, bez em dash, Edooqoo opisane oszczędnie (lektor zatwierdza). Zachowane slug, metadane (SEO_*_OVERRIDES) i linki.
 
-### M8.3 — public/llms.txt
-Decyzja gotowa: **bez zmian**. Plik opisuje produkt publicznie, a przebudowa zakładek to wewnętrzny układ ekranu nauczyciela (zasada: nie opisujemy wewnętrznych szczegółów w treściach publicznych). Zapis tej decyzji jednym zdaniem w sekcji 18 specyfikacji.
+### Faza C: bramki regresji
+1. `scripts/seo/__tests__/strategic-boilerplate-rewrites.test.mjs`: lista kompletna (17), każdy wpis ma wszystkie pola, `bespoke === true`, żaden nie jest w `templatedCloneNoindexSlugs`; wygenerowany HTML: brak `noindex`, self-canonical, jeden H1, brak tekstów `commonProblem/commonSolution/commonMechanics` i fallbackowego FAQ chatbota, brak `<p>undefined</p>` i U+2014.
+2. `audit-content-uniqueness.mjs --strategic-gate`: każdy z 17 musi mieć `maxContainment < 0.80`, inaczej exit 1 z raportem najbliższej strony; podpięty do `content:audit`. Globalny audyt pozostaje raportowy (bez zaostrzania pSEO).
+3. Globalne `commonProblem/commonSolution/commonMechanics` i nagłówki szablonu bez zmian (to Krok 2).
 
-### M8.4 — Pamięć projektu
-- Nowa notatka `mem://features/student-page/workspace-4-tabs`: 4 zakładki są ostateczne, aliasy są trwałe, nie dodawać z powrotem Overview/Worksheets/Skills jako osobnych zakładek, destrukcyjne akcje tylko w menu ustawień.
-- Aktualizacja notatki „Quick Add Note from Overview”: przycisk dodawania notatki żyje dziś w Prep (QuickNoteBox) — zaktualizować opis, zachować zasadę „nie przekierowywać do modelu ucznia”.
-- Dopisać obie w indeksie pamięci.
+### Faza D: regeneracja i weryfikacja
+1. `seo:sync-generated` dwa razy, czysty diff po drugim.
+2. `seo:audit-uniqueness` + gate, `seo:audit`, `content:audit`, `seo:audit-duplicate-meta`, `seo:check-jsonld`, `seo:audit-structured-data`, `npm test`.
+3. Ręczny przegląd 3 losowych stron (czytelność, Martha) przez niezależnego recenzenta.
 
-### M8.5 — AGENTS.md
-Jedna reguła techniczna: „Student Workspace tab state lives only in the URL and is resolved via `src/lib/students/workspaceTabs.ts`; legacy `?tab=` aliases are permanent — because sent emails and bookmarks carry them.” (zastępuje ewentualną starszą regułę o zakładkach, nie dubluje).
+### Faza E: dokumentacja
+1. `AGENTS.md`: zastąpić istniejącą regułę o templated clones wersją rozszerzoną: strategiczne strony z containment >= 0.80 naprawia się własnym źródłem treści (gate w content:audit), nigdy noindex ani edycją HTML.
+2. `roadmap.md`: Krok 1 odhaczony po bramkach; Kroki 2–4 otwarte.
+3. `docs/llm-context.md` i `mem://` bez zmian (brak zmiany architektury ani decyzji produktowej). `llms.txt` tylko przez generator.
 
-### M8.6 — roadmap.md i specyfikacja
-- roadmap: dopisać i odhaczyć „M8 docs/memory closure”.
-- `docs/ux/student-workspace-spec.md` sekcja 18: dopisać wynik M8.
+## Kryteria akceptacji
+- 17 URL-i indeksowalnych, te same adresy, canonical, registry i sitemap (252).
+- Każda z 17 stron `maxContainment < 0.80`; brak tekstów boilerplate.
+- Graf linków: orphan=0, weakTop40=0, weakTop120=0.
+- Drugi `seo:sync-generated` bez zmian; wszystkie testy i audyty PASS.
 
-### M8.7 — Weryfikacja końcowa
-- `bunx tsgo --noEmit -p tsconfig.app.json` → 0 błędów.
-- `bun test` → 227/227.
-- Playwright na koncie +44: 4 zakładki + jeden stary link (`?tab=flashcards&set=…` → zestaw BIG) + telefon 360 px (bez przewijania w bok).
-- Checklist: każdy punkt M8.1–M8.6 DONE/FAIL.
+## Ryzyka
+| Ryzyko | Zabezpieczenie |
+|---|---|
+| Edycja nadpisana przez inny generator | Faza A: mapa własności per slug |
+| Przepisanie zmieni intencję zapytania | directAnswer odpowiada na zapytanie URL; metadane bez zmian |
+| Fałszywe twierdzenia o produkcie | tylko fakty PRODUCTION, przykłady oznaczone jako konstrukcyjne |
+| Powrót boilerplate w przyszłości | test kompletności + gate containment w CI |
+| Rozlanie zmian na cały blog | brak zmian w globalnym szablonie |
 
-## Poza zakresem (nie ruszamy)
-Klawiatura w filtrach osi czasu i przełączniku biblioteki, ekran ładowania w wersji demo, stare adresy w e-mailach i powiadomieniach, cichy brak komunikatu dla usuniętej sugestii.
-
-## Szczegóły techniczne
-- Pliki zmieniane: `src/pages/StudentPage.tsx` (tylko importy/nieużywane zmienne, jeśli lint coś wskaże), `docs/llm-context.md`, `docs/ux/student-workspace-spec.md`, `roadmap.md`, `AGENTS.md`, `mem/…`.
-- Zero zmian: baza danych, funkcje serwera, silnik generowania arkuszy, `public/llms.txt`, trasy aplikacji.
+## Poza zakresem
+Krok 2 (nagłówki citable, metatekst RAG, powtarzalne FAQ globalnie), Krok 3 (filtr Marthy ~65 artykułów), Krok 4 (pSEO + Gallery), publikacja, Cloudflare Worker, GSC, silnik arkuszy, DSLM, Supabase.
