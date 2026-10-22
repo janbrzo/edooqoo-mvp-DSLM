@@ -134,10 +134,10 @@
     {
       "route": "/blog/adult-esl-student-profile-lesson-planning.html",
       "section": "/blog",
-      "words": 683,
+      "words": 711,
       "inSitemap": true,
-      "maxContainment": 0.127,
-      "uniqueShare": 0.861,
+      "maxContainment": 0.122,
+      "uniqueShare": 0.866,
       "nearest": "/blog/connected-speech-teaching-activities.html"
     },
     {
@@ -170,37 +170,37 @@
     {
       "route": "/blog/best-lesson-prep-tool-for-english-tutors.html",
       "section": "/blog",
-      "words": 636,
+      "words": 665,
       "inSitemap": true,
-      "maxContainment": 0.126,
-      "uniqueShare": 0.866,
+      "maxContainment": 0.12,
+      "uniqueShare": 0.872,
       "nearest": "/blog/business-english-material-generation-workflow.html"
     },
     {
       "route": "/blog/business-english-material-generation-workflow.html",
       "section": "/blog",
-      "words": 643,
+      "words": 669,
       "inSitemap": true,
-      "maxContainment": 0.129,
-      "uniqueShare": 0.841,
+      "maxContainment": 0.124,
+      "uniqueShare": 0.847,
       "nearest": "/blog/personalized-learning-english-teaching.html"
     },
     {
       "route": "/blog/can-ai-plan-one-to-one-english-lesson.html",
       "section": "/blog",
-      "words": 661,
+      "words": 687,
       "inSitemap": true,
-      "maxContainment": 0.126,
-      "uniqueShare": 0.869,
+      "maxContainment": 0.121,
+      "uniqueShare": 0.874,
       "nearest": "/blog/esl-exercise-type-selection-guide.html"
     },
     {
       "route": "/blog/cefr-aligned-worksheet-generation-workflow.html",
       "section": "/blog",
-      "words": 634,
+      "words": 661,
       "inSitemap": true,
-      "maxContainment": 0.14,
-      "uniqueShare": 0.836,
+      "maxContainment": 0.135,
+      "uniqueShare": 0.843,
       "nearest": "/blog/student-progress-to-worksheet-feedback-loop.html"
     },
     {
@@ -278,19 +278,19 @@
     {
       "route": "/blog/english-homework-ai-grading-workflow.html",
       "section": "/blog",
-      "words": 700,
+      "words": 733,
       "inSitemap": true,
-      "maxContainment": 0.113,
-      "uniqueShare": 0.864,
+      "maxContainment": 0.108,
+      "uniqueShare": 0.87,
       "nearest": "/blog/how-english-tutors-track-what-to-teach-next.html"
     },
     {
       "route": "/blog/english-tutor-material-organization-workflow.html",
       "section": "/blog",
-      "words": 641,
+      "words": 672,
       "inSitemap": true,
-      "maxContainment": 0.129,
-      "uniqueShare": 0.866,
+      "maxContainment": 0.123,
+      "uniqueShare": 0.872,
       "nearest": "/blog/student-progress-to-worksheet-feedback-loop.html"
     },
     {
@@ -305,10 +305,10 @@
     {
       "route": "/blog/esl-exercise-type-selection-guide.html",
       "section": "/blog",
-      "words": 626,
+      "words": 652,
       "inSitemap": true,
-      "maxContainment": 0.133,
-      "uniqueShare": 0.84,
+      "maxContainment": 0.128,
+      "uniqueShare": 0.846,
       "nearest": "/blog/can-ai-plan-one-to-one-english-lesson.html"
     },
     {
@@ -323,10 +323,10 @@
     {
       "route": "/blog/extensive-reading-programs-esl.html",
       "section": "/blog",
-      "words": 738,
+      "words": 767,
       "inSitemap": true,
-      "maxContainment": 0.126,
-      "uniqueShare": 0.867,
+      "maxContainment": 0.121,
+      "uniqueShare": 0.872,
       "nearest": "/blog/lexical-approach-language-teaching.html"
     },
     {
@@ -350,10 +350,10 @@
     {
       "route": "/blog/formative-assessment-english-teaching.html",
       "section": "/blog",
-      "words": 692,
+      "words": 725,
       "inSitemap": true,
-      "maxContainment": 0.111,
-      "uniqueShare": 0.882,
+      "maxContainment": 0.106,
+      "uniqueShare": 0.887,
       "nearest": "/blog/cefr-aligned-worksheet-generation-workflow.html"
     },
     {
@@ -368,28 +368,28 @@
     {
       "route": "/blog/homework-mistakes-next-english-lesson.html",
       "section": "/blog",
-      "words": 712,
+      "words": 737,
       "inSitemap": true,
-      "maxContainment": 0.128,
-      "uniqueShare": 0.865,
+      "maxContainment": 0.124,
+      "uniqueShare": 0.87,
       "nearest": "/blog/how-to-assess-english-level-cefr.html"
     },
     {
       "route": "/blog/how-english-tutors-track-what-to-teach-next.html",
       "section": "/blog",
-      "words": 632,
+      "words": 661,
       "inSitemap": true,
-      "maxContainment": 0.126,
-      "uniqueShare": 0.862,
+      "maxContainment": 0.12,
+      "uniqueShare": 0.868,
       "nearest": "/blog/english-homework-ai-grading-workflow.html"
     },
     {
       "route": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
       "section": "/blog",
-      "words": 627,
+      "words": 655,
       "inSitemap": true,
-      "maxContainment": 0.123,
-      "uniqueShare": 0.862,
+      "maxContainment": 0.118,
+      "uniqueShare": 0.868,
       "nearest": "/blog/fill-in-the-blanks-exercises-best-practices.html"
     },
     {
@@ -422,10 +422,10 @@
     {
       "route": "/blog/how-to-plan-english-lessons-effectively.html",
       "section": "/blog",
-      "words": 658,
+      "words": 687,
       "inSitemap": true,
-      "maxContainment": 0.13,
-      "uniqueShare": 0.853,
+      "maxContainment": 0.124,
+      "uniqueShare": 0.86,
       "nearest": "/blog/public-esl-worksheet-gallery-quality-standards.html"
     },
     {
@@ -530,10 +530,10 @@
     {
       "route": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
       "section": "/blog",
-      "words": 702,
+      "words": 731,
       "inSitemap": true,
-      "maxContainment": 0.13,
-      "uniqueShare": 0.862,
+      "maxContainment": 0.124,
+      "uniqueShare": 0.867,
       "nearest": "/blog/extensive-reading-programs-esl.html"
     },
     {
@@ -647,10 +647,10 @@
     {
       "route": "/blog/process-writing-approach-esl.html",
       "section": "/blog",
-      "words": 625,
+      "words": 655,
       "inSitemap": true,
-      "maxContainment": 0.117,
-      "uniqueShare": 0.875,
+      "maxContainment": 0.111,
+      "uniqueShare": 0.881,
       "nearest": "/blog/business-english-material-generation-workflow.html"
     },
     {
@@ -746,10 +746,10 @@
     {
       "route": "/blog/student-progress-to-worksheet-feedback-loop.html",
       "section": "/blog",
-      "words": 695,
+      "words": 728,
       "inSitemap": true,
-      "maxContainment": 0.128,
-      "uniqueShare": 0.865,
+      "maxContainment": 0.122,
+      "uniqueShare": 0.871,
       "nearest": "/blog/cefr-aligned-worksheet-generation-workflow.html"
     },
     {

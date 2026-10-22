@@ -1764,7 +1764,7 @@ function renderArticle(article, allArticles = [], strategicLinks = []) {
     <h2>Direct answer</h2>
     <p><strong>Direct answer:</strong> ${escapeHtml(article.directAnswer || summary)}</p>
   </section>
-${article.bespoke ? '' : `  <section class="summary" aria-label="Summary">
+${article.bespoke && !article.summary ? '' : `  <section class="summary" aria-label="Summary">
     <h2>Summary</h2>
     <p>${escapeHtml(summary)}</p>
   </section>

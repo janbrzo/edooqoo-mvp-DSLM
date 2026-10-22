@@ -468,6 +468,8 @@ function articleSpec({
     links: [...(detail.links || []), ...links, ...strategicCitationMeshLinks],
     sources: detail.sources || null,
     bespoke,
+    // Bespoke pages render a Summary section only when they supply their own summary.
+    summary: detail.summary || undefined,
     updatedDate: detail.updated || null,
     faqs: detail.faqs || [
       ['Who is this page for?', 'Private 1:1 adult ESL/EFL tutors, Business English coaches, and online English teachers.'],
