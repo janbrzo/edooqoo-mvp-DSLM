@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { resolveCaller, authorizedTeacherId } from "../_shared/auth.ts";
-import { WELCOME_TEST_QUESTION_IDS, answersFromQuestionRows, reconstructTraits } from "../_shared/welcomeTestTraits.ts";
+import { answersFromQuestionRows, reconstructTraits } from "../_shared/welcomeTestTraits.ts";
 import { computeLearningPathScore } from "../_shared/learningPathScore.ts";
 import { STUDENT_TEXT_RULE, wrapStudentText } from "../_shared/promptSafety.ts";
 import { acceptAiScores } from "../_shared/welcomeTestScoring.ts";
@@ -16,6 +16,7 @@ import {
 } from "../_shared/welcomeTestLevel.ts";
 import { buildReconcileEvents } from "../_shared/welcomeTestEventPayload.ts";
 import { regradeQuestionRows, welcomeTestRatingFor } from "../_shared/welcomeTestKeyedAnswer.ts";
+import { bankOfRowCount } from "../_shared/welcomeTestBank.ts";
 import {
   INTERPRETATION_VERSION,
   INTERPRETATION_VERSION_KEY,
@@ -200,13 +201,13 @@ serve(async (req) => {
     {
       const { data: persistedQs } = await supabaseAdmin
         .from('student_test_questions')
-        .select('student_answer, question_index')
+        .select('student_answer, question_index, question_data')
         .eq('test_id', test_id);
       // The positional id map exists only for the 58-question test. A legacy test
       // (another total) has no such map: its answers are the stored raw_answers of
       // the profile that describes this test.
       const totalQuestions = Number((testOwnerRow as any).total_questions ?? 0);
-      const isLegacyTest = totalQuestions > 0 && totalQuestions !== WELCOME_TEST_QUESTION_IDS.length;
+      const isLegacyTest = totalQuestions > 0 && bankOfRowCount(totalQuestions) === null;
       const storedRaw = profileTestId === test_id ? (profileOwnerRow as any)?.raw_answers : null;
       if (isLegacyTest && (!answers || Object.keys(answers).length === 0)
           && storedRaw && typeof storedRaw === 'object' && !Array.isArray(storedRaw)) {
@@ -289,7 +290,7 @@ serve(async (req) => {
       // The event metadata maps question_index onto the 58-question bank only; a
       // legacy test (another total) would get events with wrong ids and skills.
       const reconcileTotal = Number((testOwnerRow as any)?.total_questions ?? 0);
-      const reconcileIsLegacy = reconcileTotal > 0 && reconcileTotal !== WELCOME_TEST_QUESTION_IDS.length;
+      const reconcileIsLegacy = reconcileTotal > 0 && bankOfRowCount(reconcileTotal) === null;
       const reconcileEvents = reconcileIsLegacy
         ? []
         : buildReconcileEvents(questions as any[], WELCOME_TEST_EVENT_QUESTIONS);

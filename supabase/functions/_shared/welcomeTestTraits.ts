@@ -8,6 +8,7 @@
  */
 
 import { matchOptionIndex } from './welcomeTestOptionAliases.ts';
+import { storedQuestionId } from './welcomeTestBank.ts';
 
 /**
  * Question id by question_index, the order of ALL_WELCOME_TEST_QUESTIONS.
@@ -23,13 +24,18 @@ export const WELCOME_TEST_QUESTION_IDS: readonly string[] = [
   'wt_q40', 'wt_q41', 'wt_q41b', 'wt_q41s', 'wt_q42', 'wt_q43', 'wt_q44', 'wt_q45',
 ];
 
-/** Answers keyed by question id, rebuilt from stored rows (question_index + student_answer). */
+/**
+ * Answers keyed by question id, rebuilt from stored rows. The id stored in the row
+ * (question_data.question_id) wins; rows seeded before it was stored are read by
+ * question_index through WELCOME_TEST_QUESTION_IDS.
+ */
 export function answersFromQuestionRows(
-  rows: ReadonlyArray<{ question_index?: number | null; student_answer?: unknown }>,
+  rows: ReadonlyArray<{ question_index?: number | null; student_answer?: unknown; question_data?: unknown }>,
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const r of rows || []) {
-    const id = typeof r?.question_index === 'number' ? WELCOME_TEST_QUESTION_IDS[r.question_index] : undefined;
+    const id = storedQuestionId(r)
+      ?? (typeof r?.question_index === 'number' ? WELCOME_TEST_QUESTION_IDS[r.question_index] : undefined);
     if (id && r.student_answer !== null && r.student_answer !== undefined) out[id] = r.student_answer;
   }
   return out;

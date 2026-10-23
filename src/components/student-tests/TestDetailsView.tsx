@@ -37,7 +37,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { WelcomeTestResults } from './WelcomeTestResults';
 import { TestDates } from './TestDates';
 import { SuggestedLevelChangeBanner } from './SuggestedLevelChangeBanner';
-import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { welcomeTestQuestionsToAdd, welcomeTestGenerationParams } from '@/lib/welcomeTest/seed';
 import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 import { formatWelcomeTestAnswer, isWelcomeTestIdk } from '@/lib/welcomeTest/answerDisplay';
 import { ANALYSING_MESSAGE, computeKeyedScore, isKeyedQuestion } from '@/lib/welcomeTest/profileDisplay';
@@ -183,6 +183,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
+        generation_params: welcomeTestGenerationParams(),
         title: `Welcome Test - ${student?.name || 'Student'} (Retake ${nextAttempt - 1})`,
         description: 'Re-take: comparing growth against the previous attempt',
         attempt_number: nextAttempt,
@@ -190,16 +191,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
       });
 
       if (newTest) {
-        const questionsToAdd = ALL_WELCOME_TEST_QUESTIONS.map(q => ({
-          question_type: q.question_type as any,
-          question_text: q.question_text,
-          question_data: (q.options ? { options: q.options } : {}) as any,
-          correct_answer: (q.correct_answer || '') as any,
-          explanation: q.description || undefined,
-          element_type: q.element_type as any,
-          difficulty_level: q.difficulty_level,
-          skill_tags: q.nano_skill ? [q.nano_skill] : [],
-        }));
+        const questionsToAdd = welcomeTestQuestionsToAdd();
         await addQuestions(newTest.id, questionsToAdd);
 
         const token = await generateShareToken(newTest.id, 'welcome');
