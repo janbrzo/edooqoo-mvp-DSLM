@@ -347,14 +347,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Think-Pair-Share and Variations for ESL | Edooqoo",
-    "description": "Write-pair-share, think-pair-square, and rally robin adaptations for ESL discussion activities.",
-    "url": "/blog/think-pair-share-esl-variations.html",
-    "date": "2025-12-07",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Lesson Sequencing and Scaffolding for Adult ESL",
     "description": "Sequence adult one-to-one English lessons from retrieval to supported rehearsal, independent transfer, and the next evidence decision.",
     "url": "/blog/lesson-sequencing-scaffolding-curriculum.html",
@@ -375,14 +367,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "description": "Structural, notional-functional, and task-based syllabi with planning templates for ESL course designers.",
     "url": "/blog/syllabus-design-esl-courses.html",
     "date": "2025-11-25",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Trauma-Informed Teaching in ESL Classes | Edooqoo",
-    "description": "Safety, predictability, choice, and relationship-building for refugee and trauma-affected students.",
-    "url": "/blog/trauma-informed-teaching-esl.html",
-    "date": "2025-11-21",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -467,26 +451,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Running Peer Editing Workshops in ESL Classes | Edooqoo",
-    "description": "Training students in peer review, feedback forms, and structured editing protocols.",
-    "url": "/blog/peer-editing-workshops-esl.html",
-    "date": "2025-11-02",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Essay Structure to ESL Students | Edooqoo",
     "description": "Introduction-body-conclusion, thesis statements, topic sentences, and paragraph unity.",
     "url": "/blog/teaching-essay-structure-esl.html",
     "date": "2025-10-31",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Managing Large ESL Classes: Strategies for 30+ Students",
-    "description": "Monitoring techniques, choral work, group roles, and efficient feedback in large groups.",
-    "url": "/blog/managing-large-esl-classes.html",
-    "date": "2025-10-30",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -627,30 +595,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "20 Five-Minute Filler Activities for ESL | Edooqoo",
-    "description": "Quick 5-minute filler activities for ESL classes. Perfect for transitions, early finishers, unexpected free time, and energy changes in English lessons.",
-    "url": "/blog/five-minute-filler-activities-esl.html",
-    "date": "2025-08-21",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Substitute Teacher ESL Lesson Plans: Ready to Go | Edooqoo",
-    "description": "No-prep emergency lesson plans for substitute ESL teachers. Ready-to-use activities that work at any level, any topic, and require no prior knowledge of.",
-    "url": "/blog/substitute-teacher-esl-lesson-plans.html",
-    "date": "2025-08-20",
-    "category": "One-to-One Lesson Planning",
-    "state": "hold"
-  },
-  {
-    "title": "Holiday-Themed ESL Activities and Worksheets | Edooqoo",
-    "description": "Holiday-themed ESL activities for Christmas, Halloween, Easter, and cultural celebrations.",
-    "url": "/blog/holiday-themed-esl-activities.html",
-    "date": "2025-08-19",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Formal vs Informal English: Register Guide",
     "description": "How to teach English register and style shifting. Formal vs informal vocabulary, grammar differences, and activities for register awareness in ESL classes.",
     "url": "/blog/teaching-formal-informal-english.html",
@@ -723,43 +667,11 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "TEFL Certification: Complete Guide for New Teachers",
-    "description": "TEFL certification guide: TEFL vs TESOL vs CELTA, online vs in-person courses, costs, career paths, and what to look for in a TEFL program.",
-    "url": "/blog/tefl-certification-guide.html",
-    "date": "2025-07-23",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Pair Work Activities for ESL: 15 Ready-to-Use Ideas",
-    "description": "15 pair work activities for ESL: information gap, interview activities, collaborative tasks, and pair speaking exercises for all levels.",
-    "url": "/blog/pair-work-activities-esl.html",
-    "date": "2025-07-21",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Role-Play Activities for ESL: Ideas and Templates | Edooqoo",
     "description": "Role-play activities for ESL classes: scenario cards, role assignments, language support frames, and templates for speaking practice at every CEFR level.",
     "url": "/blog/role-play-activities-esl.html",
     "date": "2025-07-19",
     "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "20 Warm-Up Activities for ESL Classes | Edooqoo",
-    "description": "20 quick warm-up activities for ESL classes: vocabulary review, speaking starters, grammar games, and energy boosters to begin every lesson effectively.",
-    "url": "/blog/warm-up-activities-esl.html",
-    "date": "2025-07-18",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Peer Feedback Activities for English Classes | Edooqoo",
-    "description": "Structured peer feedback activities for ESL: peer review frameworks, feedback sentence starters, writing workshops, and collaborative assessment.",
-    "url": "/blog/peer-feedback-activities-english.html",
-    "date": "2025-07-16",
-    "category": "Student Evidence and Progress",
     "state": "hold"
   },
   {
@@ -831,14 +743,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "description": "Why adults produce grammatical but unnatural English, and ten activities that build collocation range at B1-C1. Turn a student's own errors into practice.",
     "url": "/blog/teaching-collocations-esl.html",
     "date": "2025-07-03",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Storytelling Activities for ESL Classes | Edooqoo",
-    "description": "15 storytelling activities for ESL classes: story chains, picture stories, digital storytelling, and narrative writing activities for all CEFR levels.",
-    "url": "/blog/storytelling-activities-esl.html",
-    "date": "2025-07-02",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },

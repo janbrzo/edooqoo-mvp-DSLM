@@ -26,13 +26,13 @@
   },
   "counts": {
     "total": 1988,
-    "indexable": 252,
+    "indexable": 240,
     "byState": {
       "keep": 89,
       "improve": 0,
-      "merge": 174,
+      "merge": 186,
       "retire": 0,
-      "hold": 163,
+      "hold": 151,
       "noindex": 1562
     }
   },
@@ -1204,7 +1204,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 929,
+      "wordCount": 927,
       "hasEncodingIssue": false
     },
     {
@@ -1324,7 +1324,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 759,
+      "wordCount": 758,
       "hasEncodingIssue": false
     },
     {
@@ -1504,7 +1504,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 767,
+      "wordCount": 761,
       "hasEncodingIssue": false
     },
     {
@@ -1524,7 +1524,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 726,
+      "wordCount": 722,
       "hasEncodingIssue": false
     },
     {
@@ -1704,7 +1704,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 899,
+      "wordCount": 895,
       "hasEncodingIssue": false
     },
     {
@@ -1764,7 +1764,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 775,
+      "wordCount": 771,
       "hasEncodingIssue": false
     },
     {
@@ -2104,7 +2104,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 791,
+      "wordCount": 787,
       "hasEncodingIssue": false
     },
     {
@@ -2144,7 +2144,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 679,
+      "wordCount": 678,
       "hasEncodingIssue": false
     },
     {
@@ -2534,7 +2534,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 806,
+      "wordCount": 808,
       "hasEncodingIssue": false
     },
     {
@@ -2594,7 +2594,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 740,
+      "wordCount": 742,
       "hasEncodingIssue": false
     },
     {
@@ -2674,7 +2674,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 724,
+      "wordCount": 721,
       "hasEncodingIssue": false
     },
     {
@@ -2744,7 +2744,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 835,
+      "wordCount": 834,
       "hasEncodingIssue": false
     },
     {
@@ -2764,7 +2764,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 769,
+      "wordCount": 764,
       "hasEncodingIssue": false
     },
     {
@@ -2811,11 +2811,11 @@
       "route": "/blog/five-minute-filler-activities-esl.html",
       "canonical": "https://edooqoo.com/blog/five-minute-filler-activities-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+      "reason": "Martha filter: retire classroom filler activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/five-minute-filler-activities-esl.html",
       "sourceName": "five-minute-filler-activities-esl.html",
       "title": "20 Five-Minute Filler Activities for ESL",
@@ -2904,7 +2904,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 813,
+      "wordCount": 808,
       "hasEncodingIssue": false
     },
     {
@@ -3111,11 +3111,11 @@
       "route": "/blog/holiday-themed-esl-activities.html",
       "canonical": "https://edooqoo.com/blog/holiday-themed-esl-activities.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/current-events-esl-lessons.html",
+      "reason": "Martha filter: retire holiday classroom activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/holiday-themed-esl-activities.html",
       "sourceName": "holiday-themed-esl-activities.html",
       "title": "Holiday-Themed ESL Activities and Worksheets",
@@ -3184,7 +3184,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 824,
+      "wordCount": 819,
       "hasEncodingIssue": false
     },
     {
@@ -3204,7 +3204,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 747,
+      "wordCount": 741,
       "hasEncodingIssue": false
     },
     {
@@ -3224,7 +3224,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 745,
+      "wordCount": 742,
       "hasEncodingIssue": false
     },
     {
@@ -3264,7 +3264,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 667,
+      "wordCount": 664,
       "hasEncodingIssue": false
     },
     {
@@ -3404,7 +3404,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 728,
+      "wordCount": 731,
       "hasEncodingIssue": false
     },
     {
@@ -4164,7 +4164,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 816,
+      "wordCount": 814,
       "hasEncodingIssue": false
     },
     {
@@ -4204,7 +4204,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 830,
+      "wordCount": 829,
       "hasEncodingIssue": false
     },
     {
@@ -4271,11 +4271,11 @@
       "route": "/blog/managing-large-esl-classes.html",
       "canonical": "https://edooqoo.com/blog/managing-large-esl-classes.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/teaching-english-one-to-one.html",
+      "reason": "Martha filter: retire large-class management content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/managing-large-esl-classes.html",
       "sourceName": "managing-large-esl-classes.html",
       "title": "Managing Large ESL Classes: Strategies for 30+ Students",
@@ -4544,7 +4544,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 1003,
+      "wordCount": 1002,
       "hasEncodingIssue": false
     },
     {
@@ -4611,11 +4611,11 @@
       "route": "/blog/pair-work-activities-esl.html",
       "canonical": "https://edooqoo.com/blog/pair-work-activities-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-speaking-esl.html",
+      "reason": "Martha filter: retire pair-work classroom formats content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/pair-work-activities-esl.html",
       "sourceName": "pair-work-activities-esl.html",
       "title": "Pair Work Activities for ESL: 15 Ready-to-Use Ideas",
@@ -4651,11 +4651,11 @@
       "route": "/blog/peer-editing-workshops-esl.html",
       "canonical": "https://edooqoo.com/blog/peer-editing-workshops-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-writing-esl-students.html",
+      "reason": "Martha filter: retire classroom peer-editing workshops content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/peer-editing-workshops-esl.html",
       "sourceName": "peer-editing-workshops-esl.html",
       "title": "Running Peer Editing Workshops in ESL Classes",
@@ -4671,11 +4671,11 @@
       "route": "/blog/peer-feedback-activities-english.html",
       "canonical": "https://edooqoo.com/blog/peer-feedback-activities-english.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Student Evidence and Progress",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/error-correction-techniques-esl.html",
+      "reason": "Martha filter: retire classroom peer feedback content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/peer-feedback-activities-english.html",
       "sourceName": "peer-feedback-activities-english.html",
       "title": "Peer Feedback Activities for English Classes",
@@ -5311,11 +5311,11 @@
       "route": "/blog/storytelling-activities-esl.html",
       "canonical": "https://edooqoo.com/blog/storytelling-activities-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/communicative-language-teaching-activities.html",
+      "reason": "Martha filter: retire classroom storytelling activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/storytelling-activities-esl.html",
       "sourceName": "storytelling-activities-esl.html",
       "title": "Storytelling Activities for ESL Classes",
@@ -5404,18 +5404,18 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 806,
+      "wordCount": 807,
       "hasEncodingIssue": false
     },
     {
       "route": "/blog/substitute-teacher-esl-lesson-plans.html",
       "canonical": "https://edooqoo.com/blog/substitute-teacher-esl-lesson-plans.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
+      "state": "merge",
+      "indexable": false,
       "cluster": "One-to-One Lesson Planning",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "redirectTo": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
+      "reason": "Martha filter: retire school substitute lesson plans content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/substitute-teacher-esl-lesson-plans.html",
       "sourceName": "substitute-teacher-esl-lesson-plans.html",
       "title": "Substitute Teacher ESL Lesson Plans: Ready to Go",
@@ -6961,11 +6961,11 @@
       "route": "/blog/tefl-certification-guide.html",
       "canonical": "https://edooqoo.com/blog/tefl-certification-guide.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/setting-up-freelance-esl-business.html",
+      "reason": "Martha filter: retire school-track TEFL certification content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/tefl-certification-guide.html",
       "sourceName": "tefl-certification-guide.html",
       "title": "TEFL Certification: Complete Guide for New Teachers",
@@ -6981,11 +6981,11 @@
       "route": "/blog/think-pair-share-esl-variations.html",
       "canonical": "https://edooqoo.com/blog/think-pair-share-esl-variations.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/communicative-language-teaching-activities.html",
+      "reason": "Martha filter: retire think-pair-share classroom routines content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/think-pair-share-esl-variations.html",
       "sourceName": "think-pair-share-esl-variations.html",
       "title": "Think-Pair-Share and Variations for ESL",
@@ -7121,11 +7121,11 @@
       "route": "/blog/trauma-informed-teaching-esl.html",
       "canonical": "https://edooqoo.com/blog/trauma-informed-teaching-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/teaching-english-one-to-one.html",
+      "reason": "Martha filter: retire school trauma-informed classroom practice content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/trauma-informed-teaching-esl.html",
       "sourceName": "trauma-informed-teaching-esl.html",
       "title": "Trauma-Informed Teaching in ESL Classes",
@@ -7174,7 +7174,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 967,
+      "wordCount": 970,
       "hasEncodingIssue": false
     },
     {
@@ -7401,11 +7401,11 @@
       "route": "/blog/warm-up-activities-esl.html",
       "canonical": "https://edooqoo.com/blog/warm-up-activities-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-speaking-esl.html",
+      "reason": "Martha filter: retire group warm-up games content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/warm-up-activities-esl.html",
       "sourceName": "warm-up-activities-esl.html",
       "title": "20 Warm-Up Activities for ESL Classes",

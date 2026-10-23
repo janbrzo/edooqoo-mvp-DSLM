@@ -2,11 +2,11 @@
   "generatedBy": "scripts/seo/audit-internal-link-graph.mjs",
   "totals": {
     "pages": 597,
-    "strategic": 199,
+    "strategic": 187,
     "orphanStrategic": 0,
     "weakTop40": 0,
-    "weakTop120": 0,
-    "noindexPriorityLinks": 0
+    "weakTop120": 8,
+    "noindexPriorityLinks": 12
   },
   "thresholds": {
     "minTop40Incoming": 10,
@@ -144,14 +144,14 @@
       "type": "blog",
       "state": "keep",
       "incoming": 35,
-      "outgoing": 17
+      "outgoing": 16
     },
     {
       "route": "/blog/cefr-aligned-worksheet-generation-workflow.html",
       "type": "blog",
       "state": "keep",
       "incoming": 32,
-      "outgoing": 17
+      "outgoing": 16
     },
     {
       "route": "/blog/effective-esl-homework-strategies.html",
@@ -179,14 +179,14 @@
       "type": "blog",
       "state": "keep",
       "incoming": 33,
-      "outgoing": 17
+      "outgoing": 16
     },
     {
       "route": "/blog/how-english-tutors-track-what-to-teach-next.html",
       "type": "blog",
       "state": "keep",
       "incoming": 32,
-      "outgoing": 17
+      "outgoing": 16
     },
     {
       "route": "/blog/how-to-create-grammar-worksheets-with-ai.html",
@@ -206,7 +206,7 @@
       "route": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 30,
+      "incoming": 31,
       "outgoing": 14
     },
     {
@@ -234,7 +234,7 @@
       "route": "/blog/using-ai-teacher-productivity.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 33,
+      "incoming": 32,
       "outgoing": 14
     },
     {
@@ -353,28 +353,28 @@
       "route": "/blog/communicative-language-teaching-activities.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 7,
-      "outgoing": 17
+      "incoming": 8,
+      "outgoing": 16
     },
     {
       "route": "/blog/connected-speech-teaching-activities.html",
       "type": "blog",
       "state": "hold",
       "incoming": 10,
-      "outgoing": 17
+      "outgoing": 16
     },
     {
       "route": "/blog/current-events-esl-lessons.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 5,
-      "outgoing": 17
+      "incoming": 6,
+      "outgoing": 16
     },
     {
       "route": "/blog/debate-activities-english-class.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 6,
+      "incoming": 5,
       "outgoing": 16
     },
     {
@@ -403,7 +403,7 @@
       "type": "blog",
       "state": "keep",
       "incoming": 5,
-      "outgoing": 16
+      "outgoing": 15
     },
     {
       "route": "/blog/esl-games-for-teachers",
@@ -424,42 +424,28 @@
       "type": "blog",
       "state": "hold",
       "incoming": 5,
-      "outgoing": 17
-    },
-    {
-      "route": "/blog/five-minute-filler-activities-esl.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 5,
-      "outgoing": 7
+      "outgoing": 16
     },
     {
       "route": "/blog/formative-assessment-english-teaching.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 16,
-      "outgoing": 17
-    },
-    {
-      "route": "/blog/holiday-themed-esl-activities.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 5,
-      "outgoing": 7
+      "incoming": 13,
+      "outgoing": 16
     },
     {
       "route": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 5,
-      "outgoing": 18
+      "incoming": 6,
+      "outgoing": 17
     },
     {
       "route": "/blog/how-to-assess-english-level-cefr.html",
       "type": "blog",
       "state": "hold",
       "incoming": 9,
-      "outgoing": 16
+      "outgoing": 15
     },
     {
       "route": "/blog/how-to-avoid-school-like-esl-materials-for-adults.html",
@@ -472,7 +458,7 @@
       "route": "/blog/how-to-plan-english-lessons-effectively.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 10,
+      "incoming": 7,
       "outgoing": 16
     },
     {
@@ -493,14 +479,14 @@
       "route": "/blog/how-to-teach-speaking-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 16,
+      "incoming": 14,
       "outgoing": 11
     },
     {
       "route": "/blog/how-to-teach-writing-esl-students.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 8,
+      "incoming": 7,
       "outgoing": 10
     },
     {
@@ -560,13 +546,6 @@
       "outgoing": 16
     },
     {
-      "route": "/blog/managing-large-esl-classes.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 5,
-      "outgoing": 9
-    },
-    {
       "route": "/blog/materials-design-principles-elt.html",
       "type": "blog",
       "state": "keep",
@@ -588,27 +567,6 @@
       "outgoing": 7
     },
     {
-      "route": "/blog/pair-work-activities-esl.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 5,
-      "outgoing": 9
-    },
-    {
-      "route": "/blog/peer-editing-workshops-esl.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 5,
-      "outgoing": 9
-    },
-    {
-      "route": "/blog/peer-feedback-activities-english.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 5,
-      "outgoing": 9
-    },
-    {
       "route": "/blog/personalized-learning-english-teaching.html",
       "type": "blog",
       "state": "keep",
@@ -626,28 +584,28 @@
       "route": "/blog/process-writing-approach-esl.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 8,
+      "incoming": 7,
       "outgoing": 15
     },
     {
       "route": "/blog/reading-comprehension-activities-english.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 10,
+      "incoming": 9,
       "outgoing": 14
     },
     {
       "route": "/blog/role-play-activities-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 5,
+      "incoming": 3,
       "outgoing": 9
     },
     {
       "route": "/blog/rubrics-for-english-teachers.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 9,
+      "incoming": 7,
       "outgoing": 9
     },
     {
@@ -661,7 +619,7 @@
       "route": "/blog/self-assessment-strategies-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 5,
+      "incoming": 4,
       "outgoing": 9
     },
     {
@@ -686,20 +644,6 @@
       "outgoing": 8
     },
     {
-      "route": "/blog/storytelling-activities-esl.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 7,
-      "outgoing": 10
-    },
-    {
-      "route": "/blog/substitute-teacher-esl-lesson-plans.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 5,
-      "outgoing": 7
-    },
-    {
       "route": "/blog/syllabus-design-esl-courses.html",
       "type": "blog",
       "state": "hold",
@@ -717,7 +661,7 @@
       "route": "/blog/teacher-burnout-prevention-esl.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 6,
+      "incoming": 5,
       "outgoing": 8
     },
     {
@@ -787,7 +731,7 @@
       "route": "/blog/teaching-english-immigrants-refugees.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 5,
+      "incoming": 4,
       "outgoing": 9
     },
     {
@@ -808,14 +752,14 @@
       "route": "/blog/teaching-english-one-to-one.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 8,
+      "incoming": 10,
       "outgoing": 7
     },
     {
       "route": "/blog/teaching-english-online-complete-guide.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 5,
+      "incoming": 4,
       "outgoing": 8
     },
     {
@@ -829,7 +773,7 @@
       "route": "/blog/teaching-essay-structure-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 5,
+      "incoming": 4,
       "outgoing": 9
     },
     {
@@ -852,10 +796,172 @@
       "state": "hold",
       "incoming": 6,
       "outgoing": 7
+    },
+    {
+      "route": "/blog/teaching-legal-english.html",
+      "type": "blog",
+      "state": "hold",
+      "incoming": 4,
+      "outgoing": 9
+    },
+    {
+      "route": "/blog/teaching-linking-words-connectors.html",
+      "type": "blog",
+      "state": "hold",
+      "incoming": 4,
+      "outgoing": 7
+    },
+    {
+      "route": "/blog/teaching-medical-english.html",
+      "type": "blog",
+      "state": "hold",
+      "incoming": 5,
+      "outgoing": 9
+    },
+    {
+      "route": "/blog/teaching-minimal-pairs-esl.html",
+      "type": "blog",
+      "state": "hold",
+      "incoming": 9,
+      "outgoing": 10
+    },
+    {
+      "route": "/blog/teaching-mixed-conditionals-esl.html",
+      "type": "blog",
+      "state": "hold",
+      "incoming": 7,
+      "outgoing": 7
+    },
+    {
+      "route": "/blog/teaching-note-taking-skills-english.html",
+      "type": "blog",
+      "state": "hold",
+      "incoming": 6,
+      "outgoing": 7
+    },
+    {
+      "route": "/blog/teaching-passive-voice-activities.html",
+      "type": "blog",
+      "state": "hold",
+      "incoming": 8,
+      "outgoing": 9
+    },
+    {
+      "route": "/blog/teaching-pragmatics-esl.html",
+      "type": "blog",
+      "state": "hold",
+      "incoming": 4,
+      "outgoing": 7
     }
   ],
   "orphanStrategic": [],
   "weakTop40": [],
-  "weakTop120": [],
-  "noindexPriorityLinks": []
+  "weakTop120": [
+    {
+      "route": "/blog/role-play-activities-esl.html",
+      "incoming": 3
+    },
+    {
+      "route": "/blog/self-assessment-strategies-esl.html",
+      "incoming": 4
+    },
+    {
+      "route": "/blog/teaching-english-immigrants-refugees.html",
+      "incoming": 4
+    },
+    {
+      "route": "/blog/teaching-english-online-complete-guide.html",
+      "incoming": 4
+    },
+    {
+      "route": "/blog/teaching-essay-structure-esl.html",
+      "incoming": 4
+    },
+    {
+      "route": "/blog/teaching-legal-english.html",
+      "incoming": 4
+    },
+    {
+      "route": "/blog/teaching-linking-words-connectors.html",
+      "incoming": 4
+    },
+    {
+      "route": "/blog/teaching-pragmatics-esl.html",
+      "incoming": 4
+    }
+  ],
+  "noindexPriorityLinks": [
+    {
+      "route": "/blog/five-minute-filler-activities-esl.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/holiday-themed-esl-activities.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/managing-large-esl-classes.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/pair-work-activities-esl.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/peer-editing-workshops-esl.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/peer-feedback-activities-english.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/storytelling-activities-esl.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/substitute-teacher-esl-lesson-plans.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/tefl-certification-guide.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/think-pair-share-esl-variations.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/trauma-informed-teaching-esl.html",
+      "incoming": [
+        "/blog"
+      ]
+    },
+    {
+      "route": "/blog/warm-up-activities-esl.html",
+      "incoming": [
+        "/blog"
+      ]
+    }
+  ]
 }
