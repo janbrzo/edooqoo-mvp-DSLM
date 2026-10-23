@@ -475,7 +475,7 @@ function articleSpec({
       ['Who is this page for?', 'Private 1:1 adult ESL/EFL tutors, Business English coaches, and online English teachers.'],
       ['Does this advice apply to children or school classes?', 'No. The framing is adult 1:1 tutoring unless the page explicitly rejects school-like material.'],
       ['Where does Edooqoo fit?', 'Edooqoo fits when the tutor needs recurring learner context, homework evidence, editable worksheet output, and teacher-controlled review.'],
-      [`What is the key decision rule for ${(explicitTitle || slug).toString().toLowerCase()}?`, tutorDecision || 'Choose one observable target from recent learner evidence and check that the task tests it.'],
+      [`What is the key decision rule for ${String(h1).toLowerCase()}?`, tutorDecision || 'Choose one observable target from recent learner evidence and check that the task tests it.'],
       ['What should the tutor check before use?', 'Level, task relevance, adult tone, factual accuracy, answer support, and whether the activity tests the stated decision.'],
     ],
     cluster,
