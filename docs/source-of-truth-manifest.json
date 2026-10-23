@@ -32786,6 +32786,7 @@
       "userFacingText": [
         "\"Skip\" is not the same as \"I don't know\"",
         "\"Skip\" moves on and leaves the question unanswered, so your teacher learns nothing from it. You can always go back and answer later.",
+        "About",
         "Before You Begin",
         "Don't guess on grammar/vocabulary questions",
         "If you don't know the answer, tap \"I don't know\". It is the honest choice and helps your teacher find the right level, much more than a lucky guess.",
@@ -43158,7 +43159,7 @@
           {
             "value": "state",
             "setter": "setState",
-            "initial": "{ testId: null, studentId: null, teacherId: null, title: 'Welcome Test', loading: true, error: null, answers: {}, currentSectionIndex: 0, currentQuestionIndex: 0, completed: false, submitting: false, paused: false, persistedAnsweredCount: null, isTeacherMode: false, studentNativeLanguage: null, }"
+            "initial": "{ testId: null, studentId: null, teacherId: null, title: 'Welcome Test', loading: true, error: null, answers: {}, currentSectionIndex: 0, currentQuestionIndex: 0, completed: false, submitting: false, paused: false, persistedAnsweredCount: null, isTeacherMode: false, studentNativeLanguage: null, bank: 1, form: 'A', }"
           },
           {
             "value": "saveSnapshot",

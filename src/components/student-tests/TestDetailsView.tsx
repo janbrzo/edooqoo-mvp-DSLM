@@ -37,7 +37,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { WelcomeTestResults } from './WelcomeTestResults';
 import { TestDates } from './TestDates';
 import { SuggestedLevelChangeBanner } from './SuggestedLevelChangeBanner';
-import { welcomeTestQuestionsToAdd, welcomeTestGenerationParams } from '@/lib/welcomeTest/seed';
+import { formForAttempt, welcomeTestQuestionsToAdd, welcomeTestGenerationParams } from '@/lib/welcomeTest/seed';
 import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 import { formatWelcomeTestAnswer, isWelcomeTestIdk } from '@/lib/welcomeTest/answerDisplay';
 import { ANALYSING_MESSAGE, computeKeyedScore, isKeyedQuestion } from '@/lib/welcomeTest/profileDisplay';
@@ -183,7 +183,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
-        generation_params: welcomeTestGenerationParams(),
+        generation_params: welcomeTestGenerationParams(undefined, formForAttempt(nextAttempt)),
         title: `Welcome Test - ${student?.name || 'Student'} (Retake ${nextAttempt - 1})`,
         description: 'Re-take: comparing growth against the previous attempt',
         attempt_number: nextAttempt,
@@ -191,7 +191,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
       });
 
       if (newTest) {
-        const questionsToAdd = welcomeTestQuestionsToAdd();
+        const questionsToAdd = welcomeTestQuestionsToAdd(undefined, formForAttempt(nextAttempt));
         await addQuestions(newTest.id, questionsToAdd);
 
         const token = await generateShareToken(newTest.id, 'welcome');

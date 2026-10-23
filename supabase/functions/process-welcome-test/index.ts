@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { resolveCaller, authorizedTeacherId } from "../_shared/auth.ts";
-import { answersFromQuestionRows, reconstructTraits } from "../_shared/welcomeTestTraits.ts";
+import { WELCOME_TEST_QUESTION_IDS, answersFromQuestionRows, reconstructTraits } from "../_shared/welcomeTestTraits.ts";
 import { computeLearningPathScore } from "../_shared/learningPathScore.ts";
 import { STUDENT_TEXT_RULE, wrapStudentText } from "../_shared/promptSafety.ts";
 import { acceptAiScores } from "../_shared/welcomeTestScoring.ts";
@@ -11,12 +11,15 @@ import {
   LEVEL_VERSION_KEY,
   decideLevel,
   estimateLevel,
+  estimateLevelLadder,
   parseProfileModelOutput,
+  type LadderItem,
   type ProfileModelOutput,
 } from "../_shared/welcomeTestLevel.ts";
 import { buildReconcileEvents } from "../_shared/welcomeTestEventPayload.ts";
 import { regradeQuestionRows, welcomeTestRatingFor } from "../_shared/welcomeTestKeyedAnswer.ts";
-import { bankOfRowCount } from "../_shared/welcomeTestBank.ts";
+import { bankOfRowCount, storedQuestionId } from "../_shared/welcomeTestBank.ts";
+import { LEVEL_ITEM_CEFR, shownRows } from "../_shared/welcomeTestFlow.ts";
 import {
   INTERPRETATION_VERSION,
   INTERPRETATION_VERSION_KEY,
@@ -338,11 +341,36 @@ serve(async (req) => {
       }
     }
 
+    // Bank 2 branches: a student sees only some of the adaptive questions. What was
+    // shown is recomputed here from the re-graded rows with the rules the browser
+    // used, so a question that was never shown is neither "skipped" nor a miss.
+    const isBank2 = questions.length === 72;
+    const rowQuestionId = (q: any): string | null =>
+      storedQuestionId(q) ?? WELCOME_TEST_QUESTION_IDS[q.question_index] ?? null;
+    let scoredQs = questions as any[];
+    if (isBank2) {
+      scoredQs = shownRows(questions as any[], rowQuestionId);
+    }
+    // Bank 2 reads the level as a CEFR ladder over the leveled items; bank 1 keeps the mean-percent algorithm.
+    const estimateLevelFor = (scores: { grammar: number | null; vocabulary: number | null; reading: number | null; writing: number | null }) => {
+      if (!isBank2) {
+        return estimateLevel({ ...scores, selfAssessedLevel, evidence: levelEvidence });
+      }
+      const items: LadderItem[] = [];
+      for (const q of scoredQs) {
+        const id = rowQuestionId(q);
+        const cefr = id ? LEVEL_ITEM_CEFR[id] : undefined;
+        if (!id || !cefr || q.is_correct === null || q.is_correct === undefined) continue;
+        items.push({ id, cefr, skill: String(q.element_type), correct: q.is_correct === true, idk: q.student_answer === '__IDK__' });
+      }
+      return estimateLevelLadder(items, selfAssessedLevel);
+    };
+
     // Percent per skill from the scored items (is_correct null = not scored).
     const percentByType = (type: string): number | null => {
       let correct = 0;
       let total = 0;
-      for (const q of questions as any[]) {
+      for (const q of scoredQs) {
         if (q.element_type === type && q.is_correct !== null && q.is_correct !== undefined) {
           total++;
           if (q.is_correct) correct++;
@@ -387,7 +415,7 @@ serve(async (req) => {
         if (v === '__IDK__') idkCountTotal++;
       }
     }
-    for (const q of questions as any[]) {
+    for (const q of scoredQs) {
       if (!SKILL_ELEMENT_TYPES.has(q.element_type)) continue;
       const sa = q.student_answer;
       if (sa === '__IDK__') { idkCountSkill++; skillWrongOrIdk++; }
@@ -423,7 +451,7 @@ serve(async (req) => {
     const LEVEL_EVIDENCE_TYPES = new Set(['grammar', 'vocabulary', 'reading', 'listening']);
     let levelScoredItems = 0;
     let levelAnsweredItems = 0;
-    for (const q of questions as any[]) {
+    for (const q of scoredQs) {
       if (!LEVEL_EVIDENCE_TYPES.has(q.element_type) || q.is_correct === null || q.is_correct === undefined) continue;
       levelScoredItems++;
       if (q.student_answer !== '__IDK__') levelAnsweredItems++;
@@ -440,7 +468,7 @@ serve(async (req) => {
     // items now and again after the AI step, from the final writing score. A force re-run of a
     // stored profile keeps its level unless it was written by the current algorithm version.
     const levelOpts = { force: !!force, sameAttempt: sameAttemptAsStored, previous: previousProfile as any };
-    let levelEstimate = estimateLevel({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore, selfAssessedLevel, evidence: levelEvidence });
+    let levelEstimate = estimateLevelFor({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore });
     let levelDecision = decideLevel(levelEstimate, levelOpts);
     let estimatedLevel: string | null = levelDecision.level;
     let levelConfidence: string | null = levelDecision.confidence;
@@ -483,7 +511,7 @@ serve(async (req) => {
     }
 
     // Signals computed in code before any AI step (they must not depend on it).
-    const behaviour = answerBehaviour(questions as any[]);
+    const behaviour = answerBehaviour(scoredQs);
     // A force re-run of the same attempt keeps the learning-path version its
     // profile was written with: v2 is recomputed as v2, an older stored path is kept.
     const storedLearningPath = force && sameAttemptAsStored
@@ -734,7 +762,7 @@ serve(async (req) => {
         { skill: 'reading', score: readingScore },
         { skill: 'writing', score: writingScore },
       ]));
-      levelEstimate = estimateLevel({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore, selfAssessedLevel, evidence: levelEvidence });
+      levelEstimate = estimateLevelFor({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore });
       levelDecision = decideLevel(levelEstimate, levelOpts);
       estimatedLevel = levelDecision.level;
       levelConfidence = levelDecision.confidence;

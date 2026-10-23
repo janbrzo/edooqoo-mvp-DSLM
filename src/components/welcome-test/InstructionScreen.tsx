@@ -20,7 +20,7 @@ export function InstructionScreen({ totalQuestions, onStart }: InstructionScreen
           <Sparkles className="h-10 w-10 text-primary mx-auto mb-3" />
           <h1 className="text-2xl font-bold">Before You Begin</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {totalQuestions} questions • ~{WELCOME_TEST_ESTIMATED_MINUTES} min
+            About {totalQuestions} questions • ~{WELCOME_TEST_ESTIMATED_MINUTES} min
           </p>
         </div>
 
