@@ -136,7 +136,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 ## Public Content Remediation (2026-10)
 
 - [x] Step 1: 17 strategic blog articles rewritten with page-specific source material (`scripts/seo/strategic-boilerplate-rewrites.mjs`); max containment 0.942 -> 0.135, blog near-duplicates 17 -> 0, all still indexable with self canonicals. Gate `seo:audit-uniqueness-gate` in `content:audit` + `strategic-boilerplate-rewrites.test.mjs`. Sync deterministic, 1160 tests and all SEO/content audits passed.
-- [ ] Step 2: naturalize citable section headings, remove RAG-like meta text, diversify repeated FAQs.
+- [x] Step 2: naturalize citable section headings, remove RAG-like meta text, diversify repeated FAQs (guarded by `citable-naturalization.test.mjs`).
 - [ ] Step 3: Martha filter for ~65 theory articles.
 - [ ] Step 4: root pSEO pages enrichment (Gallery examples, CTA, common B1 errors).
 - [ ] Publication + GSC "Validate fix" (requires publish).

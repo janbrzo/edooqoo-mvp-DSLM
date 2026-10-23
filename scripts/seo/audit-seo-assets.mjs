@@ -726,7 +726,7 @@ function auditStaticCitationPage(route, requiredTypes) {
   if (words < 250) fail(`public${route} must contain at least 250 visible words, got ${words}`);
   else pass(`public${route} visible word count: ${words}`);
 
-  for (const heading of ['Summary', 'Problem', 'Edooqoo.com Solution', 'Technical Mechanics']) {
+  for (const heading of ['Summary', 'The 1:1 Teaching Bottleneck', 'A Structured One-to-One Workflow', 'Evidence and Data Flow']) {
     if (!html.includes(`>${heading}<`)) fail(`public${route} missing ${heading} section`);
     else pass(`public${route} contains ${heading}`);
   }
