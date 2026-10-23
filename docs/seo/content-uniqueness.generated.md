@@ -36,9 +36,9 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /esl-worksheets/business-email/b2-upper-intermediate | 0.893 | 0.046 | 512 | /esl-worksheets/business-email/b1-intermediate |
 | /worksheets/collocations-match/meetings | 0.866 | 0.134 | 439 | /worksheets/error-correction/meetings |
 | /worksheets/error-correction/meetings | 0.866 | 0.016 | 439 | /worksheets/collocations-match/meetings |
+| /edooqoo-vs-twee.html | 0.793 | 0.19 | 670 | /edooqoo-vs-busyteacher.html |
 | /glossary | 0.791 | 0.209 | 1242 | /glossary.html |
-| /edooqoo-vs-twee.html | 0.789 | 0.193 | 661 | /edooqoo-vs-busyteacher.html |
-| /edooqoo-vs-busyteacher.html | 0.778 | 0.179 | 668 | /edooqoo-vs-twee.html |
+| /edooqoo-vs-busyteacher.html | 0.782 | 0.176 | 677 | /edooqoo-vs-twee.html |
 | /glossary.html | 0.765 | 0.22 | 1283 | /glossary |
 | /blog/think-pair-share-esl-variations.html | 0.737 | 0.22 | 434 | /blog/krashen-hypotheses-esl-teaching.html |
 | /blog/krashen-hypotheses-esl-teaching.html | 0.727 | 0.214 | 439 | /blog/think-pair-share-esl-variations.html |
@@ -49,29 +49,29 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /english-for/hr-professionals | 0.672 | 0.323 | 446 | /english-for/sales-reps |
 | /esl-worksheets/news-media/c1-advanced | 0.669 | 0.329 | 536 | /esl-worksheets/phrasal-verbs/c1-advanced |
 | /esl-worksheets/environment/b2-upper-intermediate | 0.66 | 0.312 | 513 | /esl-worksheets/business-email/b2-upper-intermediate |
+| /ai-tools-for-private-english-tutors.html | 0.658 | 0.297 | 345 | /chatgpt-alternative-for-english-tutors.html |
 | /english-for/sales-reps | 0.658 | 0.339 | 455 | /english-for/hr-professionals |
-| /ai-tools-for-private-english-tutors.html | 0.648 | 0.306 | 336 | /chatgpt-alternative-for-english-tutors.html |
+| /chatgpt-alternative-for-english-tutors.html | 0.638 | 0.316 | 371 | /ai-tools-for-private-english-tutors.html |
 | /worksheets/error-correction/business-email | 0.633 | 0.13 | 446 | /worksheets/error-correction/present-perfect |
-| /chatgpt-alternative-for-english-tutors.html | 0.628 | 0.325 | 362 | /ai-tools-for-private-english-tutors.html |
 | /worksheets/error-correction/present-perfect | 0.621 | 0.357 | 455 | /worksheets/error-correction/business-email |
 | /english-for/software-engineers | 0.598 | 0.402 | 455 | /english-for/hr-professionals |
 | /worksheets/gap-fill/ielts-writing-task-2 | 0.523 | 0.477 | 456 | /worksheets/error-correction/present-perfect |
 | /blog/teacher-burnout-prevention-esl.html | 0.518 | 0.48 | 1321 | /blog/lesson-sequencing-scaffolding-curriculum.html |
+| /edooqoo-vs-chatgpt.html | 0.515 | 0.483 | 943 | /edooqoo-vs-busyteacher.html |
 | /blog/personalized-learning-english-teaching.html | 0.512 | 0.472 | 1310 | /blog/lesson-sequencing-scaffolding-curriculum.html |
 | /blog/task-based-language-teaching-worksheets.html | 0.51 | 0.48 | 1337 | /blog/spaced-repetition-vocabulary-learning.html |
 | /blog/writing-student-progress-reports-esl.html | 0.51 | 0.485 | 1318 | /blog/materials-design-principles-elt.html |
 | /blog/teaching-business-english-guide.html | 0.509 | 0.476 | 1318 | /blog/personalized-learning-english-teaching.html |
 | /blog/teaching-english-online-complete-guide.html | 0.509 | 0.486 | 1339 | /blog/spaced-repetition-vocabulary-learning.html |
-| /edooqoo-vs-chatgpt.html | 0.509 | 0.489 | 934 | /edooqoo-vs-busyteacher.html |
 | /blog/setting-up-freelance-esl-business.html | 0.507 | 0.49 | 1321 | /blog/spaced-repetition-vocabulary-learning.html |
 | /blog/spaced-repetition-vocabulary-learning.html | 0.507 | 0.489 | 1343 | /blog/teaching-english-online-complete-guide.html |
 | /blog/materials-design-principles-elt.html | 0.503 | 0.476 | 1341 | /blog/needs-analysis-esl-students.html |
 | /blog/lesson-sequencing-scaffolding-curriculum.html | 0.5 | 0.492 | 1367 | /blog/teacher-burnout-prevention-esl.html |
 | /blog/needs-analysis-esl-students.html | 0.496 | 0.5 | 1361 | /blog/materials-design-principles-elt.html |
-| /blog/how-to-avoid-school-like-esl-materials-for-adults.html | 0.414 | 0.467 | 721 | /blog/ai-worksheet-generator-mechanics-for-esl-teachers.html |
-| /blog/ai-lesson-planning-strategies.html | 0.376 | 0.619 | 826 | /blog/effective-esl-homework-strategies.html |
-| /blog/effective-esl-homework-strategies.html | 0.374 | 0.618 | 832 | /blog/ai-lesson-planning-strategies.html |
-| /blog/what-to-teach-next-private-english-student.html | 0.374 | 0.623 | 846 | /blog/ai-lesson-planning-strategies.html |
+| /blog/how-to-avoid-school-like-esl-materials-for-adults.html | 0.409 | 0.497 | 738 | /blog/ai-worksheet-generator-mechanics-for-esl-teachers.html |
+| /blog/ai-lesson-planning-strategies.html | 0.372 | 0.622 | 835 | /blog/effective-esl-homework-strategies.html |
+| /blog/effective-esl-homework-strategies.html | 0.369 | 0.622 | 841 | /blog/ai-lesson-planning-strategies.html |
+| /blog/what-to-teach-next-private-english-student.html | 0.369 | 0.624 | 855 | /blog/ai-lesson-planning-strategies.html |
 
 ## How to read this
 
