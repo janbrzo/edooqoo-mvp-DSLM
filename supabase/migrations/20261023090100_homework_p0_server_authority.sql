@@ -19,8 +19,9 @@
 --     never lowered. A stale tab or a blur without edits can no longer replace a
 --     newer exercise snapshot.
 --  4. submit_homework_answers creates the teacher notification and the
---     homework_submitted event itself, so they no longer depend on the student's
---     tab surviving the whole AI phase.
+--     homework_submitted event itself (when rows were submitted or at the first
+--     completion), so they no longer depend on the student's tab surviving the
+--     whole AI phase.
 --  5. The owner teacher ("View as student") can no longer write the student's rows
 --     through the share-token save.
 
@@ -112,7 +113,8 @@ CREATE OR REPLACE FUNCTION public.merge_homework_answers(p_stored jsonb, p_new j
  SET search_path TO 'public'
 AS $function$
   SELECT CASE
-    WHEN jsonb_typeof(p_stored) = 'object' AND jsonb_typeof(p_new) = 'object' THEN p_stored || p_new
+    WHEN jsonb_typeof(p_new) <> 'object' THEN COALESCE(p_stored, p_new)
+    WHEN jsonb_typeof(p_stored) = 'object' THEN p_stored || p_new
     ELSE p_new
   END;
 $function$;
@@ -238,7 +240,7 @@ BEGIN
   DO UPDATE SET
     answers = public.merge_homework_answers(homework_student_answers.answers, EXCLUDED.answers),
     exercise_type = EXCLUDED.exercise_type,
-    time_spent_ms = GREATEST(COALESCE(homework_student_answers.time_spent_ms, 0), COALESCE(EXCLUDED.time_spent_ms, 0)),
+    time_spent_ms = GREATEST(homework_student_answers.time_spent_ms, EXCLUDED.time_spent_ms),
     mastery = EXCLUDED.mastery,
     item_evaluations = public.merge_homework_item_evaluations(
       homework_student_answers.item_evaluations,
@@ -345,7 +347,10 @@ DECLARE
   v_found boolean;
   v_hw record;
   v_answered integer;
+  v_first boolean;
 BEGIN
+  SELECT ha.completed_at IS NULL INTO v_first FROM public.homework_assignments ha WHERE ha.id = p_homework_id;
+
   -- Mark all answers as submitted
   UPDATE public.homework_student_answers
   SET
@@ -367,7 +372,7 @@ BEGIN
   -- Teacher notification and DSLM homework_submitted event no longer depend on
   -- the student's tab staying open through the AI phase. Idempotent, and a
   -- failure here never blocks the submit itself.
-  IF v_found AND v_rows > 0 THEN
+  IF v_found AND (v_rows > 0 OR COALESCE(v_first, false)) THEN
     BEGIN
       SELECT ha.id, ha.student_id, ha.teacher_id, ha.selected_exercises INTO v_hw
       FROM public.homework_assignments ha WHERE ha.id = p_homework_id;

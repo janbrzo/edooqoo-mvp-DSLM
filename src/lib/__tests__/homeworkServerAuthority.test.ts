@@ -23,6 +23,7 @@ describe('baseline of production-only homework functions', () => {
   it.each([
     'generate_homework_share_token', 'verify_homework_student_email',
     'get_homework_by_share_token', 'mark_homework_completed_internal',
+    'insert_homework_submission_notification',
   ])('%s is versioned', (fn) => {
     expect(baseline).toMatch(new RegExp(`CREATE OR REPLACE FUNCTION public\\.${fn}\\(`));
   });
@@ -94,7 +95,7 @@ describe('submit_homework_answers', () => {
   });
 
   it('only fires when rows were actually submitted and never blocks the submit', () => {
-    expect(body).toMatch(/v_found AND v_rows > 0/);
+    expect(body).toMatch(/v_found AND \(v_rows > 0 OR COALESCE\(v_first, false\)\)/);
     expect(body).toMatch(/EXCEPTION WHEN OTHERS THEN\s+RAISE WARNING/);
   });
 
