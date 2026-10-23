@@ -134,3 +134,31 @@ export const LEVEL_ITEM_CEFR: Readonly<Record<string, WelcomeTestCefr>> = {
   // listening
   wt_q71: 'A2', wt_q18l: 'B1', wt_q72: 'B2',
 };
+
+export interface FlowRow {
+  student_answer?: unknown;
+  is_correct?: boolean | null;
+}
+
+/**
+ * The rows of a bank 2 test the student was actually shown: every bank 1 row, the
+ * always-shown new rows and the branch rows the rules show, decided from the
+ * re-graded rows themselves. Hidden rows are neither skipped nor missed.
+ */
+export function shownRows<T extends FlowRow>(rows: readonly T[], idOf: (row: T) => string | null): T[] {
+  const byId = new Map<string, T>();
+  for (const row of rows) {
+    const id = idOf(row);
+    if (id) byId.set(id, row);
+  }
+  const shown = shownNewIds((id) => {
+    const row = byId.get(id);
+    if (!row || row.student_answer === null || row.student_answer === undefined) return undefined;
+    return row.is_correct === undefined ? null : row.is_correct;
+  });
+  const isNew = new Set<string>(BANK2_NEW_IDS);
+  return rows.filter((row) => {
+    const id = idOf(row);
+    return !id || !isNew.has(id) || shown.has(id);
+  });
+}

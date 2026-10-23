@@ -4,6 +4,7 @@ import {
   BRANCH_BLOCKS,
   LEVEL_ITEM_CEFR,
   shownNewIds,
+  shownRows,
   visibleBranchIds,
   type VerdictOf,
 } from '../../../../supabase/functions/_shared/welcomeTestFlow';
@@ -206,5 +207,29 @@ describe('level ladder (algorithm 4)', () => {
       item('wt_q22', null), item('wt_q27', null),
     ], null);
     expect(r.level).toBe('B1');
+  });
+});
+
+describe('shownRows (server side of the branching)', () => {
+  const row = (id: string, answer: unknown, ok: boolean | null) => ({ id, student_answer: answer, is_correct: ok });
+  type R = ReturnType<typeof row>;
+  const idOf = (r: R) => r.id;
+
+  it('hides undecided and unshown new rows but keeps bank 1 rows and always-shown ones', () => {
+    const rows = [
+      row('wt_q20', 'x', true), row('wt_q24', 'x', true),
+      row('wt_q59', null, null), row('wt_q61', null, null),
+      row('wt_q65', null, null), row('wt_q68', null, null),
+    ];
+    const ids = shownRows<R>(rows, idOf).map((r) => r.id);
+    expect(ids).toContain('wt_q20');
+    expect(ids).toContain('wt_q65');
+    expect(ids).toContain('wt_q68');
+    expect(ids).not.toContain('wt_q61');
+  });
+
+  it('keeps a branch row the student already answered', () => {
+    const ids = shownRows<R>([row('wt_q61', 'a', true)], idOf).map((r) => r.id);
+    expect(ids).toEqual(['wt_q61']);
   });
 });

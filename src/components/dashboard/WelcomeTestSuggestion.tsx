@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useStudentTests } from '@/hooks/useStudentTests';
-import { welcomeTestQuestionsToAdd, welcomeTestGenerationParams } from '@/lib/welcomeTest/seed';
+import { formForAttempt, welcomeTestQuestionsToAdd, welcomeTestGenerationParams } from '@/lib/welcomeTest/seed';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDemoContext } from '@/contexts/DemoContext';
@@ -388,7 +388,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
-        generation_params: welcomeTestGenerationParams(),
+        generation_params: welcomeTestGenerationParams(undefined, formForAttempt(nextAttempt)),
         title: `Welcome Test - ${studentName} (Retake ${nextAttempt - 1})`,
         description: 'Re-take: comparing growth against the previous attempt',
         attempt_number: nextAttempt,
@@ -396,7 +396,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       });
       if (!newTest) return;
 
-      const questionsToAdd = welcomeTestQuestionsToAdd();
+      const questionsToAdd = welcomeTestQuestionsToAdd(undefined, formForAttempt(nextAttempt));
       await addQuestions(newTest.id, questionsToAdd);
       const token = await generateShareToken(newTest.id, 'welcome');
       if (!token) return;

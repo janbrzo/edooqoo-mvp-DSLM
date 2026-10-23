@@ -14,7 +14,7 @@ import { TEST_STATUS_CONFIG } from '@/types/studentTests';
 import type { StudentTest } from '@/types/studentTests';
 import { TestDetailsView } from './TestDetailsView';
 import { WelcomeTestComparisonView } from '@/components/welcome-test/WelcomeTestComparisonView';
-import { welcomeTestQuestionsToAdd, welcomeTestGenerationParams, bankQuestions } from '@/lib/welcomeTest/seed';
+import { formForAttempt, welcomeTestQuestionsToAdd, welcomeTestGenerationParams, bankQuestions } from '@/lib/welcomeTest/seed';
 import { getWelcomeTestTotal } from '@/utils/welcomeTestNumbering';
 import { TestDates } from './TestDates';
 import { toast } from 'sonner';
@@ -228,14 +228,14 @@ export function StudentTestsTab({
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
-        generation_params: welcomeTestGenerationParams(),
+        generation_params: welcomeTestGenerationParams(undefined, formForAttempt(nextAttempt)),
         title: `Welcome Test - ${student?.name || studentName || 'Student'} (Retake ${nextAttempt - 1})`,
         description: 'Re-take: comparing growth against the previous attempt',
         attempt_number: nextAttempt,
         previous_attempt_id: welcomeTest.id,
       });
       if (!newTest) return;
-      const questionsToAdd = welcomeTestQuestionsToAdd();
+      const questionsToAdd = welcomeTestQuestionsToAdd(undefined, formForAttempt(nextAttempt));
       await addQuestions(newTest.id, questionsToAdd);
       const newToken = await generateShareToken(newTest.id, 'welcome');
       refetch();

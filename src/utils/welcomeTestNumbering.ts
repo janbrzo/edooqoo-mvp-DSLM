@@ -12,11 +12,12 @@
  * legacy IDs evolve.
  */
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { WELCOME_TEST_BANK_SIZES } from '../../supabase/functions/_shared/welcomeTestBank';
 
 export const QUESTION_CANONICAL_MAP: Record<string, string> = (() => {
   const map: Record<string, string> = {};
   ALL_WELCOME_TEST_QUESTIONS.forEach((q, i) => {
-    // Zero-padded canonical IDs (wt_q01..wt_q58): keeps lexicographic order
+    // Zero-padded canonical IDs (wt_q01..wt_q72): keeps lexicographic order
     // aligned with display order and is human-friendly in analytics dashboards.
     const canonical = `wt_q${String(i + 1).padStart(2, '0')}`;
     map[q.id] = canonical;        // legacy → canonical
@@ -43,5 +44,7 @@ export const getWelcomeTestTotal = (test: {
 }): number => {
   const total = test.total_questions ?? 0;
   const answered = test.answered_count ?? 0;
-  return Math.max(total, answered, ALL_WELCOME_TEST_QUESTIONS.length);
+  // No snapshot: assume the original 58-question bank. A bank-2 snapshot (72 seeded
+  // rows) is kept as is, although a student sees only part of the adaptive blocks.
+  return Math.max(total, answered, total > 0 ? 0 : WELCOME_TEST_BANK_SIZES[1]);
 };

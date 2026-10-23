@@ -22,6 +22,7 @@ import {
   PenTool,
   MessageCircle,
   Target,
+  Headphones,
   SkipForward,
   HelpCircle,
   Pause,
@@ -65,6 +66,7 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
   PenTool: <PenTool className="h-4 w-4" />,
   MessageCircle: <MessageCircle className="h-4 w-4" />,
   Target: <Target className="h-4 w-4" />,
+  Headphones: <Headphones className="h-4 w-4" />,
 };
 
 type Stage =
@@ -98,7 +100,7 @@ export default function WelcomeTestPage() {
     globalQuestionIndex,
     totalQuestions,
     answeredCount,
-    progress,
+    sectionProgressPercent,
     isLastQuestion,
     canComplete,
     completed,
@@ -449,7 +451,7 @@ export default function WelcomeTestPage() {
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="h-5 w-5 text-primary" />
               <span className="text-lg font-semibold">Welcome Test</span>
-              <span className="text-xs text-muted-foreground ml-auto">Question 1 of 58</span>
+              <span className="text-xs text-muted-foreground ml-auto">Section 1 of 8</span>
             </div>
             {/* Fake progress bar */}
             <Progress value={3} className="h-1.5 mb-3" />
@@ -722,13 +724,13 @@ export default function WelcomeTestPage() {
           </div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-muted-foreground">
-              Question {globalQuestionIndex + 1} of {totalQuestions}
+              Section {currentSectionIndex + 1} of {sections.length}
             </span>
             <Badge variant="secondary" className="text-xs">
-              {progress}%
+              {sectionProgressPercent}%
             </Badge>
           </div>
-          <Progress value={progress} className="h-1" />
+          <Progress value={sectionProgressPercent} className="h-1" />
         </div>
 
         {/* Section tabs - compact, touch-friendly */}
