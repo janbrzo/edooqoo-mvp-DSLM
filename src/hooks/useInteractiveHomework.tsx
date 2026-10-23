@@ -2,12 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { 
-  HomeworkStudentAnswer, 
   ExerciseAnswers,
   HomeworkProgress 
 } from '@/types/interactiveHomework';
 import { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
-import { ItemEvaluation } from '@/utils/masteryCalculator';
+import { ItemEvaluation, OPEN_ENDED_EXERCISE_TYPES } from '@/utils/masteryCalculator';
 import { devLog, devWarn } from '@/utils/logger';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { questionIndicesOf, hasAnswerForQuestion } from '@/lib/answers/answerKeys';
@@ -283,14 +282,21 @@ export const useInteractiveHomework = ({
     void queue.flushOne(exerciseIndex);
   }, [runSave, readOnly, isSubmitted]);
 
-  /** Re-reads the stored evaluations (written by the server after submit) without touching the answers. */
-  const loadEvaluations = useCallback(async () => {
+  /**
+   * Re-reads the stored evaluations (written by the server after submit) without touching the
+   * answers. Returns true once every submitted open exercise with an answer has its evaluation.
+   */
+  const loadEvaluations = useCallback(async (): Promise<boolean> => {
     const { data, error } = await callStudentAnswerRpc('get_student_homework_answers', {
       p_homework_id: homeworkId,
       p_student_email: studentEmail
     }, shareToken);
-    if (error || !data) return;
+    if (error || !data) return false;
     setAiEvaluations(parseAiEvaluations(data));
+    return data.every((row: any) => {
+      const hasAnswer = row.answers && typeof row.answers === 'object' && Object.keys(row.answers).length > 0;
+      return !(row.is_submitted && hasAnswer && OPEN_ENDED_EXERCISE_TYPES.includes(row.exercise_type)) || !!row.ai_evaluation;
+    });
   }, [homeworkId, studentEmail, shareToken]);
 
   const submitHomework = useCallback(async () => {
@@ -341,7 +347,14 @@ export const useInteractiveHomework = ({
           }
         }));
         if (evalError) devWarn('[submitHomework] Immediate evaluation did not run, the scheduled run will grade it:', evalError);
-        await loadEvaluations();
+        // A slow or timed-out request keeps grading on the server: look again a few times
+        // so the student sees the feedback without reloading (the scheduled run is the fallback).
+        let complete = await loadEvaluations();
+        for (const waitMs of [5000, 15000, 30000]) {
+          if (complete) break;
+          await new Promise((r) => setTimeout(r, waitMs));
+          complete = await loadEvaluations();
+        }
       } catch (aiError) {
         devWarn('[submitHomework] Evaluation request failed (non-blocking):', aiError);
       } finally {

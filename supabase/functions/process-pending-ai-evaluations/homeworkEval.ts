@@ -1,13 +1,13 @@
 /**
- * Server-side AI evaluation of SUBMITTED homework answers whose evaluation never
- * arrived (the student closed the tab while the browser path was running).
+ * Server-side AI evaluation of SUBMITTED homework answers: right after the student's submit
+ * (processSubmittedHomework, the browser no longer grades) and, for rows that did not finish
+ * (closed tab, model error), in the scheduled run (processHomeworkAiEvaluations).
  *
- * Same scoring as the homework client (useInteractiveHomework.submitHomework):
  * verify-open-answers results, scoreToMastery, aiAlternativeMastery (typed closed
  * items), averageScoredMastery / calculateExerciseMastery, written with
  * eval_trigger 'submit_homework' so the homework trigger creates the
  * submit_hw_AI_evaluation event. Idempotent: the final UPDATE only applies while
- * ai_evaluation is still NULL, so a finished browser path is never overwritten.
+ * ai_evaluation is still NULL, so a finished row is never overwritten.
  */
 import { buildClosedItemContext } from '../_shared/closedItemContext.ts';
 import {
