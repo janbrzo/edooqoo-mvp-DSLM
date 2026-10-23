@@ -5,11 +5,11 @@ import { buildClosedItemContext } from "../_shared/closedItemContext.ts";
 import { scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isOpenExerciseType, calculateExerciseMastery } from "../_shared/itemMastery.ts";
 import { DEFAULT_ENGLISH_LEVEL, resolveEnglishLevel } from "../_shared/englishLevel.ts";
 import { resolveCaller } from "../_shared/auth.ts";
-import { hasWorksheetStudentAccess, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
+import { hasWorksheetStudentAccess, homeworkIdForStudentAccess, userOwnsHomework, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
 import { hasValidCronSecret } from "../_shared/cronAuth.ts";
 import { buildOpenAnswerContext, openExerciseContextString, openExerciseItems } from "../_shared/openAnswerContext.ts";
 import { buildOpenItemEvaluations, buildQuestionEvaluations } from "./itemBuilder.ts";
-import { processHomeworkAiEvaluations } from "./homeworkEval.ts";
+import { processHomeworkAiEvaluations, processSubmittedHomework } from "./homeworkEval.ts";
 
 // Supabase Edge runtime hook for work that continues after the response.
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined;
@@ -59,6 +59,31 @@ serve(async (req) => {
     // pg_cron authenticates with CRON_SECRET (same as send-homework-reminders).
     const isCron = hasValidCronSecret(req.headers.get('x-cron-secret'), Deno.env.get('CRON_SECRET'));
     const isServiceLike = isCron || caller.kind === 'service';
+
+    // === Homework submitted: the server grades it right away (the browser no longer does) ===
+    // A student proves access with the homework share token + assigned email, the owner
+    // teacher with a session; only the rows of this one homework are evaluated.
+    const homeworkIdFilter = typeof body?.homework_id === 'string' ? body.homework_id : null;
+    if (homeworkIdFilter && triggerSource === 'submit_homework') {
+      const allowed = isServiceLike
+        || (await homeworkIdForStudentAccess(supabase, body)) === homeworkIdFilter
+        || await userOwnsHomework(supabase, caller, homeworkIdFilter);
+      if (!allowed) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      const work = processSubmittedHomework(supabase, supabaseUrl, supabaseServiceKey, homeworkIdFilter);
+      // Keep grading alive if the client disconnects while the model calls run.
+      if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(work.catch(() => undefined));
+      const homework = await work;
+      return new Response(
+        JSON.stringify({ homework }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (!isServiceLike) {
       const isOwner = await userOwnsWorksheet(supabase, caller, worksheetIdFilter);
       if (!isOwner) {
