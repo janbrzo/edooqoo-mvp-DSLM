@@ -94,6 +94,7 @@ export function useStudentTests({ studentId, teacherId }: UseStudentTestsProps) 
         .from('student_tests')
         .insert({
           ...testData,
+          generation_params: (testData.generation_params ?? {}) as unknown as Json,
           teacher_id: teacherId,
           linked_element_ids: testData.linked_element_ids || [],
           // Plan v6.0: attempt tracking

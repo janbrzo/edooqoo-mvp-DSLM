@@ -14,7 +14,7 @@ import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useStudentTests } from '@/hooks/useStudentTests';
-import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { welcomeTestQuestionsToAdd, welcomeTestGenerationParams } from '@/lib/welcomeTest/seed';
 
 interface UseWelcomeTestActionsProps {
   studentId: string;
@@ -71,22 +71,14 @@ export function useWelcomeTestActions({
         const test = await createTest({
           student_id: studentId,
           test_type: 'welcome',
+        generation_params: welcomeTestGenerationParams(),
           title: `Welcome Test - ${studentName}`,
           description: 'Comprehensive placement & learning profile assessment',
           attempt_number: 1,
         });
         if (!test) return null;
         testId = test.id;
-        const questionsToAdd = ALL_WELCOME_TEST_QUESTIONS.map((q: any) => ({
-          question_type: q.question_type as any,
-          question_text: q.question_text,
-          question_data: (q.options ? { options: q.options } : {}) as any,
-          correct_answer: (q.correct_answer || '') as any,
-          explanation: q.description || undefined,
-          element_type: q.element_type as any,
-          difficulty_level: q.difficulty_level,
-          skill_tags: q.nano_skill ? [q.nano_skill] : [],
-        }));
+        const questionsToAdd = welcomeTestQuestionsToAdd();
         await addQuestions(testId, questionsToAdd);
       }
       const newToken = await generateShareToken(testId, 'welcome');
