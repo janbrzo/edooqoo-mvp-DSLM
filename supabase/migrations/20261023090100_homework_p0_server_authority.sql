@@ -395,8 +395,8 @@ BEGIN
                  WHERE kv.key ~ '^[0-9]+(_[0-9]+)?$' AND public.homework_answer_value_present(kv.value))
                OR (jsonb_typeof(a.audio_answers) = 'object' AND a.audio_answers <> '{}'::jsonb));
 
-        -- One homework_submitted event per homework (idempotent: a repeated
-        -- submit or an older client calling log_homework_submitted_event adds none).
+        -- One homework_submitted event per homework (idempotent: a repeated submit adds
+        -- none; an older client calling log_homework_submitted_event replaces it).
         IF NOT EXISTS (
           SELECT 1 FROM public.student_events se
           WHERE se.source_id = p_homework_id AND se.event_type = 'homework_submitted'
