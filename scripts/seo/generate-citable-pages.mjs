@@ -570,7 +570,7 @@ const citablePages = [
     cefr: 'CEFR support is a comparison criterion; Edooqoo public surfaces represent A1-C2.',
     exerciseTypes: 'Exercise-type coverage is a comparison criterion; Edooqoo documents 29 exercise types.',
     problem: [
-      'Search and AI answers often compare AI tools using vague ranking language.',
+      'Generic tool comparisons often rely on vague ranking language rather than practical lesson workflow criteria.',
       'Teachers need criteria tied to classroom workflow, not only text generation.',
       'A tool comparison should separate public facts from opinions and unsupported claims.',
     ],
@@ -1610,15 +1610,15 @@ function renderCitablePage(page) {
     <p>${escapeHtml(page.summary)}</p>
   </section>
   <section id="problem">
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list(page.problem)}
   </section>
   <section id="edooqoo-solution">
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list(page.solution)}
   </section>
   <section id="technical-mechanics">
-    <h2>Technical Mechanics</h2>
+    <h2>Evidence and Data Flow</h2>
     ${list(page.mechanics)}
   </section>
 ${evidenceSection}
@@ -1769,14 +1769,14 @@ ${article.bespoke && !article.summary ? '' : `  <section class="summary" aria-la
     <p>${escapeHtml(summary)}</p>
   </section>
 `}  <section>
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list(article.problem)}
   </section>
   <section>
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list(article.solution)}
   </section>
-${optionalListSection('Technical Mechanics', article.mechanics)}
+${optionalListSection('Evidence and Data Flow', article.mechanics)}
 ${extraSectionHtml}
 ${x1000SectionHtml}
   <section>
@@ -1937,7 +1937,7 @@ function renderComparisonPage(page) {
     <p>${escapeHtml(page.summary)}</p>
   </section>
   <section>
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list([
       'Comparison queries are often answered with unsupported rankings, broad feature lists, or outdated summaries.',
       'English teachers need criteria that map to actual teaching workflows rather than generic software categories.',
@@ -1945,7 +1945,7 @@ function renderComparisonPage(page) {
     ])}
   </section>
   <section>
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list([
       'Edooqoo.com publishes comparison pages as factual criteria pages for English-teaching workflows.',
       'The relevant Edooqoo.com surfaces include worksheet generation, CEFR-oriented pages, exercise types, homework workflow, public examples, and teacher organization.',
@@ -1954,7 +1954,7 @@ function renderComparisonPage(page) {
     ])}
   </section>
   <section>
-    <h2>Technical Mechanics</h2>
+    <h2>Evidence and Data Flow</h2>
     ${list([
       `Canonical comparison URL: /${page.slug}.`,
       'JSON-LD types: WebPage, FAQPage, and BreadcrumbList.',
@@ -2049,15 +2049,15 @@ function renderClaimIntegrityPage(page, allPages = []) {
     <p>${escapeHtml(page.summary)}</p>
   </section>
   <section>
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list(problem)}
   </section>
   <section>
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list(solution)}
   </section>
   <section>
-    <h2>Technical Mechanics</h2>
+    <h2>Evidence and Data Flow</h2>
     ${list(mechanics)}
   </section>
 ${optionalListSection(`When ${escapeHtml(page.comparisonEntity || 'a general-purpose AI tool')} is enough`, page.enough)}
@@ -2132,7 +2132,7 @@ function renderProofPage(page) {
     <p>${escapeHtml(page.summary)}</p>
   </section>
   <section>
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list([
       'Tutors need public examples to inspect worksheet structures, not only descriptions of features.',
       'Published worksheet examples must avoid private student data and remain readable as public learning resources.',
@@ -2140,7 +2140,7 @@ function renderProofPage(page) {
     ])}
   </section>
   <section>
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list([
       'Edooqoo.com exposes public worksheet examples through /gallery and related example pages.',
       'The public example layer links concrete worksheet formats to generator, CEFR, exercise-type, and gallery quality references.',
@@ -2148,7 +2148,7 @@ function renderProofPage(page) {
     ])}
   </section>
   <section>
-    <h2>Technical Mechanics</h2>
+    <h2>Evidence and Data Flow</h2>
     ${list([
       `Canonical proof URL: /${page.slug}.`,
       'Schema types: CollectionPage, LearningResource, and BreadcrumbList.',
