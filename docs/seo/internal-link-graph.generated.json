@@ -5,7 +5,7 @@
     "strategic": 187,
     "orphanStrategic": 0,
     "weakTop40": 0,
-    "weakTop120": 8,
+    "weakTop120": 0,
     "noindexPriorityLinks": 0
   },
   "thresholds": {
@@ -137,21 +137,21 @@
       "type": "blog",
       "state": "keep",
       "incoming": 32,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/can-ai-plan-one-to-one-english-lesson.html",
       "type": "blog",
       "state": "keep",
       "incoming": 35,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/cefr-aligned-worksheet-generation-workflow.html",
       "type": "blog",
       "state": "keep",
       "incoming": 32,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/effective-esl-homework-strategies.html",
@@ -179,14 +179,14 @@
       "type": "blog",
       "state": "keep",
       "incoming": 33,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/how-english-tutors-track-what-to-teach-next.html",
       "type": "blog",
       "state": "keep",
       "incoming": 32,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/how-to-create-grammar-worksheets-with-ai.html",
@@ -354,21 +354,21 @@
       "type": "blog",
       "state": "hold",
       "incoming": 8,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/connected-speech-teaching-activities.html",
       "type": "blog",
       "state": "hold",
       "incoming": 10,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/current-events-esl-lessons.html",
       "type": "blog",
       "state": "hold",
       "incoming": 6,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/debate-activities-english-class.html",
@@ -403,7 +403,7 @@
       "type": "blog",
       "state": "keep",
       "incoming": 5,
-      "outgoing": 15
+      "outgoing": 16
     },
     {
       "route": "/blog/esl-games-for-teachers",
@@ -424,28 +424,28 @@
       "type": "blog",
       "state": "hold",
       "incoming": 5,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/formative-assessment-english-teaching.html",
       "type": "blog",
       "state": "keep",
       "incoming": 13,
-      "outgoing": 16
+      "outgoing": 17
     },
     {
       "route": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
       "type": "blog",
       "state": "keep",
       "incoming": 6,
-      "outgoing": 17
+      "outgoing": 18
     },
     {
       "route": "/blog/how-to-assess-english-level-cefr.html",
       "type": "blog",
       "state": "hold",
       "incoming": 9,
-      "outgoing": 15
+      "outgoing": 16
     },
     {
       "route": "/blog/how-to-avoid-school-like-esl-materials-for-adults.html",
@@ -585,7 +585,7 @@
       "type": "blog",
       "state": "keep",
       "incoming": 7,
-      "outgoing": 15
+      "outgoing": 16
     },
     {
       "route": "/blog/reading-comprehension-activities-english.html",
@@ -598,7 +598,7 @@
       "route": "/blog/role-play-activities-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 3,
+      "incoming": 6,
       "outgoing": 7
     },
     {
@@ -619,7 +619,7 @@
       "route": "/blog/self-assessment-strategies-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
+      "incoming": 5,
       "outgoing": 8
     },
     {
@@ -731,7 +731,7 @@
       "route": "/blog/teaching-english-immigrants-refugees.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
+      "incoming": 5,
       "outgoing": 6
     },
     {
@@ -759,7 +759,7 @@
       "route": "/blog/teaching-english-online-complete-guide.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 4,
+      "incoming": 6,
       "outgoing": 8
     },
     {
@@ -773,7 +773,7 @@
       "route": "/blog/teaching-essay-structure-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
+      "incoming": 5,
       "outgoing": 7
     },
     {
@@ -801,14 +801,14 @@
       "route": "/blog/teaching-legal-english.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
+      "incoming": 6,
       "outgoing": 9
     },
     {
       "route": "/blog/teaching-linking-words-connectors.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
+      "incoming": 6,
       "outgoing": 7
     },
     {
@@ -850,45 +850,12 @@
       "route": "/blog/teaching-pragmatics-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
+      "incoming": 6,
       "outgoing": 6
     }
   ],
   "orphanStrategic": [],
   "weakTop40": [],
-  "weakTop120": [
-    {
-      "route": "/blog/role-play-activities-esl.html",
-      "incoming": 3
-    },
-    {
-      "route": "/blog/self-assessment-strategies-esl.html",
-      "incoming": 4
-    },
-    {
-      "route": "/blog/teaching-english-immigrants-refugees.html",
-      "incoming": 4
-    },
-    {
-      "route": "/blog/teaching-english-online-complete-guide.html",
-      "incoming": 4
-    },
-    {
-      "route": "/blog/teaching-essay-structure-esl.html",
-      "incoming": 4
-    },
-    {
-      "route": "/blog/teaching-legal-english.html",
-      "incoming": 4
-    },
-    {
-      "route": "/blog/teaching-linking-words-connectors.html",
-      "incoming": 4
-    },
-    {
-      "route": "/blog/teaching-pragmatics-esl.html",
-      "incoming": 4
-    }
-  ],
+  "weakTop120": [],
   "noindexPriorityLinks": []
 }

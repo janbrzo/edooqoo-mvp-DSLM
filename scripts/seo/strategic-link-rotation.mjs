@@ -23,7 +23,7 @@ export const STRATEGIC_LINK_DESTINATIONS = [
   ['/blog/lexical-approach-language-teaching.html', 'The lexical approach to language teaching', 'language', 2],
   ['/blog/motivating-reluctant-esl-learners.html', 'Supporting reluctant English learners', 'evidence', 2],
   ['/blog/portfolio-assessment-esl-writing.html', 'Writing portfolio assessment', 'assessment', 1],
-  ['/blog/self-assessment-strategies-esl.html', 'English learner self-assessment', 'assessment', 2],
+  ['/blog/self-assessment-strategies-esl.html', 'English learner self-assessment', 'assessment', 3],
   ['/blog/self-directed-learning-esl.html', 'Self-directed English learning', 'evidence', 2],
   ['/blog/setting-up-freelance-esl-business.html', 'Setting up a freelance tutoring practice', 'operations', 1],
   ['/blog/syllabus-design-esl-courses.html', 'Designing an English learning syllabus', 'planning', 2],
@@ -31,10 +31,15 @@ export const STRATEGIC_LINK_DESTINATIONS = [
   ['/blog/teaching-aviation-english.html', 'Teaching aviation English', 'language', 2],
   ['/blog/teaching-ellipsis-substitution-english.html', 'Teaching ellipsis and substitution', 'language', 1],
   ['/blog/teaching-english-hospitality-tourism.html', 'English for hospitality and tourism', 'language', 1],
-  ['/blog/teaching-english-immigrants-refugees.html', 'English for everyday adult communication', 'language', 2],
+  ['/blog/teaching-english-immigrants-refugees.html', 'English for everyday adult communication', 'language', 3],
   ['/blog/teaching-english-through-literature.html', 'Teaching English through literature', 'language', 2],
-  ['/blog/teaching-essay-structure-esl.html', 'Teaching English essay structure', 'language', 1],
+  ['/blog/teaching-essay-structure-esl.html', 'Teaching English essay structure', 'language', 2],
   ['/blog/teaching-idioms-esl-activities.html', 'Teaching English idioms', 'language', 2],
+  ['/blog/role-play-activities-esl.html', 'Role-play for adult English lessons', 'language', 3],
+  ['/blog/teaching-english-online-complete-guide.html', 'Teaching English online: complete guide', 'operations', 2],
+  ['/blog/teaching-legal-english.html', 'Teaching legal English', 'language', 2],
+  ['/blog/teaching-linking-words-connectors.html', 'Teaching linking words and connectors', 'language', 2],
+  ['/blog/teaching-pragmatics-esl.html', 'Teaching pragmatics to adult learners', 'language', 2],
 ];
 
 const TOPIC_PATTERNS = {
