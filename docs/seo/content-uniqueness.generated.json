@@ -339,15 +339,6 @@
       "nearest": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html"
     },
     {
-      "route": "/blog/five-minute-filler-activities-esl.html",
-      "section": "/blog",
-      "words": 450,
-      "inSitemap": true,
-      "maxContainment": 0.014,
-      "uniqueShare": 0.986,
-      "nearest": "/adult-business-english-lesson-prep.html"
-    },
-    {
       "route": "/blog/formative-assessment-english-teaching.html",
       "section": "/blog",
       "words": 734,
@@ -355,15 +346,6 @@
       "maxContainment": 0.106,
       "uniqueShare": 0.887,
       "nearest": "/blog/cefr-aligned-worksheet-generation-workflow.html"
-    },
-    {
-      "route": "/blog/holiday-themed-esl-activities.html",
-      "section": "/blog",
-      "words": 237,
-      "inSitemap": true,
-      "maxContainment": 0.109,
-      "uniqueShare": 0.891,
-      "nearest": "/ai-grading-tool-for-english-homework.html"
     },
     {
       "route": "/blog/homework-mistakes-next-english-lesson.html",
@@ -452,7 +434,7 @@
       "words": 1155,
       "inSitemap": true,
       "maxContainment": 0.02,
-      "uniqueShare": 0.976,
+      "uniqueShare": 0.98,
       "nearest": "/blog/adult-esl-student-profile-lesson-planning.html"
     },
     {
@@ -523,9 +505,9 @@
       "section": "/blog",
       "words": 439,
       "inSitemap": true,
-      "maxContainment": 0.727,
-      "uniqueShare": 0.214,
-      "nearest": "/blog/think-pair-share-esl-variations.html"
+      "maxContainment": 0.059,
+      "uniqueShare": 0.941,
+      "nearest": "/ai-grading-tool-for-english-homework.html"
     },
     {
       "route": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
@@ -555,15 +537,6 @@
       "nearest": "/blog/extensive-reading-programs-esl.html"
     },
     {
-      "route": "/blog/managing-large-esl-classes.html",
-      "section": "/blog",
-      "words": 554,
-      "inSitemap": true,
-      "maxContainment": 0.04,
-      "uniqueShare": 0.95,
-      "nearest": "/blog/how-to-plan-english-lessons-effectively.html"
-    },
-    {
       "route": "/blog/materials-design-principles-elt.html",
       "section": "/blog",
       "words": 1341,
@@ -579,7 +552,7 @@
       "inSitemap": true,
       "maxContainment": 0.054,
       "uniqueShare": 0.946,
-      "nearest": "/blog/peer-editing-workshops-esl.html"
+      "nearest": "/blog/self-assessment-strategies-esl.html"
     },
     {
       "route": "/blog/needs-analysis-esl-students.html",
@@ -598,33 +571,6 @@
       "maxContainment": 0.341,
       "uniqueShare": 0.639,
       "nearest": "/blog/effective-esl-homework-strategies.html"
-    },
-    {
-      "route": "/blog/pair-work-activities-esl.html",
-      "section": "/blog",
-      "words": 705,
-      "inSitemap": true,
-      "maxContainment": 0.012,
-      "uniqueShare": 0.988,
-      "nearest": "/ai-lesson-planning-for-english-teachers.html"
-    },
-    {
-      "route": "/blog/peer-editing-workshops-esl.html",
-      "section": "/blog",
-      "words": 564,
-      "inSitemap": true,
-      "maxContainment": 0.038,
-      "uniqueShare": 0.96,
-      "nearest": "/blog/motivating-reluctant-esl-learners.html"
-    },
-    {
-      "route": "/blog/peer-feedback-activities-english.html",
-      "section": "/blog",
-      "words": 636,
-      "inSitemap": true,
-      "maxContainment": 0.014,
-      "uniqueShare": 0.984,
-      "nearest": "/a1-beginner-english-worksheets.html"
     },
     {
       "route": "/blog/personalized-learning-english-teaching.html",
@@ -735,15 +681,6 @@
       "nearest": "/blog/teaching-english-online-complete-guide.html"
     },
     {
-      "route": "/blog/storytelling-activities-esl.html",
-      "section": "/blog",
-      "words": 777,
-      "inSitemap": true,
-      "maxContainment": 0.03,
-      "uniqueShare": 0.97,
-      "nearest": "/comparatives-superlatives-worksheets.html"
-    },
-    {
       "route": "/blog/student-progress-to-worksheet-feedback-loop.html",
       "section": "/blog",
       "words": 737,
@@ -751,15 +688,6 @@
       "maxContainment": 0.121,
       "uniqueShare": 0.868,
       "nearest": "/blog/cefr-aligned-worksheet-generation-workflow.html"
-    },
-    {
-      "route": "/blog/substitute-teacher-esl-lesson-plans.html",
-      "section": "/blog",
-      "words": 360,
-      "inSitemap": true,
-      "maxContainment": 0.023,
-      "uniqueShare": 0.977,
-      "nearest": "/ai-lesson-planning-for-english-teachers.html"
     },
     {
       "route": "/blog/syllabus-design-esl-courses.html",
@@ -884,7 +812,7 @@
       "words": 545,
       "inSitemap": true,
       "maxContainment": 0.039,
-      "uniqueShare": 0.957,
+      "uniqueShare": 0.961,
       "nearest": "/blog/motivating-reluctant-esl-learners.html"
     },
     {
@@ -1086,33 +1014,6 @@
       "nearest": "/blog/how-to-plan-english-lessons-effectively.html"
     },
     {
-      "route": "/blog/tefl-certification-guide.html",
-      "section": "/blog",
-      "words": 643,
-      "inSitemap": true,
-      "maxContainment": 0.014,
-      "uniqueShare": 0.984,
-      "nearest": "/a1-beginner-english-worksheets.html"
-    },
-    {
-      "route": "/blog/think-pair-share-esl-variations.html",
-      "section": "/blog",
-      "words": 434,
-      "inSitemap": true,
-      "maxContainment": 0.737,
-      "uniqueShare": 0.22,
-      "nearest": "/blog/krashen-hypotheses-esl-teaching.html"
-    },
-    {
-      "route": "/blog/trauma-informed-teaching-esl.html",
-      "section": "/blog",
-      "words": 544,
-      "inSitemap": true,
-      "maxContainment": 0.043,
-      "uniqueShare": 0.953,
-      "nearest": "/blog/adult-esl-student-profile-lesson-planning.html"
-    },
-    {
       "route": "/blog/using-ai-teacher-productivity.html",
       "section": "/blog",
       "words": 872,
@@ -1156,15 +1057,6 @@
       "maxContainment": 0.012,
       "uniqueShare": 0.982,
       "nearest": "/ai-worksheet-generator-for-english-teachers.html"
-    },
-    {
-      "route": "/blog/warm-up-activities-esl.html",
-      "section": "/blog",
-      "words": 985,
-      "inSitemap": true,
-      "maxContainment": 0.006,
-      "uniqueShare": 0.994,
-      "nearest": "/adult-business-english-lesson-prep.html"
     },
     {
       "route": "/blog/washback-effect-language-testing.html",
@@ -1997,10 +1889,10 @@
     {
       "route": "/resources.html",
       "section": "/ (root pages)",
-      "words": 757,
+      "words": 544,
       "inSitemap": false,
-      "maxContainment": 0.02,
-      "uniqueShare": 0.967,
+      "maxContainment": 0.027,
+      "uniqueShare": 0.955,
       "nearest": "/resources"
     },
     {

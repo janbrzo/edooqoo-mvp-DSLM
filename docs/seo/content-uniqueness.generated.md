@@ -8,16 +8,16 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Metric | Value |
 |---|---:|
-| Indexable static pages analysed | 254 |
-| Templated (maxContainment >= 0.5) | 35 (14%) |
+| Indexable static pages analysed | 242 |
+| Templated (maxContainment >= 0.5) | 33 (14%) |
 | Near-duplicate (maxContainment >= 0.8) | 4 (2%) |
-| Templated pages listed in sitemap.xml | 34 |
+| Templated pages listed in sitemap.xml | 32 |
 
 ## By section
 
 | Section | Indexable pages | Templated >= 0.5 | Near-duplicate >= 0.8 |
 |---|---:|---:|---:|
-| /blog | 119 | 12 (10%) | 0 |
+| /blog | 107 | 10 (9%) | 0 |
 | / (root pages) | 93 | 7 (8%) | 0 |
 | /what-to-teach-next | 12 | 0 (0%) | 0 |
 | /esl-worksheets | 8 | 8 (100%) | 2 |
@@ -40,8 +40,6 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /glossary | 0.791 | 0.209 | 1242 | /glossary.html |
 | /edooqoo-vs-busyteacher.html | 0.782 | 0.176 | 677 | /edooqoo-vs-twee.html |
 | /glossary.html | 0.765 | 0.22 | 1283 | /glossary |
-| /blog/think-pair-share-esl-variations.html | 0.737 | 0.22 | 434 | /blog/krashen-hypotheses-esl-teaching.html |
-| /blog/krashen-hypotheses-esl-teaching.html | 0.727 | 0.214 | 439 | /blog/think-pair-share-esl-variations.html |
 | /esl-worksheets/phrasal-verbs/c1-advanced | 0.717 | 0.281 | 501 | /esl-worksheets/news-media/c1-advanced |
 | /esl-worksheets/travel-vocabulary/a2-elementary | 0.714 | 0.286 | 507 | /esl-worksheets/weather/a2-elementary |
 | /esl-worksheets/weather/a2-elementary | 0.71 | 0.29 | 510 | /esl-worksheets/travel-vocabulary/a2-elementary |
@@ -72,6 +70,8 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /blog/ai-lesson-planning-strategies.html | 0.372 | 0.622 | 835 | /blog/effective-esl-homework-strategies.html |
 | /blog/effective-esl-homework-strategies.html | 0.369 | 0.622 | 841 | /blog/ai-lesson-planning-strategies.html |
 | /blog/what-to-teach-next-private-english-student.html | 0.369 | 0.624 | 855 | /blog/ai-lesson-planning-strategies.html |
+| /blog/ai-worksheet-generator-mechanics-for-esl-teachers.html | 0.358 | 0.631 | 853 | /blog/how-to-avoid-school-like-esl-materials-for-adults.html |
+| /blog/using-ai-teacher-productivity.html | 0.348 | 0.638 | 872 | /blog/ai-lesson-planning-strategies.html |
 
 ## How to read this
 

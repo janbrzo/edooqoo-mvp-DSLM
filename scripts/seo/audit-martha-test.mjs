@@ -37,7 +37,10 @@ const dominantSchoolSignals = [
   /\brewards?\b/i,
   /\bbehavior management\b/i,
   /\bmainstream teachers?\b/i,
-  /\blarge classes\b/i,
+  /\blarge (?:[a-z]+ )?class(?:es|rooms?)\b/i,
+  /\bsubstitute teachers?\b/i,
+  /\bthink[- ]pair[- ]share\b/i,
+  /\bpair work\b/i,
   /\bteen(?:agers?|s)?\b/i,
 ];
 
@@ -196,7 +199,10 @@ for (const entry of entries.filter((item) => item.indexable && item.source?.ends
   if (!html) continue;
   const titleBlock = getTitleBlock(entry.route, html);
   if (!exceptionRoutes.has(entry.route) && dominantSchoolSignals.some((pattern) => pattern.test(titleBlock))) {
-    warnings.push(`${entry.route}: indexable page has school-like title/H1/meta signal outside x1000 target set`);
+    const message = `${entry.route}: indexable page has school-like title/H1/meta signal outside x1000 target set`;
+    // Step 3 Martha filter: indexable blog articles fail hard; other pages stay advisory.
+    if (entry.route.startsWith('/blog/')) errors.push(message);
+    else warnings.push(message);
   }
 }
 

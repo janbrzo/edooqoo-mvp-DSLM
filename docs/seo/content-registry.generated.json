@@ -26,13 +26,13 @@
   },
   "counts": {
     "total": 1988,
-    "indexable": 252,
+    "indexable": 240,
     "byState": {
       "keep": 89,
       "improve": 0,
-      "merge": 174,
+      "merge": 186,
       "retire": 0,
-      "hold": 163,
+      "hold": 151,
       "noindex": 1562
     }
   },
@@ -924,7 +924,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 786,
+      "wordCount": 788,
       "hasEncodingIssue": false
     },
     {
@@ -1124,7 +1124,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 916,
+      "wordCount": 915,
       "hasEncodingIssue": false
     },
     {
@@ -1204,7 +1204,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 929,
+      "wordCount": 926,
       "hasEncodingIssue": false
     },
     {
@@ -1324,7 +1324,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 759,
+      "wordCount": 758,
       "hasEncodingIssue": false
     },
     {
@@ -1464,7 +1464,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 741,
+      "wordCount": 746,
       "hasEncodingIssue": false
     },
     {
@@ -1504,7 +1504,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 767,
+      "wordCount": 768,
       "hasEncodingIssue": false
     },
     {
@@ -1524,7 +1524,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 726,
+      "wordCount": 727,
       "hasEncodingIssue": false
     },
     {
@@ -1704,7 +1704,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 899,
+      "wordCount": 900,
       "hasEncodingIssue": false
     },
     {
@@ -1764,7 +1764,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 775,
+      "wordCount": 777,
       "hasEncodingIssue": false
     },
     {
@@ -2104,7 +2104,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 791,
+      "wordCount": 790,
       "hasEncodingIssue": false
     },
     {
@@ -2144,7 +2144,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 679,
+      "wordCount": 678,
       "hasEncodingIssue": false
     },
     {
@@ -2184,7 +2184,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 893,
+      "wordCount": 892,
       "hasEncodingIssue": false
     },
     {
@@ -2594,7 +2594,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 740,
+      "wordCount": 741,
       "hasEncodingIssue": false
     },
     {
@@ -2674,7 +2674,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 724,
+      "wordCount": 727,
       "hasEncodingIssue": false
     },
     {
@@ -2764,7 +2764,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 769,
+      "wordCount": 771,
       "hasEncodingIssue": false
     },
     {
@@ -2809,22 +2809,22 @@
     },
     {
       "route": "/blog/five-minute-filler-activities-esl.html",
-      "canonical": "https://edooqoo.com/blog/five-minute-filler-activities-esl.html",
+      "canonical": "https://edooqoo.com/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+      "reason": "Martha filter: retire classroom filler activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/five-minute-filler-activities-esl.html",
       "sourceName": "five-minute-filler-activities-esl.html",
-      "title": "20 Five-Minute Filler Activities for ESL",
-      "description": "Quick 5-minute filler activities for ESL classes. Perfect for transitions, early finishers, unexpected free time, and energy changes in English lessons.",
-      "datePublished": "2025-08-21",
-      "dateModified": "2025-08-21",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 466,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -2904,7 +2904,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 813,
+      "wordCount": 815,
       "hasEncodingIssue": false
     },
     {
@@ -3109,22 +3109,22 @@
     },
     {
       "route": "/blog/holiday-themed-esl-activities.html",
-      "canonical": "https://edooqoo.com/blog/holiday-themed-esl-activities.html",
+      "canonical": "https://edooqoo.com/blog/current-events-esl-lessons.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/current-events-esl-lessons.html",
+      "reason": "Martha filter: retire holiday classroom activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/holiday-themed-esl-activities.html",
       "sourceName": "holiday-themed-esl-activities.html",
-      "title": "Holiday-Themed ESL Activities and Worksheets",
-      "description": "Holiday-themed ESL activities for Christmas, Halloween, Easter, and cultural celebrations.",
-      "datePublished": "2025-08-19",
-      "dateModified": "2025-08-19",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 261,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -3224,7 +3224,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 745,
+      "wordCount": 746,
       "hasEncodingIssue": false
     },
     {
@@ -3264,7 +3264,7 @@
       "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 667,
+      "wordCount": 668,
       "hasEncodingIssue": false
     },
     {
@@ -3504,7 +3504,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 760,
+      "wordCount": 757,
       "hasEncodingIssue": false
     },
     {
@@ -3704,7 +3704,7 @@
       "dateModified": "2025-06-23",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 1166,
+      "wordCount": 1155,
       "hasEncodingIssue": false
     },
     {
@@ -3724,7 +3724,7 @@
       "dateModified": "2025-06-24",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 1028,
+      "wordCount": 1024,
       "hasEncodingIssue": false
     },
     {
@@ -3904,7 +3904,7 @@
       "dateModified": "2025-12-01",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 453,
+      "wordCount": 441,
       "hasEncodingIssue": false
     },
     {
@@ -4004,7 +4004,7 @@
       "dateModified": "2025-12-11",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 450,
+      "wordCount": 442,
       "hasEncodingIssue": false
     },
     {
@@ -4024,7 +4024,7 @@
       "dateModified": "2025-09-07",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 341,
+      "wordCount": 339,
       "hasEncodingIssue": false
     },
     {
@@ -4124,7 +4124,7 @@
       "dateModified": "2025-12-10",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 457,
+      "wordCount": 453,
       "hasEncodingIssue": false
     },
     {
@@ -4164,7 +4164,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 816,
+      "wordCount": 815,
       "hasEncodingIssue": false
     },
     {
@@ -4269,22 +4269,22 @@
     },
     {
       "route": "/blog/managing-large-esl-classes.html",
-      "canonical": "https://edooqoo.com/blog/managing-large-esl-classes.html",
+      "canonical": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/teaching-english-one-to-one.html",
+      "reason": "Martha filter: retire large-class management content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/managing-large-esl-classes.html",
       "sourceName": "managing-large-esl-classes.html",
-      "title": "Managing Large ESL Classes: Strategies for 30+ Students",
-      "description": "Monitoring techniques, choral work, group roles, and efficient feedback in large groups.",
-      "datePublished": "2025-10-30",
-      "dateModified": "2025-10-30",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 550,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -4364,7 +4364,7 @@
       "dateModified": "2025-12-18",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 454,
+      "wordCount": 451,
       "hasEncodingIssue": false
     },
     {
@@ -4424,7 +4424,7 @@
       "dateModified": "2025-09-06",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 410,
+      "wordCount": 403,
       "hasEncodingIssue": false
     },
     {
@@ -4609,22 +4609,22 @@
     },
     {
       "route": "/blog/pair-work-activities-esl.html",
-      "canonical": "https://edooqoo.com/blog/pair-work-activities-esl.html",
+      "canonical": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-speaking-esl.html",
+      "reason": "Martha filter: retire pair-work classroom formats content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/pair-work-activities-esl.html",
       "sourceName": "pair-work-activities-esl.html",
-      "title": "Pair Work Activities for ESL: 15 Ready-to-Use Ideas",
-      "description": "15 pair work activities for ESL: information gap, interview activities, collaborative tasks, and pair speaking exercises for all levels.",
-      "datePublished": "2025-07-21",
-      "dateModified": "2025-07-21",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 719,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -4649,42 +4649,42 @@
     },
     {
       "route": "/blog/peer-editing-workshops-esl.html",
-      "canonical": "https://edooqoo.com/blog/peer-editing-workshops-esl.html",
+      "canonical": "https://edooqoo.com/blog/how-to-teach-writing-esl-students.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-writing-esl-students.html",
+      "reason": "Martha filter: retire classroom peer-editing workshops content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/peer-editing-workshops-esl.html",
       "sourceName": "peer-editing-workshops-esl.html",
-      "title": "Running Peer Editing Workshops in ESL Classes",
-      "description": "Training students in peer review, feedback forms, and structured editing protocols.",
-      "datePublished": "2025-11-02",
-      "dateModified": "2025-11-02",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 571,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
       "route": "/blog/peer-feedback-activities-english.html",
-      "canonical": "https://edooqoo.com/blog/peer-feedback-activities-english.html",
+      "canonical": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Student Evidence and Progress",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/error-correction-techniques-esl.html",
+      "reason": "Martha filter: retire classroom peer feedback content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/peer-feedback-activities-english.html",
       "sourceName": "peer-feedback-activities-english.html",
-      "title": "Peer Feedback Activities for English Classes",
-      "description": "Structured peer feedback activities for ESL: peer review frameworks, feedback sentence starters, writing workshops, and collaborative assessment.",
-      "datePublished": "2025-07-16",
-      "dateModified": "2025-07-16",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 674,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -4784,7 +4784,7 @@
       "dateModified": "2025-12-01",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 614,
+      "wordCount": 611,
       "hasEncodingIssue": false
     },
     {
@@ -4804,7 +4804,7 @@
       "dateModified": "2025-12-12",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 609,
+      "wordCount": 606,
       "hasEncodingIssue": false
     },
     {
@@ -4824,7 +4824,7 @@
       "dateModified": "2025-11-04",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 544,
+      "wordCount": 542,
       "hasEncodingIssue": false
     },
     {
@@ -4904,7 +4904,7 @@
       "dateModified": "2026-10-22",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 741,
+      "wordCount": 746,
       "hasEncodingIssue": false
     },
     {
@@ -4964,7 +4964,7 @@
       "dateModified": "2025-12-02",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 463,
+      "wordCount": 447,
       "hasEncodingIssue": false
     },
     {
@@ -5024,7 +5024,7 @@
       "dateModified": "2025-07-19",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 638,
+      "wordCount": 630,
       "hasEncodingIssue": false
     },
     {
@@ -5064,7 +5064,7 @@
       "dateModified": "2025-07-14",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 638,
+      "wordCount": 635,
       "hasEncodingIssue": false
     },
     {
@@ -5084,7 +5084,7 @@
       "dateModified": "2025-06-20",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 1130,
+      "wordCount": 1126,
       "hasEncodingIssue": false
     },
     {
@@ -5104,7 +5104,7 @@
       "dateModified": "2025-12-22",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 617,
+      "wordCount": 613,
       "hasEncodingIssue": false
     },
     {
@@ -5144,7 +5144,7 @@
       "dateModified": "2025-11-27",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 454,
+      "wordCount": 446,
       "hasEncodingIssue": false
     },
     {
@@ -5164,7 +5164,7 @@
       "dateModified": "2025-07-15",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 612,
+      "wordCount": 609,
       "hasEncodingIssue": false
     },
     {
@@ -5184,7 +5184,7 @@
       "dateModified": "2025-09-03",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 405,
+      "wordCount": 402,
       "hasEncodingIssue": false
     },
     {
@@ -5309,22 +5309,22 @@
     },
     {
       "route": "/blog/storytelling-activities-esl.html",
-      "canonical": "https://edooqoo.com/blog/storytelling-activities-esl.html",
+      "canonical": "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/communicative-language-teaching-activities.html",
+      "reason": "Martha filter: retire classroom storytelling activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/storytelling-activities-esl.html",
       "sourceName": "storytelling-activities-esl.html",
-      "title": "Storytelling Activities for ESL Classes",
-      "description": "15 storytelling activities for ESL classes: story chains, picture stories, digital storytelling, and narrative writing activities for all CEFR levels.",
-      "datePublished": "2025-07-02",
-      "dateModified": "2025-07-02",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 807,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -5409,22 +5409,22 @@
     },
     {
       "route": "/blog/substitute-teacher-esl-lesson-plans.html",
-      "canonical": "https://edooqoo.com/blog/substitute-teacher-esl-lesson-plans.html",
+      "canonical": "https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
+      "state": "merge",
+      "indexable": false,
       "cluster": "One-to-One Lesson Planning",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "redirectTo": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
+      "reason": "Martha filter: retire school substitute lesson plans content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/substitute-teacher-esl-lesson-plans.html",
       "sourceName": "substitute-teacher-esl-lesson-plans.html",
-      "title": "Substitute Teacher ESL Lesson Plans: Ready to Go",
-      "description": "No-prep emergency lesson plans for substitute ESL teachers. Ready-to-use activities that work at any level, any topic, and require no prior knowledge of.",
-      "datePublished": "2025-08-20",
-      "dateModified": "2025-08-20",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 377,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -5444,7 +5444,7 @@
       "dateModified": "2025-12-22",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 448,
+      "wordCount": 440,
       "hasEncodingIssue": false
     },
     {
@@ -5464,7 +5464,7 @@
       "dateModified": "2025-11-25",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 537,
+      "wordCount": 533,
       "hasEncodingIssue": false
     },
     {
@@ -5574,7 +5574,7 @@
       "dateModified": "2025-12-04",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 606,
+      "wordCount": 603,
       "hasEncodingIssue": false
     },
     {
@@ -5694,7 +5694,7 @@
       "dateModified": "2025-07-03",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 804,
+      "wordCount": 797,
       "hasEncodingIssue": false
     },
     {
@@ -5874,7 +5874,7 @@
       "dateModified": "2025-11-07",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 410,
+      "wordCount": 408,
       "hasEncodingIssue": false
     },
     {
@@ -5894,7 +5894,7 @@
       "dateModified": "2025-08-07",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 575,
+      "wordCount": 558,
       "hasEncodingIssue": false
     },
     {
@@ -6094,7 +6094,7 @@
       "dateModified": "2025-07-31",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 613,
+      "wordCount": 603,
       "hasEncodingIssue": false
     },
     {
@@ -6154,7 +6154,7 @@
       "dateModified": "2025-10-31",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 609,
+      "wordCount": 604,
       "hasEncodingIssue": false
     },
     {
@@ -6254,7 +6254,7 @@
       "dateModified": "2025-07-04",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 852,
+      "wordCount": 845,
       "hasEncodingIssue": false
     },
     {
@@ -6354,7 +6354,7 @@
       "dateModified": "2025-12-14",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 615,
+      "wordCount": 612,
       "hasEncodingIssue": false
     },
     {
@@ -6394,7 +6394,7 @@
       "dateModified": "2025-12-19",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 626,
+      "wordCount": 620,
       "hasEncodingIssue": false
     },
     {
@@ -6434,7 +6434,7 @@
       "dateModified": "2025-08-27",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 1010,
+      "wordCount": 1004,
       "hasEncodingIssue": false
     },
     {
@@ -6494,7 +6494,7 @@
       "dateModified": "2025-12-11",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 605,
+      "wordCount": 602,
       "hasEncodingIssue": false
     },
     {
@@ -6514,7 +6514,7 @@
       "dateModified": "2025-09-19",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 275,
+      "wordCount": 273,
       "hasEncodingIssue": false
     },
     {
@@ -6574,7 +6574,7 @@
       "dateModified": "2025-08-25",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 306,
+      "wordCount": 300,
       "hasEncodingIssue": false
     },
     {
@@ -6734,7 +6734,7 @@
       "dateModified": "2025-11-11",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 428,
+      "wordCount": 426,
       "hasEncodingIssue": false
     },
     {
@@ -6914,7 +6914,7 @@
       "dateModified": "2025-11-30",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 609,
+      "wordCount": 606,
       "hasEncodingIssue": false
     },
     {
@@ -6959,42 +6959,42 @@
     },
     {
       "route": "/blog/tefl-certification-guide.html",
-      "canonical": "https://edooqoo.com/blog/tefl-certification-guide.html",
+      "canonical": "https://edooqoo.com/blog/setting-up-freelance-esl-business.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/setting-up-freelance-esl-business.html",
+      "reason": "Martha filter: retire school-track TEFL certification content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/tefl-certification-guide.html",
       "sourceName": "tefl-certification-guide.html",
-      "title": "TEFL Certification: Complete Guide for New Teachers",
-      "description": "TEFL certification guide: TEFL vs TESOL vs CELTA, online vs in-person courses, costs, career paths, and what to look for in a TEFL program.",
-      "datePublished": "2025-07-23",
-      "dateModified": "2025-07-23",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 652,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
       "route": "/blog/think-pair-share-esl-variations.html",
-      "canonical": "https://edooqoo.com/blog/think-pair-share-esl-variations.html",
+      "canonical": "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/communicative-language-teaching-activities.html",
+      "reason": "Martha filter: retire think-pair-share classroom routines content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/think-pair-share-esl-variations.html",
       "sourceName": "think-pair-share-esl-variations.html",
-      "title": "Think-Pair-Share and Variations for ESL",
-      "description": "Write-pair-share, think-pair-square, and rally robin adaptations for ESL discussion activities.",
-      "datePublished": "2025-12-07",
-      "dateModified": "2025-12-07",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 443,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -7119,22 +7119,22 @@
     },
     {
       "route": "/blog/trauma-informed-teaching-esl.html",
-      "canonical": "https://edooqoo.com/blog/trauma-informed-teaching-esl.html",
+      "canonical": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/teaching-english-one-to-one.html",
+      "reason": "Martha filter: retire school trauma-informed classroom practice content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/trauma-informed-teaching-esl.html",
       "sourceName": "trauma-informed-teaching-esl.html",
-      "title": "Trauma-Informed Teaching in ESL Classes",
-      "description": "Safety, predictability, choice, and relationship-building for refugee and trauma-affected students.",
-      "datePublished": "2025-11-21",
-      "dateModified": "2025-11-21",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 551,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -7174,7 +7174,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 967,
+      "wordCount": 968,
       "hasEncodingIssue": false
     },
     {
@@ -7194,7 +7194,7 @@
       "dateModified": "2025-12-21",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 621,
+      "wordCount": 617,
       "hasEncodingIssue": false
     },
     {
@@ -7214,7 +7214,7 @@
       "dateModified": "2025-12-04",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 470,
+      "wordCount": 462,
       "hasEncodingIssue": false
     },
     {
@@ -7234,7 +7234,7 @@
       "dateModified": "2025-07-30",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 608,
+      "wordCount": 602,
       "hasEncodingIssue": false
     },
     {
@@ -7334,7 +7334,7 @@
       "dateModified": "2025-08-05",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 592,
+      "wordCount": 571,
       "hasEncodingIssue": false
     },
     {
@@ -7374,7 +7374,7 @@
       "dateModified": "2025-12-03",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 616,
+      "wordCount": 613,
       "hasEncodingIssue": false
     },
     {
@@ -7399,22 +7399,22 @@
     },
     {
       "route": "/blog/warm-up-activities-esl.html",
-      "canonical": "https://edooqoo.com/blog/warm-up-activities-esl.html",
+      "canonical": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
       "type": "blog",
-      "state": "hold",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-speaking-esl.html",
+      "reason": "Martha filter: retire group warm-up games content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.",
       "source": "public/blog/warm-up-activities-esl.html",
       "sourceName": "warm-up-activities-esl.html",
-      "title": "20 Warm-Up Activities for ESL Classes",
-      "description": "20 quick warm-up activities for ESL classes: vocabulary review, speaking starters, grammar games, and energy boosters to begin every lesson effectively.",
-      "datePublished": "2025-07-18",
-      "dateModified": "2025-07-18",
-      "author": "Edooqoo",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
       "reviewer": "",
-      "wordCount": 979,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -7434,7 +7434,7 @@
       "dateModified": "2025-11-18",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 521,
+      "wordCount": 519,
       "hasEncodingIssue": false
     },
     {
@@ -7514,7 +7514,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 961,
+      "wordCount": 958,
       "hasEncodingIssue": false
     },
     {
@@ -8744,7 +8744,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 314,
+      "wordCount": 311,
       "hasEncodingIssue": false
     },
     {
@@ -12814,7 +12814,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 1777,
+      "wordCount": 1333,
       "hasEncodingIssue": false
     },
     {
