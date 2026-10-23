@@ -22,6 +22,8 @@ export const WELCOME_TEST_QUESTION_IDS: readonly string[] = [
   'wt_q21', 'wt_q22', 'wt_q23', 'wt_q24', 'wt_q25', 'wt_q26', 'wt_q27', 'wt_q28', 'wt_q29', 'wt_q30',
   'wt_q31', 'wt_q32', 'wt_q33', 'wt_q34', 'wt_q35', 'wt_q36', 'wt_q36s', 'wt_q37', 'wt_q38', 'wt_q39',
   'wt_q40', 'wt_q41', 'wt_q41b', 'wt_q41s', 'wt_q42', 'wt_q43', 'wt_q44', 'wt_q45',
+  // bank 2 (appended after bank 1, question_index 58..71)
+  'wt_q59', 'wt_q60', 'wt_q61', 'wt_q62', 'wt_q63', 'wt_q64', 'wt_q65', 'wt_q66', 'wt_q67', 'wt_q68', 'wt_q69', 'wt_q70', 'wt_q71', 'wt_q72',
 ];
 
 /**

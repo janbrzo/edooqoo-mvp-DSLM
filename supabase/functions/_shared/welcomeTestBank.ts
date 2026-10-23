@@ -12,8 +12,11 @@
  * Tests of another size (49 and 54 question legacy tests) belong to no bank.
  */
 
-/** Number of seeded rows per bank. Bank 1 is the 58-question test. */
-export const WELCOME_TEST_BANK_SIZES: Readonly<Record<number, number>> = { 1: 58 };
+/**
+ * Number of seeded rows per bank. Bank 1 is the 58-question test; bank 2 appends 14
+ * keyed questions (a student sees only some of them, see welcomeTestFlow.ts).
+ */
+export const WELCOME_TEST_BANK_SIZES: Readonly<Record<number, number>> = { 1: 58, 2: 72 };
 
 export type WelcomeTestForm = 'A' | 'B';
 

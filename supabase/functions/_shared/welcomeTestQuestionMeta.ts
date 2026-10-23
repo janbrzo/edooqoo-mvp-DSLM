@@ -773,5 +773,117 @@ export const WELCOME_TEST_EVENT_QUESTIONS: readonly WelcomeEventQuestion[] = [
     "nano_skill": null,
     "reason": "Open-ended final reflection. Catches anything the structured questions missed.",
     "has_key": false
+  },
+  {
+    "id": "wt_q59",
+    "question_type": "fill_blank",
+    "element_type": "grammar",
+    "nano_skill": "ns.grammar.to_be_present_simple",
+    "reason": "To be, present simple, third person. A1 level grammar.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q60",
+    "question_type": "multiple_choice",
+    "element_type": "grammar",
+    "nano_skill": "ns.grammar.present_simple_questions",
+    "reason": "Present simple questions with do/does. A1 level grammar.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q61",
+    "question_type": "multiple_choice",
+    "element_type": "grammar",
+    "nano_skill": "ns.grammar.inversion_negative_adverbials",
+    "reason": "Inversion after negative adverbials. C1 level grammar.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q62",
+    "question_type": "multiple_choice",
+    "element_type": "grammar",
+    "nano_skill": "ns.grammar.mixed_conditionals",
+    "reason": "Mixed conditionals (past condition, present result). C1 level grammar.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q63",
+    "question_type": "multiple_choice",
+    "element_type": "vocabulary",
+    "nano_skill": "ns.vocabulary.everyday_clothes",
+    "reason": "Everyday words: clothes. A1 level vocabulary.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q64",
+    "question_type": "multiple_choice",
+    "element_type": "vocabulary",
+    "nano_skill": "ns.vocabulary.days_months",
+    "reason": "Days of the week and months. A1 level vocabulary.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q65",
+    "question_type": "multiple_choice",
+    "element_type": "vocabulary",
+    "nano_skill": "ns.vocabulary.collocation_take_make",
+    "reason": "Collocation: take/make. A2 level vocabulary.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q66",
+    "question_type": "multiple_choice",
+    "element_type": "vocabulary",
+    "nano_skill": "ns.vocabulary.advanced_adjectives",
+    "reason": "Advanced adjectives: meaning in context. C1 level vocabulary.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q67",
+    "question_type": "multiple_choice",
+    "element_type": "vocabulary",
+    "nano_skill": "ns.vocabulary.advanced_adjectives_character",
+    "reason": "Advanced adjectives: character. C1 level vocabulary.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q68",
+    "question_type": "multiple_choice",
+    "element_type": "reading",
+    "nano_skill": "ns.reading.find_specific_information",
+    "reason": "Reading: finding specific information. A2 level.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q69",
+    "question_type": "multiple_choice",
+    "element_type": "reading",
+    "nano_skill": "ns.reading.understand_email_requests",
+    "reason": "Reading: understanding requests and offers in an email. B1 level.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q70",
+    "question_type": "multiple_choice",
+    "element_type": "reading",
+    "nano_skill": "ns.reading.inference",
+    "reason": "Reading: inference from a connected argument. C1 level.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q71",
+    "question_type": "listening_comprehension",
+    "element_type": "listening",
+    "nano_skill": "ns.listening.detail_extraction",
+    "reason": "Listening: detail extraction (a time). A2 level.",
+    "has_key": true
+  },
+  {
+    "id": "wt_q72",
+    "question_type": "listening_comprehension",
+    "element_type": "listening",
+    "nano_skill": "ns.listening.reasons_and_attitude",
+    "reason": "Listening: understanding reasons across a conversation. B2 level.",
+    "has_key": true
   }
 ];
