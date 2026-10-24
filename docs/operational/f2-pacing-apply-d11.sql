@@ -9,7 +9,7 @@
 -- stored at 30 or 50 (the defaults ever inserted) qualify: any other stored value may be a teacher choice
 -- (the flag was never set for most manual edits), so those are reviewed by hand. Pending proposals of
 -- the changed students are superseded (their old to new numbers are now meaningless), and a student already
--- changed by this step is never changed again.
+-- changed by this step is never changed again. Six reviewed extreme cases are excluded by id (see the NOT IN list).
 --
 -- A student qualifies when
 --   last_pacing_set_manually is false or NULL (never set by a teacher),
@@ -53,6 +53,16 @@ BEGIN
       AND (s.last_pacing_reasoning->>'proposed')::int BETWEEN 0 AND 100
       AND (s.last_pacing_reasoning->>'proposed')::int <> s.dslm_pacing_mode
       AND s.dslm_pacing_mode IN (30, 50)
+      -- Reviewed 2026-10-23: extreme values (10, 20, 80) from the declared goal and level alone, with no metrics
+      -- and no active goals. They stay at 50 until real data exists.
+      AND s.id NOT IN (
+        '11f579b6-35b2-4de7-b7b3-3cbda70c7039'::uuid,
+        '598dd5b5-be7f-4524-b22e-2d3b70603e38'::uuid,
+        '54b5dff3-5af6-4d75-891b-0b048a1cb45b'::uuid,
+        '45af9329-e808-4737-84a9-f889e2cbbc74'::uuid,
+        'ce642c77-9e5a-4696-a8d0-b1f1a66e5403'::uuid,
+        'afb0301e-c4be-477a-8182-406722eae058'::uuid
+      )
       AND NOT EXISTS (
         SELECT 1 FROM public.dslm_backfill_audit a
         WHERE a.step = 'F2_pacing_apply_d11' AND a.row_id = s.id::text
