@@ -4451,6 +4451,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      homework_answer_value_present: {
+        Args: { p_value: Json }
+        Returns: boolean
+      }
+      homework_question_has_answer: {
+        Args: { p_answers: Json; p_audio: Json; p_q: number }
+        Returns: boolean
+      }
       increment_download_session_by_token: {
         Args: { p_session_token: string }
         Returns: {
@@ -4649,6 +4657,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      merge_homework_answers: {
+        Args: { p_new: Json; p_stored: Json }
+        Returns: Json
+      }
+      merge_homework_audio_answers: {
+        Args: { p_new: Json; p_stored: Json }
+        Returns: Json
+      }
+      merge_homework_item_evaluations: {
+        Args: { p_answers: Json; p_audio: Json; p_new: Json; p_stored: Json }
+        Returns: Json
+      }
       needs_ai_evaluation: {
         Args: {
           p_exercise_index: number
@@ -4705,6 +4725,10 @@ export type Database = {
       rollback_intake_extraction: {
         Args: { p_extraction_id: string }
         Returns: undefined
+      }
+      sanitize_homework_item_evaluations: {
+        Args: { p_exercise: Json; p_items: Json }
+        Returns: Json
       }
       save_flashcard_progress: {
         Args: {

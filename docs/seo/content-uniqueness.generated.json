@@ -8,19 +8,19 @@
     {
       "route": "/a1-beginner-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 475,
+      "words": 629,
       "inSitemap": true,
-      "maxContainment": 0.043,
-      "uniqueShare": 0.951,
+      "maxContainment": 0.133,
+      "uniqueShare": 0.857,
       "nearest": "/a2-elementary-english-worksheets.html"
     },
     {
       "route": "/a2-elementary-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 469,
+      "words": 631,
       "inSitemap": true,
-      "maxContainment": 0.043,
-      "uniqueShare": 0.924,
+      "maxContainment": 0.133,
+      "uniqueShare": 0.811,
       "nearest": "/a1-beginner-english-worksheets.html"
     },
     {
@@ -35,56 +35,56 @@
     {
       "route": "/adult-business-english-lesson-prep.html",
       "section": "/ (root pages)",
-      "words": 521,
+      "words": 719,
       "inSitemap": true,
-      "maxContainment": 0.143,
-      "uniqueShare": 0.853,
-      "nearest": "/one-minute-prep-for-english-tutors.html"
+      "maxContainment": 0.398,
+      "uniqueShare": 0.589,
+      "nearest": "/business-english-worksheet-generator.html"
     },
     {
       "route": "/ai-grading-tool-for-english-homework.html",
       "section": "/ (root pages)",
-      "words": 419,
+      "words": 620,
       "inSitemap": true,
-      "maxContainment": 0.217,
-      "uniqueShare": 0.775,
-      "nearest": "/grammar-worksheet-generator.html"
+      "maxContainment": 0.452,
+      "uniqueShare": 0.504,
+      "nearest": "/ai-lesson-planning-for-english-teachers.html"
     },
     {
       "route": "/ai-lesson-planning-for-english-teachers.html",
       "section": "/ (root pages)",
-      "words": 439,
+      "words": 640,
       "inSitemap": true,
-      "maxContainment": 0.198,
-      "uniqueShare": 0.781,
-      "nearest": "/business-english-worksheet-generator.html"
+      "maxContainment": 0.471,
+      "uniqueShare": 0.515,
+      "nearest": "/online-esl-homework-tool.html"
     },
     {
       "route": "/ai-tools-for-private-english-tutors.html",
       "section": "/ (root pages)",
-      "words": 345,
+      "words": 546,
       "inSitemap": true,
-      "maxContainment": 0.658,
-      "uniqueShare": 0.297,
+      "maxContainment": 0.791,
+      "uniqueShare": 0.182,
       "nearest": "/chatgpt-alternative-for-english-tutors.html"
     },
     {
       "route": "/ai-worksheet-generator-for-english-teachers.html",
       "section": "/ (root pages)",
-      "words": 612,
+      "words": 790,
       "inSitemap": true,
-      "maxContainment": 0.145,
-      "uniqueShare": 0.801,
-      "nearest": "/one-minute-prep-for-english-tutors.html"
+      "maxContainment": 0.239,
+      "uniqueShare": 0.608,
+      "nearest": "/present-perfect-worksheets.html"
     },
     {
       "route": "/articles-a-an-the-worksheets.html",
       "section": "/ (root pages)",
-      "words": 662,
+      "words": 823,
       "inSitemap": true,
-      "maxContainment": 0.014,
-      "uniqueShare": 0.983,
-      "nearest": "/ai-grading-tool-for-english-homework.html"
+      "maxContainment": 0.089,
+      "uniqueShare": 0.893,
+      "nearest": "/conditionals-worksheets-english.html"
     },
     {
       "route": "/authors/jan-brzostowski",
@@ -107,29 +107,29 @@
     {
       "route": "/b1-intermediate-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 472,
+      "words": 635,
       "inSitemap": true,
-      "maxContainment": 0.045,
-      "uniqueShare": 0.935,
-      "nearest": "/ai-lesson-planning-for-english-teachers.html"
+      "maxContainment": 0.258,
+      "uniqueShare": 0.696,
+      "nearest": "/cefr-progress-tracker-english-students.html"
     },
     {
       "route": "/b2-upper-intermediate-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 485,
+      "words": 649,
       "inSitemap": true,
-      "maxContainment": 0.021,
-      "uniqueShare": 0.964,
-      "nearest": "/comparatives-superlatives-worksheets.html"
+      "maxContainment": 0.245,
+      "uniqueShare": 0.723,
+      "nearest": "/cefr-worksheet-generator.html"
     },
     {
       "route": "/best-ai-tools-for-esl-teachers.html",
       "section": "/ (root pages)",
-      "words": 475,
+      "words": 676,
       "inSitemap": true,
-      "maxContainment": 0.152,
-      "uniqueShare": 0.835,
-      "nearest": "/multiple-choice-quiz-generator-english.html"
+      "maxContainment": 0.433,
+      "uniqueShare": 0.559,
+      "nearest": "/one-to-one-english-lesson-planner.html"
     },
     {
       "route": "/blog/adult-esl-student-profile-lesson-planning.html",
@@ -983,7 +983,7 @@
       "words": 646,
       "inSitemap": true,
       "maxContainment": 0.036,
-      "uniqueShare": 0.94,
+      "uniqueShare": 0.939,
       "nearest": "/blog/adult-esl-student-profile-lesson-planning.html"
     },
     {
@@ -1106,29 +1106,29 @@
     {
       "route": "/business-english-worksheet-generator.html",
       "section": "/ (root pages)",
-      "words": 449,
+      "words": 647,
       "inSitemap": true,
-      "maxContainment": 0.198,
-      "uniqueShare": 0.792,
-      "nearest": "/listening-comprehension-exercises-esl.html"
+      "maxContainment": 0.43,
+      "uniqueShare": 0.528,
+      "nearest": "/adult-business-english-lesson-prep.html"
     },
     {
       "route": "/c1-advanced-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 457,
+      "words": 644,
       "inSitemap": true,
-      "maxContainment": 0.02,
-      "uniqueShare": 0.978,
+      "maxContainment": 0.11,
+      "uniqueShare": 0.885,
       "nearest": "/a1-beginner-english-worksheets.html"
     },
     {
       "route": "/c2-proficiency-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 426,
+      "words": 611,
       "inSitemap": true,
-      "maxContainment": 0.019,
-      "uniqueShare": 0.979,
-      "nearest": "/ai-lesson-planning-for-english-teachers.html"
+      "maxContainment": 0.114,
+      "uniqueShare": 0.882,
+      "nearest": "/b1-intermediate-english-worksheets.html"
     },
     {
       "route": "/cefr-assessment",
@@ -1142,47 +1142,47 @@
     {
       "route": "/cefr-progress-tracker-english-students.html",
       "section": "/ (root pages)",
-      "words": 519,
+      "words": 682,
       "inSitemap": true,
-      "maxContainment": 0.143,
-      "uniqueShare": 0.855,
-      "nearest": "/online-esl-homework-tool.html"
+      "maxContainment": 0.371,
+      "uniqueShare": 0.624,
+      "nearest": "/english-placement-test-for-private-tutors.html"
     },
     {
       "route": "/cefr-worksheet-generator.html",
       "section": "/ (root pages)",
-      "words": 450,
+      "words": 614,
       "inSitemap": true,
-      "maxContainment": 0.171,
-      "uniqueShare": 0.826,
-      "nearest": "/grammar-worksheet-generator.html"
+      "maxContainment": 0.28,
+      "uniqueShare": 0.594,
+      "nearest": "/b2-upper-intermediate-english-worksheets.html"
     },
     {
       "route": "/chatgpt-alternative-for-english-tutors.html",
       "section": "/ (root pages)",
-      "words": 371,
+      "words": 572,
       "inSitemap": true,
-      "maxContainment": 0.638,
-      "uniqueShare": 0.316,
+      "maxContainment": 0.776,
+      "uniqueShare": 0.195,
       "nearest": "/ai-tools-for-private-english-tutors.html"
     },
     {
       "route": "/comparatives-superlatives-worksheets.html",
       "section": "/ (root pages)",
-      "words": 622,
+      "words": 786,
       "inSitemap": true,
-      "maxContainment": 0.049,
-      "uniqueShare": 0.95,
-      "nearest": "/writing-worksheets-esl.html"
+      "maxContainment": 0.211,
+      "uniqueShare": 0.754,
+      "nearest": "/multiple-choice-quiz-generator-english.html"
     },
     {
       "route": "/conditionals-worksheets-english.html",
       "section": "/ (root pages)",
-      "words": 778,
+      "words": 972,
       "inSitemap": true,
-      "maxContainment": 0.036,
-      "uniqueShare": 0.947,
-      "nearest": "/blog/teaching-conditionals-esl-guide.html"
+      "maxContainment": 0.088,
+      "uniqueShare": 0.885,
+      "nearest": "/fill-in-the-blanks-worksheet-generator.html"
     },
     {
       "route": "/cookie-policy",
@@ -1196,37 +1196,37 @@
     {
       "route": "/editable-esl-worksheet-generator.html",
       "section": "/ (root pages)",
-      "words": 521,
+      "words": 680,
       "inSitemap": true,
-      "maxContainment": 0.178,
-      "uniqueShare": 0.765,
-      "nearest": "/fill-in-the-blanks-worksheet-generator.html"
+      "maxContainment": 0.255,
+      "uniqueShare": 0.57,
+      "nearest": "/prepositions-worksheets-english.html"
     },
     {
       "route": "/edooqoo-vs-busyteacher.html",
       "section": "/ (root pages)",
-      "words": 677,
+      "words": 878,
       "inSitemap": true,
-      "maxContainment": 0.782,
-      "uniqueShare": 0.176,
+      "maxContainment": 0.842,
+      "uniqueShare": 0.128,
       "nearest": "/edooqoo-vs-twee.html"
     },
     {
       "route": "/edooqoo-vs-chatgpt.html",
       "section": "/ (root pages)",
-      "words": 943,
+      "words": 1144,
       "inSitemap": true,
-      "maxContainment": 0.515,
-      "uniqueShare": 0.483,
+      "maxContainment": 0.613,
+      "uniqueShare": 0.385,
       "nearest": "/edooqoo-vs-busyteacher.html"
     },
     {
       "route": "/edooqoo-vs-twee.html",
       "section": "/ (root pages)",
-      "words": 670,
+      "words": 871,
       "inSitemap": true,
-      "maxContainment": 0.793,
-      "uniqueShare": 0.19,
+      "maxContainment": 0.85,
+      "uniqueShare": 0.137,
       "nearest": "/edooqoo-vs-busyteacher.html"
     },
     {
@@ -1259,55 +1259,55 @@
     {
       "route": "/english-placement-test-for-private-tutors.html",
       "section": "/ (root pages)",
-      "words": 1050,
+      "words": 1213,
       "inSitemap": true,
-      "maxContainment": 0.068,
-      "uniqueShare": 0.931,
-      "nearest": "/fill-in-the-blanks-worksheet-generator.html"
+      "maxContainment": 0.208,
+      "uniqueShare": 0.79,
+      "nearest": "/cefr-progress-tracker-english-students.html"
     },
     {
       "route": "/english-tutor-calendar-booking-software.html",
       "section": "/ (root pages)",
-      "words": 502,
+      "words": 703,
       "inSitemap": true,
-      "maxContainment": 0.181,
-      "uniqueShare": 0.786,
-      "nearest": "/ai-worksheet-generator-for-english-teachers.html"
+      "maxContainment": 0.441,
+      "uniqueShare": 0.534,
+      "nearest": "/student-hub-for-english-tutors.html"
     },
     {
       "route": "/english-worksheets-for-adults.html",
       "section": "/ (root pages)",
-      "words": 356,
+      "words": 554,
       "inSitemap": true,
-      "maxContainment": 0.06,
-      "uniqueShare": 0.937,
+      "maxContainment": 0.397,
+      "uniqueShare": 0.599,
       "nearest": "/english-worksheets-for-corporate-training.html"
     },
     {
       "route": "/english-worksheets-for-corporate-training.html",
       "section": "/ (root pages)",
-      "words": 307,
+      "words": 505,
       "inSitemap": true,
-      "maxContainment": 0.073,
-      "uniqueShare": 0.923,
-      "nearest": "/passive-voice-worksheets-esl.html"
+      "maxContainment": 0.437,
+      "uniqueShare": 0.559,
+      "nearest": "/english-worksheets-for-adults.html"
     },
     {
       "route": "/english-worksheets-for-exam-prep.html",
       "section": "/ (root pages)",
-      "words": 385,
+      "words": 575,
       "inSitemap": true,
-      "maxContainment": 0.056,
-      "uniqueShare": 0.944,
-      "nearest": "/ai-lesson-planning-for-english-teachers.html"
+      "maxContainment": 0.327,
+      "uniqueShare": 0.63,
+      "nearest": "/exam-preparation-worksheets-cambridge-ielts.html"
     },
     {
       "route": "/environment-climate-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 454,
+      "words": 636,
       "inSitemap": true,
-      "maxContainment": 0.027,
-      "uniqueShare": 0.973,
+      "maxContainment": 0.13,
+      "uniqueShare": 0.866,
       "nearest": "/job-interview-english-worksheets.html"
     },
     {
@@ -1322,20 +1322,20 @@
     {
       "route": "/esl-homework-grading-tool.html",
       "section": "/ (root pages)",
-      "words": 484,
+      "words": 685,
       "inSitemap": true,
-      "maxContainment": 0.04,
-      "uniqueShare": 0.958,
+      "maxContainment": 0.319,
+      "uniqueShare": 0.68,
       "nearest": "/ai-tools-for-private-english-tutors.html"
     },
     {
       "route": "/esl-student-progress-tracking-tool.html",
       "section": "/ (root pages)",
-      "words": 484,
+      "words": 685,
       "inSitemap": true,
-      "maxContainment": 0.019,
-      "uniqueShare": 0.981,
-      "nearest": "/a1-beginner-english-worksheets.html"
+      "maxContainment": 0.299,
+      "uniqueShare": 0.696,
+      "nearest": "/ai-grading-tool-for-english-homework.html"
     },
     {
       "route": "/esl-worksheets/business-email/b1-intermediate",
@@ -1421,11 +1421,11 @@
     {
       "route": "/exam-preparation-worksheets-cambridge-ielts.html",
       "section": "/ (root pages)",
-      "words": 1334,
+      "words": 1524,
       "inSitemap": true,
-      "maxContainment": 0.014,
-      "uniqueShare": 0.977,
-      "nearest": "/ai-worksheet-generator-for-english-teachers.html"
+      "maxContainment": 0.123,
+      "uniqueShare": 0.857,
+      "nearest": "/english-worksheets-for-exam-prep.html"
     },
     {
       "route": "/exercise-types",
@@ -1511,19 +1511,19 @@
     {
       "route": "/fill-in-the-blanks-worksheet-generator.html",
       "section": "/ (root pages)",
-      "words": 447,
+      "words": 615,
       "inSitemap": true,
-      "maxContainment": 0.197,
-      "uniqueShare": 0.782,
-      "nearest": "/editable-esl-worksheet-generator.html"
+      "maxContainment": 0.297,
+      "uniqueShare": 0.558,
+      "nearest": "/gerunds-infinitives-worksheets.html"
     },
     {
       "route": "/food-and-cooking-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 529,
+      "words": 701,
       "inSitemap": true,
-      "maxContainment": 0.021,
-      "uniqueShare": 0.979,
+      "maxContainment": 0.111,
+      "uniqueShare": 0.877,
       "nearest": "/health-and-body-english-worksheets.html"
     },
     {
@@ -1538,10 +1538,10 @@
     {
       "route": "/future-tenses-worksheets-english.html",
       "section": "/ (root pages)",
-      "words": 891,
+      "words": 1089,
       "inSitemap": true,
-      "maxContainment": 0.018,
-      "uniqueShare": 0.98,
+      "maxContainment": 0.076,
+      "uniqueShare": 0.92,
       "nearest": "/reading-activities-english-worksheets.html"
     },
     {
@@ -1556,11 +1556,11 @@
     {
       "route": "/gerunds-infinitives-worksheets.html",
       "section": "/ (root pages)",
-      "words": 677,
+      "words": 845,
       "inSitemap": true,
-      "maxContainment": 0.016,
-      "uniqueShare": 0.982,
-      "nearest": "/listening-activities-esl-worksheets.html"
+      "maxContainment": 0.199,
+      "uniqueShare": 0.789,
+      "nearest": "/fill-in-the-blanks-worksheet-generator.html"
     },
     {
       "route": "/glossary",
@@ -1583,19 +1583,19 @@
     {
       "route": "/grammar-worksheet-generator.html",
       "section": "/ (root pages)",
-      "words": 452,
+      "words": 624,
       "inSitemap": true,
-      "maxContainment": 0.216,
-      "uniqueShare": 0.772,
-      "nearest": "/vocabulary-exercise-generator.html"
+      "maxContainment": 0.289,
+      "uniqueShare": 0.548,
+      "nearest": "/passive-voice-worksheets-esl.html"
     },
     {
       "route": "/health-and-body-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 492,
+      "words": 671,
       "inSitemap": true,
-      "maxContainment": 0.023,
-      "uniqueShare": 0.975,
+      "maxContainment": 0.116,
+      "uniqueShare": 0.87,
       "nearest": "/food-and-cooking-english-worksheets.html"
     },
     {
@@ -1619,65 +1619,65 @@
     {
       "route": "/how-to-create-english-worksheets-with-ai.html",
       "section": "/ (root pages)",
-      "words": 1646,
+      "words": 1840,
       "inSitemap": true,
-      "maxContainment": 0.013,
-      "uniqueShare": 0.977,
-      "nearest": "/blog/how-to-plan-english-lessons-effectively.html"
+      "maxContainment": 0.107,
+      "uniqueShare": 0.876,
+      "nearest": "/modal-verbs-worksheets-esl.html"
     },
     {
       "route": "/how-to-save-time-as-english-teacher.html",
       "section": "/ (root pages)",
-      "words": 395,
+      "words": 596,
       "inSitemap": true,
-      "maxContainment": 0.06,
-      "uniqueShare": 0.94,
-      "nearest": "/blog/adult-esl-student-profile-lesson-planning.html"
+      "maxContainment": 0.351,
+      "uniqueShare": 0.625,
+      "nearest": "/ai-grading-tool-for-english-homework.html"
     },
     {
       "route": "/job-interview-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 554,
+      "words": 766,
       "inSitemap": true,
-      "maxContainment": 0.022,
-      "uniqueShare": 0.978,
+      "maxContainment": 0.109,
+      "uniqueShare": 0.887,
       "nearest": "/environment-climate-english-worksheets.html"
     },
     {
       "route": "/listening-activities-esl-worksheets.html",
       "section": "/ (root pages)",
-      "words": 622,
+      "words": 822,
       "inSitemap": true,
-      "maxContainment": 0.018,
-      "uniqueShare": 0.98,
-      "nearest": "/gerunds-infinitives-worksheets.html"
+      "maxContainment": 0.244,
+      "uniqueShare": 0.744,
+      "nearest": "/listening-comprehension-exercises-esl.html"
     },
     {
       "route": "/listening-comprehension-exercises-esl.html",
       "section": "/ (root pages)",
-      "words": 422,
+      "words": 622,
       "inSitemap": true,
-      "maxContainment": 0.207,
-      "uniqueShare": 0.775,
-      "nearest": "/business-english-worksheet-generator.html"
+      "maxContainment": 0.345,
+      "uniqueShare": 0.515,
+      "nearest": "/listening-activities-esl-worksheets.html"
     },
     {
       "route": "/modal-verbs-worksheets-esl.html",
       "section": "/ (root pages)",
-      "words": 1201,
+      "words": 1395,
       "inSitemap": true,
-      "maxContainment": 0.011,
-      "uniqueShare": 0.98,
-      "nearest": "/blog/how-to-plan-english-lessons-effectively.html"
+      "maxContainment": 0.142,
+      "uniqueShare": 0.845,
+      "nearest": "/how-to-create-english-worksheets-with-ai.html"
     },
     {
       "route": "/multiple-choice-quiz-generator-english.html",
       "section": "/ (root pages)",
-      "words": 413,
+      "words": 577,
       "inSitemap": true,
-      "maxContainment": 0.176,
-      "uniqueShare": 0.773,
-      "nearest": "/grammar-worksheet-generator.html"
+      "maxContainment": 0.305,
+      "uniqueShare": 0.546,
+      "nearest": "/comparatives-superlatives-worksheets.html"
     },
     {
       "route": "/one-minute-prep",
@@ -1691,92 +1691,92 @@
     {
       "route": "/one-minute-prep-for-english-tutors.html",
       "section": "/ (root pages)",
-      "words": 1414,
+      "words": 1615,
       "inSitemap": true,
-      "maxContainment": 0.069,
-      "uniqueShare": 0.921,
-      "nearest": "/ai-worksheet-generator-for-english-teachers.html"
+      "maxContainment": 0.206,
+      "uniqueShare": 0.782,
+      "nearest": "/english-tutor-calendar-booking-software.html"
     },
     {
       "route": "/one-to-one-english-lesson-planner.html",
       "section": "/ (root pages)",
-      "words": 513,
+      "words": 714,
       "inSitemap": true,
-      "maxContainment": 0.176,
-      "uniqueShare": 0.809,
+      "maxContainment": 0.433,
+      "uniqueShare": 0.557,
       "nearest": "/private-english-tutor-crm.html"
     },
     {
       "route": "/online-english-teaching-tools.html",
       "section": "/ (root pages)",
-      "words": 513,
+      "words": 697,
       "inSitemap": true,
-      "maxContainment": 0.038,
-      "uniqueShare": 0.96,
-      "nearest": "/ai-tools-for-private-english-tutors.html"
+      "maxContainment": 0.262,
+      "uniqueShare": 0.707,
+      "nearest": "/speaking-activities-esl-worksheets.html"
     },
     {
       "route": "/online-esl-homework-tool.html",
       "section": "/ (root pages)",
-      "words": 517,
+      "words": 718,
       "inSitemap": true,
-      "maxContainment": 0.174,
-      "uniqueShare": 0.821,
+      "maxContainment": 0.432,
+      "uniqueShare": 0.565,
       "nearest": "/ai-lesson-planning-for-english-teachers.html"
     },
     {
       "route": "/passive-voice-worksheets-esl.html",
       "section": "/ (root pages)",
-      "words": 693,
+      "words": 865,
       "inSitemap": true,
-      "maxContainment": 0.051,
-      "uniqueShare": 0.94,
-      "nearest": "/blog/teaching-passive-voice-activities.html"
+      "maxContainment": 0.192,
+      "uniqueShare": 0.752,
+      "nearest": "/grammar-worksheet-generator.html"
     },
     {
       "route": "/past-simple-worksheets.html",
       "section": "/ (root pages)",
-      "words": 969,
+      "words": 1155,
       "inSitemap": true,
-      "maxContainment": 0.01,
-      "uniqueShare": 0.984,
-      "nearest": "/present-perfect-worksheets.html"
+      "maxContainment": 0.071,
+      "uniqueShare": 0.918,
+      "nearest": "/a2-elementary-english-worksheets.html"
     },
     {
       "route": "/phrasal-verbs-worksheets-esl.html",
       "section": "/ (root pages)",
-      "words": 792,
+      "words": 974,
       "inSitemap": true,
-      "maxContainment": 0.023,
-      "uniqueShare": 0.971,
+      "maxContainment": 0.082,
+      "uniqueShare": 0.906,
       "nearest": "/speaking-activities-esl-worksheets.html"
     },
     {
       "route": "/prepositions-worksheets-english.html",
       "section": "/ (root pages)",
-      "words": 611,
+      "words": 770,
       "inSitemap": true,
-      "maxContainment": 0.032,
-      "uniqueShare": 0.968,
-      "nearest": "/ai-tools-for-private-english-tutors.html"
+      "maxContainment": 0.199,
+      "uniqueShare": 0.766,
+      "nearest": "/editable-esl-worksheet-generator.html"
     },
     {
       "route": "/present-perfect-worksheets.html",
       "section": "/ (root pages)",
-      "words": 878,
+      "words": 1056,
       "inSitemap": true,
-      "maxContainment": 0.027,
-      "uniqueShare": 0.971,
-      "nearest": "/blog/adult-esl-student-profile-lesson-planning.html"
+      "maxContainment": 0.164,
+      "uniqueShare": 0.806,
+      "nearest": "/ai-worksheet-generator-for-english-teachers.html"
     },
     {
       "route": "/present-simple-worksheets.html",
       "section": "/ (root pages)",
-      "words": 1057,
+      "words": 1224,
       "inSitemap": true,
-      "maxContainment": 0.006,
-      "uniqueShare": 0.99,
-      "nearest": "/adult-business-english-lesson-prep.html"
+      "maxContainment": 0.058,
+      "uniqueShare": 0.933,
+      "nearest": "/past-simple-worksheets.html"
     },
     {
       "route": "/pricing",
@@ -1799,10 +1799,10 @@
     {
       "route": "/private-english-tutor-crm.html",
       "section": "/ (root pages)",
-      "words": 552,
+      "words": 753,
       "inSitemap": true,
-      "maxContainment": 0.172,
-      "uniqueShare": 0.815,
+      "maxContainment": 0.42,
+      "uniqueShare": 0.571,
       "nearest": "/student-hub-for-english-tutors.html"
     },
     {
@@ -1817,56 +1817,56 @@
     {
       "route": "/public-esl-worksheet-examples.html",
       "section": "/ (root pages)",
-      "words": 348,
+      "words": 532,
       "inSitemap": true,
-      "maxContainment": 0.068,
-      "uniqueShare": 0.911,
-      "nearest": "/business-english-worksheet-generator.html"
+      "maxContainment": 0.339,
+      "uniqueShare": 0.603,
+      "nearest": "/reported-speech-worksheets.html"
     },
     {
       "route": "/question-tags-worksheets.html",
       "section": "/ (root pages)",
-      "words": 673,
+      "words": 850,
       "inSitemap": true,
-      "maxContainment": 0.033,
-      "uniqueShare": 0.961,
-      "nearest": "/blog/how-to-plan-english-lessons-effectively.html"
+      "maxContainment": 0.102,
+      "uniqueShare": 0.888,
+      "nearest": "/how-to-create-english-worksheets-with-ai.html"
     },
     {
       "route": "/reading-activities-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 630,
+      "words": 826,
       "inSitemap": true,
-      "maxContainment": 0.026,
-      "uniqueShare": 0.973,
-      "nearest": "/future-tenses-worksheets-english.html"
+      "maxContainment": 0.231,
+      "uniqueShare": 0.741,
+      "nearest": "/reading-comprehension-worksheet-maker.html"
     },
     {
       "route": "/reading-comprehension-worksheet-maker.html",
       "section": "/ (root pages)",
-      "words": 408,
+      "words": 604,
       "inSitemap": true,
-      "maxContainment": 0.192,
-      "uniqueShare": 0.762,
-      "nearest": "/listening-comprehension-exercises-esl.html"
+      "maxContainment": 0.335,
+      "uniqueShare": 0.506,
+      "nearest": "/reading-activities-english-worksheets.html"
     },
     {
       "route": "/relative-clauses-worksheets.html",
       "section": "/ (root pages)",
-      "words": 727,
+      "words": 920,
       "inSitemap": true,
-      "maxContainment": 0.022,
-      "uniqueShare": 0.976,
-      "nearest": "/phrasal-verbs-worksheets-esl.html"
+      "maxContainment": 0.088,
+      "uniqueShare": 0.903,
+      "nearest": "/speaking-activities-esl-worksheets.html"
     },
     {
       "route": "/reported-speech-worksheets.html",
       "section": "/ (root pages)",
-      "words": 694,
+      "words": 878,
       "inSitemap": true,
-      "maxContainment": 0.022,
-      "uniqueShare": 0.969,
-      "nearest": "/blog/teaching-reported-speech-esl.html"
+      "maxContainment": 0.203,
+      "uniqueShare": 0.765,
+      "nearest": "/public-esl-worksheet-examples.html"
     },
     {
       "route": "/resources/esl-class-toolkit",
@@ -1898,28 +1898,28 @@
     {
       "route": "/spaced-repetition-flashcards-esl.html",
       "section": "/ (root pages)",
-      "words": 483,
+      "words": 656,
       "inSitemap": true,
-      "maxContainment": 0.019,
-      "uniqueShare": 0.981,
-      "nearest": "/ai-grading-tool-for-english-homework.html"
+      "maxContainment": 0.27,
+      "uniqueShare": 0.724,
+      "nearest": "/vocabulary-exercise-generator.html"
     },
     {
       "route": "/speaking-activities-esl-worksheets.html",
       "section": "/ (root pages)",
-      "words": 692,
+      "words": 876,
       "inSitemap": true,
-      "maxContainment": 0.026,
-      "uniqueShare": 0.972,
-      "nearest": "/phrasal-verbs-worksheets-esl.html"
+      "maxContainment": 0.208,
+      "uniqueShare": 0.768,
+      "nearest": "/online-english-teaching-tools.html"
     },
     {
       "route": "/student-hub-for-english-tutors.html",
       "section": "/ (root pages)",
-      "words": 496,
+      "words": 697,
       "inSitemap": true,
-      "maxContainment": 0.19,
-      "uniqueShare": 0.785,
+      "maxContainment": 0.449,
+      "uniqueShare": 0.533,
       "nearest": "/private-english-tutor-crm.html"
     },
     {
@@ -1934,11 +1934,11 @@
     {
       "route": "/technology-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 458,
+      "words": 638,
       "inSitemap": true,
-      "maxContainment": 0.04,
-      "uniqueShare": 0.96,
-      "nearest": "/ai-worksheet-generator-for-english-teachers.html"
+      "maxContainment": 0.133,
+      "uniqueShare": 0.856,
+      "nearest": "/exam-preparation-worksheets-cambridge-ielts.html"
     },
     {
       "route": "/tools/cefr-level-test",
@@ -1988,11 +1988,11 @@
     {
       "route": "/travel-english-worksheets.html",
       "section": "/ (root pages)",
-      "words": 654,
+      "words": 830,
       "inSitemap": true,
-      "maxContainment": 0.031,
-      "uniqueShare": 0.969,
-      "nearest": "/english-worksheets-for-adults.html"
+      "maxContainment": 0.103,
+      "uniqueShare": 0.878,
+      "nearest": "/comparatives-superlatives-worksheets.html"
     },
     {
       "route": "/tutor-operations",
@@ -2006,11 +2006,11 @@
     {
       "route": "/vocabulary-exercise-generator.html",
       "section": "/ (root pages)",
-      "words": 453,
+      "words": 626,
       "inSitemap": true,
-      "maxContainment": 0.214,
-      "uniqueShare": 0.781,
-      "nearest": "/grammar-worksheet-generator.html"
+      "maxContainment": 0.305,
+      "uniqueShare": 0.554,
+      "nearest": "/spaced-repetition-flashcards-esl.html"
     },
     {
       "route": "/what-to-teach-next/accountant-variance-call",
@@ -2177,10 +2177,10 @@
     {
       "route": "/writing-worksheets-esl.html",
       "section": "/ (root pages)",
-      "words": 558,
+      "words": 755,
       "inSitemap": true,
-      "maxContainment": 0.054,
-      "uniqueShare": 0.942,
+      "maxContainment": 0.122,
+      "uniqueShare": 0.862,
       "nearest": "/comparatives-superlatives-worksheets.html"
     }
   ]

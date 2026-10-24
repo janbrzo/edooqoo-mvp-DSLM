@@ -25,14 +25,14 @@
       "type": "static-landing",
       "state": "hold",
       "incoming": 98,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/edooqoo-vs-chatgpt.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 105,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/esl-exercise-design",
@@ -59,7 +59,7 @@
       "route": "/gallery",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 39,
+      "incoming": 82,
       "outgoing": 47
     },
     {
@@ -109,14 +109,14 @@
       "type": "static-landing",
       "state": "hold",
       "incoming": 93,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/edooqoo-vs-twee.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 89,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/blog/ai-lesson-planning-strategies.html",
@@ -249,77 +249,77 @@
       "type": "static-landing",
       "state": "hold",
       "incoming": 11,
-      "outgoing": 11
+      "outgoing": 14
     },
     {
       "route": "/a2-elementary-english-worksheets.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 11,
-      "outgoing": 12
+      "outgoing": 15
     },
     {
       "route": "/adult-business-english-lesson-prep.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 18,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/ai-grading-tool-for-english-homework.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 27,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/ai-lesson-planning-for-english-teachers.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 11,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 102,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/ai-worksheet-generator-for-english-teachers.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 42,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/articles-a-an-the-worksheets.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 5,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/b1-intermediate-english-worksheets.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 8,
-      "outgoing": 11
+      "outgoing": 14
     },
     {
       "route": "/b2-upper-intermediate-english-worksheets.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 11,
-      "outgoing": 11
+      "outgoing": 14
     },
     {
       "route": "/best-ai-tools-for-esl-teachers.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 5,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/blog/adult-esl-student-profile-lesson-planning.html",

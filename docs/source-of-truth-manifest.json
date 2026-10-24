@@ -23,7 +23,7 @@
     "serviceModules": 11,
     "edgeFunctions": 80,
     "typedTables": 66,
-    "typedRpcs": 117,
+    "typedRpcs": 123,
     "migrationIndexes": 23
   },
   "routes": [
@@ -56682,6 +56682,38 @@
         "returns": "boolean"
       },
       {
+        "name": "homework_answer_value_present",
+        "args": [
+          {
+            "name": "p_value",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
+        "name": "homework_question_has_answer",
+        "args": [
+          {
+            "name": "p_answers",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_audio",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_q",
+            "type": "number",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
         "name": "increment_download_session_by_token",
         "args": [
           {
@@ -57098,6 +57130,64 @@
         "returns": "undefined"
       },
       {
+        "name": "merge_homework_answers",
+        "args": [
+          {
+            "name": "p_new",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_stored",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
+        "name": "merge_homework_audio_answers",
+        "args": [
+          {
+            "name": "p_new",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_stored",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
+        "name": "merge_homework_item_evaluations",
+        "args": [
+          {
+            "name": "p_answers",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_audio",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_new",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_stored",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "needs_ai_evaluation",
         "args": [
           {
@@ -57301,6 +57391,22 @@
           }
         ],
         "returns": "undefined"
+      },
+      {
+        "name": "sanitize_homework_item_evaluations",
+        "args": [
+          {
+            "name": "p_exercise",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_items",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
       },
       {
         "name": "save_flashcard_progress",
