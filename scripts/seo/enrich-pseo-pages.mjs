@@ -67,7 +67,7 @@ ${ENRICHMENT_END}`;
 }
 
 const blockRegex = new RegExp(`\\n?${ENRICHMENT_START}[\\s\\S]*?${ENRICHMENT_END}\\n?`, 'g');
-const ANCHORS = [/\n[ \t]*<h2>(Frequently Asked Questions|FAQ)<\/h2>/, /\n[ \t]*<\/main>/, /\n[ \t]*<\/body>/];
+const ANCHORS = [/\n[ \t]*<h2>(Frequently Asked Questions|FAQ)<\/h2>/, /\n[ \t]*<footer>/, /\n[ \t]*<\/main>/, /\n[ \t]*<\/body>/];
 
 export function applyEnrichment(html, file) {
   const stripped = html.replace(blockRegex, '\n');
