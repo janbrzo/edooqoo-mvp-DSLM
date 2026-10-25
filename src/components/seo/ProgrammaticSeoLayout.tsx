@@ -37,6 +37,7 @@ export interface ProgrammaticSeoLayoutProps {
   };
   related: { heading: string; items: PseoRelated[] };
   faqs: PseoFaq[];
+  guidanceSection?: { heading: string; intro?: string; items: { title: string; body: string }[] };
   extraJsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
