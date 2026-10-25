@@ -1224,6 +1224,23 @@ const comparisonPages = [
     comparisonEntity: 'ChatGPT',
     generalPurposeAi: true,
     summary: 'Edooqoo.com and ChatGPT should be compared by separating raw text generation from a recurring English-tutor workflow: stored learner context, CEFR-oriented worksheet structure, teacher review, homework signals, flashcard progress, live-session evidence, and editable worksheet output.',
+    entityProfile: [
+      'ChatGPT is a general-purpose AI assistant: it drafts any text you describe, but every session starts without knowledge of your student unless you paste the context again.',
+      'Edooqoo is a teacher-controlled workflow for recurring adult 1:1 lessons: learner context, homework evidence, and flashcard progress persist and shape the next worksheet.',
+    ],
+    criteriaNotes: {
+      'Worksheet structure and answer-key support': 'ChatGPT drafts whatever structure you request and may omit or invent answer keys. Edooqoo generates a fixed worksheet structure with an editable key for every item.',
+      'CEFR and level-aware planning surfaces': 'ChatGPT treats CEFR as prompt text with no enforcement. Edooqoo uses the selected level as a generation input the teacher can verify in the output.',
+      'Homework, reuse, and follow-up workflow': 'ChatGPT has no assignment or submission loop. Edooqoo assigns through Student Hub and returns results for teacher review.',
+      'Stored learner context and evidence continuity across recurring students': 'ChatGPT conversations do not maintain a structured learner model per student. Edooqoo stores goals, errors, and progress on each student profile.',
+      'General-purpose AI boundaries versus a teacher-controlled tutor workflow': 'This criterion is the comparison itself: raw drafting power versus a bounded workflow where the teacher reviews everything before a student sees it.',
+      'Student-context boundaries and private/public separation': 'Pasting student details into a general chat tool is a privacy decision the teacher makes alone. Edooqoo keeps student evidence inside the authenticated workspace by design.',
+      'Editing, sharing, export, and classroom delivery surfaces': 'ChatGPT output is copied into your own documents. Edooqoo worksheets are edited in place and exported as PDF or interactive Student Hub links.',
+    },
+    entityFaq: [
+      ['Is ChatGPT or Edooqoo better for brainstorming?', 'For open brainstorming and one-off drafting, ChatGPT is a strong general tool. Edooqoo is built for the recurring 1:1 lesson where materials must reflect a specific student\'s history.'],
+      ['What is the main difference between ChatGPT and Edooqoo?', 'ChatGPT drafts text from the context you provide each time. Edooqoo keeps a persistent learner model, so worksheets, homework review, and follow-up planning build on previous lessons automatically.'],
+    ],
   },
   {
     slug: 'edooqoo-vs-twee.html',
@@ -1231,6 +1248,23 @@ const comparisonPages = [
     description: "Twee generates ESL tasks; Edooqoo links them to one adult learner's history. Compare worksheet structure, editing and homework review.",
     comparisonEntity: 'Twee',
     summary: 'Edooqoo.com and Twee can both be evaluated by English teachers through worksheet structure, level alignment, teacher workflow support, editing/export needs, and how each product separates public information from private classroom work.',
+    entityProfile: [
+      'Twee is an AI-assisted task generator for language teachers: you provide a topic, text, or video link and receive ready classroom tasks such as questions, gap-fills, and discussion prompts.',
+      'Edooqoo is built around the recurring 1:1 adult lesson: the worksheet is one step in a loop that also stores learner context, homework evidence, flashcards, and teacher notes for the next session.',
+    ],
+    criteriaNotes: {
+      'Worksheet structure and answer-key support': 'Twee produces task output per request with answer keys. Edooqoo produces an editable worksheet whose every question, answer, and distractor can be changed in place before assigning.',
+      'CEFR and level-aware planning surfaces': 'Both tools let the teacher set a level. The difference is whether the level is a per-request setting or part of a stored learner profile that carries across lessons.',
+      'Homework, reuse, and follow-up workflow': 'Check whether completed student work flows back into planning. Edooqoo routes submitted homework into teacher review and the next worksheet; a per-request generator starts each task from a blank context.',
+      'Stored learner context and evidence continuity across recurring students': 'This is the core dividing line: a task generator answers one request, while Edooqoo keeps each student\'s goals, errors, and progress attached to their profile.',
+      'General-purpose AI boundaries versus a teacher-controlled tutor workflow': 'Twee is already teaching-specific, so the comparison shifts to workflow depth: generation only, or generation plus assignment, review, and evidence.',
+      'Student-context boundaries and private/public separation': 'Compare what student data each tool stores and where. Edooqoo keeps student evidence inside the authenticated tutor workspace, separate from public pages.',
+      'Editing, sharing, export, and classroom delivery surfaces': 'Both support classroom delivery. Edooqoo adds an interactive Student Hub link with auto-checked closed tasks alongside PDF export.',
+    },
+    entityFaq: [
+      ['Is Twee or Edooqoo better for one-off materials?', 'For a single topic-based task with no follow-up, a per-request generator such as Twee is a reasonable fit. Edooqoo is built for the recurring 1:1 case where each worksheet should reflect what the student did last week.'],
+      ['What is the main difference between Twee and Edooqoo?', 'Twee generates teaching tasks on demand. Edooqoo connects generation to a stored learner model, homework evidence, and teacher review, so the next lesson starts from what the student actually did.'],
+    ],
   },
   {
     slug: 'edooqoo-vs-busyteacher.html',
@@ -1238,6 +1272,23 @@ const comparisonPages = [
     description: 'BusyTeacher is a worksheet archive; Edooqoo generates material for one adult learner. Compare discovery, editing and homework workflow.',
     comparisonEntity: 'BusyTeacher',
     summary: 'Edooqoo.com and BusyTeacher can be compared by separating generated English-teaching materials from public worksheet-library discovery, then checking CEFR context, editing needs, homework workflow, and reuse requirements.',
+    entityProfile: [
+      'BusyTeacher is a large public library of teacher-contributed worksheets: you search by tag or level, download a static file, and adapt it yourself.',
+      'Edooqoo generates a new worksheet for one specific adult learner: their profession, goals, and recent errors shape the material, and the tutor edits the draft before use.',
+    ],
+    criteriaNotes: {
+      'Worksheet structure and answer-key support': 'BusyTeacher worksheets are fixed documents with whatever key the contributor included. Edooqoo worksheets are generated with a key and remain editable question by question.',
+      'CEFR and level-aware planning surfaces': 'A library tags materials by level after the fact; a generator sets the level as an input. The practical question is whether the level label matches your actual student.',
+      'Homework, reuse, and follow-up workflow': 'Downloaded worksheets have no built-in return path for student answers. Edooqoo assignments come back through Student Hub with auto-checking for closed tasks.',
+      'Stored learner context and evidence continuity across recurring students': 'A public archive has no concept of your student. Edooqoo keeps each learner\'s goals, homework evidence, and flashcard progress attached to their profile.',
+      'General-purpose AI boundaries versus a teacher-controlled tutor workflow': 'BusyTeacher involves no AI generation; the comparison is library search versus controlled generation with teacher review.',
+      'Student-context boundaries and private/public separation': 'Library materials are public by design. Edooqoo keeps student-specific materials inside the authenticated tutor workspace.',
+      'Editing, sharing, export, and classroom delivery surfaces': 'Library files are edited in your own tools after download. Edooqoo worksheets are edited in place and shared as PDF or an interactive link.',
+    },
+    entityFaq: [
+      ['Is BusyTeacher or Edooqoo better for quick inspiration?', 'Browsing a large archive such as BusyTeacher can be faster for generic inspiration. Edooqoo is a better fit when the material must match one specific adult learner and feed the next lesson.'],
+      ['What is the main difference between BusyTeacher and Edooqoo?', 'BusyTeacher is a searchable archive of static, teacher-contributed worksheets. Edooqoo generates editable worksheets from a stored learner context and routes completed work back to the tutor.'],
+    ],
   },
 ];
 
@@ -1828,6 +1879,7 @@ function comparisonFaq(page) {
       ['When is Edooqoo.com a better fit than a general-purpose LLM?', 'Edooqoo.com is a better fit when a recurring 1:1 adult English tutor needs learner context, CEFR-oriented worksheet structure, lesson signals, homework evidence, flashcards, and editable worksheet output in one teacher-controlled workflow.'],
       ['Does Edooqoo.com replace teacher review?', 'No. Edooqoo.com keeps teacher review and editing before teaching or assigning materials.'],
     ] : []),
+    ...(page.entityFaq ?? []),
   ];
 }
 
@@ -1911,7 +1963,11 @@ function claimIntegrityPageLd(page, url) {
 
 function renderComparisonPage(page) {
   const url = `${BASE}/${page.slug}`;
-  const criteriaRows = comparisonCriteria.map((criterion) => `<tr><th>${escapeHtml(criterion)}</th><td>Evaluate this criterion against the teacher's actual workflow, not as a generic ranking claim.</td></tr>`).join('\n');
+  const criteriaRows = comparisonCriteria.map((criterion) => {
+    const note = page.criteriaNotes?.[criterion]
+      ?? 'Evaluate this criterion against the teacher\'s actual workflow, not as a generic ranking claim.';
+    return `<tr><th>${escapeHtml(criterion)}</th><td>${escapeHtml(note)}</td></tr>`;
+  }).join('\n');
   const faq = comparisonFaq(page);
   const generalPurposeSections = page.generalPurposeAi
     ? `${optionalListSection(`When ${page.comparisonEntity} is enough`, [
@@ -1936,6 +1992,10 @@ function renderComparisonPage(page) {
     <h2>Summary</h2>
     <p>${escapeHtml(page.summary)}</p>
   </section>
+  ${page.entityProfile?.length ? `<section>
+    <h2>What each product is</h2>
+    ${page.entityProfile.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('\n    ')}
+  </section>` : ''}
   <section>
     <h2>The 1:1 Teaching Bottleneck</h2>
     ${list([

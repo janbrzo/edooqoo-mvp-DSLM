@@ -15,6 +15,7 @@ import {
   isIndexableTopicLevel,
 } from '@/lib/seo/pseoIndexPolicy';
 import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
+import { getLevelGuidance } from '@/constants/pseoLevelGuidance';
 
 const TopicLevelPage: React.FC = () => {
   const { topic: topicSlug = '', level: levelSlug = '' } = useParams();
@@ -35,6 +36,7 @@ const TopicLevelPage: React.FC = () => {
     : `Edooqoo can draft ${topic.label} practice for ${level.cefr} adult learners, but this combination is not part of the current public indexing set because it does not yet have a distinct teaching rationale.`;
 
   const path = `/esl-worksheets/${topic.slug}/${level.slug}`;
+  const levelGuidance = getLevelGuidance(level.cefr);
 
   const otherLevels = PSEO_LEVELS.filter(
     (candidateLevel) =>
@@ -137,6 +139,15 @@ const TopicLevelPage: React.FC = () => {
         { value: '2', label: 'Free worksheets / month' },
       ]}
       decisionCriteria={policy}
+      guidanceSection={levelGuidance ? {
+        heading: `What changes at ${levelGuidance.cefr} in adult 1:1 teaching`,
+        intro: `The same ${topic.label} objective is taught differently depending on where the adult learner actually is. This is how experienced tutors adjust the work at ${levelGuidance.cefr}.`,
+        items: [
+          { title: 'Teaching focus', body: levelGuidance.focus },
+          { title: 'Task design', body: levelGuidance.taskDesign },
+          { title: 'Common pitfall', body: levelGuidance.pitfall },
+        ],
+      } : undefined}
       related={{
         heading: `More ${topic.label} and ${level.cefr} resources`,
         items: [...generatorLinks, ...otherLevels, ...sameCategoryTopics, ...exerciseLinks, ...personaLinks],

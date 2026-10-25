@@ -4,6 +4,24 @@
     "templated": 0.5,
     "nearDuplicate": 0.8
   },
+  "canonicalAliases": [
+    {
+      "route": "/exercise-types.html",
+      "canonical": "/exercise-types"
+    },
+    {
+      "route": "/glossary.html",
+      "canonical": "/glossary"
+    },
+    {
+      "route": "/how-it-works.html",
+      "canonical": "/how-it-works"
+    },
+    {
+      "route": "/resources.html",
+      "canonical": "/resources"
+    }
+  ],
   "rows": [
     {
       "route": "/a1-beginner-english-worksheets.html",
@@ -98,7 +116,7 @@
     {
       "route": "/authors/martha",
       "section": "/authors",
-      "words": 114,
+      "words": 115,
       "inSitemap": true,
       "maxContainment": 0,
       "uniqueShare": 1,
@@ -836,7 +854,7 @@
     {
       "route": "/blog/teaching-english-one-to-one.html",
       "section": "/blog",
-      "words": 3183,
+      "words": 3184,
       "inSitemap": true,
       "maxContainment": 0.034,
       "uniqueShare": 0.963,
@@ -1016,7 +1034,7 @@
     {
       "route": "/blog/using-ai-teacher-productivity.html",
       "section": "/blog",
-      "words": 872,
+      "words": 873,
       "inSitemap": true,
       "maxContainment": 0.348,
       "uniqueShare": 0.638,
@@ -1133,9 +1151,9 @@
     {
       "route": "/cefr-assessment",
       "section": "/ (root pages)",
-      "words": 800,
+      "words": 792,
       "inSitemap": true,
-      "maxContainment": 0.071,
+      "maxContainment": 0.072,
       "uniqueShare": 0.927,
       "nearest": "/tutor-operations"
     },
@@ -1205,28 +1223,28 @@
     {
       "route": "/edooqoo-vs-busyteacher.html",
       "section": "/ (root pages)",
-      "words": 878,
+      "words": 1061,
       "inSitemap": true,
-      "maxContainment": 0.842,
-      "uniqueShare": 0.128,
+      "maxContainment": 0.537,
+      "uniqueShare": 0.44,
       "nearest": "/edooqoo-vs-twee.html"
     },
     {
       "route": "/edooqoo-vs-chatgpt.html",
       "section": "/ (root pages)",
-      "words": 1144,
+      "words": 1334,
       "inSitemap": true,
-      "maxContainment": 0.613,
-      "uniqueShare": 0.385,
+      "maxContainment": 0.417,
+      "uniqueShare": 0.581,
       "nearest": "/edooqoo-vs-busyteacher.html"
     },
     {
       "route": "/edooqoo-vs-twee.html",
       "section": "/ (root pages)",
-      "words": 871,
+      "words": 1099,
       "inSitemap": true,
-      "maxContainment": 0.85,
-      "uniqueShare": 0.137,
+      "maxContainment": 0.517,
+      "uniqueShare": 0.473,
       "nearest": "/edooqoo-vs-busyteacher.html"
     },
     {
@@ -1313,10 +1331,10 @@
     {
       "route": "/esl-exercise-design",
       "section": "/ (root pages)",
-      "words": 673,
+      "words": 666,
       "inSitemap": true,
-      "maxContainment": 0.068,
-      "uniqueShare": 0.932,
+      "maxContainment": 0.069,
+      "uniqueShare": 0.931,
       "nearest": "/teaching-english-pronunciation"
     },
     {
@@ -1340,82 +1358,82 @@
     {
       "route": "/esl-worksheets/business-email/b1-intermediate",
       "section": "/esl-worksheets",
-      "words": 511,
+      "words": 621,
       "inSitemap": true,
-      "maxContainment": 0.895,
-      "uniqueShare": 0.105,
+      "maxContainment": 0.767,
+      "uniqueShare": 0.233,
       "nearest": "/esl-worksheets/business-email/b2-upper-intermediate"
     },
     {
       "route": "/esl-worksheets/business-email/b2-upper-intermediate",
       "section": "/esl-worksheets",
-      "words": 512,
+      "words": 621,
       "inSitemap": true,
-      "maxContainment": 0.893,
-      "uniqueShare": 0.046,
+      "maxContainment": 0.767,
+      "uniqueShare": 0.042,
       "nearest": "/esl-worksheets/business-email/b1-intermediate"
     },
     {
       "route": "/esl-worksheets/collocations/c1-advanced",
       "section": "/esl-worksheets",
-      "words": 510,
+      "words": 605,
       "inSitemap": true,
-      "maxContainment": 0.7,
-      "uniqueShare": 0.3,
+      "maxContainment": 0.734,
+      "uniqueShare": 0.266,
       "nearest": "/esl-worksheets/news-media/c1-advanced"
     },
     {
       "route": "/esl-worksheets/environment/b2-upper-intermediate",
       "section": "/esl-worksheets",
-      "words": 513,
+      "words": 622,
       "inSitemap": true,
-      "maxContainment": 0.66,
-      "uniqueShare": 0.312,
+      "maxContainment": 0.704,
+      "uniqueShare": 0.278,
       "nearest": "/esl-worksheets/business-email/b2-upper-intermediate"
     },
     {
       "route": "/esl-worksheets",
       "section": "/ (root pages)",
-      "words": 882,
+      "words": 875,
       "inSitemap": true,
       "maxContainment": 0.006,
-      "uniqueShare": 0.986,
+      "uniqueShare": 0.987,
       "nearest": "/cefr-assessment"
     },
     {
       "route": "/esl-worksheets/news-media/c1-advanced",
       "section": "/esl-worksheets",
-      "words": 536,
+      "words": 633,
       "inSitemap": true,
-      "maxContainment": 0.669,
-      "uniqueShare": 0.329,
+      "maxContainment": 0.704,
+      "uniqueShare": 0.294,
       "nearest": "/esl-worksheets/phrasal-verbs/c1-advanced"
     },
     {
       "route": "/esl-worksheets/phrasal-verbs/c1-advanced",
       "section": "/esl-worksheets",
-      "words": 501,
+      "words": 597,
       "inSitemap": true,
-      "maxContainment": 0.717,
-      "uniqueShare": 0.281,
+      "maxContainment": 0.747,
+      "uniqueShare": 0.251,
       "nearest": "/esl-worksheets/news-media/c1-advanced"
     },
     {
       "route": "/esl-worksheets/travel-vocabulary/a2-elementary",
       "section": "/esl-worksheets",
-      "words": 507,
+      "words": 616,
       "inSitemap": true,
-      "maxContainment": 0.714,
-      "uniqueShare": 0.286,
+      "maxContainment": 0.752,
+      "uniqueShare": 0.248,
       "nearest": "/esl-worksheets/weather/a2-elementary"
     },
     {
       "route": "/esl-worksheets/weather/a2-elementary",
       "section": "/esl-worksheets",
-      "words": 510,
+      "words": 619,
       "inSitemap": true,
-      "maxContainment": 0.71,
-      "uniqueShare": 0.29,
+      "maxContainment": 0.748,
+      "uniqueShare": 0.252,
       "nearest": "/esl-worksheets/travel-vocabulary/a2-elementary"
     },
     {
@@ -1432,23 +1450,14 @@
       "section": "/ (root pages)",
       "words": 1095,
       "inSitemap": true,
-      "maxContainment": 0.028,
-      "uniqueShare": 0.972,
-      "nearest": "/exercise-types.html"
-    },
-    {
-      "route": "/exercise-types.html",
-      "section": "/ (root pages)",
-      "words": 725,
-      "inSitemap": false,
-      "maxContainment": 0.042,
-      "uniqueShare": 0.947,
-      "nearest": "/exercise-types"
+      "maxContainment": 0,
+      "uniqueShare": 1,
+      "nearest": ""
     },
     {
       "route": "/features/calendar",
       "section": "/features",
-      "words": 346,
+      "words": 347,
       "inSitemap": true,
       "maxContainment": 0.115,
       "uniqueShare": 0.885,
@@ -1484,28 +1493,28 @@
     {
       "route": "/features/live-sessions",
       "section": "/features",
-      "words": 252,
+      "words": 254,
       "inSitemap": true,
-      "maxContainment": 0.163,
-      "uniqueShare": 0.833,
+      "maxContainment": 0.162,
+      "uniqueShare": 0.834,
       "nearest": "/features/homework"
     },
     {
       "route": "/features/placement-test",
       "section": "/features",
-      "words": 361,
+      "words": 362,
       "inSitemap": true,
-      "maxContainment": 0.105,
+      "maxContainment": 0.104,
       "uniqueShare": 0.873,
       "nearest": "/features/live-sessions"
     },
     {
       "route": "/features/student-hub",
       "section": "/features",
-      "words": 257,
+      "words": 258,
       "inSitemap": true,
-      "maxContainment": 0.156,
-      "uniqueShare": 0.84,
+      "maxContainment": 0.155,
+      "uniqueShare": 0.841,
       "nearest": "/features/calendar"
     },
     {
@@ -1567,18 +1576,9 @@
       "section": "/ (root pages)",
       "words": 1242,
       "inSitemap": true,
-      "maxContainment": 0.791,
-      "uniqueShare": 0.209,
-      "nearest": "/glossary.html"
-    },
-    {
-      "route": "/glossary.html",
-      "section": "/ (root pages)",
-      "words": 1283,
-      "inSitemap": false,
-      "maxContainment": 0.765,
-      "uniqueShare": 0.22,
-      "nearest": "/glossary"
+      "maxContainment": 0,
+      "uniqueShare": 1,
+      "nearest": ""
     },
     {
       "route": "/grammar-worksheet-generator.html",
@@ -1608,21 +1608,12 @@
       "nearest": "/one-minute-prep"
     },
     {
-      "route": "/how-it-works.html",
-      "section": "/ (root pages)",
-      "words": 612,
-      "inSitemap": false,
-      "maxContainment": 0.012,
-      "uniqueShare": 0.987,
-      "nearest": "/how-to-create-english-worksheets-with-ai.html"
-    },
-    {
       "route": "/how-to-create-english-worksheets-with-ai.html",
       "section": "/ (root pages)",
       "words": 1840,
       "inSitemap": true,
       "maxContainment": 0.107,
-      "uniqueShare": 0.876,
+      "uniqueShare": 0.877,
       "nearest": "/modal-verbs-worksheets-esl.html"
     },
     {
@@ -1880,20 +1871,11 @@
     {
       "route": "/resources",
       "section": "/ (root pages)",
-      "words": 52,
+      "words": 53,
       "inSitemap": true,
-      "maxContainment": 0.311,
-      "uniqueShare": 0.689,
-      "nearest": "/resources.html"
-    },
-    {
-      "route": "/resources.html",
-      "section": "/ (root pages)",
-      "words": 544,
-      "inSitemap": false,
-      "maxContainment": 0.027,
-      "uniqueShare": 0.955,
-      "nearest": "/resources"
+      "maxContainment": 0,
+      "uniqueShare": 1,
+      "nearest": ""
     },
     {
       "route": "/spaced-repetition-flashcards-esl.html",
@@ -1925,10 +1907,10 @@
     {
       "route": "/teaching-english-pronunciation",
       "section": "/ (root pages)",
-      "words": 638,
+      "words": 631,
       "inSitemap": true,
-      "maxContainment": 0.08,
-      "uniqueShare": 0.919,
+      "maxContainment": 0.081,
+      "uniqueShare": 0.918,
       "nearest": "/cefr-assessment"
     },
     {
@@ -1952,7 +1934,7 @@
     {
       "route": "/tools",
       "section": "/ (root pages)",
-      "words": 71,
+      "words": 65,
       "inSitemap": true,
       "maxContainment": 0,
       "uniqueShare": 1,
@@ -1979,10 +1961,10 @@
     {
       "route": "/tools/what-should-i-teach-next",
       "section": "/tools",
-      "words": 375,
+      "words": 365,
       "inSitemap": true,
-      "maxContainment": 0.167,
-      "uniqueShare": 0.83,
+      "maxContainment": 0.17,
+      "uniqueShare": 0.827,
       "nearest": "/what-to-teach-next/accountant-variance-call"
     },
     {
@@ -1997,10 +1979,10 @@
     {
       "route": "/tutor-operations",
       "section": "/ (root pages)",
-      "words": 678,
+      "words": 672,
       "inSitemap": true,
-      "maxContainment": 0.082,
-      "uniqueShare": 0.918,
+      "maxContainment": 0.083,
+      "uniqueShare": 0.917,
       "nearest": "/cefr-assessment"
     },
     {
@@ -2015,10 +1997,10 @@
     {
       "route": "/what-to-teach-next/accountant-variance-call",
       "section": "/what-to-teach-next",
-      "words": 259,
+      "words": 262,
       "inSitemap": true,
-      "maxContainment": 0.27,
-      "uniqueShare": 0.73,
+      "maxContainment": 0.267,
+      "uniqueShare": 0.733,
       "nearest": "/what-to-teach-next/consultant-executive-summary"
     },
     {
@@ -2042,19 +2024,19 @@
     {
       "route": "/what-to-teach-next/hr-performance-conversation",
       "section": "/what-to-teach-next",
-      "words": 252,
+      "words": 254,
       "inSitemap": true,
-      "maxContainment": 0.282,
-      "uniqueShare": 0.718,
+      "maxContainment": 0.279,
+      "uniqueShare": 0.721,
       "nearest": "/what-to-teach-next/job-interview-achievement"
     },
     {
       "route": "/what-to-teach-next/ielts-task-2-paragraph",
       "section": "/what-to-teach-next",
-      "words": 273,
+      "words": 275,
       "inSitemap": true,
-      "maxContainment": 0.256,
-      "uniqueShare": 0.741,
+      "maxContainment": 0.254,
+      "uniqueShare": 0.743,
       "nearest": "/what-to-teach-next/accountant-variance-call"
     },
     {
@@ -2063,7 +2045,7 @@
       "words": 640,
       "inSitemap": true,
       "maxContainment": 0.098,
-      "uniqueShare": 0.902,
+      "uniqueShare": 0.899,
       "nearest": "/what-to-teach-next/ielts-task-2-paragraph"
     },
     {
@@ -2078,25 +2060,25 @@
     {
       "route": "/what-to-teach-next/lawyer-client-explanation",
       "section": "/what-to-teach-next",
-      "words": 254,
+      "words": 255,
       "inSitemap": true,
-      "maxContainment": 0.283,
-      "uniqueShare": 0.717,
+      "maxContainment": 0.282,
+      "uniqueShare": 0.718,
       "nearest": "/what-to-teach-next/travel-disruption"
     },
     {
       "route": "/what-to-teach-next/marketing-campaign-recommendation",
       "section": "/what-to-teach-next",
-      "words": 252,
+      "words": 255,
       "inSitemap": true,
-      "maxContainment": 0.278,
+      "maxContainment": 0.274,
       "uniqueShare": 0.722,
       "nearest": "/what-to-teach-next/accountant-variance-call"
     },
     {
       "route": "/what-to-teach-next/project-manager-status-update",
       "section": "/what-to-teach-next",
-      "words": 297,
+      "words": 298,
       "inSitemap": true,
       "maxContainment": 0.241,
       "uniqueShare": 0.759,
@@ -2105,73 +2087,73 @@
     {
       "route": "/what-to-teach-next/sales-discovery-call",
       "section": "/what-to-teach-next",
-      "words": 283,
+      "words": 284,
       "inSitemap": true,
-      "maxContainment": 0.246,
-      "uniqueShare": 0.754,
+      "maxContainment": 0.245,
+      "uniqueShare": 0.755,
       "nearest": "/what-to-teach-next/accountant-variance-call"
     },
     {
       "route": "/what-to-teach-next/software-engineer-incident-explanation",
       "section": "/what-to-teach-next",
-      "words": 270,
+      "words": 271,
       "inSitemap": true,
-      "maxContainment": 0.266,
-      "uniqueShare": 0.734,
+      "maxContainment": 0.265,
+      "uniqueShare": 0.735,
       "nearest": "/what-to-teach-next/travel-disruption"
     },
     {
       "route": "/what-to-teach-next/travel-disruption",
       "section": "/what-to-teach-next",
-      "words": 249,
+      "words": 252,
       "inSitemap": true,
-      "maxContainment": 0.289,
-      "uniqueShare": 0.707,
+      "maxContainment": 0.286,
+      "uniqueShare": 0.706,
       "nearest": "/what-to-teach-next/lawyer-client-explanation"
     },
     {
       "route": "/worksheets/collocations-match/meetings",
       "section": "/worksheets",
-      "words": 439,
+      "words": 543,
       "inSitemap": true,
-      "maxContainment": 0.866,
-      "uniqueShare": 0.134,
+      "maxContainment": 0.688,
+      "uniqueShare": 0.312,
       "nearest": "/worksheets/error-correction/meetings"
     },
     {
       "route": "/worksheets/error-correction/business-email",
       "section": "/worksheets",
-      "words": 446,
+      "words": 553,
       "inSitemap": true,
-      "maxContainment": 0.633,
-      "uniqueShare": 0.13,
+      "maxContainment": 0.705,
+      "uniqueShare": 0.104,
       "nearest": "/worksheets/error-correction/present-perfect"
     },
     {
       "route": "/worksheets/error-correction/meetings",
       "section": "/worksheets",
-      "words": 439,
+      "words": 546,
       "inSitemap": true,
-      "maxContainment": 0.866,
-      "uniqueShare": 0.016,
-      "nearest": "/worksheets/collocations-match/meetings"
+      "maxContainment": 0.714,
+      "uniqueShare": 0.019,
+      "nearest": "/worksheets/error-correction/present-perfect"
     },
     {
       "route": "/worksheets/error-correction/present-perfect",
       "section": "/worksheets",
-      "words": 455,
+      "words": 562,
       "inSitemap": true,
-      "maxContainment": 0.621,
-      "uniqueShare": 0.357,
+      "maxContainment": 0.694,
+      "uniqueShare": 0.288,
       "nearest": "/worksheets/error-correction/business-email"
     },
     {
       "route": "/worksheets/gap-fill/ielts-writing-task-2",
       "section": "/worksheets",
-      "words": 456,
+      "words": 544,
       "inSitemap": true,
-      "maxContainment": 0.523,
-      "uniqueShare": 0.477,
+      "maxContainment": 0.428,
+      "uniqueShare": 0.572,
       "nearest": "/worksheets/error-correction/present-perfect"
     },
     {
