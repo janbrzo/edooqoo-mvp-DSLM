@@ -99,6 +99,14 @@ const ExerciseTopicPage: React.FC = () => {
         { value: 'Public', label: 'Citable workflow pages' },
       ]}
       decisionCriteria={policy}
+      guidanceSection={exerciseMechanic ? {
+        heading: `How the ${exercise.label} mechanic works`,
+        items: [
+          { title: 'The mechanic', body: exerciseMechanic.mechanic },
+          { title: 'Worked example', body: exerciseMechanic.workedExample },
+          { title: 'What makes a good item', body: exerciseMechanic.answerNote },
+        ],
+      } : undefined}
       related={{
         heading: 'Related worksheet templates',
         items: [...levelLinks, ...otherExercises, ...otherTopics],

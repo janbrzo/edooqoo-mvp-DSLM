@@ -139,6 +139,15 @@ const TopicLevelPage: React.FC = () => {
         { value: '2', label: 'Free worksheets / month' },
       ]}
       decisionCriteria={policy}
+      guidanceSection={levelGuidance ? {
+        heading: `What changes at ${levelGuidance.cefr} in adult 1:1 teaching`,
+        intro: `The same ${topic.label} objective is taught differently depending on where the adult learner actually is. This is how experienced tutors adjust the work at ${levelGuidance.cefr}.`,
+        items: [
+          { title: 'Teaching focus', body: levelGuidance.focus },
+          { title: 'Task design', body: levelGuidance.taskDesign },
+          { title: 'Common pitfall', body: levelGuidance.pitfall },
+        ],
+      } : undefined}
       related={{
         heading: `More ${topic.label} and ${level.cefr} resources`,
         items: [...generatorLinks, ...otherLevels, ...sameCategoryTopics, ...exerciseLinks, ...personaLinks],
