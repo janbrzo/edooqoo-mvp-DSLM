@@ -68,6 +68,7 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
   decisionCriteria,
   related,
   faqs,
+  guidanceSection,
   extraJsonLd,
 }) => {
   const location = useLocation();
@@ -153,6 +154,23 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
             ))}
           </ol>
         </section>
+
+        {guidanceSection && (
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-foreground mb-4">{guidanceSection.heading}</h2>
+            {guidanceSection.intro && (
+              <p className="text-muted-foreground mb-4">{guidanceSection.intro}</p>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {guidanceSection.items.map((item) => (
+                <div key={item.title} className="rounded-lg border bg-card p-4">
+                  <div className="font-semibold text-foreground text-sm mb-1">{item.title}</div>
+                  <div className="text-sm text-muted-foreground">{item.body}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mb-10 grid grid-cols-2 md:grid-cols-4 gap-3">
           {trustNumbers.map((n, i) => (
