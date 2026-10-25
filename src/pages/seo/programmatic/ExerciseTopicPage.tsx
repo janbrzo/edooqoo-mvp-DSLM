@@ -33,6 +33,7 @@ const ExerciseTopicPage: React.FC = () => {
     ? `${policy.useCase} This ${exercise.label.toLowerCase()} page narrows that objective to one teacher-editable practice mechanic and one observable quality criterion.`
     : `Build a ${exercise.label.toLowerCase()} worksheet on ${topic.label} for a selected CEFR level. This combination remains available but is not indexed without a distinct teaching rationale.`;
   const path = `/worksheets/${exercise.slug}/${topic.slug}`;
+  const exerciseMechanic = getExerciseMechanic(exercise.slug);
 
   const levelLinks = PSEO_LEVELS.filter((level) =>
     isIndexableTopicLevel(topic.slug, level.slug)

@@ -36,6 +36,7 @@ const TopicLevelPage: React.FC = () => {
     : `Edooqoo can draft ${topic.label} practice for ${level.cefr} adult learners, but this combination is not part of the current public indexing set because it does not yet have a distinct teaching rationale.`;
 
   const path = `/esl-worksheets/${topic.slug}/${level.slug}`;
+  const levelGuidance = getLevelGuidance(level.cefr);
 
   const otherLevels = PSEO_LEVELS.filter(
     (candidateLevel) =>
