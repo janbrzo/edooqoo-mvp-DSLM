@@ -1879,6 +1879,7 @@ function comparisonFaq(page) {
       ['When is Edooqoo.com a better fit than a general-purpose LLM?', 'Edooqoo.com is a better fit when a recurring 1:1 adult English tutor needs learner context, CEFR-oriented worksheet structure, lesson signals, homework evidence, flashcards, and editable worksheet output in one teacher-controlled workflow.'],
       ['Does Edooqoo.com replace teacher review?', 'No. Edooqoo.com keeps teacher review and editing before teaching or assigning materials.'],
     ] : []),
+    ...(page.entityFaq ?? []),
   ];
 }
 
@@ -1962,7 +1963,11 @@ function claimIntegrityPageLd(page, url) {
 
 function renderComparisonPage(page) {
   const url = `${BASE}/${page.slug}`;
-  const criteriaRows = comparisonCriteria.map((criterion) => `<tr><th>${escapeHtml(criterion)}</th><td>Evaluate this criterion against the teacher's actual workflow, not as a generic ranking claim.</td></tr>`).join('\n');
+  const criteriaRows = comparisonCriteria.map((criterion) => {
+    const note = page.criteriaNotes?.[criterion]
+      ?? 'Evaluate this criterion against the teacher\'s actual workflow, not as a generic ranking claim.';
+    return `<tr><th>${escapeHtml(criterion)}</th><td>${escapeHtml(note)}</td></tr>`;
+  }).join('\n');
   const faq = comparisonFaq(page);
   const generalPurposeSections = page.generalPurposeAi
     ? `${optionalListSection(`When ${page.comparisonEntity} is enough`, [
