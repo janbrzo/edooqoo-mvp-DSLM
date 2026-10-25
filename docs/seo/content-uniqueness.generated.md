@@ -10,9 +10,9 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 |---|---:|
 | Indexable static pages analysed | 238 |
 | Canonicalized aliases skipped | 4 |
-| Templated (maxContainment >= 0.5) | 30 (13%) |
-| Near-duplicate (maxContainment >= 0.8) | 4 (2%) |
-| Templated pages listed in sitemap.xml | 30 |
+| Templated (maxContainment >= 0.5) | 29 (12%) |
+| Near-duplicate (maxContainment >= 0.8) | 0 (0%) |
+| Templated pages listed in sitemap.xml | 29 |
 
 ## By section
 
@@ -21,9 +21,9 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /blog | 107 | 10 (9%) | 0 |
 | / (root pages) | 89 | 4 (4%) | 0 |
 | /what-to-teach-next | 12 | 0 (0%) | 0 |
-| /esl-worksheets | 8 | 8 (100%) | 2 |
+| /esl-worksheets | 8 | 8 (100%) | 0 |
 | /features | 7 | 0 (0%) | 0 |
-| /worksheets | 5 | 5 (100%) | 2 |
+| /worksheets | 5 | 4 (80%) | 0 |
 | /tools | 4 | 0 (0%) | 0 |
 | /english-for | 3 | 3 (100%) | 0 |
 | /authors | 2 | 0 (0%) | 0 |
@@ -33,25 +33,24 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Route | maxContainment | uniqueShare | Words | Nearest page |
 |---|---:|---:|---:|---|
-| /esl-worksheets/business-email/b1-intermediate | 0.895 | 0.105 | 511 | /esl-worksheets/business-email/b2-upper-intermediate |
-| /esl-worksheets/business-email/b2-upper-intermediate | 0.893 | 0.046 | 512 | /esl-worksheets/business-email/b1-intermediate |
-| /worksheets/collocations-match/meetings | 0.866 | 0.134 | 439 | /worksheets/error-correction/meetings |
-| /worksheets/error-correction/meetings | 0.866 | 0.016 | 439 | /worksheets/collocations-match/meetings |
 | /ai-tools-for-private-english-tutors.html | 0.791 | 0.182 | 546 | /chatgpt-alternative-for-english-tutors.html |
 | /chatgpt-alternative-for-english-tutors.html | 0.776 | 0.195 | 572 | /ai-tools-for-private-english-tutors.html |
-| /esl-worksheets/phrasal-verbs/c1-advanced | 0.717 | 0.281 | 501 | /esl-worksheets/news-media/c1-advanced |
-| /esl-worksheets/travel-vocabulary/a2-elementary | 0.714 | 0.286 | 507 | /esl-worksheets/weather/a2-elementary |
-| /esl-worksheets/weather/a2-elementary | 0.71 | 0.29 | 510 | /esl-worksheets/travel-vocabulary/a2-elementary |
-| /esl-worksheets/collocations/c1-advanced | 0.7 | 0.3 | 510 | /esl-worksheets/news-media/c1-advanced |
+| /esl-worksheets/business-email/b1-intermediate | 0.767 | 0.233 | 621 | /esl-worksheets/business-email/b2-upper-intermediate |
+| /esl-worksheets/business-email/b2-upper-intermediate | 0.767 | 0.042 | 621 | /esl-worksheets/business-email/b1-intermediate |
+| /esl-worksheets/travel-vocabulary/a2-elementary | 0.752 | 0.248 | 616 | /esl-worksheets/weather/a2-elementary |
+| /esl-worksheets/weather/a2-elementary | 0.748 | 0.252 | 619 | /esl-worksheets/travel-vocabulary/a2-elementary |
+| /esl-worksheets/phrasal-verbs/c1-advanced | 0.747 | 0.251 | 597 | /esl-worksheets/news-media/c1-advanced |
+| /esl-worksheets/collocations/c1-advanced | 0.734 | 0.266 | 605 | /esl-worksheets/news-media/c1-advanced |
+| /worksheets/error-correction/meetings | 0.714 | 0.019 | 546 | /worksheets/error-correction/present-perfect |
+| /worksheets/error-correction/business-email | 0.705 | 0.104 | 553 | /worksheets/error-correction/present-perfect |
+| /esl-worksheets/environment/b2-upper-intermediate | 0.704 | 0.278 | 622 | /esl-worksheets/business-email/b2-upper-intermediate |
+| /esl-worksheets/news-media/c1-advanced | 0.704 | 0.294 | 633 | /esl-worksheets/phrasal-verbs/c1-advanced |
+| /worksheets/error-correction/present-perfect | 0.694 | 0.288 | 562 | /worksheets/error-correction/business-email |
+| /worksheets/collocations-match/meetings | 0.688 | 0.312 | 543 | /worksheets/error-correction/meetings |
 | /english-for/hr-professionals | 0.672 | 0.323 | 446 | /english-for/sales-reps |
-| /esl-worksheets/news-media/c1-advanced | 0.669 | 0.329 | 536 | /esl-worksheets/phrasal-verbs/c1-advanced |
-| /esl-worksheets/environment/b2-upper-intermediate | 0.66 | 0.312 | 513 | /esl-worksheets/business-email/b2-upper-intermediate |
 | /english-for/sales-reps | 0.658 | 0.339 | 455 | /english-for/hr-professionals |
-| /worksheets/error-correction/business-email | 0.633 | 0.13 | 446 | /worksheets/error-correction/present-perfect |
-| /worksheets/error-correction/present-perfect | 0.621 | 0.357 | 455 | /worksheets/error-correction/business-email |
 | /english-for/software-engineers | 0.598 | 0.402 | 455 | /english-for/hr-professionals |
 | /edooqoo-vs-busyteacher.html | 0.537 | 0.44 | 1061 | /edooqoo-vs-twee.html |
-| /worksheets/gap-fill/ielts-writing-task-2 | 0.523 | 0.477 | 456 | /worksheets/error-correction/present-perfect |
 | /blog/teacher-burnout-prevention-esl.html | 0.518 | 0.48 | 1321 | /blog/lesson-sequencing-scaffolding-curriculum.html |
 | /edooqoo-vs-twee.html | 0.517 | 0.473 | 1099 | /edooqoo-vs-busyteacher.html |
 | /blog/personalized-learning-english-teaching.html | 0.512 | 0.472 | 1310 | /blog/lesson-sequencing-scaffolding-curriculum.html |
@@ -73,6 +72,7 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /one-to-one-english-lesson-planner.html | 0.433 | 0.557 | 714 | /private-english-tutor-crm.html |
 | /online-esl-homework-tool.html | 0.432 | 0.565 | 718 | /ai-lesson-planning-for-english-teachers.html |
 | /business-english-worksheet-generator.html | 0.43 | 0.528 | 647 | /adult-business-english-lesson-prep.html |
+| /worksheets/gap-fill/ielts-writing-task-2 | 0.428 | 0.572 | 544 | /worksheets/error-correction/present-perfect |
 
 ## How to read this
 
