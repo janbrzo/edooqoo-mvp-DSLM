@@ -15,6 +15,7 @@ import {
   isIndexableTopicLevel,
 } from '@/lib/seo/pseoIndexPolicy';
 import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
+import { getLevelGuidance } from '@/constants/pseoLevelGuidance';
 
 const TopicLevelPage: React.FC = () => {
   const { topic: topicSlug = '', level: levelSlug = '' } = useParams();

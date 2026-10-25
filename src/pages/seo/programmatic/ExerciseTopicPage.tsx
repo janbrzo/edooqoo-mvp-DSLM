@@ -13,6 +13,7 @@ import {
   isIndexableTopicLevel,
 } from '@/lib/seo/pseoIndexPolicy';
 import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
+import { getExerciseMechanic } from '@/constants/pseoExerciseMechanics';
 
 const ExerciseTopicPage: React.FC = () => {
   const { exerciseType: exSlug = '', topic: topicSlug = '' } = useParams();
