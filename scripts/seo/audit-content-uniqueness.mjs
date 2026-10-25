@@ -200,7 +200,7 @@ ${worst.map((row) => `| ${row.route} | ${row.maxContainment} | ${row.uniqueShare
 `;
 
 fs.writeFileSync(REPORT_MD, md);
-fs.writeFileSync(REPORT_JSON, `${JSON.stringify({ shingleSize: SHINGLE, thresholds: { templated: TEMPLATED, nearDuplicate: NEAR_DUPLICATE }, rows }, null, 2)}\n`);
+fs.writeFileSync(REPORT_JSON, `${JSON.stringify({ shingleSize: SHINGLE, thresholds: { templated: TEMPLATED, nearDuplicate: NEAR_DUPLICATE }, canonicalAliases, rows }, null, 2)}\n`);
 
 console.log(`[content-uniqueness] ${rows.length} indexable pages, ${templated.length} templated (>=${TEMPLATED}), ${nearDuplicates.length} near-duplicate (>=${NEAR_DUPLICATE}).`);
 console.log(`[content-uniqueness] report: ${path.relative(ROOT, REPORT_MD)}`);
