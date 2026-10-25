@@ -175,6 +175,7 @@ Method: visible body text of every indexable static HTML page in \`public/\` (na
 | Metric | Value |
 |---|---:|
 | Indexable static pages analysed | ${rows.length} |
+| Canonicalized aliases skipped | ${canonicalAliases.length} |
 | Templated (maxContainment >= ${TEMPLATED}) | ${templated.length} (${pct(templated.length, rows.length)}) |
 | Near-duplicate (maxContainment >= ${NEAR_DUPLICATE}) | ${nearDuplicates.length} (${pct(nearDuplicates.length, rows.length)}) |
 | Templated pages listed in sitemap.xml | ${templated.filter((row) => row.inSitemap).length} |
