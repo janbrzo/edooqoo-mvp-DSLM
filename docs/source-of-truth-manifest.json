@@ -26077,6 +26077,11 @@
               "optional": false
             },
             {
+              "name": "guidanceSection",
+              "type": "{ heading: string; intro?: string; items: { title: string; body: string }[] }",
+              "optional": true
+            },
+            {
               "name": "extraJsonLd",
               "type": "Record<string, unknown> | Record<string, unknown>[]",
               "optional": true
