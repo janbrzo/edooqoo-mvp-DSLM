@@ -25,14 +25,14 @@
       "type": "static-landing",
       "state": "hold",
       "incoming": 98,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/edooqoo-vs-chatgpt.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 105,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/esl-exercise-design",
@@ -59,7 +59,7 @@
       "route": "/gallery",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 80,
+      "incoming": 82,
       "outgoing": 47
     },
     {
@@ -109,14 +109,14 @@
       "type": "static-landing",
       "state": "hold",
       "incoming": 93,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/edooqoo-vs-twee.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 89,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/blog/ai-lesson-planning-strategies.html",
@@ -263,35 +263,35 @@
       "type": "static-landing",
       "state": "keep",
       "incoming": 18,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/ai-grading-tool-for-english-homework.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 27,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/ai-lesson-planning-for-english-teachers.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 11,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 102,
-      "outgoing": 10
+      "outgoing": 13
     },
     {
       "route": "/ai-worksheet-generator-for-english-teachers.html",
       "type": "static-landing",
       "state": "keep",
       "incoming": 42,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/articles-a-an-the-worksheets.html",
@@ -319,7 +319,7 @@
       "type": "static-landing",
       "state": "hold",
       "incoming": 5,
-      "outgoing": 18
+      "outgoing": 20
     },
     {
       "route": "/blog/adult-esl-student-profile-lesson-planning.html",
