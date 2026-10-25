@@ -93,14 +93,20 @@ const sitemap = fs.existsSync(SITEMAP) ? fs.readFileSync(SITEMAP, 'utf8') : '';
 const inSitemap = (route) => sitemap.includes(`edooqoo.com${route}<`);
 
 const pages = [];
+const canonicalAliases = [];
 for (const file of walk(PUBLIC_DIR)) {
   const html = fs.readFileSync(file, 'utf8');
   if (isNoindex(html)) continue;
+  const route = routeFor(file);
+  const canonical = canonicalRoute(html);
+  if (canonical && canonical !== route) {
+    canonicalAliases.push({ route, canonical });
+    continue;
+  }
   const words = visibleWords(html);
   const shingles = new Set();
   for (let i = 0; i + SHINGLE <= words.length; i += 1) shingles.add(words.slice(i, i + SHINGLE).join(' '));
   if (shingles.size === 0) continue;
-  const route = routeFor(file);
   pages.push({ route, section: sectionFor(route), words: words.length, inSitemap: inSitemap(route), shingles });
 }
 
