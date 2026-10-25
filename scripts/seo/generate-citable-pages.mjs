@@ -1992,6 +1992,10 @@ function renderComparisonPage(page) {
     <h2>Summary</h2>
     <p>${escapeHtml(page.summary)}</p>
   </section>
+  ${page.entityProfile?.length ? `<section>
+    <h2>What each product is</h2>
+    ${page.entityProfile.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('\n    ')}
+  </section>` : ''}
   <section>
     <h2>The 1:1 Teaching Bottleneck</h2>
     ${list([
