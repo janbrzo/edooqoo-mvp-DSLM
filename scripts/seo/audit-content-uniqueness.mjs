@@ -56,6 +56,20 @@ function isNoindex(html) {
   return Boolean(robots && /noindex/i.test(robots[0]));
 }
 
+// Canonicalized aliases (e.g. /glossary.html -> /glossary) are consolidated by design:
+// their canonical points at another route, so they must not count as duplicate content.
+function canonicalRoute(html) {
+  const link = html.match(/<link[^>]+rel=["']canonical["'][^>]*>/i);
+  if (!link) return null;
+  const href = link[0].match(/href=["']([^"']+)["']/i);
+  if (!href) return null;
+  try {
+    return new URL(href[1], 'https://edooqoo.com').pathname.replace(/\/+$/, '') || '/';
+  } catch {
+    return null;
+  }
+}
+
 function visibleWords(html) {
   const body = html
     .replace(/<(script|style|nav|footer|header|aside|noscript)\b[\s\S]*?<\/\1>/gi, ' ')
