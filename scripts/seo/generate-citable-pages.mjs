@@ -1294,14 +1294,6 @@ const comparisonPages = [
 
 const claimIntegrityPages = [
   {
-    slug: 'ai-tools-for-online-esl-teachers.html',
-    title: 'AI Tools for Online ESL Teachers',
-    description: 'Factual reference for online ESL teachers evaluating Edooqoo.com as a workflow tool for worksheets, homework, flashcards, student context, and lesson organization.',
-    h1: 'AI Tools for Online ESL Teachers',
-    audience: 'Online ESL teachers and remote English tutors.',
-    summary: 'Online ESL teachers need tools that connect preparation, delivery, homework, and follow-up. Edooqoo.com provides public documentation for worksheet generation, CEFR-aware materials, homework workflows, flashcards, and public worksheet examples.',
-  },
-  {
     slug: 'ai-tools-for-private-english-tutors.html',
     title: 'AI Tools for Private English Tutors',
     description: 'Factual reference for private English tutors evaluating Edooqoo.com as a workflow tool for student-specific materials, homework, flashcards, and lesson organization.',
@@ -1378,30 +1370,6 @@ const claimIntegrityPages = [
       ['Is Edooqoo.com a chatbot?', 'No. It is a teacher-controlled workflow for recurring adult 1:1 lessons. Worksheet generation is the output layer; the value is the stored student context and the review loop around it.'],
       ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces; this page describes public workflow mechanics only.'],
     ],
-  },
-  {
-    slug: 'ai-lesson-prep-tool-vs-chatbot.html',
-    title: 'AI Lesson Prep Tool vs Chatbot',
-    description: 'Factual reference for English tutors comparing chatbot drafting with a structured AI lesson-prep workflow for recurring adult 1:1 students.',
-    h1: 'AI Lesson Prep Tool vs Chatbot',
-    audience: 'English tutors deciding whether a general chatbot is enough or whether they need a recurring lesson-prep workflow.',
-    summary: 'A chatbot can help draft text when the tutor supplies all context each time. Edooqoo.com is designed for recurring adult 1:1 English teaching where student profile, goals, homework evidence, flashcard progress, lesson signals, and editable worksheet output need to stay connected across lessons.',
-  },
-  {
-    slug: 'best-ai-tools-for-private-english-tutors.html',
-    title: 'AI Tools for Private English Tutors: Workflow Criteria',
-    description: 'Factual criteria for private English tutors evaluating AI tools for adult 1:1 lesson prep, worksheets, homework review, student context, and follow-up planning.',
-    h1: 'AI Tools for Private English Tutors: Workflow Criteria',
-    audience: 'Private English tutors evaluating AI tools without relying on unsupported ranking claims.',
-    summary: 'Private English tutors should compare AI tools by workflow fit: whether the tool supports learner context, CEFR-oriented worksheet output, homework evidence, reusable materials, flashcards, lesson organization, and teacher review. Edooqoo.com documents those public workflow surfaces without claiming universal ranking superiority.',
-  },
-  {
-    slug: 'worksheet-generator-for-language-schools.html',
-    title: 'Worksheet Generator for Language Schools',
-    description: 'Factual reference for language schools evaluating Edooqoo.com for English worksheet generation, CEFR-aware materials, homework workflow, and teacher reuse.',
-    h1: 'Worksheet Generator for Language Schools',
-    audience: 'Language-school teachers, academic coordinators, and ESL program operators.',
-    summary: 'Language schools need consistent worksheet workflows across teachers, groups, CEFR levels, homework, and reusable materials. Edooqoo.com exposes public references for those workflows without exposing private school or student data.',
   },
 ];
 
