@@ -6,23 +6,28 @@
  * seeded the same way: same row fields, the question id stored next to the
  * options, and the bank/form written to generation_params.
  */
-import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { questionDefsFor } from '@/lib/welcomeTest/flow';
 import type { NewQuestionData } from '@/types/studentTests';
 import {
-  WELCOME_TEST_BANK_SIZES,
   welcomeTestParams,
   type WelcomeTestForm,
   type WelcomeTestParams,
 } from '../../../supabase/functions/_shared/welcomeTestBank';
 
-/** The bank new tests are created from. */
+/**
+ * The bank new tests are created from. Bank 2 is ready but stays off until the four
+ * listening recordings (wt_q71, wt_q72, Forms A and B) exist: set to 2 to switch on.
+ */
 export const CURRENT_WELCOME_BANK = 1;
 
-/** The question definitions of one bank, in array (= question_index) order. */
-export function bankQuestions(bank: number = CURRENT_WELCOME_BANK) {
-  const size = WELCOME_TEST_BANK_SIZES[bank];
-  if (!size) throw new Error(`Unknown Welcome Test bank ${bank}`);
-  return ALL_WELCOME_TEST_QUESTIONS.slice(0, size);
+/** The question definitions of one bank and form, in array (= question_index) order. */
+export function bankQuestions(bank: number = CURRENT_WELCOME_BANK, form: WelcomeTestForm = 'A') {
+  return questionDefsFor(bank, form);
+}
+
+/** Attempts alternate forms (1 = A, 2 = B, 3 = A ...), so a retake never repeats the same items. */
+export function formForAttempt(attemptNumber: number): WelcomeTestForm {
+  return attemptNumber % 2 === 0 ? 'B' : 'A';
 }
 
 /** generation_params written on a new Welcome Test row. */
@@ -50,13 +55,14 @@ function seedFields(q: ReturnType<typeof bankQuestions>[number]) {
 /** For paths that insert through useStudentTests.addQuestions (it assigns question_index). */
 export function welcomeTestQuestionsToAdd(
   bank: number = CURRENT_WELCOME_BANK,
+  form: WelcomeTestForm = 'A',
 ): NewQuestionData[] {
-  return bankQuestions(bank).map(seedFields);
+  return bankQuestions(bank, form).map(seedFields);
 }
 
 /** For paths that insert rows directly (question_index set here). */
-export function welcomeTestSeedRows(testId: string, bank: number = CURRENT_WELCOME_BANK) {
-  return bankQuestions(bank).map((q, i) => ({
+export function welcomeTestSeedRows(testId: string, bank: number = CURRENT_WELCOME_BANK, form: WelcomeTestForm = 'A') {
+  return bankQuestions(bank, form).map((q, i) => ({
     test_id: testId,
     question_index: i,
     ...seedFields(q),

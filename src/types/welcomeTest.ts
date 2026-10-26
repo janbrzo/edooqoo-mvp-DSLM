@@ -20,6 +20,9 @@ export type WelcomeQuestionType =
   | 'speaking_record'      // Student records audio via microphone
   | 'listening_comprehension'; // Audio playback + answer
 
+import type { WelcomeTestCefr } from '../../supabase/functions/_shared/welcomeTestFlow';
+export type { WelcomeTestCefr };
+
 export type WelcomeTestSection =
   | 'about_you'
   | 'experience'
@@ -27,7 +30,8 @@ export type WelcomeTestSection =
   | 'grammar'
   | 'vocabulary'
   | 'communication'
-  | 'goals';
+  | 'goals'
+  | 'receptive';           // bank 2: Reading & Listening (between vocabulary and communication)
 
 // =====================================================
 // QUESTION DEFINITION (static, predefined)
@@ -52,6 +56,7 @@ export interface WelcomeTestQuestionDef {
   // Metadata for scoring/logging
   element_type?: 'grammar' | 'vocabulary' | 'reading' | 'writing' | 'speaking' | 'listening' | 'pronunciation' | null;
   difficulty_level?: number;         // 1-5
+  cefr?: WelcomeTestCefr;            // explicit CEFR level of a keyed item (drives the level ladder, bank 2)
   nano_skill?: string;              // e.g. "ns.grammar.third_person_s"
   scoring_logic: string;            // Description of what this question measures
   

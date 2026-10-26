@@ -40,6 +40,17 @@ export interface LevelEvidence {
   min_scored: number;
   min_answered: number;
   min_skills: number;
+  /** Bank 2 ladder only. */
+  method?: 'ladder';
+  per_level?: Record<string, LadderLevelCount>;
+  /** high: the level above the result was tested and failed. medium: it was not tested, or the top was reached. */
+  certainty?: 'high' | 'medium';
+  /** The first level that was tested and failed (null when none failed). */
+  boundary_level?: string | null;
+  /** The student reached C1, the highest level the test reports ("C1 or above"). */
+  reached_top?: boolean;
+  /** Even the lowest tested level was not secure: reported as A1. */
+  below_floor?: boolean;
 }
 
 /** Key inside the profile raw_answers JSON that stores the version of the stored level. */
@@ -120,6 +131,106 @@ export function estimateLevel(input: LevelInput): LevelEstimate {
   return { level, confidence, averageScore, scoredSkills: scored.map((s) => s[0]), version: LEVEL_ALGORITHM_VERSION, ...(evidence ? { evidence } : {}) };
 }
 
+/**
+ * Level algorithm 4 (bank 2): a ladder over the keyed items, each with its own CEFR level.
+ *
+ * A level is reached when at least LADDER_MIN_ITEMS of its items were scored and at
+ * least LADDER_PASS_RATIO of them are correct; the result is the highest level reached
+ * before the first level that was tested and failed. A level with fewer than
+ * LADDER_MIN_ITEMS scored items is skipped (the adaptive blocks do not show a student the
+ * levels far from their own, so a missing level is no evidence either way). C2 is never
+ * claimed: five C1 items cannot tell C1 from C2, so the top result is C1. The AI writing
+ * score is not part of the level (it is reported on its own).
+ * "I don't know" is a scored wrong answer; a skipped item is not scored.
+ */
+export const LADDER_LEVEL_ALGORITHM_VERSION = 4;
+export const LADDER_MIN_ITEMS = 2;
+export const LADDER_PASS_RATIO = 0.6;
+export const LADDER_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'] as const;
+
+export interface LadderItem {
+  id: string;
+  cefr: (typeof LADDER_LEVELS)[number];
+  /** grammar | vocabulary | reading | listening */
+  skill: string;
+  /** true/false = scored, null = not scored (skipped, needs review). */
+  correct: boolean | null;
+  /** The student chose "I don't know". */
+  idk: boolean;
+}
+
+export interface LadderLevelCount { scored: number; correct: number }
+
+export function estimateLevelLadder(
+  items: readonly LadderItem[],
+  selfAssessedLevel: string | null | undefined,
+): LevelEstimate {
+  const perLevel = {} as Record<string, LadderLevelCount>;
+  for (const level of LADDER_LEVELS) perLevel[level] = { scored: 0, correct: 0 };
+  const scoredItems = items.filter((i) => i.correct !== null);
+  for (const item of scoredItems) {
+    perLevel[item.cefr].scored += 1;
+    if (item.correct) perLevel[item.cefr].correct += 1;
+  }
+  const answeredItems = scoredItems.filter((i) => !i.idk).length;
+  const scoredSkills = new Set(scoredItems.map((i) => i.skill)).size;
+
+  const evidence: LevelEvidence = {
+    status: scoredItems.length >= MIN_SCORED_ITEMS && answeredItems >= MIN_ANSWERED_ITEMS
+      && scoredSkills >= MIN_SCORED_SKILLS ? 'ok' : 'insufficient',
+    scored_items: scoredItems.length,
+    answered_items: answeredItems,
+    scored_skills: scoredSkills,
+    min_scored: MIN_SCORED_ITEMS,
+    min_answered: MIN_ANSWERED_ITEMS,
+    min_skills: MIN_SCORED_SKILLS,
+    method: 'ladder',
+    per_level: perLevel,
+  };
+  const none = (): LevelEstimate => ({
+    level: null, confidence: null, averageScore: null, scoredSkills: [], version: LADDER_LEVEL_ALGORITHM_VERSION, evidence,
+  });
+  if (evidence.status === 'insufficient') return none();
+
+  let reached: string | null = null;
+  let failedAt: string | null = null;
+  let nextUntested = false;
+  for (const level of LADDER_LEVELS) {
+    const c = perLevel[level];
+    if (c.scored < LADDER_MIN_ITEMS) {
+      if (reached !== null && failedAt === null) nextUntested = true;
+      continue;
+    }
+    if (c.correct / c.scored >= LADDER_PASS_RATIO) {
+      reached = level;
+      nextUntested = false;
+    } else {
+      failedAt = level;
+      break;
+    }
+  }
+  if (reached === null && failedAt === null) return none();
+  const level = reached ?? 'A1';
+  evidence.reached_top = reached === 'C1';
+  evidence.below_floor = reached === null;
+  evidence.certainty = failedAt !== null && reached !== null ? 'high' : 'medium';
+  evidence.boundary_level = failedAt;
+  if (nextUntested) evidence.certainty = 'medium';
+
+  const estNum = LEVEL_MAP[level];
+  const selfNum = selfAssessedLevel ? LEVEL_MAP[selfAssessedLevel] : undefined;
+  const confidence: LevelConfidence | null = selfNum === undefined
+    ? null
+    : Math.abs(estNum - selfNum) <= 0.5 ? 'accurate' : selfNum > estNum ? 'overestimates' : 'underestimates';
+  const total = scoredItems.length;
+  const averageScore = total > 0 ? (scoredItems.filter((i) => i.correct).length / total) * 100 : null;
+  return {
+    level, confidence, averageScore,
+    scoredSkills: [...new Set(scoredItems.map((i) => i.skill))],
+    version: LADDER_LEVEL_ALGORITHM_VERSION, evidence,
+  };
+}
+
 export interface StoredLevelProfile {
   estimated_level?: string | null;
   level_confidence?: string | null;
@@ -157,7 +268,7 @@ export function decideLevel(
 ): LevelDecision {
   const prev = opts.previous;
   if (opts.force && opts.sameAttempt && prev && prev.estimated_level
-      && storedLevelVersion(prev) !== LEVEL_ALGORITHM_VERSION) {
+      && storedLevelVersion(prev) !== computed.version) {
     return { level: prev.estimated_level, confidence: prev.level_confidence ?? null, keptStored: true, stampVersion: null };
   }
   return { level: computed.level, confidence: computed.confidence, keptStored: false, stampVersion: computed.version };

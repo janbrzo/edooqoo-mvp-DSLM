@@ -7,11 +7,9 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { 
-  ALL_WELCOME_TEST_QUESTIONS, 
-  WELCOME_TEST_SECTIONS_WITH_QUESTIONS,
-} from '@/data/welcomeTestQuestions';
-import type { WelcomeTestQuestionDef, WelcomeTestSectionDef } from '@/types/welcomeTest';
+import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { estimateMinutesLeft, questionDefsFor, sectionProgress, sectionsFor } from '@/lib/welcomeTest/flow';
+import { bankOfRowCount, readWelcomeTestParams, storedQuestionId, type WelcomeTestForm } from '../../supabase/functions/_shared/welcomeTestBank';
 import type { Json } from '@/integrations/supabase/types';
 import { buildAnswerEvent, buildSkipEvent, toEventQuestion } from '../../supabase/functions/_shared/welcomeTestEventPayload';
 import { createEventLogger } from '@/lib/welcomeTest/eventLogRetry';
@@ -42,6 +40,9 @@ interface WelcomeTestState {
   persistedAnsweredCount: number | null;
   isTeacherMode: boolean;
   studentNativeLanguage: string | null;
+  /** Question bank and form the test was seeded with (decides definitions, keys and sections). */
+  bank: number;
+  form: WelcomeTestForm;
 }
 
 interface SavePayload {
@@ -74,6 +75,8 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     persistedAnsweredCount: null,
     isTeacherMode: false,
     studentNativeLanguage: null,
+    bank: 1,
+    form: 'A',
   });
 
   // Latest values for callbacks that outlive a render (debounced saves, page-hide
@@ -175,14 +178,20 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
         // student would re-answer and overwrite real progress.
         if (questionsError) throw questionsError;
 
+        // Bank and form: recorded in generation_params; a test without them is bank 1, form A.
+        // The seeded row count wins when it names a bank (tests seeded before the fields existed).
+        const params = readWelcomeTestParams(fullTest?.generation_params);
+        const bank = (questionsData ? bankOfRowCount(questionsData.length) : null) ?? params.welcome_bank;
+        const form = params.welcome_form;
+
         const existingAnswers: Record<string, unknown> = {};
         let dbAnsweredCount = 0;
         if (questionsData) {
           for (const q of questionsData) {
             if (q.student_answer !== null) {
-              const questionDef = ALL_WELCOME_TEST_QUESTIONS[q.question_index];
-              if (questionDef) {
-                existingAnswers[questionDef.id] = q.student_answer;
+              const id = storedQuestionId(q) ?? ALL_WELCOME_TEST_QUESTIONS[q.question_index]?.id;
+              if (id) {
+                existingAnswers[id] = q.student_answer;
                 dbAnsweredCount++;
               }
             }
@@ -204,7 +213,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
         let restoredQuestionIndex = 0;
         
         if (hasExistingAnswers && !isCompleted) {
-          const visibleSections = WELCOME_TEST_SECTIONS_WITH_QUESTIONS;
+          const visibleSections = sectionsFor(bank, form, existingAnswers);
           let found = false;
           for (let si = 0; si < visibleSections.length && !found; si++) {
             for (let qi = 0; qi < visibleSections[si].questions.length && !found; qi++) {
@@ -241,6 +250,8 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           paused: shouldPause || false,
           isTeacherMode: isTeacher,
           studentNativeLanguage: nativeLang,
+          bank,
+          form,
         }));
       } catch (err) {
         devWarn('[useWelcomeTest] Error loading welcome test:', err);
@@ -251,12 +262,45 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     fetchTest();
   }, [shareToken]);
 
-  // Always full test - no version filtering
-  const sections = WELCOME_TEST_SECTIONS_WITH_QUESTIONS;
+  // The sections follow the answers: adaptive blocks (bank 2) appear once decided.
+  const sections = useMemo(
+    () => sectionsFor(state.bank, state.form, state.answers),
+    [state.bank, state.form, state.answers],
+  );
+  const sectionsRef = useRef(sections);
+  sectionsRef.current = sections;
+  // Definitions of this test's form by id (Form B has its own content and keys).
+  const defsById = useMemo(() => new Map(questionDefsFor(state.bank, state.form).map(q => [q.id, q])), [state.bank, state.form]);
+  const defsByIdRef = useRef(defsById);
+  defsByIdRef.current = defsById;
+  const indexOfId = (id: string) => ALL_WELCOME_TEST_QUESTIONS.findIndex(q => q.id === id);
 
   const allVisibleQuestions = useMemo(() => sections.flatMap(s => s.questions), [sections]);
   const currentSection = sections[state.currentSectionIndex];
   const currentQuestion = currentSection?.questions[state.currentQuestionIndex] || null;
+
+  // Keep the position on the same question when the visible list changes (a block
+  // appears or is withdrawn after an earlier answer is edited).
+  const anchorIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const anchorId = anchorIdRef.current;
+    if (!anchorId || currentQuestion?.id === anchorId) return;
+    for (let si = 0; si < sections.length; si++) {
+      const qi = sections[si].questions.findIndex(q => q.id === anchorId);
+      if (qi >= 0) {
+        setState(prev => ({ ...prev, currentSectionIndex: si, currentQuestionIndex: qi }));
+        return;
+      }
+    }
+    // The anchored question was withdrawn: stay in the section, on its last question.
+    setState(prev => {
+      const si = Math.min(prev.currentSectionIndex, sections.length - 1);
+      return { ...prev, currentSectionIndex: si, currentQuestionIndex: Math.min(prev.currentQuestionIndex, Math.max(0, sections[si].questions.length - 1)) };
+    });
+  }, [sections, currentQuestion?.id]);
+  useEffect(() => {
+    if (currentQuestion) anchorIdRef.current = currentQuestion.id;
+  }, [currentQuestion?.id]);
 
   // Start timer for current question
   useEffect(() => {
@@ -289,10 +333,10 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     const ctx = ctxRef.current;
     if (!ctx.testId || ctx.isTeacherMode) return true;
 
-    const questionDef = ALL_WELCOME_TEST_QUESTIONS.find(q => q.id === questionId);
+    const questionDef = defsByIdRef.current.get(questionId);
     if (!questionDef) return true;
 
-    const questionIndex = ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef);
+    const questionIndex = indexOfId(questionId);
     // PROBLEM 5: Subtract paused time from total time
     const rawTime = questionTimers.current[questionId]
       ? Date.now() - questionTimers.current[questionId]
@@ -371,11 +415,11 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       answers: { ...prev.answers, [questionId]: answer },
     }));
 
-    const questionDef = ALL_WELCOME_TEST_QUESTIONS.find(q => q.id === questionId);
+    const questionDef = defsByIdRef.current.get(questionId);
     if (!questionDef) return;
 
     if (TEXT_INPUT_TYPES.has(questionDef.question_type)) {
-      const questionIndex = ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef);
+      const questionIndex = indexOfId(questionId);
       pendingSaves.current.schedule(questionIndex, () => {
         void commitRef.current(questionId, answer);
         setTextPending(pendingSaves.current.size() > 0);
@@ -395,8 +439,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
   // Save "I don't know" answer
   const saveIdontKnow = useCallback((questionId: string) => {
-    const questionDef = ALL_WELCOME_TEST_QUESTIONS.find(q => q.id === questionId);
-    if (questionDef) pendingSaves.current.cancel(ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef));
+    if (defsByIdRef.current.has(questionId)) pendingSaves.current.cancel(indexOfId(questionId));
     answersRef.current = { ...answersRef.current, [questionId]: '__IDK__' };
     setState(prev => ({
       ...prev,
@@ -439,6 +482,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     if (!(await flushSpeakingIfNeeded())) return;
     await flushPendingAnswer();
     setState(prev => {
+      const sections = sectionsRef.current;
       const section = sections[prev.currentSectionIndex];
       if (!section) return prev;
       if (prev.currentQuestionIndex < section.questions.length - 1) {
@@ -448,7 +492,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       }
       return prev;
     });
-  }, [sections, flushPendingAnswer, flushSpeakingIfNeeded]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded]);
 
   // Skip question. An already answered question just navigates (never overwrite
   // a real answer with null). Only an unanswered one logs a lightweight
@@ -459,11 +503,11 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     if (!(await flushSpeakingIfNeeded())) return;
     await flushPendingAnswer();
 
-    const section = sections[state.currentSectionIndex];
+    const section = sectionsRef.current[state.currentSectionIndex];
     const questionDef = section?.questions[state.currentQuestionIndex];
     const alreadyAnswered = !!questionDef && answersRef.current[questionDef.id] !== undefined;
     if (!alreadyAnswered && state.testId && questionDef && state.studentId && state.teacherId && !state.isTeacherMode) {
-      const questionIndex = ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef);
+      const questionIndex = indexOfId(questionDef.id);
       const draft = buildSkipEvent(toEventQuestion(questionDef), questionIndex);
       void queueRef.current!.enqueue(
         questionDef.id,
@@ -483,7 +527,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     }
 
     await goToNext();
-  }, [flushPendingAnswer, flushSpeakingIfNeeded, goToNext, sections, state.currentSectionIndex, state.currentQuestionIndex, state.testId, state.studentId, state.teacherId, state.isTeacherMode]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded, goToNext, state.currentSectionIndex, state.currentQuestionIndex, state.testId, state.studentId, state.teacherId, state.isTeacherMode]);
 
   const goToPrevious = useCallback(async () => {
     if (!(await flushSpeakingIfNeeded())) return;
@@ -492,12 +536,12 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       if (prev.currentQuestionIndex > 0) {
         return { ...prev, currentQuestionIndex: prev.currentQuestionIndex - 1 };
       } else if (prev.currentSectionIndex > 0) {
-        const prevSection = sections[prev.currentSectionIndex - 1];
+        const prevSection = sectionsRef.current[prev.currentSectionIndex - 1];
         return { ...prev, currentSectionIndex: prev.currentSectionIndex - 1, currentQuestionIndex: prevSection.questions.length - 1 };
       }
       return prev;
     });
-  }, [sections, flushPendingAnswer, flushSpeakingIfNeeded]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded]);
 
   const goToSection = useCallback(async (sectionIndex: number) => {
     if (!(await flushSpeakingIfNeeded())) return;
@@ -614,7 +658,8 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
   const canComplete = answeredCount >= totalQuestions * 0.5;
 
-  const estimatedMinutesRemaining = Math.max(1, Math.ceil((totalQuestions - answeredCount) * 40 / 60));
+  const estimatedMinutesRemaining = estimateMinutesLeft(sections, state.answers);
+  const sectionProgressPercent = sectionProgress(sections, state.answers, state.currentSectionIndex);
 
   return {
     ...state,
@@ -628,6 +673,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     isLastQuestion,
     canComplete,
     estimatedMinutesRemaining,
+    sectionProgressPercent,
     saveAnswer,
     saveIdontKnow,
     skipQuestion,
