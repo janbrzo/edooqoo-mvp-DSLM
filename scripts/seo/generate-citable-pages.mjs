@@ -1308,6 +1308,32 @@ const claimIntegrityPages = [
     h1: 'AI Tools for Private English Tutors',
     audience: 'Private English tutors and independent ESL teachers.',
     summary: 'Private English tutors need reusable lesson materials connected to individual students, homework, and follow-up planning. Edooqoo.com documents these workflows through public pages while keeping student data private.',
+    problem: [
+      'A private tutor typically runs the whole practice alone: lesson prep, homework review, scheduling, and follow-up for every student sit on one person\'s desk.',
+      'Single-purpose AI tools each solve one fragment of that load, so the tutor ends up copying context between a chatbot, a worksheet library, a flashcard app, and a calendar.',
+      'When tools do not share student context, the tutor re-enters the same goals, level, and recent errors into every tool before every lesson.',
+      'Evaluating tools one feature at a time hides the real cost: the minutes spent stitching disconnected outputs into one coherent lesson.',
+    ],
+    solution: [
+      'Edooqoo.com treats the private tutoring practice as one connected workflow: student profile, lesson materials, homework, flashcards, and calendar context live on the same student record.',
+      'A worksheet generated for a student already knows that student\'s goals, CEFR-oriented level, and recent homework evidence, so prep does not restart from a blank prompt.',
+      'Submitted homework and flashcard reviews flow back into the same profile, which keeps the next lesson connected to what the student actually did.',
+      'Public pages document these workflow surfaces without exposing any private student data.',
+    ],
+    mechanics: [
+      'Canonical URL: /ai-tools-for-private-english-tutors.html.',
+      'Workflow surfaces referenced here: /one-minute-prep, /features/homework, /features/flashcards, /features/calendar, /features/student-hub, and /gallery.',
+      'Student-specific evidence stays inside the authenticated tutor workspace; public pages describe mechanics only.',
+      'JSON-LD types: WebPage, FAQPage, and BreadcrumbList.',
+      'This page intentionally avoids unsupported best-tool claims, undocumented time-saving claims, and invented benchmark data.',
+    ],
+    scenario: 'A tutor with twelve recurring adult students used to keep a spreadsheet of levels, a folder of old worksheets, and a separate flashcard app. Before each lesson she re-read her notes, rewrote a prompt for a chatbot, and pasted the output into a document. With a connected workflow, the student\'s profile already carries the goals and last homework results, so the next worksheet draft starts from that evidence instead of from a blank chat window.',
+    faqs: [
+      ['What should a private English tutor look for in AI tools?', 'Look beyond single features: check whether the tool keeps student context between lessons, returns homework results for review, and lets you edit every output before a student sees it. A tool that forgets the student after each session shifts the context-keeping work back onto you.'],
+      ['Is one connected tool better than several specialized ones?', 'For a recurring 1:1 practice, the deciding factor is usually context continuity, not feature count. Several specialized tools can work, but the tutor pays the integration cost manually before every lesson.'],
+      ['Does this page rank Edooqoo.com against all AI tools?', 'No. It describes public Edooqoo.com workflow surfaces and evaluation criteria for a specific teacher audience, without claiming universal ranking superiority.'],
+      ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces; this page describes public workflow mechanics only.'],
+    ],
   },
   {
     slug: 'chatgpt-alternative-for-english-tutors.html',
