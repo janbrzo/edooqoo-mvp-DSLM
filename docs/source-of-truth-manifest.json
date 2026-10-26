@@ -41325,13 +41325,8 @@
                 "optional": true
               },
               {
-                "name": "englishLevel",
-                "type": "string | null",
-                "optional": true
-              },
-              {
-                "name": "worksheetAudioTranscript",
-                "type": "string | null",
+                "name": "readOnly",
+                "type": "boolean",
                 "optional": true
               }
             ]
@@ -41402,11 +41397,10 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "update_homework_answer_by_share_token",
             "verify_homework_student_email"
           ],
           "edgeFunctions": [
-            "verify-open-answers"
+            "process-pending-ai-evaluations"
           ],
           "fetchTargets": []
         },
@@ -46751,6 +46745,7 @@
         ],
         "requestFields": [
           "exercise_index",
+          "homework_id",
           "trigger_source",
           "worksheet_id"
         ],
@@ -46762,6 +46757,7 @@
           "english_level",
           "error",
           "failed",
+          "homework",
           "message",
           "processed",
           "skipped",
@@ -48508,11 +48504,13 @@
         "name": "process-pending-ai-evaluations",
         "callsites": [
           "src/components/WorksheetDisplay.tsx",
+          "src/hooks/useInteractiveHomework.tsx",
           "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/hooks/useLiveSessionAnswers.tsx"
         ],
         "payloadFields": [
           "exercise_index",
+          "homework_id",
           "share_token",
           "student_email",
           "trigger_source",
@@ -48789,11 +48787,9 @@
       {
         "name": "verify-open-answers",
         "callsites": [
-          "src/components/worksheet/ExerciseSection.tsx",
-          "src/hooks/useInteractiveHomework.tsx"
+          "src/components/worksheet/ExerciseSection.tsx"
         ],
         "payloadFields": [
-          "access",
           "answers",
           "context",
           "english_level"
@@ -49368,24 +49364,6 @@
         "payloadExpressions": [
           "{ p_id: id, p_comment: comment, } as any"
         ]
-      },
-      {
-        "name": "update_homework_answer_by_share_token",
-        "callsites": [
-          "src/hooks/useInteractiveHomework.tsx"
-        ],
-        "payloadFields": [
-          "p_ai_evaluation",
-          "p_answers",
-          "p_eval_trigger",
-          "p_exercise_index",
-          "p_homework_id",
-          "p_item_evaluations",
-          "p_mastery",
-          "p_share_token",
-          "p_student_email"
-        ],
-        "payloadExpressions": []
       },
       {
         "name": "verify_homework_student_email",
@@ -58437,6 +58415,10 @@
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
+        "name": "generate_homework_share_token",
+        "migration": "supabase/migrations/20261023090000_baseline_homework_prod_only_functions.sql"
+      },
+      {
         "name": "generate_public_slug",
         "migration": "supabase/migrations/20260519195659_1d0dda8d-dc80-427b-9c7b-9c562e694f90.sql"
       },
@@ -58455,6 +58437,10 @@
       {
         "name": "get_flashcard_set_is_bidirectional",
         "migration": "supabase/migrations/20260728202525_74d9d02e-d674-4a75-955e-7eba54b61291.sql"
+      },
+      {
+        "name": "get_homework_by_share_token",
+        "migration": "supabase/migrations/20261023090000_baseline_homework_prod_only_functions.sql"
       },
       {
         "name": "get_homework_comments",
@@ -58541,12 +58527,24 @@
         "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
       },
       {
+        "name": "homework_answer_value_present",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
+        "name": "homework_question_has_answer",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
         "name": "increment_download_session_by_token",
         "migration": "supabase/migrations/20260727075433_18fadd76-8521-42b8-9575-9cf22e1f3c52.sql"
       },
       {
         "name": "insert_homework_submission_notification_by_share_token",
         "migration": "supabase/migrations/20261016100020_w0_c_share_token_queue_and_notification.sql"
+      },
+      {
+        "name": "insert_homework_submission_notification",
+        "migration": "supabase/migrations/20261023090000_baseline_homework_prod_only_functions.sql"
       },
       {
         "name": "insert_public_booking_notification",
@@ -58641,12 +58639,28 @@
         "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
       },
       {
+        "name": "mark_homework_completed_internal",
+        "migration": "supabase/migrations/20261023090000_baseline_homework_prod_only_functions.sql"
+      },
+      {
         "name": "mark_homework_completed",
         "migration": "supabase/migrations/20261016100010_w0_b_mark_homework_completed.sql"
       },
       {
         "name": "mark_worksheet_answer_not_evaluable",
         "migration": "supabase/migrations/20261012160200_ai_queue_not_evaluable_marker.sql"
+      },
+      {
+        "name": "merge_homework_answers",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
+        "name": "merge_homework_audio_answers",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
+        "name": "merge_homework_item_evaluations",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
       },
       {
         "name": "needs_ai_evaluation_by_share_token",
@@ -58709,6 +58723,10 @@
         "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
       },
       {
+        "name": "sanitize_homework_item_evaluations",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
         "name": "save_flashcard_progress",
         "migration": "supabase/migrations/20260807134305_4fefd413-26a5-465b-af2f-30820627dde8.sql"
       },
@@ -58717,12 +58735,20 @@
         "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
       },
       {
+        "name": "save_homework_answer_by_share_token",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
         "name": "save_homework_answer",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "save_homework_answer",
         "migration": "supabase/migrations/20261016110010_w2_homework_lock_after_submit.sql"
+      },
+      {
+        "name": "save_homework_answer",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
       },
       {
         "name": "save_mark_done_evaluation",
@@ -58797,6 +58823,10 @@
         "migration": "supabase/migrations/20261016110010_w2_homework_lock_after_submit.sql"
       },
       {
+        "name": "submit_homework_answers",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
         "name": "supersede_previous_welcome_test_events",
         "migration": "supabase/migrations/20261015090300_welcome_test_event_reconciliation.sql"
       },
@@ -58821,8 +58851,16 @@
         "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
       },
       {
+        "name": "update_homework_answer_by_share_token",
+        "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
         "name": "update_homework_event_with_ai_evaluation",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "verify_homework_student_email",
+        "migration": "supabase/migrations/20261023090000_baseline_homework_prod_only_functions.sql"
       },
       {
         "name": "verify_welcome_test_email",
@@ -58853,7 +58891,8 @@
       {
         "host": "a",
         "callsites": [
-          "src/lib/answers/__tests__/openAnswerContext.test.ts"
+          "src/lib/answers/__tests__/openAnswerContext.test.ts",
+          "src/lib/homework/__tests__/deltaSave.test.ts"
         ]
       },
       {
@@ -58917,6 +58956,12 @@
         "host": "api.unsplash.com",
         "callsites": [
           "supabase/functions/fetch-media/index.ts"
+        ]
+      },
+      {
+        "host": "b",
+        "callsites": [
+          "src/lib/homework/__tests__/deltaSave.test.ts"
         ]
       },
       {
