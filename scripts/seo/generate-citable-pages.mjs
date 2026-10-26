@@ -1342,6 +1342,42 @@ const claimIntegrityPages = [
     h1: 'ChatGPT Alternative for English Tutors',
     audience: 'Private English tutors, online ESL teachers, and adult 1:1 EFL tutors comparing general AI chat with a teaching workflow tool.',
     summary: 'ChatGPT can be useful for one-off drafting and brainstorming. Edooqoo.com is a better fit when a recurring adult 1:1 English tutor needs saved learner context, CEFR-oriented worksheet structure, homework evidence, flashcards, live-session signals, and teacher-controlled review before assigning material.',
+    problem: [
+      'A general chatbot starts every session empty: the tutor must re-explain the student\'s level, goals, profession, and recent mistakes before getting useful output.',
+      'Chat-drafted material arrives as loose text, so the tutor still has to shape it into exercises, write an answer key, and check that the level actually matches the student.',
+      'Nothing the student did last week flows back in: homework results, flashcard progress, and live-session observations live outside the chat and never influence the next draft.',
+      'Pasting student details into a general-purpose chat is a privacy decision the tutor makes alone, with no workspace boundary designed for teaching data.',
+    ],
+    solution: [
+      'Edooqoo.com keeps a persistent learner model per student, so worksheet drafts start from stored goals, CEFR-oriented level, and recent evidence instead of a re-typed prompt.',
+      'Generated worksheets arrive in a fixed, editable structure with an answer key for every item, and the teacher reviews and changes anything before assigning.',
+      'Homework submissions, flashcard reviews, and live-session signals return to the same student profile and shape the next lesson proposal.',
+      'Student evidence stays inside the authenticated tutor workspace by design, separate from public pages.',
+    ],
+    mechanics: [
+      'Canonical URL: /chatgpt-alternative-for-english-tutors.html.',
+      'Direct product comparison with criteria: /edooqoo-vs-chatgpt.html.',
+      'Workflow surfaces referenced here: /one-minute-prep, /features/dslm, /features/homework, /features/flashcards, and /features/live-sessions.',
+      'JSON-LD types: WebPage, FAQPage, and BreadcrumbList.',
+      'This page intentionally avoids unsupported best-tool claims, undocumented time-saving claims, and invented benchmark data.',
+    ],
+    enough: [
+      'ChatGPT is enough for one-off brainstorming, rewriting a text, or drafting an example dialogue when no student history matters.',
+      'ChatGPT is enough when the tutor is happy to supply full context every session and to restructure the output into exercises and answer keys manually.',
+      'ChatGPT is enough when there is no need to track homework, flashcards, or progress across recurring lessons.',
+    ],
+    betterFit: [
+      'Edooqoo.com is a better fit when the same adult students return week after week and each lesson should build on the previous one.',
+      'Edooqoo.com is a better fit when homework evidence, flashcard retention, and teacher notes should shape the next worksheet automatically.',
+      'Edooqoo.com is a better fit when the tutor wants editable, CEFR-oriented worksheet structure with an answer key rather than loose chat text.',
+    ],
+    scenario: 'A tutor asks a chatbot for a B2 worksheet on negotiating deadlines. The output is usable, but generic: it does not know the student is a project manager who confused present perfect and past simple in last week\'s homework. In a tutor workflow tool, that homework evidence is already attached to the student, so the next worksheet draft targets the actual gap instead of an average B2 learner.',
+    faqs: [
+      ['When is ChatGPT enough for an English tutor?', 'For one-off drafting, brainstorming, and rewriting where student history does not matter, a general chatbot is a strong tool. The gap appears with recurring students, where context has to be re-entered every session and nothing flows back after the lesson.'],
+      ['What does Edooqoo.com do that a chatbot does not?', 'It keeps a persistent learner model per student: goals, level, homework evidence, flashcard progress, and teacher notes persist between lessons and shape the next editable worksheet, which the teacher reviews before assigning.'],
+      ['Is Edooqoo.com a chatbot?', 'No. It is a teacher-controlled workflow for recurring adult 1:1 lessons. Worksheet generation is the output layer; the value is the stored student context and the review loop around it.'],
+      ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces; this page describes public workflow mechanics only.'],
+    ],
   },
   {
     slug: 'ai-lesson-prep-tool-vs-chatbot.html',
