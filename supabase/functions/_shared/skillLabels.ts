@@ -69,5 +69,6 @@ export function skillLabel(skillName: string | null | undefined, storedCategory?
   text = text.replace(/[._]+/g, ' ').replace(/\s+/g, ' ').trim();
   // Skill names come from a model; keep the label short and free of markup.
   text = text.replace(/[<>]/g, '').slice(0, 60);
-  return c.category ? `${c.category}: ${text}` : text;
+  const category = c.category ? String(c.category).replace(/[\r\n"<>]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40) : '';
+  return category ? `${category}: ${text}` : text;
 }

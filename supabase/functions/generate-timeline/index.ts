@@ -93,7 +93,7 @@ serve(async (req) => {
         // next_steps: read the current in_progress phase so near-term steps stay inside it (D14).
         : supabase.from('dslm_curriculum_phases').select('id, title, description, focus_areas, generation_context')
           .eq('student_id', studentId).eq('teacher_id', teacherId).eq('status', 'in_progress').is('deleted_at', null)
-          .order('sequence_number', { ascending: true }).limit(1).maybeSingle(),
+          .order('sequence_number', { ascending: true }).limit(3),
       excludeIds.length > 0
         ? supabase.from('future_worksheet_suggestions').select('suggested_topic').in('id', excludeIds)
         : Promise.resolve({ data: [] }),
@@ -127,7 +127,11 @@ serve(async (req) => {
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
     const recentWorksheets = toWorksheetHistoryRows(worksheetsRes.data);
-    const phase: any = (phaseRes as any).data || null;
+    // next_steps returns up to 3 in_progress phases (a plan can have more than one active); phase_steps returns one row.
+    const phaseData: any = (phaseRes as any).data || null;
+    const phaseRows: any[] = Array.isArray(phaseData) ? phaseData : phaseData ? [phaseData] : [];
+    const phase: any = phaseRows[0] || null;
+    const otherActivePhases: any[] = finalMode === 'phase_steps' ? [] : phaseRows.slice(1);
     const excludedTopics = ((excludeRes as any).data || [])
       .map((r: any) => r.suggested_topic).filter(Boolean).join(', ');
     const existingSteps = ((existingStepsRes as any)?.data) || [];
@@ -189,7 +193,7 @@ These are LESSON-LEVEL steps WITHIN this phase, do NOT introduce unrelated topic
         ? phase.generation_context.weak_skills_snapshot.skills.map((x: any) => String(x?.label || '')).filter(Boolean).slice(0, 6)
         : [];
       const currentPhaseLine = phase
-        ? `\nCURRENT PHASE (in progress): "${phase.title}". Description: ${phase.description || '(none)'}. Focus areas: [${(phase.focus_areas || []).join(', ')}].${phaseSnapshotSkills.length ? ` Weak skills when the phase was planned: ${phaseSnapshotSkills.join('; ')}.` : ''}\nStay inside this phase: steps must advance its focus areas, not unrelated topics.`
+        ? `\nCURRENT PHASE (in progress): "${phase.title}". Description: ${phase.description || '(none)'}. Focus areas: [${(phase.focus_areas || []).join(', ')}].${phaseSnapshotSkills.length ? ` Weak skills when the phase was planned: ${phaseSnapshotSkills.join('; ')}.` : ''}\n${otherActivePhases.length ? `\nOther phases in progress at the same time: ${otherActivePhases.map((x: any) => `"${x.title}" (focus: [${(x.focus_areas || []).join(', ')}])`).join('; ')}.\nSteps must advance the focus areas of one of the phases in progress, not unrelated topics.` : '\nStay inside this phase: steps must advance its focus areas, not unrelated topics.'}`
         : '';
       modeBrief = `MODE: IMMEDIATE NEXT STEPS.
 These are the most urgent ${count} concrete worksheets to assign THIS WEEK or NEXT.

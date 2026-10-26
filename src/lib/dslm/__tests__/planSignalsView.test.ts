@@ -89,6 +89,13 @@ describe('decidePhaseAdvanceProposal', () => {
     expect(decidePhaseAdvanceProposal({ currentPhase: null, metrics: recovered, metricsLoaded: true, proposalPhaseIds: none, now: NOW }).create).toBe(false);
     expect(decidePhaseAdvanceProposal({ currentPhase: { ...current, status: 'planned' }, metrics: recovered, metricsLoaded: true, proposalPhaseIds: none, now: NOW }).create).toBe(false);
   });
+  it('counts evidence only after the phase became active (the snapshot is shared by the roadmap run)', () => {
+    const justStarted = { ...current, updated_at: ago(1) };
+    const d = decidePhaseAdvanceProposal({ currentPhase: justStarted, metrics: recovered, metricsLoaded: true, proposalPhaseIds: none, now: NOW });
+    expect(d.create).toBe(false);
+    const longActive = { ...current, updated_at: ago(10) };
+    expect(decidePhaseAdvanceProposal({ currentPhase: longActive, metrics: recovered, metricsLoaded: true, proposalPhaseIds: none, now: NOW }).create).toBe(true);
+  });
   it('finds the next planned phase by sequence', () => {
     const phases = [current, phase('p3', 3, 'planned', 20), phase('p2', 2, 'planned', 20), phase('p0', 0, 'planned', 20)];
     expect(findNextPlannedPhase(phases, current)?.id).toBe('p2');
@@ -104,6 +111,11 @@ describe('phase_advance_proposals migration', () => {
     expect(sql).toMatch(/CHECK \(status IN \('pending', 'accepted', 'dismissed', 'superseded'\)\)/);
     expect(sql).toMatch(/ENABLE ROW LEVEL SECURITY/);
     expect(sql).toMatch(/auth\.uid\(\) = teacher_id/);
+  });
+  it('ties a proposal to a phase of the same teacher and student, and revokes default grants', () => {
+    expect(sql).toMatch(/ph\.teacher_id = auth\.uid\(\)/);
+    expect(sql).toMatch(/ph\.student_id = phase_advance_proposals\.student_id/);
+    expect(sql).toMatch(/REVOKE ALL ON public\.phase_advance_proposals FROM PUBLIC, anon, authenticated/);
   });
   it('has no destructive keywords and no apostrophes in comments', () => {
     expect(sql).not.toMatch(/\b(drop|delete)\b/i);

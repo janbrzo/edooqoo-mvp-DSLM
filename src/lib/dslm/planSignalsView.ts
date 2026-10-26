@@ -22,6 +22,8 @@ export interface PlanPhaseSignals {
   sequence_number: number;
   status: string;
   created_at?: string | null;
+  /** Changes when the phase status changes: used as the moment an in-progress phase started. */
+  updated_at?: string | null;
   generation_context?: any;
 }
 
@@ -96,6 +98,7 @@ export interface PhaseAdvanceEvidence {
   recovered: string[];
   pending: string[];
   plan_generated_at: string | null;
+  evidence_from?: string | null;
 }
 
 export interface PhaseAdvanceCreateDecision {
@@ -124,9 +127,17 @@ export function decidePhaseAdvanceProposal(input: {
   if (!input.metricsLoaded) return no('metrics not loaded');
   if (input.proposalPhaseIds.has(phase.id)) return no('a proposal for this phase already exists');
   const origin = planOriginOfPhase(phase);
+  // The snapshot and plan date are shared by every phase of one roadmap run. Evidence counts only
+  // after this phase became active (its last update), so accepting phase 1 does not make phase 2
+  // look finished at once.
+  const originMs = origin.generatedAt ? new Date(origin.generatedAt).getTime() : NaN;
+  const startedMs = phase.updated_at ? new Date(phase.updated_at).getTime() : NaN;
+  const evidenceFrom = Number.isFinite(startedMs) && (!Number.isFinite(originMs) || startedMs > originMs)
+    ? new Date(startedMs).toISOString()
+    : origin.generatedAt;
   const decision = evaluatePhaseAdvance({
     phaseStatus: phase.status,
-    planGeneratedAt: origin.generatedAt,
+    planGeneratedAt: evidenceFrom,
     snapshot: origin.snapshot,
     metrics: input.metrics ?? [],
     now: input.now,
@@ -141,6 +152,7 @@ export function decidePhaseAdvanceProposal(input: {
       recovered: decision.recovered,
       pending: decision.pending,
       plan_generated_at: origin.generatedAt,
+      evidence_from: evidenceFrom,
     },
   };
 }

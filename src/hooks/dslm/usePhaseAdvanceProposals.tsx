@@ -175,8 +175,11 @@ export const usePhaseAdvanceProposals = ({
       toast.success(next ? `Phase done. "${next.title}" is now in progress.` : 'Phase marked as done.');
       emit();
     } catch (e: any) {
-      if (phaseDone) await updatePhase(proposal.phase_id, { status: 'in_progress' });
-      if (claimed) {
+      let rolledBack = true;
+      if (phaseDone) rolledBack = await updatePhase(proposal.phase_id, { status: 'in_progress' });
+      // Give the proposal back only when the phase is in progress again; otherwise keep the claim
+      // so the next render does not offer a proposal for a phase that is already done.
+      if (claimed && rolledBack) {
         await (supabase as any).from('phase_advance_proposals')
           .update({ status: 'pending', decided_at: null, decided_by: null })
           .eq('id', proposal.id).eq('status', 'accepted');
@@ -190,13 +193,18 @@ export const usePhaseAdvanceProposals = ({
 
   const dismiss = async (proposal: PhaseAdvanceProposal) => {
     try {
-      const { error } = await (supabase as any)
+      const { data, error } = await (supabase as any)
         .from('phase_advance_proposals')
         .update({ status: 'dismissed', decided_at: new Date().toISOString(), decided_by: teacherId })
         .eq('id', proposal.id)
-        .eq('status', 'pending');
+        .eq('status', 'pending')
+        .select('id');
       if (error) throw error;
-      toast.message('Proposal dismissed', { description: 'The phase stays in progress.' });
+      if (!data || data.length === 0) {
+        toast.message('Proposal already handled', { description: 'It was accepted, dismissed or replaced elsewhere.' });
+      } else {
+        toast.message('Proposal dismissed', { description: 'The phase stays in progress.' });
+      }
       emit();
     } catch (e: any) {
       toast.error('Failed to dismiss', { description: e?.message || 'Unknown error' });

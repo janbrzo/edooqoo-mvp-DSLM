@@ -17,14 +17,14 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 397,
-    "hookModules": 97,
+    "componentModules": 398,
+    "hookModules": 99,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 80,
     "typedTables": 66,
     "typedRpcs": 123,
-    "migrationIndexes": 23
+    "migrationIndexes": 25
   },
   "routes": [
     {
@@ -18753,6 +18753,69 @@
       }
     },
     {
+      "path": "src/components/dslm/PhaseAdvanceProposalCard.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Phase Advance Proposal Card behavior in the dslm domain.",
+      "exports": [
+        "PhaseAdvanceProposalCard"
+      ],
+      "props": [
+        {
+          "name": "Props",
+          "fields": [
+            {
+              "name": "proposal",
+              "type": "PhaseAdvanceProposal",
+              "optional": false
+            },
+            {
+              "name": "phaseTitle",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "nextPhaseTitle",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "onAccept",
+              "type": "(proposal: PhaseAdvanceProposal) => void",
+              "optional": false
+            },
+            {
+              "name": "onDismiss",
+              "type": "(proposal: PhaseAdvanceProposal) => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Accept",
+        "Dismiss",
+        "Mark",
+        "Ready for the next phase?",
+        "and start",
+        "as done"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/dslm/ProfileSignalsV2.tsx",
       "domain": "dslm",
       "purpose": "Implements Answer Behaviour Line behavior in the dslm domain.",
@@ -20079,6 +20142,36 @@
               "optional": false
             },
             {
+              "name": "phaseAdvanceProposals",
+              "type": "readonly PhaseAdvanceProposal[]",
+              "optional": true
+            },
+            {
+              "name": "phaseTitleById",
+              "type": "ReadonlyMap<string, string>",
+              "optional": true
+            },
+            {
+              "name": "onAcceptPhaseAdvance",
+              "type": "(proposal: PhaseAdvanceProposal) => void",
+              "optional": true
+            },
+            {
+              "name": "onDismissPhaseAdvance",
+              "type": "(proposal: PhaseAdvanceProposal) => void",
+              "optional": true
+            },
+            {
+              "name": "staleNotice",
+              "type": "string | null",
+              "optional": true
+            },
+            {
+              "name": "onRefreshPlan",
+              "type": "() => void",
+              "optional": true
+            },
+            {
               "name": "goals",
               "type": "readonly ProgressGoal[]",
               "optional": false
@@ -20117,7 +20210,9 @@
         "fetchTargets": []
       },
       "storage": [],
-      "userFacingText": [],
+      "userFacingText": [
+        "Refresh plan"
+      ],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -39459,6 +39554,8 @@
           "useFutureTimeline",
           "useMemo",
           "usePacingProposals",
+          "usePhaseAdvanceProposals",
+          "usePlanEvidenceMetrics",
           "useState",
           "useStudentAttentionDots",
           "useStudentProgress",
@@ -39473,6 +39570,134 @@
           "fetchTargets": []
         },
         "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
+        "path": "src/hooks/dslm/usePhaseAdvanceProposals.tsx",
+        "domain": "dslm",
+        "purpose": "Implements use Phase Advance Proposals behavior in the dslm domain.",
+        "exports": [
+          "usePhaseAdvanceProposals"
+        ],
+        "props": [
+          {
+            "name": "Props",
+            "fields": [
+              {
+                "name": "studentId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "name": "teacherId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "name": "phases",
+                "type": "readonly PhaseLite[]",
+                "optional": false
+              },
+              {
+                "name": "currentPhase",
+                "type": "PhaseLite | null",
+                "optional": false
+              },
+              {
+                "name": "metrics",
+                "type": "any[]",
+                "optional": false
+              },
+              {
+                "name": "metricsLoaded",
+                "type": "boolean",
+                "optional": false
+              },
+              {
+                "name": "plansReady",
+                "type": "boolean",
+                "optional": false
+              },
+              {
+                "name": "updatePhase",
+                "type": "(id: string, fields: { status: any }) => Promise<boolean>",
+                "optional": false
+              }
+            ]
+          }
+        ],
+        "state": [
+          {
+            "value": "rows",
+            "setter": "setRows",
+            "initial": "null"
+          }
+        ],
+        "hooks": [
+          "useCallback",
+          "useEffect",
+          "useMemo",
+          "useRef",
+          "useState"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [
+            "phase_advance_proposals"
+          ],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [
+          {
+            "storage": "localStorage",
+            "operation": "getItem",
+            "key": "edooqoo_demo_mode",
+            "file": "src/hooks/dslm/usePhaseAdvanceProposals.tsx"
+          }
+        ],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
+        "path": "src/hooks/dslm/usePlanEvidenceMetrics.ts",
+        "domain": "dslm",
+        "purpose": "Implements use Plan Evidence Metrics behavior in the dslm domain.",
+        "exports": [
+          "usePlanEvidenceMetrics"
+        ],
+        "props": [],
+        "state": [],
+        "hooks": [
+          "useQuery"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [
+            "student_skill_metrics"
+          ],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [
+          {
+            "storage": "localStorage",
+            "operation": "getItem",
+            "key": "edooqoo_demo_mode",
+            "file": "src/hooks/dslm/usePlanEvidenceMetrics.ts"
+          }
+        ],
         "userFacingText": [],
         "userFacingBehavior": {
           "actionHandlers": [],
@@ -44352,6 +44577,8 @@
         "files": [
           "src/components/calendar/SlotDetailModal.tsx",
           "src/components/worksheet/WorksheetContent.tsx",
+          "src/hooks/dslm/usePhaseAdvanceProposals.tsx",
+          "src/hooks/dslm/usePlanEvidenceMetrics.ts",
           "src/hooks/usePublicGalleryExamples.ts",
           "src/hooks/useWorksheetAutosave.ts",
           "src/hooks/useWtSignalFeedback.ts"
@@ -54112,6 +54339,7 @@
         ],
         "featureOwnership": {
           "clientFiles": [
+            "src/hooks/dslm/usePlanEvidenceMetrics.ts",
             "src/hooks/useSkillMetrics.tsx",
             "src/lib/mcp/tools/get_student_summary.ts"
           ],
@@ -58309,6 +58537,18 @@
         "table": "wt_signal_feedback",
         "unique": false,
         "migration": "supabase/migrations/20261017120000_wt_signal_feedback.sql"
+      },
+      {
+        "name": "phase_advance_proposals_one_pending_idx",
+        "table": "phase_advance_proposals",
+        "unique": true,
+        "migration": "supabase/migrations/20261026090000_phase_advance_proposals.sql"
+      },
+      {
+        "name": "phase_advance_proposals_student_idx",
+        "table": "phase_advance_proposals",
+        "unique": false,
+        "migration": "supabase/migrations/20261026090000_phase_advance_proposals.sql"
       }
     ],
     "migrationFunctions": [

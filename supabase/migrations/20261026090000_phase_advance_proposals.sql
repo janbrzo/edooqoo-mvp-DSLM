@@ -28,6 +28,7 @@ CREATE INDEX IF NOT EXISTS phase_advance_proposals_student_idx
 
 ALTER TABLE public.phase_advance_proposals ENABLE ROW LEVEL SECURITY;
 
+REVOKE ALL ON public.phase_advance_proposals FROM PUBLIC, anon, authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.phase_advance_proposals TO authenticated;
 GRANT ALL ON public.phase_advance_proposals TO service_role;
 
@@ -49,7 +50,16 @@ BEGIN
   ) THEN
     CREATE POLICY "Teachers manage their own phase advance proposals"
       ON public.phase_advance_proposals FOR ALL TO authenticated
-      USING (auth.uid() = teacher_id) WITH CHECK (auth.uid() = teacher_id);
+      USING (auth.uid() = teacher_id)
+      WITH CHECK (
+        auth.uid() = teacher_id
+        AND EXISTS (
+          SELECT 1 FROM public.dslm_curriculum_phases ph
+          WHERE ph.id = phase_advance_proposals.phase_id
+            AND ph.teacher_id = auth.uid()
+            AND ph.student_id = phase_advance_proposals.student_id
+        )
+      );
   END IF;
 END
 $$;
