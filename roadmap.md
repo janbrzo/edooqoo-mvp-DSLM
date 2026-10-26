@@ -135,6 +135,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
 ## Public Content Remediation (2026-10)
 
+- [x] Claim-integrity hygiene: removed four retired definitions and canonicalized AI answer citations; four worker 301 contracts and live preview fallback/target reads passed, two synchronization runs compared 708 files with zero second-run changes, 1263 tests and content/SEO audits passed. Worksheet engine and both llms.txt files unchanged. Existing x1000 production-routing warning remains outside scope; no publication performed.
 - [x] Step 1: 17 strategic blog articles rewritten with page-specific source material (`scripts/seo/strategic-boilerplate-rewrites.mjs`); max containment 0.942 -> 0.135, blog near-duplicates 17 -> 0, all still indexable with self canonicals. Gate `seo:audit-uniqueness-gate` in `content:audit` + `strategic-boilerplate-rewrites.test.mjs`. Sync deterministic, 1160 tests and all SEO/content audits passed.
 - [x] Step 2: naturalize citable section headings, remove RAG-like meta text, diversify repeated FAQs (guarded by `citable-naturalization.test.mjs`).
 - [x] Step 3: Martha filter: 12 school-only articles 301-merged (sitemap 252 -> 240), retired-link rewriter in sync, Martha audit hard-fails school signals in indexable blog title/H1/meta.
