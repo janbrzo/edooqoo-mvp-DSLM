@@ -15,6 +15,7 @@ import {
   buildScientificPrinciplesBlock,
   buildStudentProfileBlock,
   buildWeakAreasBlock,
+  groupSkillMetrics,
   buildKnowledgeBlock,
   buildWorksheetHistoryBlock,
   buildGoalsBlock,
@@ -28,6 +29,7 @@ import { withEffectiveMastery } from "../_shared/forgetting.ts";
 import { computeIntensity, intensityPromptLines, loadLearningProfileForPacing, computeStylePacingForStudent } from "../_shared/pacing.ts";
 import { resolveDeadline, overduePromptText, deadlineReminder, goalsForPrompt } from "../_shared/deadline.ts";
 import { buildWeakSkillsSnapshot } from "../_shared/planSignals.ts";
+import { buildAllowedFocusSkillsBlock, resolveFocusSkills, type AllowedFocusSkill } from "../_shared/focusSkills.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -88,7 +90,10 @@ serve(async (req) => {
         .is('deleted_at', null).order('created_at', { ascending: false }).limit(10),
       finalMode === 'phase_steps' && phaseId
         ? supabase.from('dslm_curriculum_phases').select('id, title, description, focus_areas').eq('id', phaseId).single()
-        : Promise.resolve({ data: null }),
+        // next_steps: read the current in_progress phase so near-term steps stay inside it (D14).
+        : supabase.from('dslm_curriculum_phases').select('id, title, description, focus_areas, generation_context')
+          .eq('student_id', studentId).eq('teacher_id', teacherId).eq('status', 'in_progress').is('deleted_at', null)
+          .order('sequence_number', { ascending: true }).limit(1).maybeSingle(),
       excludeIds.length > 0
         ? supabase.from('future_worksheet_suggestions').select('suggested_topic').in('id', excludeIds)
         : Promise.resolve({ data: [] }),
@@ -159,6 +164,9 @@ serve(async (req) => {
     );
     const studentProfile = buildStudentProfileBlock(student as any, pacing, intensityPromptLines(intensity));
     const weakBlock = buildWeakAreasBlock(metrics, 8);
+    // D14 / 9.6: focusSkills may only be copied from the student's real weak skills.
+    const allowedFocus: AllowedFocusSkill[] = groupSkillMetrics(metrics).weak.slice(0, 8).map((g) => ({ label: g.label, key: g.key }));
+    const allowedFocusBlock = buildAllowedFocusSkillsBlock(allowedFocus);
     const knowledgeBlock = buildKnowledgeBlock(knowledge, 6);
     const goalsBlock = buildGoalsBlock(goalsForPrompt(goals as any[]));
     const worksheetHistory = buildWorksheetHistoryBlock(recentWorksheets, 8);
@@ -177,9 +185,15 @@ Phase description: ${phase.description || '(none)'}.
 Phase focus areas: [${(phase.focus_areas || []).join(', ')}].
 These are LESSON-LEVEL steps WITHIN this phase, do NOT introduce unrelated topics.`;
     } else {
+      const phaseSnapshotSkills: string[] = Array.isArray(phase?.generation_context?.weak_skills_snapshot?.skills)
+        ? phase.generation_context.weak_skills_snapshot.skills.map((x: any) => String(x?.label || '')).filter(Boolean).slice(0, 6)
+        : [];
+      const currentPhaseLine = phase
+        ? `\nCURRENT PHASE (in progress): "${phase.title}". Description: ${phase.description || '(none)'}. Focus areas: [${(phase.focus_areas || []).join(', ')}].${phaseSnapshotSkills.length ? ` Weak skills when the phase was planned: ${phaseSnapshotSkills.join('; ')}.` : ''}\nStay inside this phase: steps must advance its focus areas, not unrelated topics.`
+        : '';
       modeBrief = `MODE: IMMEDIATE NEXT STEPS.
 These are the most urgent ${count} concrete worksheets to assign THIS WEEK or NEXT.
-They are NOT macro phases; they are concrete lesson plans for the very near term.`;
+They are NOT macro phases; they are concrete lesson plans for the very near term.${currentPhaseLine}`;
     }
 
     const LESSON_EXERCISE_COUNT = 8;
@@ -199,6 +213,8 @@ COMPLEMENTARITY RULE: New steps must EXTEND this queue logically, fill skill gap
 
 WEAK AREAS (recency-weighted: RECENT SIGNALS CARRY MORE AUTHORITY):
   ${weakBlock}
+
+${allowedFocusBlock}
 
 RECENCY RULE: follow the confidence tag on each line. AUTHORITATIVE lines are reliable; RECENT lines are good evidence; single observations and STALE lines are hypotheses to verify, not facts.
 
@@ -231,7 +247,7 @@ Return EXACTLY ${count} suggestions. NO MORE, NO LESS. Each suggestion must incl
 MEDIA FAMILY RULE: each suggestion may use AT MOST ONE media family, picture-* OR audio-* OR none. Never mix picture and audio in the same step.
 
 FOCUS DISTRIBUTION RULE: do NOT mark all exercises as "none". When grammarFocus is set, at least 2 exercises must be tagged "grammar". At least 2 exercises must be tagged "vocabulary". Remaining may be "none".
-- rationale (cite student data: weak skill, deadline, complementarity), focusSkills, difficulty (CEFR level), estimatedImpact
+- rationale (cite student data: weak skill, deadline, complementarity), focusSkills (copied from the ALLOWED focusSkills list, or []), difficulty (CEFR level), estimatedImpact
 
 Adult/professional tone. No school-like content. CLT anchoring mandatory.
 
@@ -337,7 +353,10 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
 
     // Sanitize: enforce exactly 8 exercises per suggestion (defense in depth)
     const TARGET_EX_COUNT = 8;
+    let focusSkillsDropped = 0;
     suggestions = suggestions.map((s: any) => {
+      const focus = resolveFocusSkills(s.focusSkills, allowedFocus);
+      focusSkillsDropped += focus.dropped;
       let exercises: string[] = (s.exercises || []).filter((ex: string) => VALID_EXERCISES.includes(ex));
       // Pad to TARGET_EX_COUNT with safe defaults from NO_MEDIA pool
       const NO_MEDIA_DEFAULTS = ['reading','fill-in-blanks','multiple-choice','true-false','matching','dialogue','answer-questions','discussion'];
@@ -408,7 +427,8 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
         exercises,
         exerciseFocusMap,
         rationale: s.rationale ? String(s.rationale).slice(0, 600) : null,
-        focusSkills: Array.isArray(s.focusSkills) ? s.focusSkills.map(String).slice(0, 8) : [],
+        focusSkills: focus.labels,
+        focusSkillKeys: focus.keys,
         difficulty: s.difficulty || student.english_level,
         estimatedImpact: (s.estimatedImpact && typeof s.estimatedImpact === 'object') ? s.estimatedImpact : {}
       };
@@ -430,6 +450,9 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
       deadline_overdue_items: deadline.overdue ? deadline.overdueDeadlines : null,
       // D14 / 9.6: weak skills this plan was generated from, to check later whether it helped.
       weak_skills_snapshot: buildWeakSkillsSnapshot(metrics),
+      // Model focusSkills not found in the allowed list (dropped server side).
+      focus_skills_dropped: focusSkillsDropped,
+      current_phase_id: finalMode === 'next_steps' ? (phase?.id ?? null) : null,
       existing_steps_count: existingSteps.length,
       metrics_count: metrics.length,
       goals_count: goals.length,

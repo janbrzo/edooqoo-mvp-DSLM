@@ -219,7 +219,8 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         focus_skill_names: s.focusSkills || [],
         difficulty_level: s.difficulty || null,
         estimated_impact: s.estimatedImpact || {},
-        generation_context: generationContext
+        // Per-step canonical focus skill keys live in the JSON (no column for them).
+        generation_context: { ...generationContext, focus_skill_keys: s.focusSkillKeys || [] }
       }));
 
       const { error } = await supabase.from('future_worksheet_suggestions').insert(insertData);
@@ -388,7 +389,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
           focus_skill_names: s.focusSkills || [],
           difficulty_level: s.difficulty || null,
           estimated_impact: s.estimatedImpact || {},
-          generation_context: generationContext,
+          generation_context: { ...generationContext, focus_skill_keys: s.focusSkillKeys || [] },
         });
       if (insErr) throw insErr;
       await fetchSuggestions();
