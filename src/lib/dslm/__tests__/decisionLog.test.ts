@@ -10,9 +10,17 @@ import {
 const STUDENT = '11111111-1111-4111-8111-111111111111';
 const ok = () => vi.fn().mockResolvedValue({ data: 'id', error: null });
 
+const store = new Map<string, string>();
+const localStorage = {
+  getItem: (k: string) => store.get(k) ?? null,
+  setItem: (k: string, v: string) => { store.set(k, v); },
+  clear: () => store.clear(),
+};
+
 beforeEach(() => {
   __resetDecisionLogForTests();
-  localStorage.clear();
+  vi.stubGlobal('localStorage', localStorage);
+  store.clear();
 });
 
 describe('logDslmDecision', () => {

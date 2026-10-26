@@ -31,6 +31,7 @@ const PIPELINE_FUNCTIONS = [
   'list_homework_answers_needing_ai_evaluation', 'claim_homework_answer_ai_attempt', 'mark_homework_answer_ai_not_evaluable',
   'worksheet_answers_differ', 'keep_ai_alternative_ratings',
   'log_dslm_decision',
+  'dslm_validation_report',
 ];
 
 const PIPELINE_TRIGGERS = [

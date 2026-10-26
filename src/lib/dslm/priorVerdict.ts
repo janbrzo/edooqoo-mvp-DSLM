@@ -74,6 +74,8 @@ export function describePrefillItem(args: {
 
 /** Maximum items sent; a mark done form has far fewer skills. */
 export const PRIOR_VERDICT_MAX_ITEMS = 60;
+/** The RPC rejects more than 8192 bytes, which would fail the whole save: stay well below. */
+export const PRIOR_VERDICT_MAX_CHARS = 6500;
 
 /**
  * Pairs the prefill snapshot (same order as the form rows) with the submitted
@@ -92,5 +94,9 @@ export function finalizePriorVerdict(
     items.push({ ...p, final_mastery: row.mastery, changed: p.prefill_mastery !== row.mastery });
   });
   if (items.length === 0) return null;
-  return { version: 1, items: items.slice(0, PRIOR_VERDICT_MAX_ITEMS) };
+  let kept = items.slice(0, PRIOR_VERDICT_MAX_ITEMS);
+  while (kept.length > 0 && JSON.stringify({ version: 1, items: kept }).length > PRIOR_VERDICT_MAX_CHARS) {
+    kept = kept.slice(0, Math.floor(kept.length * 0.8));
+  }
+  return kept.length > 0 ? { version: 1, items: kept } : null;
 }

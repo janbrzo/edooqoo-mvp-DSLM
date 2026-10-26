@@ -41,6 +41,12 @@ describe('finalizePriorVerdict', () => {
     expect(out?.version).toBe(1);
     expect(out?.items.map((i) => [i.name, i.final_mastery, i.changed])).toEqual([['a', 70, false], ['c', 40, true]]);
   });
+  it('stays under the size the RPC accepts', () => {
+    const many = Array.from({ length: 80 }, (_, i) => describePrefillItem({ ...base, name: `skill.${i}.` + 'n'.repeat(60), itemIndex: i, mastery: 50, hasValue: true, aiEvaluations: { [i]: 50 } }));
+    const out = finalizePriorVerdict(many, many.map(() => ({ mastery: 60, hasValue: true })));
+    expect(JSON.stringify(out).length).toBeLessThanOrEqual(6500);
+    expect(out!.items.length).toBeGreaterThan(0);
+  });
   it('returns null when nothing is saved or lengths differ', () => {
     expect(finalizePriorVerdict(prefill, [{ mastery: null, hasValue: false }, { mastery: null, hasValue: false }, { mastery: null, hasValue: false }])).toBeNull();
     expect(finalizePriorVerdict(prefill, [{ mastery: 1, hasValue: true }])).toBeNull();
