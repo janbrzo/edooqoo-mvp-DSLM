@@ -13,7 +13,6 @@ import type { WelcomeTestQuestionDef } from '@/types/welcomeTest';
 const FILL_INSTRUCTION = 'Write the correct word.';
 
 // Audio is generated with generate-welcome-test-audio (see mem/features/welcome-test).
-// An empty audio_url shows the transcript instead of the player until the file exists.
 export const BANK2_NEW_QUESTIONS: WelcomeTestQuestionDef[] = [
   // ---- Grammar A1 ----
   {
@@ -138,7 +137,7 @@ export const BANK2_NEW_QUESTIONS: WelcomeTestQuestionDef[] = [
   {
     id: 'wt_q71', section: 'receptive', question_type: 'listening_comprehension',
     question_text: 'Listen to the conversation and answer: what time does the next bus to the airport leave?',
-    audio_url: '',
+    audio_url: 'https://pub-1b974ada9ae240948229c52d927980ee.r2.dev/audio/welcome-test-listening-1793037331618.mp3',
     audio_transcript: 'A: "Excuse me, what time does the next bus to the airport leave?"\nB: "The next one leaves at ten past four, from stop number three."\nA: "Ten past four... and how long does it take?"\nB: "About forty minutes."',
     options: ['4:10', '4:15', '4:40', '3:10'],
     correct_answer: '4:10',
@@ -149,7 +148,7 @@ export const BANK2_NEW_QUESTIONS: WelcomeTestQuestionDef[] = [
   {
     id: 'wt_q72', section: 'receptive', question_type: 'listening_comprehension',
     question_text: 'Listen to the conversation and answer: why is the man hesitating?',
-    audio_url: '',
+    audio_url: 'https://pub-1b974ada9ae240948229c52d927980ee.r2.dev/audio/welcome-test-listening-1793037340290.mp3',
     audio_transcript: 'A: "So, have you decided whether to take the job in Lisbon?"\nB: "Honestly, I keep going back and forth. The salary is nearly thirty percent higher, but I\'d have to leave my team just when we\'re launching the new product."\nA: "And what about the relocation package?"\nB: "They\'d cover the move and three months of rent, which helps. But my manager has hinted that a promotion might come up here next spring, so I\'d be walking away from that."\nA: "Sounds like you\'re not really ready to leave."\nB: "Maybe. I\'ll tell them on Monday either way."',
     options: [
       'The salary in Lisbon is lower than he expected',
@@ -255,7 +254,7 @@ export const BANK2_VARIANTS_B: Record<string, WelcomeTestQuestionDef> = {
   wt_q71: {
     ...BANK2_NEW_QUESTIONS[12],
     question_text: 'Listen to the conversation and answer: what kind of room does the customer book?',
-    audio_url: '',
+    audio_url: 'https://pub-1b974ada9ae240948229c52d927980ee.r2.dev/audio/welcome-test-listening-1793037335224.mp3',
     audio_transcript: 'A: "Hi, I\'d like to book a room for two nights, from Friday."\nB: "Certainly. A single or a double room?"\nA: "A double, please. And is breakfast included?"\nB: "Yes, it is, from seven o\'clock."',
     options: [
       'A single room for two nights',
@@ -268,7 +267,7 @@ export const BANK2_VARIANTS_B: Record<string, WelcomeTestQuestionDef> = {
   wt_q72: {
     ...BANK2_NEW_QUESTIONS[13],
     question_text: 'Listen to the conversation and answer: what compromise does the man support?',
-    audio_url: '',
+    audio_url: 'https://pub-1b974ada9ae240948229c52d927980ee.r2.dev/audio/welcome-test-listening-1793037346592.mp3',
     audio_transcript: 'A: "Did you read the proposal for the new office layout?"\nB: "I skimmed it. Open plan again, apparently, which I\'m not thrilled about."\nA: "The architect says it increases collaboration by about a fifth."\nB: "Perhaps, but on the pilot floor people started wearing headphones all day, so I\'m not convinced it\'s actually collaboration."\nA: "Fair point. Maybe we should ask for quiet zones."\nB: "Yes, that\'s the compromise I\'d support."',
     options: [
       'Keeping the old layout completely',

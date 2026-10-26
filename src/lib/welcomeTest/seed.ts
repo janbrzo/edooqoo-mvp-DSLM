@@ -14,11 +14,8 @@ import {
   type WelcomeTestParams,
 } from '../../../supabase/functions/_shared/welcomeTestBank';
 
-/**
- * The bank new tests are created from. Bank 2 is ready but stays off until the four
- * listening recordings (wt_q71, wt_q72, Forms A and B) exist: set to 2 to switch on.
- */
-export const CURRENT_WELCOME_BANK = 1;
+/** The bank new tests are created from. */
+export const CURRENT_WELCOME_BANK = 2;
 
 /** The question definitions of one bank and form, in array (= question_index) order. */
 export function bankQuestions(bank: number = CURRENT_WELCOME_BANK, form: WelcomeTestForm = 'A') {

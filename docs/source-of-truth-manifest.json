@@ -8051,7 +8051,7 @@
       "storage": [],
       "userFacingText": [
         ", focus on listening skills while maintaining C1 areas.",
-        "AI English Placement Test: 58 Questions, CEFR Assessment | Edooqoo",
+        "AI English Placement Test: About 65 Questions, CEFR Assessment | Edooqoo",
         "AI Summary:",
         "Anna Chen · Completed Apr 12, 2026",
         "Guided",
@@ -59144,6 +59144,7 @@
         "host": "pub-1b974ada9ae240948229c52d927980ee.r2.dev",
         "callsites": [
           "src/data/demoWorksheetContent.ts",
+          "src/data/welcomeTestBank2.ts",
           "src/data/welcomeTestQuestions.ts",
           "supabase/functions/upload-to-r2/index.ts"
         ]

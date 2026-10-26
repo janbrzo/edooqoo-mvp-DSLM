@@ -39,7 +39,7 @@ const steps = [
     icon: Send,
     title: "Send the Welcome Test, optional",
     description: "Send a placement test when you need a stronger baseline. The test covers grammar, vocabulary, reading, listening and speaking, then updates the student profile.",
-    benefits: ["58-question assessment", "Speaking analysis included", "Initial DSLM profile data"],
+    benefits: ["adaptive assessment of about 65 questions", "Speaking analysis included", "Initial DSLM profile data"],
   },
   {
     number: 4,
