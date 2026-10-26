@@ -76,6 +76,79 @@ const STRATEGIC_ROOT_HTML = new Set([
 ]);
 
 export const CONTENT_OVERRIDES = {
+  // Martha filter (Step 3): school-only classroom articles retired via 301.
+  '/blog/managing-large-esl-classes.html': {
+    state: 'merge',
+    redirectTo: '/blog/teaching-english-one-to-one.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire large-class management content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/pair-work-activities-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-teach-speaking-esl.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire pair-work classroom formats content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/think-pair-share-esl-variations.html': {
+    state: 'merge',
+    redirectTo: '/blog/communicative-language-teaching-activities.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire think-pair-share classroom routines content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/substitute-teacher-esl-lesson-plans.html': {
+    state: 'merge',
+    redirectTo: '/blog/one-minute-prep-workflow-for-esl-tutors.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire school substitute lesson plans content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/peer-editing-workshops-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-teach-writing-esl-students.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire classroom peer-editing workshops content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/peer-feedback-activities-english.html': {
+    state: 'merge',
+    redirectTo: '/blog/error-correction-techniques-esl.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire classroom peer feedback content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/holiday-themed-esl-activities.html': {
+    state: 'merge',
+    redirectTo: '/blog/current-events-esl-lessons.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire holiday classroom activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/five-minute-filler-activities-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire classroom filler activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/warm-up-activities-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-teach-speaking-esl.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire group warm-up games content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/storytelling-activities-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/communicative-language-teaching-activities.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire classroom storytelling activities content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/trauma-informed-teaching-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/teaching-english-one-to-one.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire school trauma-informed classroom practice content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
+  '/blog/tefl-certification-guide.html': {
+    state: 'merge',
+    redirectTo: '/blog/setting-up-freelance-esl-business.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Martha filter: retire school-track TEFL certification content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
+  },
   // Add measured keep/improve/merge/retire decisions here after GSC and backlink
   // evidence is recorded. Unknown content remains hold to prevent destructive
   // redirects based only on code inspection.

@@ -335,7 +335,7 @@ PROBLEM: Public examples help teachers inspect output quality without exposing p
 
 EDOOQOO SOLUTION: PublicGalleryIndex.tsx, PublicGalleryWorksheetPage.tsx, GalleryExerciseRenderer, publish-worksheet, unpublish-worksheet, bulk-publish-worksheets, regenerate-gallery-sitemap, sitemap-xml, and worksheet public fields implement the gallery surface.
 
-TECHNICAL MECHANICS: PublicGalleryIndex reads worksheets where is_public is true, selects id, public_slug, title, public_topic, public_level, public_exercise_types, published_at, and public_view_count, filters by public_level and topic, paginates 24 items, and emits ItemList JSON-LD. PublicGalleryWorksheetPage resolves public_slug, shows soft removal when is_public is false, parses ai_response for static exercise previews, emits LearningResource JSON-LD, and links visitors to signup for interactive generation. Publishing functions mutate worksheet public fields and gallery sitemap generation. Tables: worksheets. Public access is read-only; student answers, teacher edits, downloads, and AI review are not exposed in gallery preview.
+TECHNICAL MECHANICS: PublicGalleryIndex uses the publication-filtered `list_public_worksheets` metadata RPC, filters by public_level and topic, paginates 24 items, and emits ItemList JSON-LD. PublicGalleryWorksheetPage resolves public_slug through `get_public_worksheet_by_slug`, shows soft removal when the returned is_public flag is false, parses ai_response for static exercise previews, emits LearningResource JSON-LD, and links visitors to signup for interactive generation. The detail RPC does not enforce `is_public=true` in SQL; the page's client-side handling is not a publication-filtered content-read guarantee. Do not reuse that RPC for exercise excerpts: separate author reuse permission and a bounded public read with SQL-enforced publication filtering are required first. Publishing functions mutate worksheet public fields and gallery sitemap generation. Tables: worksheets. Public access is read-only; student answers, teacher edits, downloads, and AI review are not exposed in gallery preview.
 
 RAG KEYWORDS: public worksheet gallery, ESL worksheet examples, free worksheet preview, CEFR filter, worksheet publishing, public_slug, LearningResource schema, static worksheet, gallery sitemap, teacher-published worksheet, public ESL materials
 
@@ -346,7 +346,7 @@ PROBLEM: Teachers and AI agents need crawlable factual pages that explain capabi
 
 EDOOQOO SOLUTION: PageSeo, SEO_META, About, Blog, Prompts, Glossary, ExerciseTypes, HowItWorks, OneMinutePrep, Resources, seo pages, features pages, scripts/seo/generate-citable-pages.mjs, generate-ai-resources.mjs, build-blog-index.mjs, prerender-spa-routes.mjs, audit-seo-assets.mjs, public/llms.txt, public/llms-full.txt, public/llms-answers.txt, public/knowledge-graph.json, public/openapi.yaml, public/sitemap.xml, and public/.well-known/ai-plugin.json implement discovery.
 
-TECHNICAL MECHANICS: App.tsx exposes SEO routes for /about, /prompts, /glossary, /exercise-types, /how-it-works, /one-minute-prep, /resources, /blog, /esl-worksheets, /for-english-tutors, /resources/esl-class-toolkit, /teach-english-online, /esl-games-for-teachers, /english-games-for-learners, /features/*, /tools/*, and programmatic worksheet/persona routes. package.json build:seo runs citable generation, blog index build, AI resource generation, Vite build, SPA prerendering, and SEO audit. generate-citable-pages.mjs renders teacher-facing content without visible citation instructions, bot-only FAQs or keyword sections. JSON-LD keywords and educational audiences remain machine-readable; visible FAQs and FAQPage use the same source. content-verification.mjs detects bot-directed text including headers and footers while excluding scripts and styles. generate-ai-resources.mjs owns public/llms.txt and root llms.txt; audits read docs/llm-context.md rather than overwrite it. Internal RAG headings and dedicated AI resource files are separate from human-facing HTML.
+TECHNICAL MECHANICS: App.tsx exposes SEO routes for /about, /prompts, /glossary, /exercise-types, /how-it-works, /one-minute-prep, /resources, /blog, /esl-worksheets, /for-english-tutors, /resources/esl-class-toolkit, /teach-english-online, /esl-games-for-teachers, /english-games-for-learners, /features/*, /tools/*, and programmatic worksheet/persona routes. `package.json` owns the ordered `seo:sync-generated` pipeline: source manifest, citable/strategic content, encoding, blog index/sitemap, triage, index policy, decision routes, registry, hub backlinks, edge routing, sitemap payload, AI resources, citation blocks, JSON-LD deduplication and snapshot snippet/head repairs. `.github/workflows/seo-integrity.yml` invokes this same command twice with `git diff --exit-code` after each run, then gates `content:audit`, check-only backlink/snapshot validation, edge-routing tests, metadata/schema audits and unit tests before `build:seo`. `scripts/seo/__tests__/seo-ci-contract.test.mjs` guards shared generation order and mandatory CI checks. `build:seo` separately builds and prerenders the application; passing local synchronization does not establish deployment or GSC outcomes. generate-citable-pages.mjs renders teacher-facing content without visible citation instructions, bot-only FAQs or keyword sections. JSON-LD keywords and educational audiences remain machine-readable; visible FAQs and FAQPage use the same source. content-verification.mjs detects bot-directed text including headers and footers while excluding scripts and styles. generate-ai-resources.mjs owns public/llms.txt and root llms.txt; audits read docs/llm-context.md rather than overwrite it. Internal RAG headings and dedicated AI resource files are separate from human-facing HTML.
 
 RAG KEYWORDS: SEO, llms.txt, AI discovery, citable pages, sitemap, schema.org, FAQ JSON-LD, ESL content, programmatic SEO, teacher resources, search landing page, public route, AI agent documentation
 
@@ -1688,9 +1688,20 @@ TECHNICAL MECHANICS:
   ten distinct incoming sources for top-40 routes and five for top-120 routes. This public-content
   module does not read private student evidence or alter DSLM or worksheet generation.
 - AI discovery: `## Topic Hubs` section emitted into `public/llms.txt` by `scripts/seo/generate-ai-resources.mjs`.
+- Public tool navigation: all four hubs expose `/tools` and the local Next Lesson Decision Tool;
+  `/tools` links back to the hubs. Exercise Design, ESL Worksheets and Tools show reviewed Gallery
+  source links from `PublicGalleryExamples`, revalidated on mount through publication-filtered
+  metadata with anonymous credentials. Prerender disables that read and never saves worksheet bodies.
+  Gallery detail links pass only an exact supported CEFR band to the decision tool; mixed bands
+  pass nothing, and level-only links do not generate a recommendation before evidence is entered.
+  Direct exercise embedding is not implemented: author reuse permission and a bounded public
+  content RPC that excludes unpublished worksheets are required first. Private DSLM metrics and
+  the worksheet engine are unchanged.
 - CI guard: `scripts/seo/audit-cluster-hubs.mjs` (`npm run seo:audit-cluster-hubs`) validates routes,
   manifest registration, citation block, spoke existence, backlink presence, and title/description limits.
-  Wired into `.github/workflows/seo-integrity.yml` and both `build:seo` scripts.
+  Wired into the shared `seo:sync-generated` pipeline and both `build:seo` scripts. CI also runs
+  `seo:check-cluster-hub-links` and the full `content:audit`, including the strict internal-link graph
+  thresholds; the same local synchronization command is repeated before audits to detect output drift.
 - Metadata rules unchanged: hub titles <= 60 chars, descriptions <= 155 chars, enforced by the audit and
   by `audit-duplicate-meta.mjs` baseline (longTitles 3, longDescriptions 0).
 

@@ -4,6 +4,7 @@ import { CheckCircle2, ClipboardCopy, Link2 } from 'lucide-react';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import { useEventTracking } from '@/hooks/useEventTracking';
 import NewsletterSignup from '@/components/newsletter/NewsletterSignup';
+import { Button } from '@/components/ui/button';
 import {
   CEFR_LEVELS,
   DEFAULT_DECISION_INPUT,
@@ -14,6 +15,7 @@ import {
   RECURRING_ERRORS,
   UPCOMING_SITUATIONS,
   decideNextLesson,
+  hasSharedDecisionEvidence,
   parseDecisionInput,
   serializeDecisionInput,
   type DecisionInput,
@@ -67,6 +69,7 @@ const WhatShouldITeachNextTool: React.FC = () => {
   const location = useLocation();
   const { trackEvent } = useEventTracking();
   const startedRef = useRef(false);
+  const hasSharedEvidence = hasSharedDecisionEvidence(location.search);
   const [input, setInput] = useState<DecisionInput>(() => {
     try {
       return location.search ? parseDecisionInput(location.search) : DEFAULT_DECISION_INPUT;
@@ -75,9 +78,16 @@ const WhatShouldITeachNextTool: React.FC = () => {
     }
   });
   const [result, setResult] = useState<DecisionResult | null>(() => (
-    location.search ? decideNextLesson(parseDecisionInput(location.search)) : null
+    hasSharedEvidence ? decideNextLesson(parseDecisionInput(location.search)) : null
   ));
   const [copyStatus, setCopyStatus] = useState<'result' | 'link' | null>(null);
+
+  useEffect(() => {
+    const nextInput = parseDecisionInput(location.search);
+    setInput(nextInput);
+    setResult(hasSharedEvidence ? decideNextLesson(nextInput) : null);
+    setCopyStatus(null);
+  }, [location.search, hasSharedEvidence]);
 
   useEffect(() => {
     trackEvent({
@@ -92,6 +102,8 @@ const WhatShouldITeachNextTool: React.FC = () => {
       trackEvent({ eventType: 'decision_tool_start', eventData: { entry: location.search ? 'shared_link' : 'blank_form' } });
     }
     setInput((previous) => ({ ...previous, [key]: value }));
+    setResult(null);
+    setCopyStatus(null);
   };
 
   const generate = (event: React.FormEvent) => {
@@ -204,9 +216,9 @@ const WhatShouldITeachNextTool: React.FC = () => {
               </label>
             ))}
           </div>
-          <button type="submit" className="mt-7 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90">
+          <Button type="submit" className="mt-7 h-auto whitespace-normal px-6 py-3">
             Decide the next lesson
-          </button>
+          </Button>
         </form>
 
         {result && (
@@ -247,16 +259,22 @@ const WhatShouldITeachNextTool: React.FC = () => {
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3 border-t pt-6">
-              <button type="button" onClick={copyResult} className="inline-flex items-center gap-2 rounded-lg border border-input px-5 py-3 text-sm font-semibold hover:bg-accent">
+              <Button type="button" onClick={copyResult} variant="outline" className="h-auto px-5 py-3">
                 {copyStatus === 'result' ? <CheckCircle2 className="h-4 w-4" /> : <ClipboardCopy className="h-4 w-4" />}
                 {copyStatus === 'result' ? 'Result copied' : 'Copy result'}
-              </button>
-              <button type="button" onClick={copySafeLink} className="inline-flex items-center gap-2 rounded-lg border border-input px-5 py-3 text-sm font-semibold hover:bg-accent">
+              </Button>
+              <Button type="button" onClick={copySafeLink} variant="outline" className="h-auto px-5 py-3">
                 {copyStatus === 'link' ? <CheckCircle2 className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
                 {copyStatus === 'link' ? 'Safe link copied' : 'Copy safe link'}
-              </button>
+              </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">The link contains only the seven selected teaching categories. It cannot contain student notes or identity data.</p>
+            <nav aria-label="Next lesson resources" className="mt-6 flex flex-wrap gap-4 text-sm text-primary">
+              <Link to="/tools/lesson-plan-generator" className="hover:underline">Plan the lesson stages</Link>
+              <Link to="/gallery" className="hover:underline">Browse published worksheet examples</Link>
+              <Link to="/what-to-teach-next" className="hover:underline">Compare worked teaching scenarios</Link>
+              <Link to="/features/dslm" className="hover:underline">Student learning model in Edooqoo</Link>
+            </nav>
           </section>
         )}
 

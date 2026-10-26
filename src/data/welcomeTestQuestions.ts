@@ -19,6 +19,7 @@
  */
 
 import type { WelcomeTestQuestionDef, WelcomeTestSectionDef } from '@/types/welcomeTest';
+import { BANK2_NEW_QUESTIONS, BANK2_VARIANTS_B } from './welcomeTestBank2';
 
 // =====================================================
 // SECTION 1: About You (Q1-Q8)
@@ -1070,8 +1071,14 @@ export const WELCOME_TEST_SECTIONS_WITH_QUESTIONS: WelcomeTestSectionDef[] = [
 ];
 
 // Flat list of all questions for easy access
-export const ALL_WELCOME_TEST_QUESTIONS: WelcomeTestQuestionDef[] = 
-  WELCOME_TEST_SECTIONS_WITH_QUESTIONS.flatMap(s => s.questions);
+// Bank 1 = the sections above, in display order (question_index 0..57).
+// Bank 2 appends 14 questions (question_index 58..71): they are shown inside their
+// sections by lib/welcomeTest/flow.ts, but live at the end of the array so no stored
+// index ever moves.
+export const ALL_WELCOME_TEST_QUESTIONS: WelcomeTestQuestionDef[] = [
+  ...WELCOME_TEST_SECTIONS_WITH_QUESTIONS.flatMap(s => s.questions),
+  ...BANK2_NEW_QUESTIONS,
+];
 
 export const WELCOME_TEST_TOTAL_QUESTIONS = ALL_WELCOME_TEST_QUESTIONS.length;
 
@@ -1087,7 +1094,7 @@ export const WELCOME_TEST_TOTAL_QUESTIONS = ALL_WELCOME_TEST_QUESTIONS.length;
 // the student does not face the exact same item twice (test-effect).
 // =====================================================
 
-export const WELCOME_TEST_SKILL_VARIANTS_B: Record<string, WelcomeTestQuestionDef> = {
+const BANK1_SKILL_VARIANTS_B: Record<string, WelcomeTestQuestionDef> = {
   // Grammar
   wt_q20: {
     id: 'wt_q20', section: 'grammar', question_type: 'fill_blank',
@@ -1334,8 +1341,15 @@ export const WELCOME_TEST_SKILL_VARIANTS_B: Record<string, WelcomeTestQuestionDe
   },
 };
 
+/** Form B variants of both banks, by question id (bank 2 adds one per new question). */
+export const WELCOME_TEST_SKILL_VARIANTS_B: Record<string, WelcomeTestQuestionDef> = {
+  ...BANK1_SKILL_VARIANTS_B,
+  ...BANK2_VARIANTS_B,
+};
+
 /**
- * Returns the Welcome Test question set for a given attempt number.
+ * Returns the Welcome Test question set for a given attempt number
+ * (all 72 questions of both banks; callers slice with bankQuestions in lib/welcomeTest/seed.ts).
  * - Attempt 1 → original (form A) questions.
  * - Attempt 2+ → for skill items defined in WELCOME_TEST_SKILL_VARIANTS_B
  *   the variant is substituted; profiling questions stay identical.

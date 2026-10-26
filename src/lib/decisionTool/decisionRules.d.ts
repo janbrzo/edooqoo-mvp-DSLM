@@ -31,3 +31,4 @@ export const DEFAULT_DECISION_INPUT: DecisionInput;
 export function decideNextLesson(input: DecisionInput): DecisionResult;
 export function serializeDecisionInput(input: DecisionInput): string;
 export function parseDecisionInput(search: string): DecisionInput;
+export function hasSharedDecisionEvidence(search: string): boolean;

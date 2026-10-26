@@ -137,6 +137,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
       }
       const newPhases = response.data?.phases || [];
       const ctx = response.data?.generationContext || {};
+      if (response.data?.deadlineReminder?.message) toast.warning(response.data.deadlineReminder.message);
       if (newPhases.length === 0) {
         toast.info('No phases generated. Add more goals or notes first.');
         return false;

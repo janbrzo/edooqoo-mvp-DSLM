@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useStudentTests } from '@/hooks/useStudentTests';
-import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { formForAttempt, welcomeTestQuestionsToAdd, welcomeTestGenerationParams } from '@/lib/welcomeTest/seed';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDemoContext } from '@/contexts/DemoContext';
@@ -202,22 +202,14 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       const test = await createTest({
         student_id: studentId,
         test_type: 'welcome',
+        generation_params: welcomeTestGenerationParams(),
         title: `Welcome Test - ${studentName}`,
         description: 'Comprehensive placement & learning profile assessment',
         attempt_number: 1,
       });
       if (!test) return null;
 
-      const questionsToAdd = ALL_WELCOME_TEST_QUESTIONS.map(q => ({
-        question_type: q.question_type as any,
-        question_text: q.question_text,
-        question_data: (q.options ? { options: q.options } : {}) as any,
-        correct_answer: (q.correct_answer || '') as any,
-        explanation: q.description || undefined,
-        element_type: q.element_type as any,
-        difficulty_level: q.difficulty_level,
-        skill_tags: q.nano_skill ? [q.nano_skill] : [],
-      }));
+      const questionsToAdd = welcomeTestQuestionsToAdd();
       await addQuestions(test.id, questionsToAdd);
 
       const token = await generateShareToken(test.id, 'welcome');
@@ -396,6 +388,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
+        generation_params: welcomeTestGenerationParams(undefined, formForAttempt(nextAttempt)),
         title: `Welcome Test - ${studentName} (Retake ${nextAttempt - 1})`,
         description: 'Re-take: comparing growth against the previous attempt',
         attempt_number: nextAttempt,
@@ -403,16 +396,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       });
       if (!newTest) return;
 
-      const questionsToAdd = ALL_WELCOME_TEST_QUESTIONS.map(q => ({
-        question_type: q.question_type as any,
-        question_text: q.question_text,
-        question_data: (q.options ? { options: q.options } : {}) as any,
-        correct_answer: (q.correct_answer || '') as any,
-        explanation: q.description || undefined,
-        element_type: q.element_type as any,
-        difficulty_level: q.difficulty_level,
-        skill_tags: q.nano_skill ? [q.nano_skill] : [],
-      }));
+      const questionsToAdd = welcomeTestQuestionsToAdd(undefined, formForAttempt(nextAttempt));
       await addQuestions(newTest.id, questionsToAdd);
       const token = await generateShareToken(newTest.id, 'welcome');
       if (!token) return;

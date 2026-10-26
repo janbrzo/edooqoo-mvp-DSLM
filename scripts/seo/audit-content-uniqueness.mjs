@@ -18,6 +18,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { STRATEGIC_BOILERPLATE_REWRITE_SLUGS } from './strategic-boilerplate-rewrites.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PUBLIC_DIR = path.join(ROOT, 'public');
@@ -29,6 +30,9 @@ const SHINGLE = 8;
 const TEMPLATED = 0.5;
 const NEAR_DUPLICATE = 0.8;
 const STRICT = process.argv.includes('--strict');
+// Step 1 gate: the 17 rewritten strategic articles must stay indexable and below the
+// near-duplicate threshold; other sections stay report-only.
+const STRATEGIC_GATE = process.argv.includes('--strategic-gate');
 
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -50,6 +54,20 @@ function decodeEntities(text) {
 function isNoindex(html) {
   const robots = html.match(/<meta[^>]+name=["']robots["'][^>]*>/i);
   return Boolean(robots && /noindex/i.test(robots[0]));
+}
+
+// Canonicalized aliases (e.g. /glossary.html -> /glossary) are consolidated by design:
+// their canonical points at another route, so they must not count as duplicate content.
+function canonicalRoute(html) {
+  const link = html.match(/<link[^>]+rel=["']canonical["'][^>]*>/i);
+  if (!link) return null;
+  const href = link[0].match(/href=["']([^"']+)["']/i);
+  if (!href) return null;
+  try {
+    return new URL(href[1], 'https://edooqoo.com').pathname.replace(/\/+$/, '') || '/';
+  } catch {
+    return null;
+  }
 }
 
 function visibleWords(html) {
@@ -75,14 +93,20 @@ const sitemap = fs.existsSync(SITEMAP) ? fs.readFileSync(SITEMAP, 'utf8') : '';
 const inSitemap = (route) => sitemap.includes(`edooqoo.com${route}<`);
 
 const pages = [];
+const canonicalAliases = [];
 for (const file of walk(PUBLIC_DIR)) {
   const html = fs.readFileSync(file, 'utf8');
   if (isNoindex(html)) continue;
+  const route = routeFor(file);
+  const canonical = canonicalRoute(html);
+  if (canonical && canonical !== route) {
+    canonicalAliases.push({ route, canonical });
+    continue;
+  }
   const words = visibleWords(html);
   const shingles = new Set();
   for (let i = 0; i + SHINGLE <= words.length; i += 1) shingles.add(words.slice(i, i + SHINGLE).join(' '));
   if (shingles.size === 0) continue;
-  const route = routeFor(file);
   pages.push({ route, section: sectionFor(route), words: words.length, inSitemap: inSitemap(route), shingles });
 }
 
@@ -151,6 +175,7 @@ Method: visible body text of every indexable static HTML page in \`public/\` (na
 | Metric | Value |
 |---|---:|
 | Indexable static pages analysed | ${rows.length} |
+| Canonicalized aliases skipped | ${canonicalAliases.length} |
 | Templated (maxContainment >= ${TEMPLATED}) | ${templated.length} (${pct(templated.length, rows.length)}) |
 | Near-duplicate (maxContainment >= ${NEAR_DUPLICATE}) | ${nearDuplicates.length} (${pct(nearDuplicates.length, rows.length)}) |
 | Templated pages listed in sitemap.xml | ${templated.filter((row) => row.inSitemap).length} |
@@ -175,8 +200,23 @@ ${worst.map((row) => `| ${row.route} | ${row.maxContainment} | ${row.uniqueShare
 `;
 
 fs.writeFileSync(REPORT_MD, md);
-fs.writeFileSync(REPORT_JSON, `${JSON.stringify({ shingleSize: SHINGLE, thresholds: { templated: TEMPLATED, nearDuplicate: NEAR_DUPLICATE }, rows }, null, 2)}\n`);
+fs.writeFileSync(REPORT_JSON, `${JSON.stringify({ shingleSize: SHINGLE, thresholds: { templated: TEMPLATED, nearDuplicate: NEAR_DUPLICATE }, canonicalAliases, rows }, null, 2)}\n`);
 
 console.log(`[content-uniqueness] ${rows.length} indexable pages, ${templated.length} templated (>=${TEMPLATED}), ${nearDuplicates.length} near-duplicate (>=${NEAR_DUPLICATE}).`);
 console.log(`[content-uniqueness] report: ${path.relative(ROOT, REPORT_MD)}`);
+if (STRATEGIC_GATE) {
+  const byRoute = new Map(rows.map((row) => [row.route, row]));
+  const gateFailures = STRATEGIC_BOILERPLATE_REWRITE_SLUGS.flatMap((slug) => {
+    const row = byRoute.get(`/blog/${slug}`);
+    if (!row) return [`/blog/${slug}: not measured as an indexable page`];
+    return row.maxContainment >= NEAR_DUPLICATE
+      ? [`/blog/${slug}: maxContainment ${row.maxContainment} >= ${NEAR_DUPLICATE} (nearest ${row.nearest})`]
+      : [];
+  });
+  if (gateFailures.length) {
+    console.error(`[content-uniqueness] strategic gate FAIL\n- ${gateFailures.join('\n- ')}`);
+    process.exit(1);
+  }
+  console.log(`[content-uniqueness] strategic gate PASS ${STRATEGIC_BOILERPLATE_REWRITE_SLUGS.length} rewritten articles below ${NEAR_DUPLICATE}`);
+}
 if (STRICT && templated.length > 0) process.exit(1);

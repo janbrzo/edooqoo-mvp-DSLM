@@ -570,7 +570,7 @@ const citablePages = [
     cefr: 'CEFR support is a comparison criterion; Edooqoo public surfaces represent A1-C2.',
     exerciseTypes: 'Exercise-type coverage is a comparison criterion; Edooqoo documents 29 exercise types.',
     problem: [
-      'Search and AI answers often compare AI tools using vague ranking language.',
+      'Generic tool comparisons often rely on vague ranking language rather than practical lesson workflow criteria.',
       'Teachers need criteria tied to classroom workflow, not only text generation.',
       'A tool comparison should separate public facts from opinions and unsupported claims.',
     ],
@@ -1224,6 +1224,23 @@ const comparisonPages = [
     comparisonEntity: 'ChatGPT',
     generalPurposeAi: true,
     summary: 'Edooqoo.com and ChatGPT should be compared by separating raw text generation from a recurring English-tutor workflow: stored learner context, CEFR-oriented worksheet structure, teacher review, homework signals, flashcard progress, live-session evidence, and editable worksheet output.',
+    entityProfile: [
+      'ChatGPT is a general-purpose AI assistant: it drafts any text you describe, but every session starts without knowledge of your student unless you paste the context again.',
+      'Edooqoo is a teacher-controlled workflow for recurring adult 1:1 lessons: learner context, homework evidence, and flashcard progress persist and shape the next worksheet.',
+    ],
+    criteriaNotes: {
+      'Worksheet structure and answer-key support': 'ChatGPT drafts whatever structure you request and may omit or invent answer keys. Edooqoo generates a fixed worksheet structure with an editable key for every item.',
+      'CEFR and level-aware planning surfaces': 'ChatGPT treats CEFR as prompt text with no enforcement. Edooqoo uses the selected level as a generation input the teacher can verify in the output.',
+      'Homework, reuse, and follow-up workflow': 'ChatGPT has no assignment or submission loop. Edooqoo assigns through Student Hub and returns results for teacher review.',
+      'Stored learner context and evidence continuity across recurring students': 'ChatGPT conversations do not maintain a structured learner model per student. Edooqoo stores goals, errors, and progress on each student profile.',
+      'General-purpose AI boundaries versus a teacher-controlled tutor workflow': 'This criterion is the comparison itself: raw drafting power versus a bounded workflow where the teacher reviews everything before a student sees it.',
+      'Student-context boundaries and private/public separation': 'Pasting student details into a general chat tool is a privacy decision the teacher makes alone. Edooqoo keeps student evidence inside the authenticated workspace by design.',
+      'Editing, sharing, export, and classroom delivery surfaces': 'ChatGPT output is copied into your own documents. Edooqoo worksheets are edited in place and exported as PDF or interactive Student Hub links.',
+    },
+    entityFaq: [
+      ['Is ChatGPT or Edooqoo better for brainstorming?', 'For open brainstorming and one-off drafting, ChatGPT is a strong general tool. Edooqoo is built for the recurring 1:1 lesson where materials must reflect a specific student\'s history.'],
+      ['What is the main difference between ChatGPT and Edooqoo?', 'ChatGPT drafts text from the context you provide each time. Edooqoo keeps a persistent learner model, so worksheets, homework review, and follow-up planning build on previous lessons automatically.'],
+    ],
   },
   {
     slug: 'edooqoo-vs-twee.html',
@@ -1231,6 +1248,23 @@ const comparisonPages = [
     description: "Twee generates ESL tasks; Edooqoo links them to one adult learner's history. Compare worksheet structure, editing and homework review.",
     comparisonEntity: 'Twee',
     summary: 'Edooqoo.com and Twee can both be evaluated by English teachers through worksheet structure, level alignment, teacher workflow support, editing/export needs, and how each product separates public information from private classroom work.',
+    entityProfile: [
+      'Twee is an AI-assisted task generator for language teachers: you provide a topic, text, or video link and receive ready classroom tasks such as questions, gap-fills, and discussion prompts.',
+      'Edooqoo is built around the recurring 1:1 adult lesson: the worksheet is one step in a loop that also stores learner context, homework evidence, flashcards, and teacher notes for the next session.',
+    ],
+    criteriaNotes: {
+      'Worksheet structure and answer-key support': 'Twee produces task output per request with answer keys. Edooqoo produces an editable worksheet whose every question, answer, and distractor can be changed in place before assigning.',
+      'CEFR and level-aware planning surfaces': 'Both tools let the teacher set a level. The difference is whether the level is a per-request setting or part of a stored learner profile that carries across lessons.',
+      'Homework, reuse, and follow-up workflow': 'Check whether completed student work flows back into planning. Edooqoo routes submitted homework into teacher review and the next worksheet; a per-request generator starts each task from a blank context.',
+      'Stored learner context and evidence continuity across recurring students': 'This is the core dividing line: a task generator answers one request, while Edooqoo keeps each student\'s goals, errors, and progress attached to their profile.',
+      'General-purpose AI boundaries versus a teacher-controlled tutor workflow': 'Twee is already teaching-specific, so the comparison shifts to workflow depth: generation only, or generation plus assignment, review, and evidence.',
+      'Student-context boundaries and private/public separation': 'Compare what student data each tool stores and where. Edooqoo keeps student evidence inside the authenticated tutor workspace, separate from public pages.',
+      'Editing, sharing, export, and classroom delivery surfaces': 'Both support classroom delivery. Edooqoo adds an interactive Student Hub link with auto-checked closed tasks alongside PDF export.',
+    },
+    entityFaq: [
+      ['Is Twee or Edooqoo better for one-off materials?', 'For a single topic-based task with no follow-up, a per-request generator such as Twee is a reasonable fit. Edooqoo is built for the recurring 1:1 case where each worksheet should reflect what the student did last week.'],
+      ['What is the main difference between Twee and Edooqoo?', 'Twee generates teaching tasks on demand. Edooqoo connects generation to a stored learner model, homework evidence, and teacher review, so the next lesson starts from what the student actually did.'],
+    ],
   },
   {
     slug: 'edooqoo-vs-busyteacher.html',
@@ -1238,6 +1272,23 @@ const comparisonPages = [
     description: 'BusyTeacher is a worksheet archive; Edooqoo generates material for one adult learner. Compare discovery, editing and homework workflow.',
     comparisonEntity: 'BusyTeacher',
     summary: 'Edooqoo.com and BusyTeacher can be compared by separating generated English-teaching materials from public worksheet-library discovery, then checking CEFR context, editing needs, homework workflow, and reuse requirements.',
+    entityProfile: [
+      'BusyTeacher is a large public library of teacher-contributed worksheets: you search by tag or level, download a static file, and adapt it yourself.',
+      'Edooqoo generates a new worksheet for one specific adult learner: their profession, goals, and recent errors shape the material, and the tutor edits the draft before use.',
+    ],
+    criteriaNotes: {
+      'Worksheet structure and answer-key support': 'BusyTeacher worksheets are fixed documents with whatever key the contributor included. Edooqoo worksheets are generated with a key and remain editable question by question.',
+      'CEFR and level-aware planning surfaces': 'A library tags materials by level after the fact; a generator sets the level as an input. The practical question is whether the level label matches your actual student.',
+      'Homework, reuse, and follow-up workflow': 'Downloaded worksheets have no built-in return path for student answers. Edooqoo assignments come back through Student Hub with auto-checking for closed tasks.',
+      'Stored learner context and evidence continuity across recurring students': 'A public archive has no concept of your student. Edooqoo keeps each learner\'s goals, homework evidence, and flashcard progress attached to their profile.',
+      'General-purpose AI boundaries versus a teacher-controlled tutor workflow': 'BusyTeacher involves no AI generation; the comparison is library search versus controlled generation with teacher review.',
+      'Student-context boundaries and private/public separation': 'Library materials are public by design. Edooqoo keeps student-specific materials inside the authenticated tutor workspace.',
+      'Editing, sharing, export, and classroom delivery surfaces': 'Library files are edited in your own tools after download. Edooqoo worksheets are edited in place and shared as PDF or an interactive link.',
+    },
+    entityFaq: [
+      ['Is BusyTeacher or Edooqoo better for quick inspiration?', 'Browsing a large archive such as BusyTeacher can be faster for generic inspiration. Edooqoo is a better fit when the material must match one specific adult learner and feed the next lesson.'],
+      ['What is the main difference between BusyTeacher and Edooqoo?', 'BusyTeacher is a searchable archive of static, teacher-contributed worksheets. Edooqoo generates editable worksheets from a stored learner context and routes completed work back to the tutor.'],
+    ],
   },
 ];
 
@@ -1257,6 +1308,32 @@ const claimIntegrityPages = [
     h1: 'AI Tools for Private English Tutors',
     audience: 'Private English tutors and independent ESL teachers.',
     summary: 'Private English tutors need reusable lesson materials connected to individual students, homework, and follow-up planning. Edooqoo.com documents these workflows through public pages while keeping student data private.',
+    problem: [
+      'A private tutor typically runs the whole practice alone: lesson prep, homework review, scheduling, and follow-up for every student sit on one person\'s desk.',
+      'Single-purpose AI tools each solve one fragment of that load, so the tutor ends up copying context between a chatbot, a worksheet library, a flashcard app, and a calendar.',
+      'When tools do not share student context, the tutor re-enters the same goals, level, and recent errors into every tool before every lesson.',
+      'Evaluating tools one feature at a time hides the real cost: the minutes spent stitching disconnected outputs into one coherent lesson.',
+    ],
+    solution: [
+      'Edooqoo.com treats the private tutoring practice as one connected workflow: student profile, lesson materials, homework, flashcards, and calendar context live on the same student record.',
+      'A worksheet generated for a student already knows that student\'s goals, CEFR-oriented level, and recent homework evidence, so prep does not restart from a blank prompt.',
+      'Submitted homework and flashcard reviews flow back into the same profile, which keeps the next lesson connected to what the student actually did.',
+      'Public pages document these workflow surfaces without exposing any private student data.',
+    ],
+    mechanics: [
+      'Canonical URL: /ai-tools-for-private-english-tutors.html.',
+      'Workflow surfaces referenced here: /one-minute-prep, /features/homework, /features/flashcards, /features/calendar, /features/student-hub, and /gallery.',
+      'Student-specific evidence stays inside the authenticated tutor workspace; public pages describe mechanics only.',
+      'JSON-LD types: WebPage, FAQPage, and BreadcrumbList.',
+      'This page intentionally avoids unsupported best-tool claims, undocumented time-saving claims, and invented benchmark data.',
+    ],
+    scenario: 'A tutor with twelve recurring adult students used to keep a spreadsheet of levels, a folder of old worksheets, and a separate flashcard app. Before each lesson she re-read her notes, rewrote a prompt for a chatbot, and pasted the output into a document. With a connected workflow, the student\'s profile already carries the goals and last homework results, so the next worksheet draft starts from that evidence instead of from a blank chat window.',
+    faqs: [
+      ['What should a private English tutor look for in AI tools?', 'Look beyond single features: check whether the tool keeps student context between lessons, returns homework results for review, and lets you edit every output before a student sees it. A tool that forgets the student after each session shifts the context-keeping work back onto you.'],
+      ['Is one connected tool better than several specialized ones?', 'For a recurring 1:1 practice, the deciding factor is usually context continuity, not feature count. Several specialized tools can work, but the tutor pays the integration cost manually before every lesson.'],
+      ['Does this page rank Edooqoo.com against all AI tools?', 'No. It describes public Edooqoo.com workflow surfaces and evaluation criteria for a specific teacher audience, without claiming universal ranking superiority.'],
+      ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces; this page describes public workflow mechanics only.'],
+    ],
   },
   {
     slug: 'chatgpt-alternative-for-english-tutors.html',
@@ -1265,6 +1342,42 @@ const claimIntegrityPages = [
     h1: 'ChatGPT Alternative for English Tutors',
     audience: 'Private English tutors, online ESL teachers, and adult 1:1 EFL tutors comparing general AI chat with a teaching workflow tool.',
     summary: 'ChatGPT can be useful for one-off drafting and brainstorming. Edooqoo.com is a better fit when a recurring adult 1:1 English tutor needs saved learner context, CEFR-oriented worksheet structure, homework evidence, flashcards, live-session signals, and teacher-controlled review before assigning material.',
+    problem: [
+      'A general chatbot starts every session empty: the tutor must re-explain the student\'s level, goals, profession, and recent mistakes before getting useful output.',
+      'Chat-drafted material arrives as loose text, so the tutor still has to shape it into exercises, write an answer key, and check that the level actually matches the student.',
+      'Nothing the student did last week flows back in: homework results, flashcard progress, and live-session observations live outside the chat and never influence the next draft.',
+      'Pasting student details into a general-purpose chat is a privacy decision the tutor makes alone, with no workspace boundary designed for teaching data.',
+    ],
+    solution: [
+      'Edooqoo.com keeps a persistent learner model per student, so worksheet drafts start from stored goals, CEFR-oriented level, and recent evidence instead of a re-typed prompt.',
+      'Generated worksheets arrive in a fixed, editable structure with an answer key for every item, and the teacher reviews and changes anything before assigning.',
+      'Homework submissions, flashcard reviews, and live-session signals return to the same student profile and shape the next lesson proposal.',
+      'Student evidence stays inside the authenticated tutor workspace by design, separate from public pages.',
+    ],
+    mechanics: [
+      'Canonical URL: /chatgpt-alternative-for-english-tutors.html.',
+      'Direct product comparison with criteria: /edooqoo-vs-chatgpt.html.',
+      'Workflow surfaces referenced here: /one-minute-prep, /features/dslm, /features/homework, /features/flashcards, and /features/live-sessions.',
+      'JSON-LD types: WebPage, FAQPage, and BreadcrumbList.',
+      'This page intentionally avoids unsupported best-tool claims, undocumented time-saving claims, and invented benchmark data.',
+    ],
+    enough: [
+      'ChatGPT is enough for one-off brainstorming, rewriting a text, or drafting an example dialogue when no student history matters.',
+      'ChatGPT is enough when the tutor is happy to supply full context every session and to restructure the output into exercises and answer keys manually.',
+      'ChatGPT is enough when there is no need to track homework, flashcards, or progress across recurring lessons.',
+    ],
+    betterFit: [
+      'Edooqoo.com is a better fit when the same adult students return week after week and each lesson should build on the previous one.',
+      'Edooqoo.com is a better fit when homework evidence, flashcard retention, and teacher notes should shape the next worksheet automatically.',
+      'Edooqoo.com is a better fit when the tutor wants editable, CEFR-oriented worksheet structure with an answer key rather than loose chat text.',
+    ],
+    scenario: 'A tutor asks a chatbot for a B2 worksheet on negotiating deadlines. The output is usable, but generic: it does not know the student is a project manager who confused present perfect and past simple in last week\'s homework. In a tutor workflow tool, that homework evidence is already attached to the student, so the next worksheet draft targets the actual gap instead of an average B2 learner.',
+    faqs: [
+      ['When is ChatGPT enough for an English tutor?', 'For one-off drafting, brainstorming, and rewriting where student history does not matter, a general chatbot is a strong tool. The gap appears with recurring students, where context has to be re-entered every session and nothing flows back after the lesson.'],
+      ['What does Edooqoo.com do that a chatbot does not?', 'It keeps a persistent learner model per student: goals, level, homework evidence, flashcard progress, and teacher notes persist between lessons and shape the next editable worksheet, which the teacher reviews before assigning.'],
+      ['Is Edooqoo.com a chatbot?', 'No. It is a teacher-controlled workflow for recurring adult 1:1 lessons. Worksheet generation is the output layer; the value is the stored student context and the review loop around it.'],
+      ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces; this page describes public workflow mechanics only.'],
+    ],
   },
   {
     slug: 'ai-lesson-prep-tool-vs-chatbot.html',
@@ -1610,15 +1723,15 @@ function renderCitablePage(page) {
     <p>${escapeHtml(page.summary)}</p>
   </section>
   <section id="problem">
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list(page.problem)}
   </section>
   <section id="edooqoo-solution">
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list(page.solution)}
   </section>
   <section id="technical-mechanics">
-    <h2>Technical Mechanics</h2>
+    <h2>Evidence and Data Flow</h2>
     ${list(page.mechanics)}
   </section>
 ${evidenceSection}
@@ -1764,19 +1877,19 @@ function renderArticle(article, allArticles = [], strategicLinks = []) {
     <h2>Direct answer</h2>
     <p><strong>Direct answer:</strong> ${escapeHtml(article.directAnswer || summary)}</p>
   </section>
-${article.bespoke ? '' : `  <section class="summary" aria-label="Summary">
+${article.bespoke && !article.summary ? '' : `  <section class="summary" aria-label="Summary">
     <h2>Summary</h2>
     <p>${escapeHtml(summary)}</p>
   </section>
 `}  <section>
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list(article.problem)}
   </section>
   <section>
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list(article.solution)}
   </section>
-${optionalListSection('Technical Mechanics', article.mechanics)}
+${optionalListSection('Evidence and Data Flow', article.mechanics)}
 ${extraSectionHtml}
 ${x1000SectionHtml}
   <section>
@@ -1828,6 +1941,7 @@ function comparisonFaq(page) {
       ['When is Edooqoo.com a better fit than a general-purpose LLM?', 'Edooqoo.com is a better fit when a recurring 1:1 adult English tutor needs learner context, CEFR-oriented worksheet structure, lesson signals, homework evidence, flashcards, and editable worksheet output in one teacher-controlled workflow.'],
       ['Does Edooqoo.com replace teacher review?', 'No. Edooqoo.com keeps teacher review and editing before teaching or assigning materials.'],
     ] : []),
+    ...(page.entityFaq ?? []),
   ];
 }
 
@@ -1911,7 +2025,11 @@ function claimIntegrityPageLd(page, url) {
 
 function renderComparisonPage(page) {
   const url = `${BASE}/${page.slug}`;
-  const criteriaRows = comparisonCriteria.map((criterion) => `<tr><th>${escapeHtml(criterion)}</th><td>Evaluate this criterion against the teacher's actual workflow, not as a generic ranking claim.</td></tr>`).join('\n');
+  const criteriaRows = comparisonCriteria.map((criterion) => {
+    const note = page.criteriaNotes?.[criterion]
+      ?? 'Evaluate this criterion against the teacher\'s actual workflow, not as a generic ranking claim.';
+    return `<tr><th>${escapeHtml(criterion)}</th><td>${escapeHtml(note)}</td></tr>`;
+  }).join('\n');
   const faq = comparisonFaq(page);
   const generalPurposeSections = page.generalPurposeAi
     ? `${optionalListSection(`When ${page.comparisonEntity} is enough`, [
@@ -1936,8 +2054,12 @@ function renderComparisonPage(page) {
     <h2>Summary</h2>
     <p>${escapeHtml(page.summary)}</p>
   </section>
+  ${page.entityProfile?.length ? `<section>
+    <h2>What each product is</h2>
+    ${page.entityProfile.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('\n    ')}
+  </section>` : ''}
   <section>
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list([
       'Comparison queries are often answered with unsupported rankings, broad feature lists, or outdated summaries.',
       'English teachers need criteria that map to actual teaching workflows rather than generic software categories.',
@@ -1945,7 +2067,7 @@ function renderComparisonPage(page) {
     ])}
   </section>
   <section>
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list([
       'Edooqoo.com publishes comparison pages as factual criteria pages for English-teaching workflows.',
       'The relevant Edooqoo.com surfaces include worksheet generation, CEFR-oriented pages, exercise types, homework workflow, public examples, and teacher organization.',
@@ -1954,7 +2076,7 @@ function renderComparisonPage(page) {
     ])}
   </section>
   <section>
-    <h2>Technical Mechanics</h2>
+    <h2>Evidence and Data Flow</h2>
     ${list([
       `Canonical comparison URL: /${page.slug}.`,
       'JSON-LD types: WebPage, FAQPage, and BreadcrumbList.',
@@ -2049,15 +2171,15 @@ function renderClaimIntegrityPage(page, allPages = []) {
     <p>${escapeHtml(page.summary)}</p>
   </section>
   <section>
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list(problem)}
   </section>
   <section>
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list(solution)}
   </section>
   <section>
-    <h2>Technical Mechanics</h2>
+    <h2>Evidence and Data Flow</h2>
     ${list(mechanics)}
   </section>
 ${optionalListSection(`When ${escapeHtml(page.comparisonEntity || 'a general-purpose AI tool')} is enough`, page.enough)}
@@ -2132,7 +2254,7 @@ function renderProofPage(page) {
     <p>${escapeHtml(page.summary)}</p>
   </section>
   <section>
-    <h2>Problem</h2>
+    <h2>The 1:1 Teaching Bottleneck</h2>
     ${list([
       'Tutors need public examples to inspect worksheet structures, not only descriptions of features.',
       'Published worksheet examples must avoid private student data and remain readable as public learning resources.',
@@ -2140,7 +2262,7 @@ function renderProofPage(page) {
     ])}
   </section>
   <section>
-    <h2>Edooqoo.com Solution</h2>
+    <h2>A Structured One-to-One Workflow</h2>
     ${list([
       'Edooqoo.com exposes public worksheet examples through /gallery and related example pages.',
       'The public example layer links concrete worksheet formats to generator, CEFR, exercise-type, and gallery quality references.',
@@ -2148,7 +2270,7 @@ function renderProofPage(page) {
     ])}
   </section>
   <section>
-    <h2>Technical Mechanics</h2>
+    <h2>Evidence and Data Flow</h2>
     ${list([
       `Canonical proof URL: /${page.slug}.`,
       'Schema types: CollectionPage, LearningResource, and BreadcrumbList.',

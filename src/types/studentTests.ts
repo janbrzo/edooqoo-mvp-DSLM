@@ -194,6 +194,9 @@ export interface GenerationParams {
   include_weaknesses?: boolean;
   question_count?: number;
   question_types?: QuestionType[];
+  /** Welcome Test only: question bank (1 = the 58-question test) and form (A first attempt, B retake). */
+  welcome_bank?: number;
+  welcome_form?: 'A' | 'B';
 }
 
 export interface GenerateTestRequest {
@@ -234,6 +237,8 @@ export interface NewTestData {
   // Plan v6.0: attempt tracking for welcome test retakes
   attempt_number?: number;
   previous_attempt_id?: string | null;
+  // Welcome Test: bank and form the test is seeded from (see lib/welcomeTest/seed.ts)
+  generation_params?: GenerationParams;
 }
 
 export interface NewQuestionData {

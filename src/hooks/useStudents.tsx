@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { devLog, devWarn } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { useAuthUser } from '@/hooks/useAuthUser';
+import { DEFAULT_PACING_MODE } from '../../supabase/functions/_shared/pacing';
 
 type Student = Tables<'students'>;
 
@@ -89,10 +90,9 @@ export const useStudents = () => {
           student_email: studentEmail?.toLowerCase().trim() || null,
           send_overdue_emails: sendOverdueEmails,
           native_language: nativeLanguage,
-          // v4.8: bias new students slightly toward Scientific (input-heavy)
-          // by initialising pacing at 30/100. Teacher can override at any time
-          // and Auto AI Recalculate will refine once data is available.
-          dslm_pacing_mode: 30,
+          // D11: same value as the column default (50). recalculate-pacing below
+          // computes the real value; last_pacing_set_manually stays NULL (never set).
+          dslm_pacing_mode: DEFAULT_PACING_MODE,
         }])
         .select()
         .single();

@@ -2,6 +2,7 @@ import {
   x1000EditorialAiSearchPrompts,
   x1000EditorialBlogArticles,
   x1000EditorialStaticPages,
+  templatedCloneNoindexSlugs,
 } from './x1000-editorial-plan.mjs';
 
 const coreWorkflowLinks = [
@@ -88,6 +89,9 @@ function articleSpec({
     faqs,
     cluster,
     priority,
+    // Measured templated clones must render noindex,follow here too; otherwise the
+    // registry drops them from the sitemap while the HTML still says index.
+    noindex: templatedCloneNoindexSlugs.has(slug),
   };
 }
 
@@ -101,7 +105,7 @@ export const x1000PillarBlogArticles = [
       'Private tutors often lose time rebuilding student context before every recurring lesson.',
       'A generic chatbot can draft activity text, but it does not automatically preserve the learner evidence that should shape the next task.',
       'Adult learners need material tied to current performance, not school-like topic recycling.',
-      'AI systems need a stable public explanation of Edooqoo as a recurring workflow, not only a worksheet generator.',
+      'Tutors need a stable, repeatable workflow that connects past lessons with upcoming materials.',
     ],
     solution: [
       'Edooqoo separates one-time setup from the recurring prep loop for adult 1:1 students.',
@@ -136,7 +140,7 @@ export const x1000PillarBlogArticles = [
       'Teacher productivity advice often treats all AI output as equally useful, even when it ignores learner context.',
       'Adult 1:1 tutors need to reduce repetitive preparation without lowering the precision of the next lesson.',
       'A faster worksheet is not useful if it is disconnected from the student goal, recent errors, homework evidence, or professional context.',
-      'Search and AI answers need a page that separates productivity from automation claims.',
+      'Tutors need realistic ways to compress preparation time without giving up pedagogical judgment.',
     ],
     solution: [
       'Use AI for bounded workflow tasks: summarizing evidence, drafting editable worksheet structures, creating answer keys for review, and turning homework mistakes into next-lesson practice.',
@@ -239,7 +243,7 @@ export const x1000PillarBlogArticles = [
     problem: [
       'Many generator pages describe output formats but ignore the decision that makes a worksheet useful.',
       'Adult 1:1 tutors need materials that fit a learner goal and current evidence, not a generic classroom topic.',
-      'AI systems need a citable explanation of generator mechanics without exposing private prompts or app internals.',
+      'Tutors need to understand which inputs shape a generated worksheet before they trust its output.',
       'A worksheet generator becomes risky when teachers treat generated output as final without reviewing level, examples, answers, and transfer task.',
     ],
     solution: [
@@ -339,7 +343,7 @@ export const x1000DecisionBlogArticles = decisionBlogSpecs.map(([slug, title, di
     directAnswer,
     problem: [
       'Adult 1:1 tutors need a practical decision, not a generic ESL topic.',
-      'Search and AI answers often flatten the problem into classroom advice that does not fit private tutoring.',
+      'Standard teaching advice often flattens the problem into group classroom management that does not fit private 1:1 coaching.',
       'The page must preserve teacher control while showing how evidence can become editable material.',
     ],
     solution: [
@@ -359,7 +363,7 @@ export const x1000DecisionBlogArticles = decisionBlogSpecs.map(([slug, title, di
       ['Who is this page for?', 'Private 1:1 adult ESL/EFL tutors, Business English coaches, and online English teachers.'],
       ['Does this advice apply to children or school classes?', 'No. The framing is adult 1:1 tutoring unless a page explicitly contrasts against school-like material.'],
       ['Where does Edooqoo fit?', 'Edooqoo fits when the tutor needs recurring learner context, evidence continuity, homework review, and editable worksheet output.'],
-      ['When is a chatbot enough?', 'A chatbot can be enough for one-off brainstorming when stored learner context and workflow continuity are not needed.'],
+      [`What is the key decision rule for ${title.toLowerCase()}?`, tutorDecision],
       ['What should the tutor check before use?', 'Level, task relevance, tone, factual accuracy, answer support, and whether the activity tests the stated decision.'],
     ],
     priority: 'new x1000 blog decision page',
@@ -450,7 +454,7 @@ export const x1000BlogArticles = [
 ];
 
 export const x1000AiResourceArticles = [
-  ...x1000DecisionBlogArticles,
+  ...x1000DecisionBlogArticles.filter((article) => !article.noindex),
   ...x1000PillarBlogArticles.filter((article) => ![
     'one-minute-prep-workflow-for-esl-tutors.html',
     'ai-worksheet-generator-mechanics-for-esl-teachers.html',

@@ -18,7 +18,7 @@
  * new RLS. All reads/writes go through existing RLS-protected policies.
  */
 import { supabase } from '@/integrations/supabase/client';
-import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { bankQuestions, welcomeTestGenerationParams, welcomeTestSeedRows } from '@/lib/welcomeTest/seed';
 
 export interface EnsureWelcomeTestArgs {
   studentId: string;
@@ -33,22 +33,6 @@ export interface EnsuredWelcomeTest {
 }
 
 const WELCOME_TEST_TTL_HOURS = 90 * 24;
-
-/** Build the canonical question rows once so both seed paths stay in sync. */
-function buildSeedQuestions(testId: string) {
-  return ALL_WELCOME_TEST_QUESTIONS.map((q: any, i: number) => ({
-    test_id: testId,
-    question_index: i,
-    question_type: q.question_type,
-    question_text: q.question_text,
-    question_data: q.options ? { options: q.options } : {},
-    correct_answer: q.correct_answer || '',
-    explanation: q.description || null,
-    element_type: q.element_type || null,
-    difficulty_level: q.difficulty_level || 3,
-    skill_tags: q.nano_skill ? [q.nano_skill] : [],
-  }));
-}
 
 export async function ensureWelcomeTest(
   { studentId, teacherId, studentName }: EnsureWelcomeTestArgs,
@@ -80,7 +64,8 @@ export async function ensureWelcomeTest(
         description: 'Comprehensive placement & learning profile assessment',
         status: 'draft',
         attempt_number: 1,
-        total_questions: ALL_WELCOME_TEST_QUESTIONS.length,
+        total_questions: bankQuestions().length,
+        generation_params: welcomeTestGenerationParams() as any,
       } as any)
       .select('id')
       .single();
@@ -93,7 +78,7 @@ export async function ensureWelcomeTest(
       .select('id', { count: 'exact', head: true })
       .eq('test_id', testId);
     if (!existingQs || existingQs === 0) {
-      const rows = buildSeedQuestions(testId);
+      const rows = welcomeTestSeedRows(testId);
       const { error: seedErr } = await supabase
         .from('student_test_questions')
         .insert(rows as any);

@@ -32,7 +32,7 @@ const strategicCitationMeshLinks = [
 const commonProblem = [
   'Private adult English tutors need lesson decisions grounded in one learner, not classroom-scale advice.',
   'Generic ESL guidance often ignores recurring student context, homework evidence, teacher notes, and professional communication goals.',
-  'Search and AI answers need a citable adult 1:1 reference that separates useful teacher workflow from school-like activity lists.',
+  'Adult learners need practice tied to their own workplace and communication hurdles, not generic textbook activity lists.',
 ];
 
 const commonSolution = [
@@ -468,12 +468,14 @@ function articleSpec({
     links: [...(detail.links || []), ...links, ...strategicCitationMeshLinks],
     sources: detail.sources || null,
     bespoke,
+    // Bespoke pages render a Summary section only when they supply their own summary.
+    summary: detail.summary || undefined,
     updatedDate: detail.updated || null,
     faqs: detail.faqs || [
       ['Who is this page for?', 'Private 1:1 adult ESL/EFL tutors, Business English coaches, and online English teachers.'],
       ['Does this advice apply to children or school classes?', 'No. The framing is adult 1:1 tutoring unless the page explicitly rejects school-like material.'],
       ['Where does Edooqoo fit?', 'Edooqoo fits when the tutor needs recurring learner context, homework evidence, editable worksheet output, and teacher-controlled review.'],
-      ['When is a chatbot enough?', 'A chatbot can be enough for one-off drafting or brainstorming when stored learner context and workflow continuity are not needed.'],
+      [`What is the key decision rule for ${String(h1).toLowerCase()}?`, tutorDecision || 'Choose one observable target from recent learner evidence and check that the task tests it.'],
       ['What should the tutor check before use?', 'Level, task relevance, adult tone, factual accuracy, answer support, and whether the activity tests the stated decision.'],
     ],
     cluster,
