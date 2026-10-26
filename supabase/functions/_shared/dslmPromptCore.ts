@@ -265,6 +265,8 @@ export type EvidenceTier = 'AUTHORITATIVE' | 'RECENT' | 'SINGLE OBSERVATION' | '
 
 export interface WeakSkillGroup {
   label: string;
+  /** Canonical grouping key (`grammar|modal_might`), stable across naming schemes. */
+  key: string;
   mastery: number;
   events: number;
   lastEventAt: string | null;
@@ -305,7 +307,7 @@ export function groupSkillMetrics(metrics: any[], now: number = Date.now()): { a
     groups.set(key, g);
   }
   const all: WeakSkillGroup[] = [];
-  for (const { rows } of groups.values()) {
+  for (const [groupKey, { rows }] of groups.entries()) {
     const counts = rows.map((r) => {
       const n = Number(r.total_events);
       return Number.isFinite(n) && n > 0 ? n : 1;
@@ -321,6 +323,7 @@ export function groupSkillMetrics(metrics: any[], now: number = Date.now()): { a
     const first = rows[0];
     all.push({
       label: skillLabel(first.skill_name, first.skill_category, first.micro_skill),
+      key: groupKey,
       mastery: Math.round(mastery),
       events,
       lastEventAt,

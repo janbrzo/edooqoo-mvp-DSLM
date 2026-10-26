@@ -363,6 +363,7 @@ export const LearningPlanView: React.FC<LearningPlanViewProps> = ({
   const queuedInCurrentPhase = currentPhase
     ? upNext.filter((item) => item.phaseId === currentPhase.id).length
     : 0;
+  const phaseTitleById = useMemo(() => new Map(phases.map((p) => [p.id, p.title])), [phases]);
   const currentPhaseCaption = currentPhase ? `Phase ${currentPhase.sequence_number}: ${currentPhase.title}` : null;
   const mainGoalLabel = formatGoal(mainGoal) || null;
 
@@ -385,6 +386,12 @@ export const LearningPlanView: React.FC<LearningPlanViewProps> = ({
         pendingCount={plan.pendingReviewCount}
         showLevelChange={plan.attention.level}
         pacingProposals={plan.pacing.proposals}
+        phaseAdvanceProposals={plan.phaseAdvance.proposals}
+        phaseTitleById={phaseTitleById}
+        onAcceptPhaseAdvance={(p) => guardAction('Changing phases', () => { void plan.phaseAdvance.accept(p); })}
+        onDismissPhaseAdvance={(p) => guardAction('Changing phases', () => { void plan.phaseAdvance.dismiss(p); })}
+        staleNotice={plan.stalePlan?.text ?? null}
+        onRefreshPlan={requestGenerateRoadmap}
         goals={progress.goals}
         hasSuggestedGoals={plan.suggestedGoals.length > 0}
         updateGoal={progress.updateGoal}
