@@ -50,7 +50,9 @@ import {
   renderOtherExerciseTypes
 } from "./ExerciseSectionUtils";
 import { devLog, devWarn } from '@/utils/logger';
-import { isClosedExerciseType, OPEN_EXERCISE_TYPES, CLOSED_EXERCISE_TYPES, scoreToMastery, storedItemMasteryByQuestion } from '@/utils/masteryCalculator';
+import { isClosedExerciseType, OPEN_EXERCISE_TYPES, CLOSED_EXERCISE_TYPES, scoreToMastery, storedItemMasteryByQuestion, storedItemSourceByQuestion } from '@/utils/masteryCalculator';
+import { saveMarkDoneEvaluationRpc } from '@/lib/dslm/markDoneSave';
+import type { PriorVerdict } from '@/lib/dslm/priorVerdict';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 import { resolveEnglishLevel } from '../../../supabase/functions/_shared/englishLevel';
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
@@ -553,7 +555,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
     }
   };
   
-  const handleMasterySubmit = async (ratings: { name: string; reason: string; mastery: number; hasValue?: boolean }[]) => {
+  const handleMasterySubmit = async (ratings: { name: string; reason: string; mastery: number; hasValue?: boolean }[], priorVerdict?: PriorVerdict | null) => {
     // Filter out ratings without explicit value (PROBLEM 1.2)
     const ratingsWithValue = ratings.filter(r => r.hasValue !== false);
     
@@ -587,14 +589,14 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
         // Teacher-checked upsert (student_events has no UPDATE policy for teachers,
         // so a direct update silently changed nothing). Falls back to the legacy
         // path only while the RPC migration is not applied.
-        const { error: saveRpcError } = await callUntypedRpc('save_mark_done_evaluation', {
+        const { error: saveRpcError } = await saveMarkDoneEvaluationRpc({
           p_student_id: studentIdProp,
           p_worksheet_id: worksheetIdForStorage,
           p_exercise_index: exerciseIdx,
           p_element_type: exercise.type,
           p_exercise_title: exercise.title ?? null,
           p_ratings: ratingsWithValue,
-        });
+        }, priorVerdict);
         if (saveRpcError && !isMissingRpcError(saveRpcError)) throw saveRpcError;
         if (saveRpcError) {
           // PROBLEM 3: UPSERT - Check if event already exists for this exercise
@@ -809,6 +811,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   const liveAiEvaluations = resolveAiEvaluations(liveAiEvalProp, liveItemEvalsProp);
   // Mark done starts from the stored evaluation of the saved answer (decision D2).
   const storedMarkDoneEvaluations = React.useMemo(() => storedItemMasteryByQuestion(liveItemEvalsProp), [liveItemEvalsProp]);
+  const storedMarkDoneSources = React.useMemo(() => storedItemSourceByQuestion(liveItemEvalsProp), [liveItemEvalsProp]);
   
   // DEBUG: Log structure for answer-questions-picture to diagnose editing issues
   if (exercise.type === 'answer-questions-picture') {
@@ -1926,6 +1929,8 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
         exerciseData={exercise}
         aiEvaluations={aiEvaluations}
         storedEvaluations={storedMarkDoneEvaluations}
+        storedSources={storedMarkDoneSources}
+        feedbackContext={{ worksheetId: worksheetIdForStorage, teacherId: validTeacherId, exerciseIndex: originalIndex !== undefined ? originalIndex : index - 1 }}
         isLoadingAiEvaluation={isLoadingAiEvaluation || isLoadingSavedRatings}
         savedRatings={savedMarkDoneRatings}
       />

@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { toast } from 'sonner';
 import { devWarn } from '@/utils/logger';
+import { logDslmDecision, logDslmDecisionOnce } from '@/lib/dslm/decisionLog';
+import { buildPacingDecisionPayload } from '@/lib/dslm/decisionPayloads';
 import { PACING_PROPOSAL_MAX_AGE_DAYS, isPacingProposalExpired } from '../../supabase/functions/_shared/pacing';
 
 export interface PacingProposal {
@@ -26,6 +28,16 @@ export interface PacingProposal {
   // joined student name (best-effort)
   student_name?: string;
 }
+
+/** Validation loop: the teacher was shown this proposal (once per proposal per browser session). */
+export const logPacingProposalSeen = (proposal: PacingProposal, surface: string) => {
+  logDslmDecisionOnce(`pacing-seen:${proposal.id}`, {
+    studentId: proposal.student_id,
+    type: 'pacing_proposal_seen',
+    sourceId: proposal.id,
+    payload: buildPacingDecisionPayload(proposal, { surface }),
+  });
+};
 
 export const usePacingProposals = (studentId?: string) => {
   const { data: user } = useAuthUser();
@@ -125,6 +137,12 @@ export const usePacingProposals = (studentId?: string) => {
         description: `${proposal.student_name || 'Student'}: ${proposal.current_pacing} → ${fresh}`,
       });
       window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
+      void logDslmDecision({
+        studentId: proposal.student_id,
+        type: 'pacing_proposal_accepted',
+        sourceId: proposal.id,
+        payload: buildPacingDecisionPayload(proposal, { applied_pacing: fresh }),
+      });
     } catch (e: any) {
       if (claimed) {
         // The recompute failed after the claim: give the proposal back.
@@ -139,7 +157,7 @@ export const usePacingProposals = (studentId?: string) => {
     }
   };
 
-  const reject = async (proposal: PacingProposal) => {
+  const reject = async (proposal: PacingProposal, reason?: string | null) => {
     try {
       const { error } = await (supabase as any)
         .from('pacing_proposals')
@@ -148,6 +166,12 @@ export const usePacingProposals = (studentId?: string) => {
       if (error) throw error;
       toast.message('Proposal dismissed', { description: `${proposal.student_name || 'Student'}: keeping ${proposal.current_pacing}/100` });
       window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
+      void logDslmDecision({
+        studentId: proposal.student_id,
+        type: 'pacing_proposal_dismissed',
+        sourceId: proposal.id,
+        payload: buildPacingDecisionPayload(proposal, { reason }),
+      });
     } catch (e: any) {
       toast.error('Failed to reject', { description: e?.message || 'Unknown error' });
     }

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Gauge, Check, X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { PacingProposal, triggerLabel, usePacingProposals } from '@/hooks/usePacingProposals';
+import { PacingProposal, triggerLabel, usePacingProposals, logPacingProposalSeen } from '@/hooks/usePacingProposals';
 import { pacingLabel } from './PacingModeSlider';
 
 interface Props {
@@ -47,6 +47,7 @@ export const PacingProposalCard: React.FC<Props> = ({ proposal }) => {
   const delta = proposal.proposed_pacing - proposal.current_pacing;
   const direction = delta > 0 ? 'Pragmatic' : 'Scientific';
   const explanation = buildExplanation(proposal);
+  React.useEffect(() => { logPacingProposalSeen(proposal, 'student_card'); }, [proposal]);
 
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2.5">

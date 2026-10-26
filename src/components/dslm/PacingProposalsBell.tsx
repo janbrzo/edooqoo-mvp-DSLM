@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Gauge, Check, X, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { usePacingProposals, triggerLabel } from '@/hooks/usePacingProposals';
+import { usePacingProposals, triggerLabel, logPacingProposalSeen } from '@/hooks/usePacingProposals';
 import { pacingLabel } from './PacingModeSlider';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -27,7 +27,7 @@ export const PacingProposalsBell: React.FC = () => {
   if (count === 0) return null;
 
   return (
-    <Popover>
+    <Popover onOpenChange={(open) => { if (open) proposals.forEach((p) => logPacingProposalSeen(p, 'header_bell')); }}>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="h-8 relative shrink-0 gap-1 px-2 sm:gap-1.5 sm:px-3" aria-label={`Pacing proposals (${count})`}>
           <Gauge className="h-3.5 w-3.5" />

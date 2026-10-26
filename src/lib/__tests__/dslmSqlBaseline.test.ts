@@ -30,6 +30,7 @@ const PIPELINE_FUNCTIONS = [
   'reconcile_welcome_test_events', 'supersede_previous_welcome_test_events', 'calculate_test_results',
   'list_homework_answers_needing_ai_evaluation', 'claim_homework_answer_ai_attempt', 'mark_homework_answer_ai_not_evaluable',
   'worksheet_answers_differ', 'keep_ai_alternative_ratings',
+  'log_dslm_decision',
 ];
 
 const PIPELINE_TRIGGERS = [
@@ -356,5 +357,64 @@ describe('calculate_test_results is owner or service role only (2026-10-18)', ()
     expect(body).not.toMatch(/'in_progress'/);
     expect(body).toMatch(/REVOKE ALL ON FUNCTION public\.calculate_test_results\(uuid\) FROM PUBLIC, anon;/);
     expect(body).toMatch(/GRANT EXECUTE ON FUNCTION public\.calculate_test_results\(uuid\) TO authenticated, service_role;/);
+  });
+});
+
+describe('Iteration 10: validation loop v1 (additive)', () => {
+  const read = (f: string) => readFileSync(join(MIGRATIONS, f), 'utf8');
+  const loop = read('20261027090000_dslm_validation_loop_v1.sql');
+  const replace = read('20261027090200_save_mark_done_replace_signature.sql');
+
+  it.each(['dslm_interpretation_params', 'dslm_decision_log'])('table %s is versioned with RLS', (t) => {
+    expect(loop).toMatch(new RegExp(`CREATE TABLE IF NOT EXISTS public\\.${t}\\b`));
+    expect(loop).toMatch(new RegExp(`ALTER TABLE public\\.${t} ENABLE ROW LEVEL SECURITY`));
+  });
+
+  it('clients can read their own decisions but never write the log directly', () => {
+    expect(loop).toMatch(/GRANT SELECT ON public\.dslm_decision_log TO authenticated/);
+    expect(loop).not.toMatch(/GRANT (ALL|INSERT|UPDATE)[^;]*dslm_decision_log TO authenticated/);
+    expect(loop).toMatch(/USING \(auth\.uid\(\) = teacher_id\)/);
+    expect(loop).toMatch(/REVOKE ALL ON public\.dslm_interpretation_params FROM PUBLIC, anon, authenticated/);
+  });
+
+  it('log_dslm_decision checks the student owner, the type list and the payload size', () => {
+    const start = loop.indexOf('CREATE OR REPLACE FUNCTION public.log_dslm_decision(');
+    const body = loop.slice(start, loop.indexOf('$function$;', start));
+    expect(body).toMatch(/s\.id = p_student_id AND s\.teacher_id = v_teacher_id/);
+    expect(body).toMatch(/octet_length\(v_payload::text\) > 8192/);
+    expect(loop).toMatch(/REVOKE ALL ON FUNCTION public\.log_dslm_decision\(uuid, text, text, jsonb\) FROM PUBLIC, anon/);
+    expect(loop).toMatch(/GRANT EXECUTE ON FUNCTION public\.log_dslm_decision\(uuid, text, text, jsonb\) TO authenticated, service_role/);
+  });
+
+  it('the decision type list in the check constraint and in the RPC are identical', () => {
+    const list = (s: string) => [...s.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort().join(',');
+    const check = loop.match(/decision_type IN \(([^)]+)\)\)/)![1];
+    const rpc = loop.match(/p_decision_type NOT IN \(([^)]+)\)/)![1];
+    expect(list(check)).toBe(list(rpc));
+  });
+
+  it('the main migration needs no removal statement, only the replacement file does', () => {
+    expect(loop).not.toMatch(/\b(DROP|DELETE)\b/i);
+    expect(replace).toMatch(/DROP FUNCTION IF EXISTS public\.save_mark_done_evaluation\(uuid, uuid, integer, text, text, jsonb\);/);
+  });
+
+  it('save_mark_done_evaluation stores prior_verdict only as payload and never reads it for ratings', () => {
+    expect(latestDefinition('save_mark_done_evaluation')).toBe(replace);
+    const start = replace.indexOf('CREATE OR REPLACE FUNCTION public.save_mark_done_evaluation(');
+    const body = replace.slice(start, replace.indexOf('$function$;', start));
+    expect(body).toMatch(/p_prior_verdict jsonb DEFAULT NULL\s*\)/);
+    expect(body).toContain('public.add_student_event_internal(');
+    // prior_verdict only reaches the payload, never the ratings, skills or mastery
+    expect(body).toMatch(/v_payload := v_payload \|\| jsonb_build_object\('prior_verdict', p_prior_verdict\)/);
+    const priorLines = body.split('\n').filter((l) => /prior/i.test(l)).map((l) => l.trim());
+    const allowed = /^(p_prior_verdict jsonb DEFAULT NULL|IF p_prior_verdict IS NOT NULL AND \(|jsonb_typeof\(p_prior_verdict\)|RAISE EXCEPTION 'p_prior_verdict|v_old_prior jsonb;|SELECT se\.id, se\.event_payload->'prior_verdict' INTO v_event_id, v_old_prior|-- A new verdict|IF p_prior_verdict IS NOT NULL THEN|v_payload := v_payload \|\| jsonb_build_object\('prior_verdict', (p_prior_verdict|v_old_prior)\);|ELSIF v_old_prior IS NOT NULL THEN)/;
+    for (const l of priorLines) expect(l).toMatch(allowed);
+    // the metric engine never reads it
+    expect(latestDefinition('compute_skill_metric')).not.toMatch(/prior_verdict/);
+    expect(read('20261017100000_welcome_test_server_authority.sql')).not.toMatch(/prior_verdict/);
+  });
+
+  it('keeps execute rights for the 7 argument signature', () => {
+    expect(replace).toMatch(/GRANT EXECUTE ON FUNCTION public\.save_mark_done_evaluation\(uuid, uuid, integer, text, text, jsonb, jsonb\) TO authenticated, service_role/);
   });
 });
