@@ -2,29 +2,17 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { 
-  HomeworkStudentAnswer, 
   ExerciseAnswers,
   HomeworkProgress 
 } from '@/types/interactiveHomework';
 import { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
-import { 
-  buildItemEvaluations, 
-  calculateOverallMastery,
-  calculateItemMastery,
-  aiAlternativeMastery,
-  applyAiAlternatives,
-  averageScoredMastery,
-  OPEN_ENDED_EXERCISE_TYPES,
-  isClosedExerciseType,
-  ItemEvaluation 
-} from '@/utils/masteryCalculator';
+import { ItemEvaluation, OPEN_ENDED_EXERCISE_TYPES } from '@/utils/masteryCalculator';
 import { devLog, devWarn } from '@/utils/logger';
-import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
-import { resolveEnglishLevel } from '../../supabase/functions/_shared/englishLevel';
 import { questionIndicesOf, hasAnswerForQuestion } from '@/lib/answers/answerKeys';
-import { callStudentAnswerRpc, callTokenOrLegacyRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
+import { callStudentAnswerRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
+import { buildHomeworkDelta, parseAiEvaluations } from '@/lib/homework/deltaSave';
 
 
 interface UseInteractiveHomeworkProps {
@@ -37,10 +25,8 @@ interface UseInteractiveHomeworkProps {
   /** v6.9.84: required for anonymous students: direct table writes were
    *  replaced by the token-scoped RPC `update_homework_answer_by_share_token`. */
   shareToken?: string;
-  /** Student's CEFR level (students.english_level) sent to the evaluation model. */
-  englishLevel?: string | null;
-  /** Transcript of the source worksheet audio (homework selected_audio.transcript), sent as source text for listening items. */
-  worksheetAudioTranscript?: string | null;
+  /** Teacher "View as student": the page is shown but nothing is ever written for the student. */
+  readOnly?: boolean;
 }
 
 export const useInteractiveHomework = ({
@@ -51,8 +37,7 @@ export const useInteractiveHomework = ({
   exerciseQuestionCounts = {},
   exercises = [],
   shareToken,
-  englishLevel,
-  worksheetAudioTranscript
+  readOnly = false
 }: UseInteractiveHomeworkProps) => {
   const [answers, setAnswers] = useState<Record<number, ExerciseAnswers>>({});
   // submitHomework is memoised without `answers` in its deps; it reads the latest
@@ -60,6 +45,12 @@ export const useInteractiveHomework = ({
   const answersRef = useRef<Record<number, ExerciseAnswers>>(answers);
   answersRef.current = answers;
   const [audioAnswers, setAudioAnswers] = useState<Record<number, Record<number, string>>>({});
+  const audioAnswersRef = useRef<Record<number, Record<number, string>>>(audioAnswers);
+  audioAnswersRef.current = audioAnswers;
+  // Answer keys / recordings changed since the last confirmed save, per exercise: a save sends only these.
+  const dirtyKeysRef = useRef<Record<number, Set<string>>>({});
+  const dirtyAudioRef = useRef<Record<number, Set<number>>>({});
+  const submittingRef = useRef(false);
   const [aiEvaluations, setAiEvaluations] = useState<Record<number, Record<number, AiEvaluation>>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -112,24 +103,11 @@ export const useInteractiveHomework = ({
 
       if (data && data.length > 0) {
         const loadedAnswers: Record<number, ExerciseAnswers> = {};
-        const loadedEvaluations: Record<number, Record<number, AiEvaluation>> = {};
         const loadedAudio: Record<number, Record<number, string>> = {};
         let allSubmitted = true;
 
         data.forEach((answer: any) => {
           loadedAnswers[answer.exercise_index] = answer.answers;
-          
-          if (answer.ai_evaluation) {
-            const evalData = answer.ai_evaluation;
-            if (evalData.question_evaluations && Array.isArray(evalData.question_evaluations)) {
-              loadedEvaluations[answer.exercise_index] = {};
-              evalData.question_evaluations.forEach((qEval: any) => {
-                loadedEvaluations[answer.exercise_index][qEval.question_index] = qEval;
-              });
-            } else if (evalData.is_acceptable !== undefined) {
-              loadedEvaluations[answer.exercise_index] = { 0: evalData as AiEvaluation };
-            }
-          }
           
           if (answer.audio_answers && typeof answer.audio_answers === 'object' && Object.keys(answer.audio_answers).length > 0) {
             const audioForExercise: Record<number, string> = {};
@@ -152,7 +130,7 @@ export const useInteractiveHomework = ({
         });
 
         setAnswers(loadedAnswers);
-        setAiEvaluations(loadedEvaluations);
+        setAiEvaluations(parseAiEvaluations(data));
         setAudioAnswers(loadedAudio);
         setIsSubmitted(allSubmitted);
       }
@@ -178,6 +156,7 @@ export const useInteractiveHomework = ({
     return accumulated;
   }, []);
 
+  /** One request: the delta of an exercise (merged by key on the server), never a whole snapshot. */
   const saveAnswer = useCallback(async (
     exerciseIndex: number, 
     exerciseType: string, 
@@ -228,28 +207,38 @@ export const useInteractiveHomework = ({
     }
   }, [homeworkId, studentEmail, getActiveTimeMs, shareToken]);
 
-  const scheduleAutoSave = useCallback((exerciseIndex: number, exerciseType: string, exerciseAnswers: ExerciseAnswers) => {
-    if (isSubmitted) return;
-
-    pendingSavesRef.current.add(exerciseIndex);
-    setIsSaving(true);
-
-    const effectiveWorksheetId = sourceWorksheetId || homeworkId;
-    const exerciseData = { ...exercises[exerciseIndex], worksheetId: effectiveWorksheetId };
-    const mastery = calculateOverallMastery(exerciseType, exerciseData, exerciseAnswers as Record<string | number, any>);
-    const itemEvaluations = buildItemEvaluations(exerciseData, exerciseAnswers as Record<string | number, any>, exerciseType, null, audioAnswers[exerciseIndex] || null);
-
-    devLog('[useInteractiveHomework] Saving with itemEvaluations:', {
-      exerciseIndex,
+  /**
+   * Save job of one exercise. It reads the dirty keys and the latest local state when it
+   * runs (also on every retry), so a debounced, blurred or retried save always sends the
+   * newest value of exactly the keys this tab changed.
+   */
+  const runSave = useCallback(async (exerciseIndex: number, exerciseType: string): Promise<boolean> => {
+    const dirty = dirtyKeysRef.current[exerciseIndex];
+    const dirtyAudio = dirtyAudioRef.current[exerciseIndex];
+    const delta = buildHomeworkDelta({
+      exerciseData: { ...exercises[exerciseIndex], worksheetId: sourceWorksheetId || homeworkId },
       exerciseType,
-      mastery,
-      itemEvaluationsCount: itemEvaluations?.length || 0
+      answers: (answersRef.current[exerciseIndex] || {}) as Record<string, any>,
+      audio: audioAnswersRef.current[exerciseIndex] || {},
+      dirtyKeys: dirty ?? [],
+      dirtyAudio: dirtyAudio ?? [],
     });
-
-    pendingSavesQueueRef.current.schedule(exerciseIndex, () =>
-      saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, itemEvaluations)
-    );
-  }, [saveAnswer, exercises, isSubmitted]);
+    if (!delta) {
+      pendingSavesRef.current.delete(exerciseIndex);
+      if (pendingSavesRef.current.size === 0) setIsSaving(false);
+      return true;
+    }
+    devLog('[useInteractiveHomework] Saving delta:', { exerciseIndex, exerciseType, keys: delta.keys, audioKeys: delta.audioKeys });
+    const ok = await saveAnswer(exerciseIndex, exerciseType, delta.answers, delta.mastery, delta.itemEvaluations, delta.audio);
+    if (ok) {
+      // A key edited again while the request was in flight stays dirty for its own save.
+      const sentAnswers = answersRef.current[exerciseIndex] as Record<string, any> | undefined;
+      for (const k of delta.keys) if (sentAnswers?.[k] === delta.answers[k]) dirty?.delete(k);
+      const sentAudio = audioAnswersRef.current[exerciseIndex];
+      for (const q of delta.audioKeys) if (sentAudio?.[q] === delta.audio?.[q]) dirtyAudio?.delete(q);
+    }
+    return ok;
+  }, [exercises, sourceWorksheetId, homeworkId, saveAnswer]);
 
   const updateAnswer = useCallback((
     exerciseIndex: number, 
@@ -261,38 +250,58 @@ export const useInteractiveHomework = ({
       exerciseStartTimeRef.current[exerciseIndex] = Date.now();
     }
     
-    setAnswers(prev => {
-      const exerciseAnswers = prev[exerciseIndex] || {};
-      const updated = {
-        ...prev,
-        [exerciseIndex]: {
-          ...exerciseAnswers,
-          [questionIndex]: value
-        }
-      };
+    setAnswers(prev => ({
+      ...prev,
+      [exerciseIndex]: {
+        ...(prev[exerciseIndex] || {}),
+        [questionIndex]: value
+      }
+    }));
+    // The save job reads the ref, which only follows state after the next render.
+    answersRef.current = {
+      ...answersRef.current,
+      [exerciseIndex]: { ...(answersRef.current[exerciseIndex] || {}), [questionIndex]: value }
+    };
 
-      scheduleAutoSave(exerciseIndex, exerciseType, updated[exerciseIndex]);
-
-      return updated;
-    });
-  }, [scheduleAutoSave]);
+    if (readOnly || isSubmitted) return;
+    (dirtyKeysRef.current[exerciseIndex] ??= new Set()).add(String(questionIndex));
+    pendingSavesRef.current.add(exerciseIndex);
+    setIsSaving(true);
+    pendingSavesQueueRef.current.schedule(exerciseIndex, () => runSave(exerciseIndex, exerciseType));
+  }, [runSave, readOnly, isSubmitted]);
 
   const saveOnBlur = useCallback((exerciseIndex: number, exerciseType: string) => {
-    if (isSubmitted) return;
-
-    const exerciseAnswers = answers[exerciseIndex];
-    if (!exerciseAnswers) return;
-    const effectiveWorksheetId = sourceWorksheetId || homeworkId;
-    const exerciseData = { ...exercises[exerciseIndex], worksheetId: effectiveWorksheetId };
-    const mastery = calculateOverallMastery(exerciseType, exerciseData, exerciseAnswers as Record<string | number, any>);
-    const itemEvaluations = buildItemEvaluations(exerciseData, exerciseAnswers as Record<string | number, any>, exerciseType, null, audioAnswers[exerciseIndex] || null);
+    if (readOnly || isSubmitted) return;
+    // A blur without edits writes nothing: it must never replay an old local snapshot.
+    const dirty = dirtyKeysRef.current[exerciseIndex];
+    const dirtyAudio = dirtyAudioRef.current[exerciseIndex];
+    if ((!dirty || dirty.size === 0) && (!dirtyAudio || dirtyAudio.size === 0)) return;
     // Save this exercise right now through the queue (serialized and retried); other exercises keep their pending saves.
     const queue = pendingSavesQueueRef.current;
-    queue.schedule(exerciseIndex, () => saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, itemEvaluations), 0);
+    queue.schedule(exerciseIndex, () => runSave(exerciseIndex, exerciseType), 0);
     void queue.flushOne(exerciseIndex);
-  }, [answers, saveAnswer, exercises, isSubmitted]);
+  }, [runSave, readOnly, isSubmitted]);
+
+  /**
+   * Re-reads the stored evaluations (written by the server after submit) without touching the
+   * answers. Returns true once every submitted open exercise with an answer has its evaluation.
+   */
+  const loadEvaluations = useCallback(async (): Promise<boolean> => {
+    const { data, error } = await callStudentAnswerRpc('get_student_homework_answers', {
+      p_homework_id: homeworkId,
+      p_student_email: studentEmail
+    }, shareToken);
+    if (error || !data) return false;
+    setAiEvaluations(parseAiEvaluations(data));
+    return data.every((row: any) => {
+      const hasAnswer = row.answers && typeof row.answers === 'object' && Object.keys(row.answers).length > 0;
+      return !(row.is_submitted && hasAnswer && OPEN_ENDED_EXERCISE_TYPES.includes(row.exercise_type)) || !!row.ai_evaluation;
+    });
+  }, [homeworkId, studentEmail, shareToken]);
 
   const submitHomework = useCallback(async () => {
+    if (readOnly || submittingRef.current) return false;
+    submittingRef.current = true;
     try {
       setIsSaving(true);
 
@@ -315,8 +324,9 @@ export const useInteractiveHomework = ({
         setIsSaving(false);
         return false;
       }
-      const latestAnswers = answersRef.current;
 
+      // The server marks the answers submitted, notifies the teacher and records the
+      // homework_submitted event in this same call (submit_homework_answers).
       const { error } = await submitHomeworkAnswers(homeworkId, studentEmail, shareToken);
 
       if (error) throw error;
@@ -324,283 +334,31 @@ export const useInteractiveHomework = ({
       setIsSubmitted(true);
       setSubmittedAt(new Date());
 
-      // Emit homework_submitted event for DSLM Layer A
-      try {
-        // Authorised by the student's email server-side; anonymous students
-        // may not call add_student_event directly.
-        const { error: eventError } = await (supabase.rpc as any)('log_homework_submitted_event', {
-          p_homework_id: homeworkId,
-          p_student_email: studentEmail,
-          p_event_payload: {
-            homework_id: homeworkId,
-            total_exercises: totalExercises,
-            answered_exercises: Object.keys(latestAnswers).length,
-          },
-        });
-        if (eventError) throw eventError;
-        devLog('[submitHomework] homework_submitted event emitted');
-      } catch (e) {
-        devWarn('[submitHomework] Failed to emit homework_submitted event:', e);
-      }
-
-      const openAnswerTypes = OPEN_ENDED_EXERCISE_TYPES;
-      
-      devLog('[submitHomework] Starting AI verification process...');
-      devLog('[submitHomework] Recognized open answer types:', openAnswerTypes);
+      // Grading is server-owned: the browser only asks for it and reads the stored result.
+      // A failure here is harmless, the scheduled run evaluates the same rows later.
       setIsWaitingForAiEval(true);
-      
       try {
-        const { data: savedAnswers } = await callStudentAnswerRpc('get_student_homework_answers', {
-          p_homework_id: homeworkId,
-          p_student_email: studentEmail
-        }, shareToken);
-
-        devLog('[submitHomework] Fetched saved answers:', savedAnswers?.length || 0);
-        
-        if (savedAnswers && savedAnswers.length > 0) {
-          const allTypes = savedAnswers.map((a: any) => a.exercise_type);
-          devLog('[submitHomework] All exercise types:', allTypes);
-          
-          const answersToVerify: any[] = [];
-          
-          // Transcribe all audio using shared utility
-          const transcriptionCache = await transcribeAllAudio(audioAnswers, '[submitHomework]', {
+        const { error: evalError } = await invokeWithRetry<unknown>(() => supabase.functions.invoke('process-pending-ai-evaluations', {
+          body: {
+            homework_id: homeworkId,
+            trigger_source: 'submit_homework',
             share_token: shareToken || '',
             student_email: studentEmail,
-          });
-          
-          // Merge transcriptions into local savedAnswers for AI eval (NO DB writes yet, will persist with AI eval)
-          if (Object.keys(transcriptionCache).length > 0) {
-            for (const [cacheKey, transcription] of Object.entries(transcriptionCache)) {
-              const [exIdxStr, qIdxStr] = cacheKey.split('_');
-              const exIdx = parseInt(exIdxStr);
-              const qIdx = parseInt(qIdxStr);
-              const ans = savedAnswers.find((a: any) => a.exercise_index === exIdx);
-              if (ans) {
-                const existingAnswers = (typeof ans.answers === 'object' && ans.answers !== null) ? ans.answers : {};
-                ans.answers = { ...existingAnswers, [`_transcription_${qIdx}`]: transcription.text };
-              }
-            }
-            devLog('[submitHomework] Transcriptions merged into local savedAnswers (DB write deferred)');
           }
-          
-          // Open and closed exercises both go to AI. Closed items carry the answer key
-          // (buildAnswersToVerify -> closedItemContext); DSLM mastery for closed types
-          // stays deterministic in buildItemEvaluations.
-          for (const ans of savedAnswers.filter((a: any) => {
-            const isOpen = openAnswerTypes.includes(a.exercise_type);
-            const isClosed = !!a.exercise_type && isClosedExerciseType(a.exercise_type);
-            devLog(`[submitHomework] Exercise ${a.exercise_index}: type=${a.exercise_type}, isOpen=${isOpen}, isClosed=${isClosed}`);
-            return isOpen || isClosed;
-          })) {
-            const exerciseData = exercises[ans.exercise_index];
-            
-            // Use shared utility for building answers from union of written + audio
-            const exerciseAnswers = buildAnswersToVerify({
-              savedAnswer: { exercise_index: ans.exercise_index, exercise_type: ans.exercise_type, answers: (ans.answers || {}) as Record<string | number, any> },
-              exerciseData,
-              audioAnswers,
-              transcriptionCache,
-              worksheetAudioTranscript
-            });
-            answersToVerify.push(...exerciseAnswers);
-          }
-
-          if (answersToVerify.length > 0) {
-            devLog('[submitHomework] Verifying', answersToVerify.length, 'individual questions');
-            
-            // One retry on a transient failure: homework is evaluated only here.
-            const { data: verifyResult, error: verifyError } = await invokeWithRetry<any>(() => supabase.functions.invoke('verify-open-answers', {
-              body: { 
-                answers: answersToVerify, 
-                english_level: resolveEnglishLevel(englishLevel),
-                context: 'Homework submission - individual question evaluation',
-                // Anonymous students prove access with the homework link token + their email.
-                access: { share_token: shareToken || '', student_email: studentEmail },
-              }
-            }));
-
-            if (!verifyError && verifyResult?.evaluations) {
-              devLog('[submitHomework] AI evaluation received:', verifyResult.evaluations.length, 'results');
-              
-              const groupedEvaluations: Record<number, Record<number, AiEvaluation>> = {};
-              const dbUpdates: Record<number, { question_evaluations: any[] }> = {};
-              
-              for (const evaluation of verifyResult.evaluations) {
-                const exIdx = evaluation.exercise_index ?? evaluation.question_index;
-                const qIdx = evaluation.question_index ?? 0;
-                
-                if (!groupedEvaluations[exIdx]) {
-                  groupedEvaluations[exIdx] = {};
-                  dbUpdates[exIdx] = { question_evaluations: [] };
-                }
-                
-                groupedEvaluations[exIdx][qIdx] = {
-                  is_acceptable: evaluation.is_acceptable,
-                  quality_score: evaluation.quality_score,
-                  writing_score: evaluation.writing_score,
-                  speaking_score: evaluation.speaking_score,
-                  feedback: evaluation.feedback,
-                  key_verdict: evaluation.key_verdict,
-                  question_index: qIdx
-                };
-                
-                dbUpdates[exIdx].question_evaluations.push({
-                  question_index: qIdx,
-                  is_acceptable: evaluation.is_acceptable,
-                  quality_score: evaluation.quality_score,
-                  writing_score: evaluation.writing_score,
-                  speaking_score: evaluation.speaking_score,
-                  feedback: evaluation.feedback,
-                  ...(evaluation.key_verdict ? { key_verdict: evaluation.key_verdict } : {})
-                });
-              }
-              
-              for (const [exIdxStr, evalData] of Object.entries(dbUpdates)) {
-                const exIdx = parseInt(exIdxStr);
-                
-                const exerciseData = exercises[exIdx];
-                const questionItems = exerciseData?.questions || exerciseData?.prompts || exerciseData?.sentences || exerciseData?.expressions || exerciseData?.items || [];
-                
-                const aiEvalLookup: Record<number, { quality_score?: number; writing_score?: number; speaking_score?: number }> = {};
-                if (evalData.question_evaluations) {
-                  evalData.question_evaluations.forEach((qEval: any) => {
-                    const qIdx = qEval.question_index ?? 0;
-                    aiEvalLookup[qIdx] = {
-                      quality_score: qEval.quality_score,
-                      writing_score: qEval.writing_score,
-                      speaking_score: qEval.speaking_score,
-                    };
-                  });
-                }
-                const studentAnswersForThisExercise = latestAnswers[exIdx] || {};
-                const itemEvals = buildItemEvaluations(
-                  exerciseData, studentAnswersForThisExercise as Record<string | number, any>, 
-                  savedAnswers.find((a: any) => a.exercise_index === exIdx)?.exercise_type || '',
-                  aiEvalLookup, audioAnswers[exIdx] || null
-                ) || [];
-                
-                const exType = savedAnswers.find((a: any) => a.exercise_index === exIdx)?.exercise_type || '';
-                // Closed items: key-based like autosave. Decision D1: the AI may only raise a
-                // typed answer the key marks wrong or uncertain (accepted alternative, 85-95).
-                const closedAnswers = studentAnswersForThisExercise as Record<string | number, any>;
-                const raised: Record<number, number> = {};
-                if (isClosedExerciseType(exType)) {
-                  for (const qEval of evalData.question_evaluations || []) {
-                    const qi = qEval.question_index ?? 0;
-                    const keyMastery = calculateItemMastery(exType, exerciseData, qi, closedAnswers[qi], closedAnswers);
-                    const up = aiAlternativeMastery(exType, keyMastery, qEval, closedAnswers[qi]);
-                    if (up !== null) raised[qi] = up;
-                  }
-                }
-                const hasRaised = Object.keys(raised).length > 0;
-                const closedItemEvals = hasRaised ? applyAiAlternatives(itemEvals, raised).items : null;
-                // The row mastery is the mean of the FINAL item evaluations (raises included),
-                // the same value the answer trigger writes to the event.
-                const overallMastery = isClosedExerciseType(exType)
-                  ? (closedItemEvals ? averageScoredMastery(closedItemEvals) : null)
-                    ?? calculateOverallMastery(exType, exerciseData, closedAnswers, hasRaised ? raised : undefined)
-                  : averageScoredMastery(itemEvals);
-                
-                // Merge transcriptions into answers for this exercise (single DB write with AI eval)
-                const ansForEx = savedAnswers.find((a: any) => a.exercise_index === exIdx);
-                const mergedAnswers = (typeof ansForEx?.answers === 'object' && ansForEx?.answers !== null) ? { ...ansForEx.answers } : {};
-                
-                await supabase.rpc('update_homework_answer_by_share_token', {
-                  p_share_token: shareToken || '',
-                  p_homework_id: homeworkId,
-                  p_student_email: studentEmail,
-                  p_exercise_index: exIdx,
-                  p_answers: mergedAnswers as any,
-                  p_ai_evaluation: evalData as any,
-                  // null keeps the stored value (COALESCE server-side); [] would wipe it.
-                  p_item_evaluations: isClosedExerciseType(exType)
-                    ? (closedItemEvals ? JSON.parse(JSON.stringify(closedItemEvals)) : null)
-                    : (itemEvals.length === 0 ? null : JSON.parse(JSON.stringify(itemEvals))),
-                  p_mastery: overallMastery,
-                  p_eval_trigger: 'submit_homework',
-                });
-              }
-              
-              setAiEvaluations(prev => {
-                const updated = { ...prev };
-                for (const [exIdx, questionEvals] of Object.entries(groupedEvaluations)) {
-                  updated[parseInt(exIdx)] = questionEvals as Record<number, AiEvaluation>;
-                }
-                return updated;
-              });
-              setIsWaitingForAiEval(false);
-            } else if (verifyError) {
-              console.error('[submitHomework] AI verification error:', verifyError);
-              setIsWaitingForAiEval(false);
-            }
-          }
-          
-          // Persist transcriptions for exercises that had audio but NO AI eval
-          // (e.g. non-open exercise types with audio recordings, or when AI eval had no results for them)
-          if (Object.keys(transcriptionCache).length > 0) {
-            // Collect exercise indexes that already got a merged DB write above
-            const exercisesAlreadyPersisted = new Set<number>();
-            for (const [cacheKey] of Object.entries(transcriptionCache)) {
-              const exIdx = parseInt(cacheKey.split('_')[0]);
-              // Check if this exercise was part of the AI eval DB updates by looking at savedAnswers
-              // that already have _transcription_ keys merged (done in the dbUpdates loop)
-              const ans = savedAnswers.find((a: any) => a.exercise_index === exIdx);
-              if (ans?.answers && typeof ans.answers === 'object') {
-                const keys = Object.keys(ans.answers);
-                if (keys.some(k => k.startsWith('_transcription_'))) {
-                  // Check if this exercise had an AI eval update (mergedAnswers was written)
-                  // We can detect this by checking if eval_trigger would have been set
-                  // Simple approach: check answersToVerify had entries for this exercise
-                  const hadAiEval = answersToVerify.some((a: any) => a.exercise_index === exIdx);
-                  if (hadAiEval) {
-                    exercisesAlreadyPersisted.add(exIdx);
-                  }
-                }
-              }
-            }
-            
-            for (const [cacheKey, transcription] of Object.entries(transcriptionCache)) {
-              const [exIdxStr, qIdxStr] = cacheKey.split('_');
-              const exIdx = parseInt(exIdxStr);
-              if (exercisesAlreadyPersisted.has(exIdx)) continue;
-              
-              const ans = savedAnswers.find((a: any) => a.exercise_index === exIdx);
-              if (!ans) continue;
-              const existingAnswers = (typeof ans.answers === 'object' && ans.answers !== null) ? { ...ans.answers } : {};
-              existingAnswers[`_transcription_${qIdxStr}`] = transcription.text;
-              
-              await supabase.rpc('update_homework_answer_by_share_token', {
-                p_share_token: shareToken || '',
-                p_homework_id: homeworkId,
-                p_student_email: studentEmail,
-                p_exercise_index: exIdx,
-                p_answers: existingAnswers as any,
-              });
-            }
-            devLog('[submitHomework] Transcriptions persisted for non-AI-eval exercises');
-          }
+        }));
+        if (evalError) devWarn('[submitHomework] Immediate evaluation did not run, the scheduled run will grade it:', evalError);
+        // A slow or timed-out request keeps grading on the server: look again a few times
+        // so the student sees the feedback without reloading (the scheduled run is the fallback).
+        let complete = await loadEvaluations();
+        for (const waitMs of [5000, 15000, 30000]) {
+          if (complete) break;
+          await new Promise((r) => setTimeout(r, waitMs));
+          complete = await loadEvaluations();
         }
       } catch (aiError) {
-        console.error('[submitHomework] AI verification failed (non-blocking):', aiError);
+        devWarn('[submitHomework] Evaluation request failed (non-blocking):', aiError);
+      } finally {
         setIsWaitingForAiEval(false);
-      }
-
-      try {
-        const { error: notifError } = await callTokenOrLegacyRpc(
-          'insert_homework_submission_notification_by_share_token',
-          { p_share_token: shareToken ?? '', p_homework_id: homeworkId, p_student_email: studentEmail },
-          'insert_homework_submission_notification',
-          { p_homework_id: homeworkId },
-        );
-        
-        if (notifError) {
-          console.error('[submitHomework] RPC notification error:', notifError);
-        } else {
-          devLog('[submitHomework] Notification created successfully');
-        }
-      } catch (notifError) {
-        console.error('[submitHomework] Failed to create notification:', notifError);
       }
 
       toast({
@@ -618,9 +376,10 @@ export const useInteractiveHomework = ({
       });
       return false;
     } finally {
+      submittingRef.current = false;
       setIsSaving(false);
     }
-  }, [homeworkId, studentEmail, audioAnswers, exercises, shareToken, totalExercises, englishLevel, worksheetAudioTranscript]);
+  }, [homeworkId, studentEmail, shareToken, readOnly, loadEvaluations]);
 
   const getProgress = useCallback((): HomeworkProgress => {
     let answeredExercises = 0;
@@ -707,10 +466,8 @@ export const useInteractiveHomework = ({
   }, []);
 
   const updateAudioAnswer = useCallback((exerciseIndex: number, questionIndex: number, audioUrl: string) => {
-    if (isSubmitted) return;
+    if (readOnly || isSubmitted) return;
 
-    const newAudioForExercise = { ...(audioAnswers[exerciseIndex] || {}), [questionIndex]: audioUrl };
-    
     setAudioAnswers(prev => ({
       ...prev,
       [exerciseIndex]: {
@@ -718,19 +475,20 @@ export const useInteractiveHomework = ({
         [questionIndex]: audioUrl
       }
     }));
-    
+    // The save job reads the ref, which only follows state after the next render.
+    audioAnswersRef.current = {
+      ...audioAnswersRef.current,
+      [exerciseIndex]: { ...(audioAnswersRef.current[exerciseIndex] || {}), [questionIndex]: audioUrl }
+    };
+    (dirtyAudioRef.current[exerciseIndex] ??= new Set()).add(questionIndex);
+
     const exerciseType = exercises[exerciseIndex]?.type || exercises[exerciseIndex]?.exercise_type || '';
-    const currentAnswers = answers[exerciseIndex] || {};
-    const effectiveWorksheetId = sourceWorksheetId || homeworkId;
-    const exerciseData = { ...exercises[exerciseIndex], worksheetId: effectiveWorksheetId };
-    const mastery = calculateOverallMastery(exerciseType, exerciseData, currentAnswers as Record<string | number, any>);
-    const itemEvals = buildItemEvaluations(exerciseData, currentAnswers as Record<string | number, any>, exerciseType, null, newAudioForExercise);
     const queue = pendingSavesQueueRef.current;
-    queue.schedule(exerciseIndex, () => saveAnswer(exerciseIndex, exerciseType, currentAnswers, mastery, itemEvals, newAudioForExercise), 0);
+    queue.schedule(exerciseIndex, () => runSave(exerciseIndex, exerciseType), 0);
     void queue.flushOne(exerciseIndex);
     
     devLog('[useInteractiveHomework] Audio answer saved to DB:', { exerciseIndex, questionIndex, audioUrl: audioUrl.substring(0, 50) });
-  }, [answers, exercises, saveAnswer, sourceWorksheetId, homeworkId, audioAnswers, isSubmitted]);
+  }, [exercises, runSave, isSubmitted, readOnly]);
 
   return {
     answers,

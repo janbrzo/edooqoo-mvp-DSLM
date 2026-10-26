@@ -118,8 +118,10 @@ describe('Iteration 7: ownership checks on DSLM write paths', () => {
   });
 
   it('homework answer updates and submits need the share token and the assigned email', () => {
-    expect(latestDefinition('update_homework_answer_by_share_token')).toBe(body);
-    expect(body).toMatch(/has_homework_student_access\(p_share_token, p_homework_id, p_student_email\)/);
+    // Redefined by the homework P0 migration (grading is server-owned); the access check stays.
+    const hardened = read('20261023090100_homework_p0_server_authority.sql');
+    expect(latestDefinition('update_homework_answer_by_share_token')).toBe(hardened);
+    expect(hardened).toMatch(/has_homework_student_access\(p_share_token, p_homework_id, p_student_email\)/);
     expect(read('20261014090100_revoke_legacy_submit_homework.sql'))
       .toMatch(/REVOKE EXECUTE ON FUNCTION public\.submit_homework_answers\(uuid, text\) FROM PUBLIC, anon, authenticated/);
   });

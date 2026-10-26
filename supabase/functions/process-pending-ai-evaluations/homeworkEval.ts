@@ -1,13 +1,13 @@
 /**
- * Server-side AI evaluation of SUBMITTED homework answers whose evaluation never
- * arrived (the student closed the tab while the browser path was running).
+ * Server-side AI evaluation of SUBMITTED homework answers: right after the student's submit
+ * (processSubmittedHomework, the browser no longer grades) and, for rows that did not finish
+ * (closed tab, model error), in the scheduled run (processHomeworkAiEvaluations).
  *
- * Same scoring as the homework client (useInteractiveHomework.submitHomework):
  * verify-open-answers results, scoreToMastery, aiAlternativeMastery (typed closed
  * items), averageScoredMastery / calculateExerciseMastery, written with
  * eval_trigger 'submit_homework' so the homework trigger creates the
  * submit_hw_AI_evaluation event. Idempotent: the final UPDATE only applies while
- * ai_evaluation is still NULL, so a finished browser path is never overwritten.
+ * ai_evaluation is still NULL, so a finished row is never overwritten.
  */
 import { buildClosedItemContext } from '../_shared/closedItemContext.ts';
 import {
@@ -222,108 +222,150 @@ async function transcribeAll(
   return map;
 }
 
-export async function processHomeworkAiEvaluations(
-  supabase: any, supabaseUrl: string, serviceKey: string, limit: number,
-): Promise<{ processed: number; failed: number; skipped: number }> {
-  const result = { processed: 0, failed: 0, skipped: 0 };
-  const { data: rows, error } = await supabase.rpc('list_homework_answers_needing_ai_evaluation', { p_limit: limit });
-  if (error) {
-    console.warn('[homework-ai] scan unavailable:', error.message);
-    return result;
-  }
-  const metaCache = new Map<string, Promise<HomeworkMeta | null>>();
-  const queue: HomeworkAnswerRow[] = [...(rows || [])];
+type RowOutcome = 'processed' | 'skipped';
+type RunResult = { processed: number; failed: number; skipped: number };
 
+/**
+ * Evaluates one submitted answer row. Returns 'skipped' when another run owns it, it has nothing
+ * to evaluate or the answers changed meanwhile; throws on a failure the claim retries later.
+ */
+async function evaluateHomeworkRow(
+  supabase: any, supabaseUrl: string, serviceKey: string, row: HomeworkAnswerRow,
+  metaCache: Map<string, Promise<HomeworkMeta | null>>,
+): Promise<RowOutcome> {
+  // Atomic attempt counter: another run (or a retry spacing) may own this row.
+  const { data: claimed, error: claimError } = await supabase.rpc('claim_homework_answer_ai_attempt', { p_id: row.id });
+  if (claimError) throw claimError;
+  if (!claimed) return 'skipped';
+
+  if (!metaCache.has(row.homework_id)) metaCache.set(row.homework_id, loadHomeworkMeta(supabase, row.homework_id));
+  const meta = await metaCache.get(row.homework_id)!;
+  const exercise = meta?.exercises?.[row.exercise_index];
+  if (!meta || !exercise) {
+    await supabase.rpc('mark_homework_answer_ai_not_evaluable', { p_id: row.id, p_note: 'exercise not found' });
+    return 'skipped';
+  }
+
+  const answers = (row.answers && typeof row.answers === 'object' ? row.answers : {}) as Record<string, unknown>;
+  const audioAnswers = (row.audio_answers && typeof row.audio_answers === 'object' ? row.audio_answers : {}) as Record<string, string>;
+  const isClosed = isClosedExerciseType(row.exercise_type);
+  const transcriptions = isClosed ? {} : await transcribeAll(supabaseUrl, serviceKey, audioAnswers);
+  if (!isClosed) {
+    // A recorded answer without a transcription (transient failure) must be retried by the
+    // claim, not dropped: the row would otherwise finish with that item permanently unevaluated.
+    const missing = missingTranscriptions(audioAnswers, transcriptions);
+    if (missing.length > 0) throw new Error(`Transcription missing for audio answer(s) ${missing.join(', ')}`);
+  }
+  const toVerify = isClosed
+    ? buildClosedAnswersToVerify(row, exercise, answers)
+    : buildOpenAnswersToVerify(row, exercise, answers, audioAnswers, transcriptions, meta.worksheetAudioTranscript);
+  if (toVerify.length === 0) {
+    await supabase.rpc('mark_homework_answer_ai_not_evaluable', { p_id: row.id, p_note: 'no evaluable answers' });
+    return 'skipped';
+  }
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/verify-open-answers`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` },
+    body: JSON.stringify({
+      answers: toVerify,
+      english_level: resolveEnglishLevel(meta.studentLevel),
+      context: isClosed
+        ? 'Homework submission - individual question evaluation'
+        : openExerciseContextString(exercise, `Exercise ${row.exercise_index + 1}`, { worksheetAudioTranscript: meta.worksheetAudioTranscript }),
+    }),
+  });
+  if (!res.ok) throw new Error(`AI verification failed: ${await res.text()}`);
+  const ai = await res.json();
+  if (!Array.isArray(ai.evaluations) || ai.evaluations.length === 0) throw new Error('AI returned no evaluations');
+  // A partial result for an open exercise would replace the exercise's ratings with a subset.
+  if (!isClosed && Number(ai.unevaluated_count) > 0) throw new Error(`AI left ${ai.unevaluated_count} item(s) unevaluated`);
+
+  const write = computeHomeworkWrite({
+    exerciseType: row.exercise_type,
+    exercise,
+    answers,
+    storedItemEvaluations: row.item_evaluations,
+    evaluations: ai.evaluations,
+    transcribed: (q) => !!transcriptions[q],
+  });
+  const mergedAnswers: Record<string, unknown> = { ...answers };
+  for (const [q, t] of Object.entries(transcriptions)) mergedAnswers[`_transcription_${q}`] = t.text;
+
+  const patch: Record<string, unknown> = {
+    answers: mergedAnswers,
+    ai_evaluation: write.ai_evaluation,
+    eval_trigger: 'submit_homework',
+    ...(write.item_evaluations ? { item_evaluations: write.item_evaluations } : {}),
+    ...(write.mastery !== null ? { mastery: write.mastery } : {}),
+  };
+  // Only while nobody else finished it and the answers are the ones evaluated.
+  const { data: written, error: updateError } = await supabase
+    .from('homework_student_answers')
+    .update(patch)
+    .eq('id', row.id)
+    .is('ai_evaluation', null)
+    .eq('last_saved_at', row.last_saved_at)
+    .select('id');
+  if (updateError) throw updateError;
+  return Array.isArray(written) && written.length > 0 ? 'processed' : 'skipped';
+}
+
+async function evaluateRows(
+  supabase: any, supabaseUrl: string, serviceKey: string, rows: HomeworkAnswerRow[], label: string,
+): Promise<RunResult> {
+  const result: RunResult = { processed: 0, failed: 0, skipped: 0 };
+  const metaCache = new Map<string, Promise<HomeworkMeta | null>>();
+  const queue: HomeworkAnswerRow[] = [...rows];
   const work = async () => {
     while (true) {
       const row = queue.shift();
       if (!row) return;
       try {
-        // Atomic attempt counter: another run (or a retry spacing) may own this row.
-        const { data: claimed, error: claimError } = await supabase.rpc('claim_homework_answer_ai_attempt', { p_id: row.id });
-        if (claimError) throw claimError;
-        if (!claimed) { result.skipped++; continue; }
-
-        if (!metaCache.has(row.homework_id)) metaCache.set(row.homework_id, loadHomeworkMeta(supabase, row.homework_id));
-        const meta = await metaCache.get(row.homework_id)!;
-        const exercise = meta?.exercises?.[row.exercise_index];
-        if (!meta || !exercise) {
-          await supabase.rpc('mark_homework_answer_ai_not_evaluable', { p_id: row.id, p_note: 'exercise not found' });
-          result.skipped++;
-          continue;
-        }
-
-        const answers = (row.answers && typeof row.answers === 'object' ? row.answers : {}) as Record<string, unknown>;
-        const audioAnswers = (row.audio_answers && typeof row.audio_answers === 'object' ? row.audio_answers : {}) as Record<string, string>;
-        const isClosed = isClosedExerciseType(row.exercise_type);
-        const transcriptions = isClosed ? {} : await transcribeAll(supabaseUrl, serviceKey, audioAnswers);
-        if (!isClosed) {
-          // A recorded answer without a transcription (transient failure) must be retried by the
-          // claim, not dropped: the row would otherwise finish with that item permanently unevaluated.
-          const missing = missingTranscriptions(audioAnswers, transcriptions);
-          if (missing.length > 0) throw new Error(`Transcription missing for audio answer(s) ${missing.join(', ')}`);
-        }
-        const toVerify = isClosed
-          ? buildClosedAnswersToVerify(row, exercise, answers)
-          : buildOpenAnswersToVerify(row, exercise, answers, audioAnswers, transcriptions, meta.worksheetAudioTranscript);
-        if (toVerify.length === 0) {
-          await supabase.rpc('mark_homework_answer_ai_not_evaluable', { p_id: row.id, p_note: 'no evaluable answers' });
-          result.skipped++;
-          continue;
-        }
-
-        const res = await fetch(`${supabaseUrl}/functions/v1/verify-open-answers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` },
-          body: JSON.stringify({
-            answers: toVerify,
-            english_level: resolveEnglishLevel(meta.studentLevel),
-            context: isClosed
-              ? 'Homework submission - individual question evaluation'
-              : openExerciseContextString(exercise, `Exercise ${row.exercise_index + 1}`, { worksheetAudioTranscript: meta.worksheetAudioTranscript }),
-          }),
-        });
-        if (!res.ok) throw new Error(`AI verification failed: ${await res.text()}`);
-        const ai = await res.json();
-        if (!Array.isArray(ai.evaluations) || ai.evaluations.length === 0) throw new Error('AI returned no evaluations');
-        // A partial result for an open exercise would replace the exercise's ratings with a subset.
-        if (!isClosed && Number(ai.unevaluated_count) > 0) throw new Error(`AI left ${ai.unevaluated_count} item(s) unevaluated`);
-
-        const write = computeHomeworkWrite({
-          exerciseType: row.exercise_type,
-          exercise,
-          answers,
-          storedItemEvaluations: row.item_evaluations,
-          evaluations: ai.evaluations,
-          transcribed: (q) => !!transcriptions[q],
-        });
-        const mergedAnswers: Record<string, unknown> = { ...answers };
-        for (const [q, t] of Object.entries(transcriptions)) mergedAnswers[`_transcription_${q}`] = t.text;
-
-        const patch: Record<string, unknown> = {
-          answers: mergedAnswers,
-          ai_evaluation: write.ai_evaluation,
-          eval_trigger: 'submit_homework',
-          ...(write.item_evaluations ? { item_evaluations: write.item_evaluations } : {}),
-          ...(write.mastery !== null ? { mastery: write.mastery } : {}),
-        };
-        // Only while nobody else finished it and the answers are the ones evaluated.
-        const { data: written, error: updateError } = await supabase
-          .from('homework_student_answers')
-          .update(patch)
-          .eq('id', row.id)
-          .is('ai_evaluation', null)
-          .eq('last_saved_at', row.last_saved_at)
-          .select('id');
-        if (updateError) throw updateError;
-        if (Array.isArray(written) && written.length > 0) result.processed++; else result.skipped++;
+        result[await evaluateHomeworkRow(supabase, supabaseUrl, serviceKey, row, metaCache)]++;
       } catch (e) {
         result.failed++;
-        console.error(`[homework-ai] ${row.id} failed:`, (e as Error).message);
+        console.error(`[${label}] ${row.id} failed:`, (e as Error).message);
       }
     }
   };
   await Promise.all(Array.from({ length: 3 }, () => work()));
-  console.log(`[homework-ai] ${result.processed} processed, ${result.skipped} skipped, ${result.failed} failed`);
+  console.log(`[${label}] ${result.processed} processed, ${result.skipped} skipped, ${result.failed} failed`);
   return result;
+}
+
+/** Scheduled run: submitted answers whose evaluation never arrived. */
+export async function processHomeworkAiEvaluations(
+  supabase: any, supabaseUrl: string, serviceKey: string, limit: number,
+): Promise<RunResult> {
+  const { data: rows, error } = await supabase.rpc('list_homework_answers_needing_ai_evaluation', { p_limit: limit });
+  if (error) {
+    console.warn('[homework-ai] scan unavailable:', error.message);
+    return { processed: 0, failed: 0, skipped: 0 };
+  }
+  return evaluateRows(supabase, supabaseUrl, serviceKey, rows || [], 'homework-ai');
+}
+
+/**
+ * Right after the student's submit: the AI-evaluated rows of ONE homework, without the
+ * 3-minute grace of the scheduled scan. The browser no longer grades anything; the same
+ * claim (3 attempts, 10 minutes apart) keeps retries owned by the scheduled run.
+ */
+export async function processSubmittedHomework(
+  supabase: any, supabaseUrl: string, serviceKey: string, homeworkId: string,
+): Promise<RunResult> {
+  const { data: rows, error } = await supabase
+    .from('homework_student_answers')
+    .select('id, homework_id, student_email, exercise_index, exercise_type, answers, audio_answers, item_evaluations, last_saved_at')
+    .eq('homework_id', homeworkId)
+    .eq('is_submitted', true)
+    .is('ai_evaluation', null)
+    .lt('ai_eval_attempts', 3)
+    .order('exercise_index');
+  if (error) throw error;
+  const hasContent = (v: unknown) => !!v && typeof v === 'object' && Object.keys(v as object).length > 0;
+  const due = ((rows || []) as HomeworkAnswerRow[]).filter(
+    (r) => isHomeworkAiType(r.exercise_type) && (hasContent(r.answers) || hasContent(r.audio_answers)),
+  );
+  return evaluateRows(supabase, supabaseUrl, serviceKey, due, 'homework-submit');
 }

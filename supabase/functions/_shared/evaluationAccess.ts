@@ -79,3 +79,19 @@ export async function userOwnsWorksheet(
     .maybeSingle();
   return !!ws?.id;
 }
+
+/** True when the signed-in user is the teacher who owns the homework. */
+export async function userOwnsHomework(
+  admin: SupabaseClient,
+  caller: Caller,
+  homeworkId: string | null,
+): Promise<boolean> {
+  if (caller.kind !== "user" || !homeworkId) return false;
+  const { data: hw } = await admin
+    .from("homework_assignments")
+    .select("id")
+    .eq("id", homeworkId)
+    .eq("teacher_id", caller.user.id)
+    .maybeSingle();
+  return !!hw?.id;
+}

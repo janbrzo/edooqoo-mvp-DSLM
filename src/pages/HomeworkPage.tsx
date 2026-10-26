@@ -155,8 +155,7 @@ export default function HomeworkPage() {
     exerciseQuestionCounts,
     exercises: Array.isArray(homework?.selected_exercises) ? homework.selected_exercises : [],
     shareToken: token,
-    englishLevel: homework?.student_english_level ?? null,
-    worksheetAudioTranscript: homework?.selected_audio?.transcript ?? null
+    readOnly: isTeacher
   });
 
   useEffect(() => {
