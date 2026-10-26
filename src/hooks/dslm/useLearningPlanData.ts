@@ -10,6 +10,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { useStudentProgress } from '@/hooks/useStudentProgress';
+import { usePlanEvidenceMetrics } from '@/hooks/dslm/usePlanEvidenceMetrics';
+import { usePhaseAdvanceProposals } from '@/hooks/dslm/usePhaseAdvanceProposals';
+import { computeStalePlanNotice } from '@/lib/dslm/planSignalsView';
 import { usePacingProposals } from '@/hooks/usePacingProposals';
 import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
 import { useWelcomeTestState } from '@/hooks/dslm/useWelcomeTestState';
@@ -59,7 +62,25 @@ export function useLearningPlanData({
   const activeGoals = useMemo(() => progress.goals.filter(isActiveGoal), [progress.goals]);
   const suggestedGoals = useMemo(() => progress.goals.filter(isSuggestedGoal), [progress.goals]);
 
-  const pendingReviewCount = suggestedGoals.length + pacing.proposals.length + (attention.level ? 1 : 0);
+  // D14 / 9.6: evidence for the stale-plan reminder and the phase advance proposal.
+  const evidence = usePlanEvidenceMetrics(studentId, teacherId);
+  const phaseAdvance = usePhaseAdvanceProposals({
+    studentId,
+    teacherId,
+    phases,
+    currentPhase,
+    metrics: evidence.metrics,
+    metricsLoaded: evidence.loaded,
+    plansReady: hasLoaded,
+    updatePhase: curriculum.updatePhase,
+  });
+  // A reminder only: it is not a pending decision, so it never counts in `pendingReviewCount`.
+  const stalePlan = useMemo(
+    () => (evidence.loaded ? computeStalePlanNotice({ phases, metrics: evidence.metrics }) : null),
+    [evidence.loaded, evidence.metrics, phases],
+  );
+
+  const pendingReviewCount = suggestedGoals.length + pacing.proposals.length + phaseAdvance.proposals.length + (attention.level ? 1 : 0);
 
   const readiness = useMemo(
     () =>
@@ -86,6 +107,8 @@ export function useLearningPlanData({
     activeGoals,
     suggestedGoals,
     pacing,
+    phaseAdvance,
+    stalePlan,
     attention,
     welcomeTest,
     pendingReviewCount,
