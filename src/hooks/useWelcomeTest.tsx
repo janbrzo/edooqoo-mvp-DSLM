@@ -280,11 +280,14 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   const currentQuestion = currentSection?.questions[state.currentQuestionIndex] || null;
 
   // Keep the position on the same question when the visible list changes (a block
-  // appears or is withdrawn after an earlier answer is edited).
+  // appears or is withdrawn after an earlier answer is edited). Runs only when the
+  // sections change: navigation moves the anchor (second effect), it must not be undone.
   const anchorIdRef = useRef<string | null>(null);
+  const currentIdRef = useRef<string | null>(null);
+  currentIdRef.current = currentQuestion?.id ?? null;
   useEffect(() => {
     const anchorId = anchorIdRef.current;
-    if (!anchorId || currentQuestion?.id === anchorId) return;
+    if (!anchorId || currentIdRef.current === anchorId) return;
     for (let si = 0; si < sections.length; si++) {
       const qi = sections[si].questions.findIndex(q => q.id === anchorId);
       if (qi >= 0) {
@@ -297,7 +300,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       const si = Math.min(prev.currentSectionIndex, sections.length - 1);
       return { ...prev, currentSectionIndex: si, currentQuestionIndex: Math.min(prev.currentQuestionIndex, Math.max(0, sections[si].questions.length - 1)) };
     });
-  }, [sections, currentQuestion?.id]);
+  }, [sections]);
   useEffect(() => {
     if (currentQuestion) anchorIdRef.current = currentQuestion.id;
   }, [currentQuestion?.id]);
