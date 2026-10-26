@@ -10,16 +10,16 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 |---|---:|
 | Indexable static pages analysed | 238 |
 | Canonicalized aliases skipped | 4 |
-| Templated (maxContainment >= 0.5) | 29 (12%) |
+| Templated (maxContainment >= 0.5) | 27 (11%) |
 | Near-duplicate (maxContainment >= 0.8) | 0 (0%) |
-| Templated pages listed in sitemap.xml | 29 |
+| Templated pages listed in sitemap.xml | 27 |
 
 ## By section
 
 | Section | Indexable pages | Templated >= 0.5 | Near-duplicate >= 0.8 |
 |---|---:|---:|---:|
 | /blog | 107 | 10 (9%) | 0 |
-| / (root pages) | 89 | 4 (4%) | 0 |
+| / (root pages) | 89 | 2 (2%) | 0 |
 | /what-to-teach-next | 12 | 0 (0%) | 0 |
 | /esl-worksheets | 8 | 8 (100%) | 0 |
 | /features | 7 | 0 (0%) | 0 |
@@ -33,8 +33,6 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Route | maxContainment | uniqueShare | Words | Nearest page |
 |---|---:|---:|---:|---|
-| /ai-tools-for-private-english-tutors.html | 0.791 | 0.182 | 546 | /chatgpt-alternative-for-english-tutors.html |
-| /chatgpt-alternative-for-english-tutors.html | 0.776 | 0.195 | 572 | /ai-tools-for-private-english-tutors.html |
 | /esl-worksheets/business-email/b1-intermediate | 0.767 | 0.233 | 621 | /esl-worksheets/business-email/b2-upper-intermediate |
 | /esl-worksheets/business-email/b2-upper-intermediate | 0.767 | 0.042 | 621 | /esl-worksheets/business-email/b1-intermediate |
 | /esl-worksheets/travel-vocabulary/a2-elementary | 0.752 | 0.248 | 616 | /esl-worksheets/weather/a2-elementary |
@@ -71,8 +69,10 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /best-ai-tools-for-esl-teachers.html | 0.433 | 0.559 | 676 | /one-to-one-english-lesson-planner.html |
 | /one-to-one-english-lesson-planner.html | 0.433 | 0.557 | 714 | /private-english-tutor-crm.html |
 | /online-esl-homework-tool.html | 0.432 | 0.565 | 718 | /ai-lesson-planning-for-english-teachers.html |
-| /business-english-worksheet-generator.html | 0.43 | 0.528 | 647 | /adult-business-english-lesson-prep.html |
+| /business-english-worksheet-generator.html | 0.43 | 0.526 | 647 | /adult-business-english-lesson-prep.html |
 | /worksheets/gap-fill/ielts-writing-task-2 | 0.428 | 0.572 | 544 | /worksheets/error-correction/present-perfect |
+| /private-english-tutor-crm.html | 0.42 | 0.571 | 753 | /student-hub-for-english-tutors.html |
+| /edooqoo-vs-chatgpt.html | 0.417 | 0.569 | 1334 | /edooqoo-vs-busyteacher.html |
 
 ## How to read this
 

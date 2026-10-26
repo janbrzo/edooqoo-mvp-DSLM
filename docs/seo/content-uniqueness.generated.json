@@ -80,10 +80,10 @@
     {
       "route": "/ai-tools-for-private-english-tutors.html",
       "section": "/ (root pages)",
-      "words": 546,
+      "words": 834,
       "inSitemap": true,
-      "maxContainment": 0.791,
-      "uniqueShare": 0.182,
+      "maxContainment": 0.299,
+      "uniqueShare": 0.681,
       "nearest": "/chatgpt-alternative-for-english-tutors.html"
     },
     {
@@ -116,7 +116,7 @@
     {
       "route": "/authors/martha",
       "section": "/authors",
-      "words": 115,
+      "words": 114,
       "inSitemap": true,
       "maxContainment": 0,
       "uniqueShare": 1,
@@ -854,7 +854,7 @@
     {
       "route": "/blog/teaching-english-one-to-one.html",
       "section": "/blog",
-      "words": 3184,
+      "words": 3183,
       "inSitemap": true,
       "maxContainment": 0.034,
       "uniqueShare": 0.963,
@@ -1034,7 +1034,7 @@
     {
       "route": "/blog/using-ai-teacher-productivity.html",
       "section": "/blog",
-      "words": 873,
+      "words": 872,
       "inSitemap": true,
       "maxContainment": 0.348,
       "uniqueShare": 0.638,
@@ -1127,7 +1127,7 @@
       "words": 647,
       "inSitemap": true,
       "maxContainment": 0.43,
-      "uniqueShare": 0.528,
+      "uniqueShare": 0.526,
       "nearest": "/adult-business-english-lesson-prep.html"
     },
     {
@@ -1178,10 +1178,10 @@
     {
       "route": "/chatgpt-alternative-for-english-tutors.html",
       "section": "/ (root pages)",
-      "words": 572,
+      "words": 993,
       "inSitemap": true,
-      "maxContainment": 0.776,
-      "uniqueShare": 0.195,
+      "maxContainment": 0.254,
+      "uniqueShare": 0.713,
       "nearest": "/ai-tools-for-private-english-tutors.html"
     },
     {
@@ -1235,7 +1235,7 @@
       "words": 1334,
       "inSitemap": true,
       "maxContainment": 0.417,
-      "uniqueShare": 0.581,
+      "uniqueShare": 0.569,
       "nearest": "/edooqoo-vs-busyteacher.html"
     },
     {
@@ -1344,7 +1344,7 @@
       "inSitemap": true,
       "maxContainment": 0.319,
       "uniqueShare": 0.68,
-      "nearest": "/ai-tools-for-private-english-tutors.html"
+      "nearest": "/one-to-one-english-lesson-planner.html"
     },
     {
       "route": "/esl-student-progress-tracking-tool.html",
@@ -1457,7 +1457,7 @@
     {
       "route": "/features/calendar",
       "section": "/features",
-      "words": 347,
+      "words": 346,
       "inSitemap": true,
       "maxContainment": 0.115,
       "uniqueShare": 0.885,
@@ -1493,28 +1493,28 @@
     {
       "route": "/features/live-sessions",
       "section": "/features",
-      "words": 254,
+      "words": 252,
       "inSitemap": true,
-      "maxContainment": 0.162,
-      "uniqueShare": 0.834,
+      "maxContainment": 0.163,
+      "uniqueShare": 0.833,
       "nearest": "/features/homework"
     },
     {
       "route": "/features/placement-test",
       "section": "/features",
-      "words": 362,
+      "words": 361,
       "inSitemap": true,
-      "maxContainment": 0.104,
+      "maxContainment": 0.105,
       "uniqueShare": 0.873,
       "nearest": "/features/live-sessions"
     },
     {
       "route": "/features/student-hub",
       "section": "/features",
-      "words": 258,
+      "words": 257,
       "inSitemap": true,
-      "maxContainment": 0.155,
-      "uniqueShare": 0.841,
+      "maxContainment": 0.156,
+      "uniqueShare": 0.84,
       "nearest": "/features/calendar"
     },
     {
@@ -1871,7 +1871,7 @@
     {
       "route": "/resources",
       "section": "/ (root pages)",
-      "words": 53,
+      "words": 52,
       "inSitemap": true,
       "maxContainment": 0,
       "uniqueShare": 1,
@@ -1997,10 +1997,10 @@
     {
       "route": "/what-to-teach-next/accountant-variance-call",
       "section": "/what-to-teach-next",
-      "words": 262,
+      "words": 259,
       "inSitemap": true,
-      "maxContainment": 0.267,
-      "uniqueShare": 0.733,
+      "maxContainment": 0.27,
+      "uniqueShare": 0.73,
       "nearest": "/what-to-teach-next/consultant-executive-summary"
     },
     {
@@ -2024,19 +2024,19 @@
     {
       "route": "/what-to-teach-next/hr-performance-conversation",
       "section": "/what-to-teach-next",
-      "words": 254,
+      "words": 252,
       "inSitemap": true,
-      "maxContainment": 0.279,
-      "uniqueShare": 0.721,
+      "maxContainment": 0.282,
+      "uniqueShare": 0.718,
       "nearest": "/what-to-teach-next/job-interview-achievement"
     },
     {
       "route": "/what-to-teach-next/ielts-task-2-paragraph",
       "section": "/what-to-teach-next",
-      "words": 275,
+      "words": 273,
       "inSitemap": true,
-      "maxContainment": 0.254,
-      "uniqueShare": 0.743,
+      "maxContainment": 0.256,
+      "uniqueShare": 0.741,
       "nearest": "/what-to-teach-next/accountant-variance-call"
     },
     {
@@ -2045,7 +2045,7 @@
       "words": 640,
       "inSitemap": true,
       "maxContainment": 0.098,
-      "uniqueShare": 0.899,
+      "uniqueShare": 0.902,
       "nearest": "/what-to-teach-next/ielts-task-2-paragraph"
     },
     {
@@ -2060,25 +2060,25 @@
     {
       "route": "/what-to-teach-next/lawyer-client-explanation",
       "section": "/what-to-teach-next",
-      "words": 255,
+      "words": 254,
       "inSitemap": true,
-      "maxContainment": 0.282,
-      "uniqueShare": 0.718,
+      "maxContainment": 0.283,
+      "uniqueShare": 0.717,
       "nearest": "/what-to-teach-next/travel-disruption"
     },
     {
       "route": "/what-to-teach-next/marketing-campaign-recommendation",
       "section": "/what-to-teach-next",
-      "words": 255,
+      "words": 252,
       "inSitemap": true,
-      "maxContainment": 0.274,
+      "maxContainment": 0.278,
       "uniqueShare": 0.722,
       "nearest": "/what-to-teach-next/accountant-variance-call"
     },
     {
       "route": "/what-to-teach-next/project-manager-status-update",
       "section": "/what-to-teach-next",
-      "words": 298,
+      "words": 297,
       "inSitemap": true,
       "maxContainment": 0.241,
       "uniqueShare": 0.759,
@@ -2087,28 +2087,28 @@
     {
       "route": "/what-to-teach-next/sales-discovery-call",
       "section": "/what-to-teach-next",
-      "words": 284,
+      "words": 283,
       "inSitemap": true,
-      "maxContainment": 0.245,
-      "uniqueShare": 0.755,
+      "maxContainment": 0.246,
+      "uniqueShare": 0.754,
       "nearest": "/what-to-teach-next/accountant-variance-call"
     },
     {
       "route": "/what-to-teach-next/software-engineer-incident-explanation",
       "section": "/what-to-teach-next",
-      "words": 271,
+      "words": 270,
       "inSitemap": true,
-      "maxContainment": 0.265,
-      "uniqueShare": 0.735,
+      "maxContainment": 0.266,
+      "uniqueShare": 0.734,
       "nearest": "/what-to-teach-next/travel-disruption"
     },
     {
       "route": "/what-to-teach-next/travel-disruption",
       "section": "/what-to-teach-next",
-      "words": 252,
+      "words": 249,
       "inSitemap": true,
-      "maxContainment": 0.286,
-      "uniqueShare": 0.706,
+      "maxContainment": 0.289,
+      "uniqueShare": 0.707,
       "nearest": "/what-to-teach-next/lawyer-client-explanation"
     },
     {
