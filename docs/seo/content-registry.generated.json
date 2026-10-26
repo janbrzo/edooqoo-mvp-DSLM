@@ -279,7 +279,7 @@
     },
     {
       "route": "/ai-lesson-prep-tool-vs-chatbot.html",
-      "canonical": "https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html",
+      "canonical": "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html",
       "type": "static-landing",
       "state": "merge",
       "indexable": false,
@@ -288,13 +288,13 @@
       "reason": "Consolidation: near-duplicate chatbot-alternative page merged into the canonical ChatGPT alternative page.",
       "source": "public/ai-lesson-prep-tool-vs-chatbot.html",
       "sourceName": "ai-lesson-prep-tool-vs-chatbot.html",
-      "title": "AI Lesson Prep Tool vs Chatbot",
-      "description": "Factual reference for English tutors comparing chatbot drafting with a structured AI lesson-prep workflow for recurring adult 1:1 students.",
+      "title": "Moved",
+      "description": "",
       "datePublished": "",
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 339,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -379,7 +379,7 @@
     },
     {
       "route": "/ai-tools-for-online-esl-teachers.html",
-      "canonical": "https://edooqoo.com/ai-tools-for-online-esl-teachers.html",
+      "canonical": "https://edooqoo.com/ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "merge",
       "indexable": false,
@@ -388,13 +388,13 @@
       "reason": "Consolidation: near-duplicate AI tools page merged into the canonical AI tools for private English tutors page.",
       "source": "public/ai-tools-for-online-esl-teachers.html",
       "sourceName": "ai-tools-for-online-esl-teachers.html",
-      "title": "AI Tools for Online ESL Teachers",
-      "description": "Factual reference for online ESL teachers evaluating Edooqoo.com as a workflow tool for worksheets, homework, flashcards, student context, and lesson organization.",
+      "title": "Moved",
+      "description": "",
       "datePublished": "",
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 309,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -599,7 +599,7 @@
     },
     {
       "route": "/best-ai-tools-for-private-english-tutors.html",
-      "canonical": "https://edooqoo.com/best-ai-tools-for-private-english-tutors.html",
+      "canonical": "https://edooqoo.com/ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "merge",
       "indexable": false,
@@ -608,13 +608,13 @@
       "reason": "Consolidation: near-duplicate AI tools page merged into the canonical AI tools for private English tutors page.",
       "source": "public/best-ai-tools-for-private-english-tutors.html",
       "sourceName": "best-ai-tools-for-private-english-tutors.html",
-      "title": "AI Tools for Private English Tutors: Workflow Criteria",
-      "description": "Factual criteria for private English tutors evaluating AI tools for adult 1:1 lesson prep, worksheets, homework review, student context, and follow-up planning.",
+      "title": "Moved",
+      "description": "",
       "datePublished": "",
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 337,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -13379,7 +13379,7 @@
     },
     {
       "route": "/worksheet-generator-for-language-schools.html",
-      "canonical": "https://edooqoo.com/worksheet-generator-for-language-schools.html",
+      "canonical": "https://edooqoo.com/ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "merge",
       "indexable": false,
@@ -13388,13 +13388,13 @@
       "reason": "Consolidation: near-duplicate AI tools page merged into the canonical AI tools for private English tutors page.",
       "source": "public/worksheet-generator-for-language-schools.html",
       "sourceName": "worksheet-generator-for-language-schools.html",
-      "title": "Worksheet Generator for Language Schools",
-      "description": "Factual reference for language schools evaluating Edooqoo.com for English worksheet generation, CEFR-aware materials, homework workflow, and teacher reuse.",
+      "title": "Moved",
+      "description": "",
       "datePublished": "",
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 308,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
