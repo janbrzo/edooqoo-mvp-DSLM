@@ -14,13 +14,20 @@
  *   add --what-if-aliases aliases.json ({ questionId: { legacyText: currentOptionText } }) to see the table once
  *   those legacy option texts are accepted; the aliases live in memory only and nothing is written.
  *
+ * --emit-payload <file> --only <id prefixes> writes the reviewed payload of the service-only function
+ * public.backfill_profile_v2 ([{ profile_id, welcome_test_id, expected, after }], full uuids) for ONLY the
+ * profiles whose 8 character student id prefixes are listed in --only (comma separated). It exits non-zero and
+ * writes nothing when a listed id is missing or fails a safety gate. The payload holds answer derived data:
+ * write it to the session scratchpad, never into the repository. It needs an input with the full profile id and
+ * welcome_test_id (the REST loader has them; an export must add them).
+ *
  * --input is a JSON array of { profile, test, rows } (a SQL export of
  * student_learning_profiles, its student_tests row and its student_test_questions
  * rows). The service role key is read only from the environment, never from
  * arguments or the file, and only GET requests are ever sent.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { applyExtraAliases, recomputeProfile, renderMarkdown } from './profileV2Recompute.ts';
+import { applyExtraAliases, buildPayload, parseOnly, recomputeProfile, renderMarkdown } from './profileV2Recompute.ts';
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -67,6 +74,22 @@ const aliasFile = opt('--what-if-aliases');
 if (aliasFile) applyExtraAliases(JSON.parse(readFileSync(aliasFile, 'utf8')));
 const results = entries.map((e) => recomputeProfile(e));
 const markdown = renderMarkdown(results, asOf, flag('--include-current'));
+
+const emit = opt('--emit-payload');
+if (emit || opt('--only')) {
+  if (!emit || !opt('--only')) {
+    console.error('--emit-payload <file> and --only <id prefixes> must be used together');
+    process.exit(2);
+  }
+  try {
+    const payload = buildPayload(entries, parseOnly(opt('--only')));
+    writeFileSync(emit, JSON.stringify(payload));
+    console.error(`payload: ${payload.length} profiles written to ${emit}`);
+  } catch (e) {
+    console.error(String(e instanceof Error ? e.message : e));
+    process.exit(1);
+  }
+}
 
 const out = opt('--out');
 if (out) writeFileSync(out, markdown);

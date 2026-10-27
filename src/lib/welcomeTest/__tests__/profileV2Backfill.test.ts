@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import live from './liveStudentAnswers.json';
 import {
+  MAX_PAYLOAD_ITEMS,
   applyExtraAliases,
+  buildPayload,
   classifyProfile,
   findUnmatchedAnswers,
+  parseOnly,
   recomputeProfile,
   renderMarkdown,
   resolveAnswers,
@@ -177,5 +180,59 @@ describe('renderMarkdown', () => {
     expect(md).not.toMatch(/@/);
     expect(md).toContain('Dry run, nothing written');
     expect(md).not.toContain('\u2014');
+  });
+});
+
+describe('payload emission (--emit-payload / --only)', () => {
+  const PROFILE_ID = '11111111-2222-4333-8444-555555555555';
+  const TEST_ID = '66666666-7777-4888-8999-000000000000';
+  const entry = (raw: Record<string, unknown>, extra: Record<string, unknown> = {}) => ({
+    profile: legacyProfile(raw, { id: PROFILE_ID, welcome_test_id: TEST_ID, ...extra }),
+    test: { total_questions: 49 },
+    rows: [] as any[],
+  });
+
+  it('parses the --only list and rejects malformed ones', () => {
+    expect(parseOnly('4992288D, 8144a198')).toEqual(['4992288d', '8144a198']);
+    expect(() => parseOnly('')).toThrow();
+    expect(() => parseOnly('4992288')).toThrow();
+    expect(() => parseOnly('4992288d,4992288d')).toThrow(/duplicated/);
+  });
+
+  it('emits exactly the documented item shape with full uuids and the stored state as expected', () => {
+    const items = buildPayload([entry({ ...LIVE })], ['4992288d']);
+    expect(items).toHaveLength(1);
+    const it = items[0];
+    expect(Object.keys(it).sort()).toEqual(['after', 'expected', 'profile_id', 'welcome_test_id']);
+    expect(it.profile_id).toBe(PROFILE_ID);
+    expect(it.welcome_test_id).toBe(TEST_ID);
+    expect(it.expected).toEqual({ traits: null, learning_path: null });
+    expect(Object.keys(it.after).sort()).toEqual(['answer_behaviour', 'divergences', 'learning_path', 'signal_coverage', 'trait_evidence', 'traits']);
+    const r = recomputeProfile(entry({ ...LIVE }));
+    expect(it.after.traits).toEqual(r.after.traits);
+    expect(it.after.learning_path).toEqual(r.after.learning_path);
+    expect(it.after.signal_coverage).toBe((r.after.learning_path as any).coverage);
+    expect(it.after.trait_evidence).toEqual(r.afterRaw.trait_evidence);
+    expect(JSON.stringify(it)).not.toContain('\u2014');
+  });
+
+  it('keeps only the selected profiles', () => {
+    const other = entry({ ...LIVE }); other.profile.student_id = 'abcdef12-0000-4000-8000-000000000000'; other.profile.id = '99999999-2222-4333-8444-555555555555';
+    const items = buildPayload([entry({ ...LIVE }), other], ['abcdef12']);
+    expect(items.map((i) => i.profile_id)).toEqual(['99999999-2222-4333-8444-555555555555']);
+  });
+
+  it('refuses (throws, nothing returned) for a missing id, an unsafe profile, a non missing-v2 tier or an input without full ids', () => {
+    expect(() => buildPayload([entry({ ...LIVE })], ['00000000'])).toThrow(/not found/);
+    expect(() => buildPayload([entry({ ...LIVE, wt_q3: 'A sentence from an older wording of this question' })], ['4992288d'])).toThrow(/unsafe/);
+    expect(() => buildPayload([entry({ ...LIVE }, { traits: { version: 1 }, learning_path: { version: 2 } })], ['4992288d'])).toThrow(/only missing_v2_columns/);
+    expect(() => buildPayload([{ profile: legacyProfile({ ...LIVE }), test: { total_questions: 49 }, rows: [] }], ['4992288d'])).toThrow(/full profile id/);
+    // one failing id refuses the whole payload even when another selected id is fine
+    expect(() => buildPayload([entry({ ...LIVE })], ['4992288d', '00000000'])).toThrow(/00000000: not found/);
+  });
+
+  it('never exceeds the SQL function limit', () => {
+    expect(MAX_PAYLOAD_ITEMS).toBe(50);
+    expect(() => buildPayload([], Array.from({ length: 51 }, (_, i) => i.toString(16).padStart(8, '0')))).toThrow(/at most 50/);
   });
 });
