@@ -17,14 +17,14 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 398,
+    "componentModules": 399,
     "hookModules": 99,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 80,
     "typedTables": 66,
     "typedRpcs": 123,
-    "migrationIndexes": 25
+    "migrationIndexes": 26
   },
   "routes": [
     {
@@ -33595,6 +33595,51 @@
       }
     },
     {
+      "path": "src/components/worksheet/AiScoreThumbs.tsx",
+      "domain": "worksheet",
+      "purpose": "Implements Ai Score Thumbs behavior in the worksheet domain.",
+      "exports": [
+        "AiScoreThumbs"
+      ],
+      "props": [
+        {
+          "name": "AiScoreThumbsProps",
+          "fields": [
+            {
+              "name": "value",
+              "type": "boolean | undefined",
+              "optional": false
+            },
+            {
+              "name": "onVote",
+              "type": "(thumbsUp: boolean) => Promise<string | null>",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "AI score looks right",
+        "AI score looks wrong",
+        "Was the AI score right?"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/worksheet/AnswerStatusBadge.tsx",
       "domain": "worksheet",
       "purpose": "Implements Answer Status Badge behavior in the worksheet domain.",
@@ -37749,7 +37794,7 @@
             },
             {
               "name": "onSubmit",
-              "type": "(ratings: NanoSkillRating[]) => void",
+              "type": "(ratings: NanoSkillRating[], priorVerdict?: PriorVerdict | null) => void",
               "optional": false
             },
             {
@@ -37785,6 +37830,16 @@
             {
               "name": "storedEvaluations",
               "type": "Record<number, number>",
+              "optional": true
+            },
+            {
+              "name": "storedSources",
+              "type": "Record<number, string>",
+              "optional": true
+            },
+            {
+              "name": "feedbackContext",
+              "type": "{ worksheetId?: string; teacherId?: string; exerciseIndex: number } | null",
               "optional": true
             },
             {
@@ -37835,6 +37890,11 @@
           "value": "ratings",
           "setter": "setRatings",
           "initial": "[]"
+        },
+        {
+          "value": "thumbVotes",
+          "setter": "setThumbVotes",
+          "initial": "{}"
         }
       ],
       "hooks": [
@@ -42064,6 +42124,7 @@
         "domain": "state",
         "purpose": "Implements use Pacing Proposals behavior in the state domain.",
         "exports": [
+          "logPacingProposalSeen",
           "triggerLabel",
           "usePacingProposals"
         ],
@@ -44566,7 +44627,8 @@
         "storage": "localStorage",
         "key": "edooqoo_demo_mode",
         "operations": [
-          "getItem"
+          "getItem",
+          "setItem"
         ],
         "files": [
           "src/components/calendar/SlotDetailModal.tsx",
@@ -44575,7 +44637,9 @@
           "src/hooks/dslm/usePlanEvidenceMetrics.ts",
           "src/hooks/usePublicGalleryExamples.ts",
           "src/hooks/useWorksheetAutosave.ts",
-          "src/hooks/useWtSignalFeedback.ts"
+          "src/hooks/useWtSignalFeedback.ts",
+          "src/lib/dslm/__tests__/decisionLog.test.ts",
+          "src/lib/dslm/decisionLog.ts"
         ]
       },
       {
@@ -58527,6 +58591,12 @@
         "table": "phase_advance_proposals",
         "unique": false,
         "migration": "supabase/migrations/20261026090000_phase_advance_proposals.sql"
+      },
+      {
+        "name": "dslm_decision_log_teacher_type_created_idx",
+        "table": "dslm_decision_log",
+        "unique": false,
+        "migration": "supabase/migrations/20261027090000_dslm_validation_loop_v1.sql"
       }
     ],
     "migrationFunctions": [
@@ -58641,6 +58711,10 @@
       {
         "name": "dslm_effective_mastery",
         "migration": "supabase/migrations/20261017135037_f8cf555a-7b86-47a5-a998-915463827528.sql"
+      },
+      {
+        "name": "dslm_validation_report",
+        "migration": "supabase/migrations/20261027090100_dslm_validation_report.sql"
       },
       {
         "name": "extract_micro_skill",
@@ -58809,6 +58883,10 @@
       {
         "name": "list_worksheet_answers_needing_ai_evaluation",
         "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
+      },
+      {
+        "name": "log_dslm_decision",
+        "migration": "supabase/migrations/20261027090000_dslm_validation_loop_v1.sql"
       },
       {
         "name": "log_flashcard_review_event",
@@ -58997,6 +59075,10 @@
       {
         "name": "save_mark_done_evaluation",
         "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
+      },
+      {
+        "name": "save_mark_done_evaluation",
+        "migration": "supabase/migrations/20261027090200_save_mark_done_replace_signature.sql"
       },
       {
         "name": "save_teacher_comment",

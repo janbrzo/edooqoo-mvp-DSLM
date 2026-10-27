@@ -247,6 +247,22 @@ export const storedItemMasteryByQuestion = (
   return out;
 };
 
+/** question_index -> `source` of the stored rating counted by `storedItemMasteryByQuestion` (for example `ai_alternative`). */
+export const storedItemSourceByQuestion = (
+  itemEvaluations: ReadonlyArray<{ question_index?: number; mastery?: number; hasValue?: boolean; source?: string }> | null | undefined,
+): Record<number, string> => {
+  const out: Record<number, string> = {};
+  const seen = new Set<number>();
+  for (const e of itemEvaluations || []) {
+    const q = e?.question_index;
+    if (typeof q !== 'number' || seen.has(q)) continue;
+    if (e.hasValue === false || typeof e.mastery !== 'number' || !(e.mastery >= 0)) continue;
+    seen.add(q);
+    if (typeof e.source === 'string') out[q] = e.source;
+  }
+  return out;
+};
+
 /**
  * Initial slider value for one exercise item (decision D2: Mark done is a teacher
  * override on the 0-100 scale; saving it replaces the student's rating, so the

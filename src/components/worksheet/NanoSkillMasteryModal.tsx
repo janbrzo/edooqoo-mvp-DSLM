@@ -7,7 +7,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { devLog } from '@/utils/logger';
-import { calculateInitialMasteryForItem } from '@/utils/masteryCalculator';
+import { calculateInitialMasteryForItem, calculateItemMastery, isClosedExerciseType } from '@/utils/masteryCalculator';
+import { describePrefillItem, finalizePriorVerdict, type PriorVerdict, type PriorVerdictItem } from '@/lib/dslm/priorVerdict';
+import { fetchThumbVotes, saveThumbVote } from '@/lib/dslm/aiThumbs';
+import { AiScoreThumbs } from './AiScoreThumbs';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +28,8 @@ interface NanoSkillRating {
 interface NanoSkillMasteryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (ratings: NanoSkillRating[]) => void;
+  /** Second argument: what the form showed before the teacher changed it (validation loop), null when unknown. */
+  onSubmit: (ratings: NanoSkillRating[], priorVerdict?: PriorVerdict | null) => void;
   onSkip?: () => void;
   nanoSkills: NanoSkill[];
   exerciseTitle: string;
@@ -36,6 +40,10 @@ interface NanoSkillMasteryModalProps {
   aiEvaluations?: Record<number, number>;
   /** question_index -> mastery stored with the saved answer (see storedItemMasteryByQuestion). */
   storedEvaluations?: Record<number, number>;
+  /** question_index -> source of the stored evaluation (`ai_alternative`); for the validation loop only. */
+  storedSources?: Record<number, string>;
+  /** Enables the AI score thumbs (teacher_ai_eval_feedback) when all three are known. */
+  feedbackContext?: { worksheetId?: string; teacherId?: string; exerciseIndex: number } | null;
   isLoadingAiEvaluation?: boolean;
   /**
    * Ratings of the teacher's saved mark_done_evaluation for this exercise (null/absent = never
@@ -123,11 +131,30 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
   exerciseData,
   aiEvaluations,
   storedEvaluations,
+  storedSources,
+  feedbackContext = null,
   isLoadingAiEvaluation = false,
   savedRatings = null,
 }) => {
   const [ratings, setRatings] = useState<NanoSkillRating[]>([]);
   const hasInitialized = useRef(false);
+  /** Snapshot of what each row showed at open, same order as `ratings` (validation loop). */
+  const prefillRef = useRef<PriorVerdictItem[]>([]);
+  const [thumbVotes, setThumbVotes] = useState<Record<number, boolean>>({});
+  const thumbIds = feedbackContext?.worksheetId && feedbackContext?.teacherId
+    ? { worksheetId: feedbackContext.worksheetId, teacherId: feedbackContext.teacherId, exerciseIndex: feedbackContext.exerciseIndex }
+    : null;
+  const thumbWorksheetId = thumbIds?.worksheetId;
+  const thumbTeacherId = thumbIds?.teacherId;
+  const thumbExerciseIndex = thumbIds?.exerciseIndex;
+
+  useEffect(() => {
+    if (!isOpen || !thumbWorksheetId || !thumbTeacherId || thumbExerciseIndex === undefined) return;
+    let cancelled = false;
+    fetchThumbVotes({ worksheetId: thumbWorksheetId, teacherId: thumbTeacherId, exerciseIndex: thumbExerciseIndex })
+      .then((votes) => { if (!cancelled) setThumbVotes((current) => ({ ...votes, ...current })); });
+    return () => { cancelled = true; };
+  }, [isOpen, thumbWorksheetId, thumbTeacherId, thumbExerciseIndex]);
 
   // PROBLEM 1 FIX: Create a direct mapping from skill index to item index
   // This preserves the 1:1 relationship between skills and exercise items
@@ -177,10 +204,21 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
         if (typeof r?.name !== 'string' || typeof r.mastery !== 'number' || !(r.mastery >= 0)) continue;
         savedQueue.set(r.name, [...(savedQueue.get(r.name) || []), r.mastery]);
       }
-      setRatings(
-        nanoSkills.map((skill, skillIndex) => {
+      const prefill: PriorVerdictItem[] = [];
+      const describe = (name: string, itemIndex: number, mastery: number | null, hasValue: boolean, fromSavedRatings: boolean) => {
+        let keyMastery: number | null = null;
+        const type: string = exerciseData?.type || '';
+        if (isClosedExerciseType(type)) {
+          try { keyMastery = calculateItemMastery(type, exerciseData, itemIndex, studentAnswers?.[itemIndex], studentAnswers) ?? null; } catch { keyMastery = null; }
+        }
+        prefill.push(describePrefillItem({
+          name, itemIndex, mastery, hasValue, fromSavedRatings, aiEvaluations, storedEvaluations, storedSources, keyMastery,
+        }));
+      };
+      const initial = nanoSkills.map((skill, skillIndex) => {
           if (savedRatings) {
             const saved = savedQueue.get(skill.name)?.shift();
+            describe(skill.name, skillToItemMapping[skillIndex]?.itemIndex ?? skillIndex, saved ?? null, saved !== undefined, true);
             return saved === undefined
               ? { name: skill.name, reason: skill.reason, mastery: null, hasValue: false }
               : { name: skill.name, reason: skill.reason, mastery: saved, hasValue: true };
@@ -193,6 +231,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
           // Get mastery for this SPECIFIC item based on its answer (now includes AI evaluations)
           const { mastery, hasValue } = calculateInitialMasteryForItem(itemIndex, studentAnswers, exerciseData, aiEvaluations, storedEvaluations);
           
+          describe(skill.name, itemIndex, mastery, hasValue, false);
           devLog(`[Mastery Init] SkillIndex: ${skillIndex}, Skill: ${skill.name}, ItemIndex: ${itemIndex}, Answer: ${studentAnswers?.[itemIndex]}, AI: ${aiEvaluations?.[itemIndex]}, Mastery: ${mastery}`);
           
           return {
@@ -201,8 +240,9 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
             mastery: mastery,
             hasValue: hasValue,
           };
-        })
-      );
+      });
+      prefillRef.current = prefill;
+      setRatings(initial);
       hasInitialized.current = true;
     }
     
@@ -210,7 +250,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
     if (!isOpen) {
       hasInitialized.current = false;
     }
-  }, [isOpen, nanoSkills, studentAnswers, exerciseData, skillToItemMapping, aiEvaluations, storedEvaluations, isLoadingAiEvaluation, savedRatings]);
+  }, [isOpen, nanoSkills, studentAnswers, exerciseData, skillToItemMapping, aiEvaluations, storedEvaluations, storedSources, isLoadingAiEvaluation, savedRatings]);
 
   const handleMasteryChange = (index: number, value: number[]) => {
     setRatings(prevRatings => {
@@ -227,7 +267,9 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
   const handleSubmit = () => {
     // PROBLEM 1.2: Only submit ratings that have values set
     const ratingsWithValues = ratings.filter(r => r.hasValue && r.mastery !== null);
-    onSubmit(ratingsWithValues);
+    let prior: PriorVerdict | null = null;
+    try { prior = finalizePriorVerdict(prefillRef.current, ratings); } catch { prior = null; }
+    onSubmit(ratingsWithValues, prior);
     onClose();
   };
   
@@ -366,6 +408,26 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
                     "{rating.reason}"
                   </p>
                 </div>
+                {(() => {
+                  const p = prefillRef.current[index];
+                  const aiScored = !!p && (p.prefill_source === 'ai_live' || p.prefill_source === 'stored_ai_alternative'
+                    || (p.prefill_source === 'stored' && !isClosedExerciseType(exerciseData?.type || '')));
+                  if (!aiScored || !thumbIds) return null;
+                  const score = p.ai_score ?? p.stored_mastery;
+                  return (
+                    <AiScoreThumbs
+                      value={thumbVotes[p.item_index]}
+                      onVote={async (up) => {
+                        const err = await saveThumbVote(
+                          { ...thumbIds, questionIndex: p.item_index },
+                          { thumbsUp: up, exerciseType: String(exerciseData?.type || 'unknown'), qualityScore: score === null ? null : score / 100 },
+                        );
+                        if (!err) setThumbVotes((v) => ({ ...v, [p.item_index]: up }));
+                        return err;
+                      }}
+                    />
+                  );
+                })()}
                 <div className={`text-2xl font-bold ${getMasteryColor(rating.mastery)}`}>
                   {rating.mastery !== null ? `${rating.mastery}%` : '-'}
                 </div>

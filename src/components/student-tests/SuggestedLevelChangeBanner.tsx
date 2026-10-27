@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logDslmDecision } from '@/lib/dslm/decisionLog';
+import { buildLevelSuggestionPayload } from '@/lib/dslm/decisionPayloads';
 import { readLevelEvidence } from '@/lib/welcomeTest/profileDisplay';
 
 interface SuggestedLevelChangeBannerProps {
@@ -86,6 +88,12 @@ export function SuggestedLevelChangeBanner({
         .eq('id', studentId);
       if (error) throw error;
       dismiss();
+      void logDslmDecision({
+        studentId,
+        type: 'level_suggestion_accepted',
+        sourceId: testId ?? null,
+        payload: buildLevelSuggestionPayload({ fromLevel: currentLevel, toLevel: estimatedLevel, testId, scope: testId ? 'test' : 'student' }),
+      });
       toast.success(`Student level updated to ${estimatedLevel}.`);
       onApplied?.(estimatedLevel);
     } catch (err) {
@@ -110,7 +118,16 @@ export function SuggestedLevelChangeBanner({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => { dismiss(); onDismissed?.(); }} disabled={applying}>
+            <Button variant="outline" size="sm" onClick={() => {
+              dismiss();
+              void logDslmDecision({
+                studentId,
+                type: 'level_suggestion_dismissed',
+                sourceId: testId ?? null,
+                payload: buildLevelSuggestionPayload({ fromLevel: currentLevel, toLevel: estimatedLevel, testId, scope: testId ? 'test' : 'student' }),
+              });
+              onDismissed?.();
+            }} disabled={applying}>
               Keep {currentLevel}
             </Button>
             <Button size="sm" onClick={apply} disabled={applying}>
