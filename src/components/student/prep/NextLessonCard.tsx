@@ -24,6 +24,7 @@ export interface NextLessonCardProps {
   isLessonLoading: boolean;
   suggestion: PrepSuggestion;
   rationale: string;
+  evidenceContent?: React.ReactNode;
   focusAreas: readonly string[];
   isSuggestionsLoading: boolean;
   onGenerate: () => void;
@@ -37,6 +38,7 @@ export const NextLessonCard: React.FC<NextLessonCardProps> = ({
   isLessonLoading,
   suggestion,
   rationale,
+  evidenceContent,
   focusAreas,
   isSuggestionsLoading,
   onGenerate,
@@ -75,7 +77,7 @@ export const NextLessonCard: React.FC<NextLessonCardProps> = ({
               >
                 {suggestion.topic}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">{rationale}</p>
+              {evidenceContent ? <div className="mt-3">{evidenceContent}</div> : <p className="mt-1 text-sm text-muted-foreground">{rationale}</p>}
               {/* 2026-10: Prep and the Learning plan share one queue; say where #1 comes from. */}
               <p className="mt-2 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
                 {suggestion.source === 'fallback' ? (

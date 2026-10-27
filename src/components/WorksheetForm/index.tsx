@@ -18,6 +18,7 @@ import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
 import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
+import type { AppliedEvidenceSource } from '@/lib/dslm/recommendationEvidenceView';
 import { StudentContextHint } from "./StudentContextHint";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser, Plus } from "lucide-react";
@@ -100,6 +101,15 @@ export default function WorksheetForm({
   const [selectedStudentId, setSelectedStudentId] = useState<string>(
     () => (initialAutoIntentRef.current?.studentId as string) || preSelectedStudent?.id || "no-student"
   );
+  const [appliedEvidenceSource, setAppliedEvidenceSource] = useState<AppliedEvidenceSource | null>(() => {
+    try {
+      const suggestionId = sessionStorage.getItem('prefillSuggestionId');
+      return suggestionId ? { suggestionId, studentId: initialAutoIntentRef.current?.studentId || preSelectedStudent?.id || 'no-student' } : null;
+    } catch { return null; }
+  });
+  useEffect(() => {
+    setAppliedEvidenceSource(previous => previous?.studentId === selectedStudentId ? previous : null);
+  }, [selectedStudentId]);
 
   // Initialize selectedExercises based on lessonTime and selectionMode
   const getInitialExercises = (): string[] => {
@@ -241,6 +251,7 @@ export default function WorksheetForm({
   );
 
   const clearForm = () => {
+    setAppliedEvidenceSource(null);
     setLessonTopic('');
     setLessonGoal('');
     setGrammarFocus('');
@@ -333,6 +344,7 @@ export default function WorksheetForm({
   // intentionally preserve the draft so the user can retry.
   useEffect(() => {
     const handler = (e: Event) => {
+      setAppliedEvidenceSource(null);
       try {
         clearPersistedDraft();
         devLog('[WorksheetForm] Draft cleared after successful generation');
@@ -745,6 +757,7 @@ export default function WorksheetForm({
 
   // v6.9.10: apply a Next-Step preset (chip click) into form state.
   const applyPreset = (p: PresetPayload) => {
+    setAppliedEvidenceSource({ studentId: selectedStudentId, suggestionId: p.sourceSuggestionId });
     setLessonTopic(p.topic || '');
     setLessonGoal(p.goal || '');
     if (p.additionalInfo || p.grammarFocus) setShowMoreFields(true);
@@ -891,6 +904,8 @@ export default function WorksheetForm({
                   studentName={students.find(s => s.id === selectedStudentId)?.name}
                   teacherId={userId}
                   onApplyPreset={applyPreset}
+                  appliedEvidenceSource={appliedEvidenceSource}
+                  lessonFields={{ topic: lessonTopic, goal: lessonGoal, grammarFocus, additionalInfo: additionalInformation }}
                 />
               )}
 

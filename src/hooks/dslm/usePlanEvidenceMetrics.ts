@@ -4,6 +4,7 @@
  * time from `last_event_at`; flashcards are excluded later by the signal helpers.
  */
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { withEffectiveMastery } from '../../../supabase/functions/_shared/forgetting';
 import type { ExplainabilityMetric } from '@/lib/dslm/recommendationExplainability';
@@ -28,8 +29,9 @@ export function usePlanEvidenceMetrics(studentId: string, teacherId: string) {
       return (data || []) as ExplainabilityMetric[];
     },
   });
+  const metrics = useMemo(() => withEffectiveMastery(query.data ?? []), [query.data]);
   return {
-    metrics: withEffectiveMastery(query.data ?? []),
+    metrics,
     rawMetrics: query.data ?? [],
     loaded: query.isSuccess,
     loading: query.isFetching && !query.isSuccess,
