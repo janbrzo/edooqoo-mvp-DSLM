@@ -153,7 +153,7 @@ export async function verifyPayload<T extends Record<string, unknown>>(token: un
   const [body, signature] = token.split('.');
   if (!body || !signature) return null;
   try {
-    const valid = await crypto.subtle.verify('HMAC', await hmacKey(), base64UrlDecode(signature), encoder.encode(body));
+    const valid = await crypto.subtle.verify('HMAC', await hmacKey(), new Uint8Array(base64UrlDecode(signature)).buffer, encoder.encode(body));
     if (!valid) return null;
     const payload = JSON.parse(new TextDecoder().decode(base64UrlDecode(body)));
     if (typeof payload?.exp !== 'number' || payload.exp < Date.now()) return null;
