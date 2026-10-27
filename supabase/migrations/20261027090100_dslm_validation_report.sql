@@ -184,6 +184,7 @@ BEGIN
            regexp_replace(regexp_replace(lower(btrim(coalesce(skill_name, ''))), '^ns\.', ''),
                           '^(a1|a2|b1|b2|c1|c2)(\.|$)', '') AS s1
     FROM public.student_skill_metrics
+    WHERE skill_name NOT LIKE 'flashcard:%'
   ), seg AS (
     SELECT *, split_part(s1, '.', 1) AS first_seg, position('.' IN s1) > 0 AS has_more,
            CASE split_part(s1, '.', 1) WHEN 'vocab' THEN 'vocabulary' WHEN 'grammar' THEN 'grammar'
@@ -207,18 +208,18 @@ BEGIN
     SELECT ckey, count(*) AS names FROM per_name GROUP BY ckey
   )
   SELECT jsonb_build_object(
-    'n', (SELECT count(*) FROM public.student_skill_metrics),
+    'n', (SELECT count(*) FROM public.student_skill_metrics WHERE skill_name NOT LIKE 'flashcard:%'),
     'min_n', 30,
-    'sufficient', (SELECT count(*) FROM public.student_skill_metrics) >= 30,
+    'sufficient', (SELECT count(*) FROM public.student_skill_metrics WHERE skill_name NOT LIKE 'flashcard:%') >= 30,
     'distinct_skill_names', (SELECT count(*) FROM per_name),
     'distinct_canonical_keys', (SELECT count(*) FROM per_key),
     'names_sharing_a_canonical_key', (SELECT coalesce(sum(names), 0) FROM per_key WHERE names > 1),
     'share_names_sharing_a_canonical_key',
       (SELECT round(coalesce(sum(names) FILTER (WHERE names > 1), 0)::numeric / nullif(sum(names), 0), 3) FROM per_key),
-    'single_event_metrics', (SELECT count(*) FROM public.student_skill_metrics WHERE total_events = 1),
+    'single_event_metrics', (SELECT count(*) FROM public.student_skill_metrics WHERE total_events = 1 AND skill_name NOT LIKE 'flashcard:%'),
     'share_single_event_metrics',
       (SELECT round(count(*) FILTER (WHERE total_events = 1)::numeric / nullif(count(*), 0), 3)
-         FROM public.student_skill_metrics)
+         FROM public.student_skill_metrics WHERE skill_name NOT LIKE 'flashcard:%')
   ) INTO v_cov;
 
   -- (7) Prediction error from stored mastery history of non flashcard skills with at

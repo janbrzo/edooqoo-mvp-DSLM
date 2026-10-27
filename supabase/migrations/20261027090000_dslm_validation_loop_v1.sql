@@ -21,6 +21,7 @@ ALTER TABLE public.dslm_interpretation_params ENABLE ROW LEVEL SECURITY;
 
 REVOKE ALL ON public.dslm_interpretation_params FROM PUBLIC, anon, authenticated;
 GRANT ALL ON public.dslm_interpretation_params TO service_role;
+REVOKE ALL ON SEQUENCE public.dslm_interpretation_params_id_seq FROM PUBLIC, anon, authenticated;
 GRANT USAGE, SELECT ON SEQUENCE public.dslm_interpretation_params_id_seq TO service_role;
 
 DO $$

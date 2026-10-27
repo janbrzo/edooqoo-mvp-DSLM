@@ -20,8 +20,10 @@ export async function saveMarkDoneEvaluationRpc(
 ) {
   if (priorVerdict && priorArgAvailable) {
     const res = await rpc('save_mark_done_evaluation', { ...args, p_prior_verdict: priorVerdict });
-    if (!isMissingRpcError(res.error)) return res;
-    priorArgAvailable = false;
+    if (!res.error) return res;
+    // The prior verdict is only an extra record: whatever the server rejects (a missing 7-argument
+    // function or a size/shape error), the teacher's save must still go through with the old call.
+    if (isMissingRpcError(res.error)) priorArgAvailable = false;
   }
   return rpc('save_mark_done_evaluation', args);
 }

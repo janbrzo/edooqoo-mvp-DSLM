@@ -152,7 +152,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
     if (!isOpen || !thumbWorksheetId || !thumbTeacherId || thumbExerciseIndex === undefined) return;
     let cancelled = false;
     fetchThumbVotes({ worksheetId: thumbWorksheetId, teacherId: thumbTeacherId, exerciseIndex: thumbExerciseIndex })
-      .then((votes) => { if (!cancelled) setThumbVotes(votes); });
+      .then((votes) => { if (!cancelled) setThumbVotes((current) => ({ ...votes, ...current })); });
     return () => { cancelled = true; };
   }, [isOpen, thumbWorksheetId, thumbTeacherId, thumbExerciseIndex]);
 

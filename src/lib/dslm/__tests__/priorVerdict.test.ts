@@ -92,7 +92,17 @@ describe('saveMarkDoneEvaluationRpc', () => {
     const denied = { data: null, error: { code: '42501', message: 'no' } };
     const rpc2 = vi.fn().mockResolvedValue(denied);
     expect((await saveMarkDoneEvaluationRpc({}, prior, rpc2)).error).toBe(denied.error);
-    expect(rpc2).toHaveBeenCalledTimes(1);
+    // a rejected 7-argument call is retried once with the old signature (the prior verdict is optional)
+    expect(rpc2).toHaveBeenCalledTimes(2);
+  });
+  it('a size or shape rejection of the prior verdict still saves with the old call and keeps using the new one', async () => {
+    const tooBig = { data: null, error: { code: '22023', message: 'p_prior_verdict is too large' } };
+    const rpc = vi.fn().mockResolvedValueOnce(tooBig).mockResolvedValueOnce({ data: 1, error: null }).mockResolvedValue({ data: 1, error: null });
+    const res = await saveMarkDoneEvaluationRpc({ p_student_id: 's' }, prior, rpc);
+    expect(res.error).toBeNull();
+    expect(rpc.mock.calls[1][1]).toEqual({ p_student_id: 's' });
+    await saveMarkDoneEvaluationRpc({ p_student_id: 's' }, prior, rpc);
+    expect(rpc.mock.calls[2][1]).toEqual({ p_student_id: 's', p_prior_verdict: prior });
   });
   it('without a prior verdict calls the old signature directly', async () => {
     const rpc = vi.fn().mockResolvedValue({ data: 1, error: null });
