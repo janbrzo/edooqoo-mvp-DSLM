@@ -140,7 +140,7 @@ export function normalizeExerciseShape<T extends AnyExercise>(exercise: T): T {
     }
   }
 
-  return (next as T) || exercise;
+  return (next || exercise) as T;
 }
 
 /** Normalize every exercise in a worksheet-like object. */

@@ -30,6 +30,8 @@ import { TIMELINE_PAGE_SIZE, type TimelineFilter } from '@/lib/students/timeline
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
+import { findEvidenceSuggestion } from '@/lib/dslm/recommendationEvidenceView';
+import { ConnectedWhyThisLesson } from '@/components/dslm/ConnectedWhyThisLesson';
 // v6.9.111 M6.4: Library tab (pure rules + presentational composition).
 import {
   buildWorksheetItems,
@@ -274,6 +276,9 @@ const StudentPage = () => {
   const prepRationale = useMemo(
     () => buildRationale(prepSuggestion, focusAreas),
     [prepSuggestion, focusAreas],
+  );
+  const prepEvidenceSource = findEvidenceSuggestion(
+    [...futureTimeline.phaseSteps, ...futureTimeline.nextSteps], prepSuggestion.id, id || '', student?.teacher_id || '',
   );
 
   // v6.9.111 M5.4: Timeline data. The three extra reads only fire once the
@@ -600,6 +605,10 @@ const StudentPage = () => {
               isLessonLoading={nextLessonLoading}
               suggestion={prepSuggestion}
               rationale={prepRationale}
+              evidenceContent={!isDemoMode && prepEvidenceSource ? (
+                <ConnectedWhyThisLesson studentId={student.id} teacherId={student.teacher_id}
+                  suggestion={prepEvidenceSource} phases={curriculum.phases} rationale={prepEvidenceSource.rationale} />
+              ) : undefined}
               focusAreas={focusAreas}
               isSuggestionsLoading={futureTimeline.loading}
               onGenerate={() => handlePrepGenerate(prepSuggestion, true)}

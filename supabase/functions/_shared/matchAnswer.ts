@@ -12,7 +12,11 @@
  *    Anything that was correct before stays correct.
  * 2. When we cannot prove an answer is wrong, we return `review`
  *    ("needs teacher review") instead of `wrong`. We never tell a student
- *    they are wrong on a guess.
+ *    they are wrong on a guess. Two cases are provably wrong (D8): an
+ *    error-correction answer that is a copy of the source sentence, and, in
+ *    grammar items (`grammar: true`), an answer that differs from the key only
+ *    by a regular ending on a stem of 3+ letters (walk/walks, study/studies).
+ *    Typos, transpositions, word order and vocabulary items stay `review`.
  * 3. Pure module, no React, no I/O, so it can be unit tested and reused
  *    by both the UI layer and the DSLM mastery calculator.
  */
@@ -30,6 +34,8 @@ export type MatchReason =
   | 'near'
   | 'no-key'
   | 'no-error-item'
+  | 'source-copy'
+  | 'ending'
   | 'mismatch';
 
 export interface MatchResult {
@@ -48,6 +54,12 @@ export interface MatchOptions {
   mode?: 'word' | 'sentence';
   /** Defaults to false. */
   caseSensitive?: boolean;
+  /**
+   * Grammar item (gap-text, fill-in-blanks, complete-word): the word form is
+   * what is tested, so a regular-ending difference is wrong, not a typo (D8).
+   * Leave unset for vocabulary items and the Welcome Test vocabulary items.
+   */
+  grammar?: boolean;
 }
 
 /** Answer-key phrases meaning "the source sentence contains no error". */
@@ -181,6 +193,45 @@ const sameWordSet = (a: string, b: string): boolean => {
   return wa.length > 0 && wa === wb;
 };
 
+/** Regular endings that make a grammar answer provably the wrong form (D8). */
+const REGULAR_ENDINGS = ['s', 'es', 'ed', 'd', 'ing', 'ly', 'er', 'est'];
+const MIN_STEM_LENGTH = 3;
+/** Words whose s-form is a valid alternative (toward/towards) or the same word (fish/fishes): never proven wrong. */
+const TWO_VALID_FORMS = new Set([
+  'toward', 'afterward', 'forward', 'backward', 'upward', 'downward', 'inward', 'outward', 'onward', 'homeward',
+  'anyway', 'someday', 'fish', 'hair', 'sheep', 'deer', 'series', 'species', 'news',
+]);
+
+const isRegularEndingPair = (shorter: string, longer: string): boolean => {
+  if (shorter.length < MIN_STEM_LENGTH || !/^[a-z']+$/.test(shorter) || !/^[a-z']+$/.test(longer)) return false;
+  if (TWO_VALID_FORMS.has(shorter) || TWO_VALID_FORMS.has(longer)) return false;
+  // y -> ies: study / studies.
+  if (shorter.endsWith('y') && longer === `${shorter.slice(0, -1)}ies`) return true;
+  if (!longer.startsWith(shorter)) return false;
+  const ending = longer.slice(shorter.length);
+  // "recommendss", "likeed": an ending that repeats the last stem letter is a typo.
+  return REGULAR_ENDINGS.includes(ending) && ending[0] !== shorter[shorter.length - 1];
+};
+
+/**
+ * True when both strings are identical except for one word that differs only by a
+ * regular ending ("she walk" / "she walks"). Same word count required.
+ */
+const differsOnlyByRegularEnding = (a: string, b: string): boolean => {
+  const wa = a.split(' ').filter(Boolean);
+  const wb = b.split(' ').filter(Boolean);
+  if (wa.length === 0 || wa.length !== wb.length) return false;
+  let diff = -1;
+  for (let i = 0; i < wa.length; i++) {
+    if (wa[i] === wb[i]) continue;
+    if (diff !== -1) return false;
+    diff = i;
+  }
+  if (diff === -1) return false;
+  const [x, y] = [wa[diff], wb[diff]];
+  return x.length < y.length ? isRegularEndingPair(x, y) : isRegularEndingPair(y, x);
+};
+
 const isNearMatch = (student: string, key: string, mode: 'word' | 'sentence'): boolean => {
   if (!student || !key) return false;
 
@@ -204,7 +255,7 @@ export const matchAnswer = (
   correctAnswer: unknown,
   options: MatchOptions = {}
 ): MatchResult => {
-  const { sourceSentence, mode = 'sentence', caseSensitive = false } = options;
+  const { sourceSentence, mode = 'sentence', caseSensitive = false, grammar = false } = options;
 
   const rawStudent = toText(studentAnswer).trim();
   const variants = splitAnswerVariants(correctAnswer);
@@ -252,12 +303,32 @@ export const matchAnswer = (
     }
   }
 
+  // 2b) Error correction: handing the source sentence back unchanged proves the student
+  // found no error, but the key (not a "no error" sentinel, handled above) says there is one.
+  if (sourceSentence) {
+    const normalizedSource = normalizeAnswerText(sourceSentence).toLowerCase();
+    if (normalizedSource && studentExpanded === expandContractions(normalizedSource)) {
+      return { verdict: 'wrong', reason: 'source-copy', acceptedAnswers: variants };
+    }
+  }
+
   // 3) Near match -> needs teacher review (yellow), never red.
+  // Grammar items: a pure regular-ending difference (walk/walks) is provably the wrong
+  // form, so it is not a near match, unless another variant is a real near match.
+  let endingVariant: string | undefined;
   for (const variant of variants) {
-    const key = normalizeAnswerText(variant, caseSensitive).toLowerCase();
-    if (isNearMatch(studentExpanded, expandContractions(key), mode)) {
+    const key = expandContractions(normalizeAnswerText(variant, caseSensitive).toLowerCase());
+    const near = isNearMatch(studentExpanded, key, mode);
+    if (grammar && differsOnlyByRegularEnding(studentExpanded, key)) {
+      endingVariant ??= variant;
+      continue;
+    }
+    if (near) {
       return { verdict: 'review', matchedVariant: variant, reason: 'near', acceptedAnswers: variants };
     }
+  }
+  if (endingVariant !== undefined) {
+    return { verdict: 'wrong', matchedVariant: endingVariant, reason: 'ending', acceptedAnswers: variants };
   }
 
   // 4) Error-correction item whose key is the source sentence itself ("no error" item):

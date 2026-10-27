@@ -107,6 +107,14 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Stage 1.3: owner/service-only read-time state vector RPC, canonical metrics, parity-tested decay, 1056 tests passed; production student reads and <15 ms latency unverified because external Supabase testing has no authorized session (spec: docs/operational/pillar-1-stage-13.md)
 - [x] Stage 1.4: zero-regression baseline — SQL contract tests for Stages 1.1-1.3 in `dslmSqlBaseline.test.ts` + cross-cutting TS/parity guards in `pillar1Baseline.test.ts` (spec: `docs/operational/pillar-1-stage-14.md`); production state-vector reads and latency still unverified (external Supabase)
 
+## AI Defensibility, Pillar 2
+
+- [x] Stage 2.1: pure `explainRecommendation` engine with six evidence kinds and 81 unit tests; full suite 1471 tests passed. No UI integration, network calls, database changes or worksheet engine edits; goal/note/diagnostic evidence requires explicit links, diagnostic scored counts are caller-computed from evaluated answers. Two pre-existing shared-function type errors corrected without behavior changes; protected file hashes unchanged.
+- [x] Stage 2.2: shared Why This Lesson disclosure in Prep, Learning plan and the applied worksheet preset; exact source and learner/teacher guards, evidence badges, loading/error/Retry/empty states. 1485 tests passed, browser fixtures verified all three surfaces, non-first selection, source text edits, learner switch, small-screen/dark/error/retry states with zero writes and page errors; protected engine and llms.txt hashes unchanged. Authenticated production end-to-end checks remain unavailable on external unmanaged Supabase; fixtures are not production-session verification. Spec: docs/ux/explainable-dslm-spec.md.
+- [x] Stage 2.3: competency radar in Insights — pure `competencyRadar.ts` zone classifier (critical_gap <50, retention_alert raw>=80 faded below 80, mastered >=80, in_progress), two-layer radar (stored vs estimated retention) and manual "Add to next lesson" prefill behind the demo guard; 15 unit tests.
+- [x] Stage 2.4: `pillar2Baseline.test.ts` (22 tests) guards engine purity, read-only evidence UI, demo protection, semantic tokens, honest-evidence contract and the worksheet-engine boundary. Full suite 1522 tests passed; protected engine and llms.txt unchanged.
+- [ ] Pillar 2 production verification: authenticated end-to-end pass on a real account remains unavailable on external unmanaged Supabase.
+
 ## SEO/GEO Consolidation, Step 2
 
 - [x] Merged 63 near-duplicate pages (containment 0.65-0.93) into 5 canonical targets: /edooqoo-vs-chatgpt.html, /chatgpt-alternative-for-english-tutors.html, /ai-tools-for-private-english-tutors.html, /edooqoo-vs-twee.html, /edooqoo-vs-busyteacher.html; retired URLs 301 via CONTENT_OVERRIDES + meta-refresh stubs, dropped from sitemap, internal links pruned (Resources, GlobalFooter, citation mesh)

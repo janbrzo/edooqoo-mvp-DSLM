@@ -12,6 +12,7 @@ import { ArrowDownRight, ArrowRight, ArrowUpRight, BarChart3, Loader2, Send } fr
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SkillsOverviewPanel } from '@/components/dslm/SkillsOverviewPanel';
+import { CompetencyRadarView } from '@/components/dslm/CompetencyRadarView';
 import { ProfileView } from '@/components/dslm/ProfileView';
 import { useSkillMetrics } from '@/hooks/useSkillMetrics';
 import { useStudentProfile } from '@/hooks/dslm/useStudentProfile';
@@ -52,7 +53,7 @@ export const InsightsView: React.FC<InsightsViewProps> = ({
   welcomeTest,
 }) => {
   const { guardAction } = useDemoGuard();
-  const { categories, isLoading: skillsLoading } = useSkillMetrics(studentId, teacherId, null);
+  const { skills, categories, isLoading: skillsLoading } = useSkillMetrics(studentId, teacherId, null);
   const { data: profile } = useStudentProfile({ studentId, teacherId });
   const { data: stats } = useBehavioralStats({ studentId, teacherId });
   const [exploreOpen, setExploreOpen] = useState(false);
@@ -149,6 +150,7 @@ export const InsightsView: React.FC<InsightsViewProps> = ({
             ))}
           </ul>
         )}
+        {!skillsLoading && summary.ranked.length > 0 && <CompetencyRadarView skills={skills} />}
       </PlanSection>
 
       <PlanSection ref={profileRef} id="insights-profile" title={`How ${firstName} learns`}>

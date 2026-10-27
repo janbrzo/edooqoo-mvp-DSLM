@@ -26,6 +26,7 @@ export interface PrepTabProps {
   isLessonLoading: boolean;
   suggestion: PrepSuggestion;
   rationale: string;
+  evidenceContent?: React.ReactNode;
   focusAreas: readonly string[];
   isSuggestionsLoading: boolean;
   onGenerate: () => void;
@@ -54,6 +55,7 @@ export const PrepTab: React.FC<PrepTabProps> = ({
   isLessonLoading,
   suggestion,
   rationale,
+  evidenceContent,
   focusAreas,
   isSuggestionsLoading,
   onGenerate,
@@ -80,6 +82,7 @@ export const PrepTab: React.FC<PrepTabProps> = ({
         isLessonLoading={isLessonLoading}
         suggestion={suggestion}
         rationale={rationale}
+        evidenceContent={evidenceContent}
         focusAreas={focusAreas}
         isSuggestionsLoading={isSuggestionsLoading}
         onGenerate={onGenerate}

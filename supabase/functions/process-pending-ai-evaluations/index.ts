@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
-import { isClosedType } from "../_shared/closedEvaluation.ts";
+import { isClosedType, selectClosedItemsForAi } from "../_shared/closedEvaluation.ts";
 import { buildClosedItemContext } from "../_shared/closedItemContext.ts";
 import { scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isOpenExerciseType, calculateExerciseMastery } from "../_shared/itemMastery.ts";
 import { DEFAULT_ENGLISH_LEVEL, resolveEnglishLevel } from "../_shared/englishLevel.ts";
@@ -341,7 +341,14 @@ serve(async (req) => {
         const closedItems: any[] = Array.isArray(context.closed_items) ? context.closed_items : [];
         const isClosedPending = closedItems.length > 0;
         if (isClosedPending) {
-          for (const ci of closedItems) {
+          // D9: automatic triggers send only items the model could raise; Mark done (teacher) asks for all explanations.
+          const sendItems = selectClosedItemsForAi(
+            pending.exercise_type,
+            closedItems.filter((ci) => ci && typeof ci.question_index === 'number'),
+            answers,
+            { onDemand: effectiveTriggerSource === 'mark_done' && !studentEmailFilter },
+          );
+          for (const ci of sendItems) {
             if (!ci || typeof ci.question_index !== 'number' || !ci.student_answer) continue;
             answersToVerify.push({
               exercise_index: pending.exercise_index,
@@ -403,7 +410,10 @@ serve(async (req) => {
           throw new Error(`Audio evaluation failed: ${audioCount} audio answers found but none could be transcribed or evaluated`);
         }
 
-        if (answersToVerify.length === 0) {
+        // Closed row whose items need no model call (all selection or key-correct): written below with no evaluations.
+        const closedNeedsNoAi = isClosedPending && answersToVerify.length === 0 &&
+          closedItems.some((ci) => ci && typeof ci.question_index === 'number' && ci.student_answer);
+        if (answersToVerify.length === 0 && !closedNeedsNoAi) {
           console.log(`[process-pending] No valid answers for ${pending.id}`);
           await supabase
             .from('pending_worksheet_ai_evaluations')
@@ -413,32 +423,35 @@ serve(async (req) => {
           continue;
         }
 
-        // Call verify-open-answers
-        const verifyResponse = await fetch(`${supabaseUrl}/functions/v1/verify-open-answers`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseServiceKey}`
-          },
-          body: JSON.stringify({
-            answers: answersToVerify,
-            english_level: await learnerLevel(supabase, pending.worksheet_id, pending.english_level),
-            context: isClosedPending
-              ? (context.title || `Exercise ${pending.exercise_index + 1}`)
-              : openExerciseContextString(openExercise, `Exercise ${pending.exercise_index + 1}`, { worksheetAudioTranscript })
-          })
-        });
+        // Call verify-open-answers (skipped when no closed item can change a score, D9)
+        let aiResult: any = { evaluations: [] };
+        if (!closedNeedsNoAi) {
+          const verifyResponse = await fetch(`${supabaseUrl}/functions/v1/verify-open-answers`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseServiceKey}`
+            },
+            body: JSON.stringify({
+              answers: answersToVerify,
+              english_level: await learnerLevel(supabase, pending.worksheet_id, pending.english_level),
+              context: isClosedPending
+                ? (context.title || `Exercise ${pending.exercise_index + 1}`)
+                : openExerciseContextString(openExercise, `Exercise ${pending.exercise_index + 1}`, { worksheetAudioTranscript })
+            })
+          });
 
-        if (!verifyResponse.ok) {
-          throw new Error(`AI verification failed: ${await verifyResponse.text()}`);
-        }
+          if (!verifyResponse.ok) {
+            throw new Error(`AI verification failed: ${await verifyResponse.text()}`);
+          }
 
-        const aiResult = await verifyResponse.json();
-        console.log(`[process-pending] AI returned ${aiResult.evaluations?.length || 0} evaluations`);
-        if (!Array.isArray(aiResult.evaluations) || aiResult.evaluations.length === 0) {
-          // Nothing evaluated: keep the stored answer row untouched (an empty write
-          // would wipe earlier evaluations) and leave this row failed for a retry.
-          throw new Error('AI returned no evaluations');
+          aiResult = await verifyResponse.json();
+          console.log(`[process-pending] AI returned ${aiResult.evaluations?.length || 0} evaluations`);
+          if (!Array.isArray(aiResult.evaluations) || aiResult.evaluations.length === 0) {
+            // Nothing evaluated: keep the stored answer row untouched (an empty write
+            // would wipe earlier evaluations) and leave this row failed for a retry.
+            throw new Error('AI returned no evaluations');
+          }
         }
         if (!isClosedPending && Number(aiResult.unevaluated_count) > 0) {
           // Partial result for an open exercise: writing it would replace the whole
