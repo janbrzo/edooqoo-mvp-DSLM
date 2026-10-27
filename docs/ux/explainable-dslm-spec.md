@@ -2,7 +2,7 @@
 
 ## Scope
 
-Stage 2.1 provides deterministic supporting evidence. Stage 2.2 surfaces it in the teacher's Prep next-lesson card, the Learning plan featured lesson and the applied worksheet preset. The competency radar and full Pillar 2 closure are not included.
+Stage 2.1 provides deterministic supporting evidence. Stage 2.2 surfaces it in the teacher's Prep next-lesson card, the Learning plan featured lesson and the applied worksheet preset. Stage 2.3 adds the competency radar to the Insights Skills section: a two-layer chart (stored mastery vs estimated retention) with four zones (critical gap, retention alert, mastered, in progress) and a manual "Add to next lesson" prefill for skills needing attention. Stage 2.4 locks the contracts with `pillar2Baseline.test.ts`.
 
 ## Evidence contract
 
