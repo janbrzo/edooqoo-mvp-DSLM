@@ -90,6 +90,10 @@ export function NextStepsPresetBanner({
     studentId: enabledStudentId,
     teacherId: enabledTeacherId,
   });
+  // Existing hooks retain their last rows while another learner is loading.
+  const scopedPhaseSteps = phaseSteps.filter(row => row.student_id === studentId && row.teacher_id === teacherId);
+  const scopedNextSteps = nextSteps.filter(row => row.student_id === studentId && row.teacher_id === teacherId);
+  const scopedPhases = phases.filter(row => row.student_id === studentId && row.teacher_id === teacherId);
   const signals = usePlanEvidenceMetrics(enabledStudentId, enabledTeacherId);
   const appliedSuggestion = lessonFields ? resolveAppliedEvidenceSuggestion({
     source: appliedEvidenceSource ?? null, rows: [...phaseSteps, ...nextSteps],
@@ -97,21 +101,21 @@ export function NextStepsPresetBanner({
   }) : null;
   const now = Date.now();
   const explain = (suggestion: typeof phaseSteps[number]) => explainRecommendation({
-    suggestion, now, metrics: signals.error ? [] : signals.rawMetrics, phases,
+    suggestion, now, metrics: signals.error ? [] : signals.rawMetrics, phases: scopedPhases,
   });
 
   // Same queue as the Prep card and Learning plan Up next (AGENTS.md: orderUpNext).
   const { sortedItems } = useMemo(() => {
     const phaseSeqById: Record<string, number> = {};
-    phases.forEach((p: any) => { phaseSeqById[p.id] = p.sequence_number; });
-    const items = orderUpNext({ phases, phaseSteps, nextSteps }).map((item) => ({
+    scopedPhases.forEach((p) => { phaseSeqById[p.id] = p.sequence_number; });
+    const items = orderUpNext({ phases: scopedPhases, phaseSteps: scopedPhaseSteps, nextSteps: scopedNextSteps }).map((item) => ({
       s: item.suggestion as any,
       displayIndex: item.displayIndex,
       phaseLabel: item.phaseLabel,
       phaseSeq: item.phaseId ? (phaseSeqById[item.phaseId] ?? null) : null,
     }));
     return { sortedItems: items };
-  }, [phaseSteps, nextSteps, phases]);
+  }, [phaseSteps, nextSteps, phases, studentId, teacherId]);
 
   // Sliding-window carousel state (3 visible at a time, advances by 1).
   const [windowStart, setWindowStart] = useState(0);
