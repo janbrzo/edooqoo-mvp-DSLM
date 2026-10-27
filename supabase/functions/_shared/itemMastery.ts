@@ -19,9 +19,10 @@ const textVerdict = (
   studentAnswer: unknown,
   correctAnswer: unknown,
   mode: 'word' | 'sentence',
-  sourceSentence?: string
+  sourceSentence?: string,
+  grammar = false
 ): boolean | null => {
-  const { verdict } = matchAnswer(studentAnswer, correctAnswer, { mode, sourceSentence });
+  const { verdict } = matchAnswer(studentAnswer, correctAnswer, { mode, sourceSentence, grammar });
   if (verdict === 'correct') return true;
   if (verdict === 'wrong') return false;
   return null; // 'review' / 'empty' => not scored
@@ -50,7 +51,7 @@ export const multiBlankMastery = (
       wrong++;
       continue;
     }
-    const verdict = textVerdict(answer, key, 'word');
+    const verdict = textVerdict(answer, key, 'word', undefined, true);
     if (verdict === true) correct++;
     else if (verdict === false) wrong++;
   }
@@ -258,7 +259,7 @@ export const calculateItemMastery = (
         const sentence = exerciseData.sentences[itemIndex];
         const correctAnswer = typeof sentence === 'string' ? null : (sentence.answer || sentence.correct || sentence.missing_word);
         if (correctAnswer && typeof studentAnswer === 'string') {
-          isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
+          isCorrect = textVerdict(studentAnswer, correctAnswer, 'word', undefined, exerciseType === 'fill-in-blanks');
         }
       }
     }
@@ -290,7 +291,7 @@ export const calculateItemMastery = (
       const word = exerciseData.words[itemIndex];
       const correctWord = typeof word === 'string' ? word : (word.word || word.complete || word.complete_word);
       if (correctWord && typeof studentAnswer === 'string') {
-        isCorrect = textVerdict(studentAnswer, correctWord, 'word');
+        isCorrect = textVerdict(studentAnswer, correctWord, 'word', undefined, true);
       }
     }
 
@@ -363,7 +364,7 @@ export const calculateItemMastery = (
         if (hasEmptyBlank || correctParts.length < blanksCount) return null;
         let allCorrectFlag = true;
         for (let b = 0; b < blanksCount; b++) {
-          if (textVerdict(blankAnswers[b], correctParts[b], 'word') !== true) {
+          if (textVerdict(blankAnswers[b], correctParts[b], 'word', undefined, true) !== true) {
             allCorrectFlag = false;
             break;
           }
@@ -373,7 +374,7 @@ export const calculateItemMastery = (
         // Single blank (backward compatible)
         const correctAnswer = sentence.answer || sentence.correct || sentence.missing_word;
         if (correctAnswer && typeof studentAnswer === 'string') {
-          isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
+          isCorrect = textVerdict(studentAnswer, correctAnswer, 'word', undefined, true);
         }
       }
     }

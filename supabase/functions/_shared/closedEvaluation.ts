@@ -25,6 +25,47 @@ export function chunkAnswers<T>(items: T[]): T[][] {
   return out;
 }
 
+/**
+ * Decision D9: the only way the model can change stored data for a closed item is
+ * `aiAlternativeMastery`, which raises a TYPED (non-selection) answer the key marks
+ * wrong or uncertain. Selection items, items the key already accepts and a single
+ * letter pick (a synonyms/antonyms choice, not typed text) can never be raised, so
+ * they are not sent. A missing verdict (old queue rows) is sent: nothing proves it is safe to skip.
+ * `rawStudentAnswer` is the stored answer (answers[q]), the value `aiAlternativeMastery` checks.
+ */
+export function shouldSendClosedItemToAi(args: {
+  exerciseType: string;
+  keyVerdict?: string | null;
+  rawStudentAnswer?: unknown;
+}): boolean {
+  const { exerciseType, keyVerdict, rawStudentAnswer } = args;
+  if (!isClosedExerciseType(exerciseType) || isSelectionType(exerciseType)) return false;
+  if (keyVerdict === 'correct') return false;
+  if (typeof rawStudentAnswer === 'string' && /^[A-Z]$/i.test(rawStudentAnswer.trim())) return false;
+  return true;
+}
+
+/**
+ * Closed items that go to the model. `onDemand` (teacher pressed Mark done) sends every
+ * resolvable item because the teacher asked for the explanations; automatic triggers
+ * (submit, 10 min timer, scheduled run) send only the items that can change a score.
+ */
+export function selectClosedItemsForAi<T extends { question_index: number; key_verdict?: string | null }>(
+  exerciseType: string,
+  items: readonly T[],
+  answers: Record<string | number, unknown> | null | undefined,
+  opts: { onDemand?: boolean } = {},
+): T[] {
+  if (opts.onDemand) return [...items];
+  return items.filter((it) =>
+    shouldSendClosedItemToAi({
+      exerciseType,
+      keyVerdict: it.key_verdict,
+      rawStudentAnswer: answers?.[it.question_index],
+    }),
+  );
+}
+
 const normalize = (s: string | undefined): string =>
   (s || "")
     .toLowerCase()

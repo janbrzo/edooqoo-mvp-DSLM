@@ -114,7 +114,7 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
           const blankAnswerOf = (b: number): string =>
             String(answersByKey[blankKey(b)] || (multiBlank && b === 0 && answersByKey[`${sIndex}_0`] === undefined ? answersByKey[sIndex] : '') || '');
           const blankVerdicts = Array.from({ length: Math.max(blanksCount, 1) }).map((_, b) =>
-            matchAnswer(blankAnswerOf(b), multiBlank ? (correctParts[b] ?? '') : (correctParts[0] ?? ''), { mode: 'word' }).verdict);
+            matchAnswer(blankAnswerOf(b), multiBlank ? (correctParts[b] ?? '') : (correctParts[0] ?? ''), { mode: 'word', grammar: true }).verdict);
           const studentAnswer = multiBlank
             ? Array.from({ length: blanksCount }).map((_, b) => blankAnswerOf(b)).join(' / ')
             : blankAnswerOf(0);
@@ -122,7 +122,7 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
           // Use normalized comparison to ignore punctuation and case
           const match: { verdict: MatchVerdict } = multiBlank
             ? { verdict: blankVerdicts.every((v) => v === 'correct') ? 'correct' : blankVerdicts.some((v) => v === 'wrong') ? 'wrong' : 'review' }
-            : matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+            : matchAnswer(studentAnswer, correctAnswer, { mode: 'word', grammar: true });
           const isCorrect = showCorrectAnswers && match.verdict === 'correct';
           const isReview = showCorrectAnswers && match.verdict === 'review';
           const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';

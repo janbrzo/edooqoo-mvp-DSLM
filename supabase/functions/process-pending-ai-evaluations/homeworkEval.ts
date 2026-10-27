@@ -10,6 +10,7 @@
  * ai_evaluation is still NULL, so a finished row is never overwritten.
  */
 import { buildClosedItemContext } from '../_shared/closedItemContext.ts';
+import { selectClosedItemsForAi } from '../_shared/closedEvaluation.ts';
 import {
   aiAlternativeMastery, applyAiAlternatives, averageScoredMastery, calculateExerciseMastery,
   calculateItemMastery, isClosedExerciseType, isOpenExerciseType, isSelectionType,
@@ -256,28 +257,34 @@ async function evaluateHomeworkRow(
     const missing = missingTranscriptions(audioAnswers, transcriptions);
     if (missing.length > 0) throw new Error(`Transcription missing for audio answer(s) ${missing.join(', ')}`);
   }
-  const toVerify = isClosed
+  const resolvable = isClosed
     ? buildClosedAnswersToVerify(row, exercise, answers)
     : buildOpenAnswersToVerify(row, exercise, answers, audioAnswers, transcriptions, meta.worksheetAudioTranscript);
-  if (toVerify.length === 0) {
+  // D9: of the closed items only typed ones the key marks wrong or uncertain can be raised by the model.
+  const toVerify = isClosed ? selectClosedItemsForAi(row.exercise_type, resolvable, answers) : resolvable;
+  if (resolvable.length === 0) {
     await supabase.rpc('mark_homework_answer_ai_not_evaluable', { p_id: row.id, p_note: 'no evaluable answers' });
     return 'skipped';
   }
 
-  const res = await fetch(`${supabaseUrl}/functions/v1/verify-open-answers`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` },
-    body: JSON.stringify({
-      answers: toVerify,
-      english_level: resolveEnglishLevel(meta.studentLevel),
-      context: isClosed
-        ? 'Homework submission - individual question evaluation'
-        : openExerciseContextString(exercise, `Exercise ${row.exercise_index + 1}`, { worksheetAudioTranscript: meta.worksheetAudioTranscript }),
-    }),
-  });
-  if (!res.ok) throw new Error(`AI verification failed: ${await res.text()}`);
-  const ai = await res.json();
-  if (!Array.isArray(ai.evaluations) || ai.evaluations.length === 0) throw new Error('AI returned no evaluations');
+  // Nothing the model could change: no call, the row is still written (events, mastery) as before.
+  let ai: any = { evaluations: [] };
+  if (toVerify.length > 0) {
+    const res = await fetch(`${supabaseUrl}/functions/v1/verify-open-answers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` },
+      body: JSON.stringify({
+        answers: toVerify,
+        english_level: resolveEnglishLevel(meta.studentLevel),
+        context: isClosed
+          ? 'Homework submission - individual question evaluation'
+          : openExerciseContextString(exercise, `Exercise ${row.exercise_index + 1}`, { worksheetAudioTranscript: meta.worksheetAudioTranscript }),
+      }),
+    });
+    if (!res.ok) throw new Error(`AI verification failed: ${await res.text()}`);
+    ai = await res.json();
+    if (!Array.isArray(ai.evaluations) || ai.evaluations.length === 0) throw new Error('AI returned no evaluations');
+  }
   // A partial result for an open exercise would replace the exercise's ratings with a subset.
   if (!isClosed && Number(ai.unevaluated_count) > 0) throw new Error(`AI left ${ai.unevaluated_count} item(s) unevaluated`);
 

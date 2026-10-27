@@ -73,7 +73,7 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
           const key = getBlankKey(i);
           const answer = studentAnswers[key] || '';
           const correct = correctAnswers[i] || correctAnswers[0] || '';
-          return matchAnswer(answer, correct, { mode: 'word' }).verdict;
+          return matchAnswer(answer, correct, { mode: 'word', grammar: true }).verdict;
         });
         const allBlanksCorrect = blanksCount > 0 && blankVerdicts.every((v) => v === 'correct');
         const sentenceVerdict: 'correct' | 'review' | 'wrong' | 'empty' = allBlanksCorrect
