@@ -456,3 +456,74 @@ export function renderMarkdown(results: RecomputeResult[], asOf: string, include
   }
   return lines.join('\n') + '\n';
 }
+
+/** Maximum items one backfill_profile_v2 call accepts (the SQL function rejects more). */
+export const MAX_PAYLOAD_ITEMS = 50;
+
+export interface PayloadItem {
+  profile_id: string;
+  welcome_test_id: string;
+  expected: { traits: unknown; learning_path: unknown };
+  after: {
+    traits: unknown;
+    learning_path: unknown;
+    divergences: unknown;
+    answer_behaviour: unknown;
+    signal_coverage: unknown;
+    trait_evidence: unknown;
+  };
+}
+
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Parses a comma separated list of 8 character id prefixes; throws on an empty list, a malformed or duplicated prefix. */
+export function parseOnly(value: string): string[] {
+  const list = value.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (list.length === 0) throw new Error('--only needs at least one 8 character id prefix');
+  for (const p of list) if (!/^[0-9a-f]{8}$/.test(p)) throw new Error(`--only: "${p}" is not an 8 character hex id prefix`);
+  if (new Set(list).size !== list.length) throw new Error('--only: duplicated id prefix');
+  return list;
+}
+
+/**
+ * Builds the reviewed payload of backfill_profile_v2 for the selected profiles
+ * (prefix of student_id). Throws, so the caller exits non-zero and writes
+ * nothing, when a selected id is missing, ambiguous or fails a safety gate:
+ * not in the missing-v2 tier, an answer that matches no option text, no stored
+ * answers, or no full profile id / welcome test id in the input.
+ */
+export function buildPayload(entries: ProfileEntry[], prefixes: readonly string[], now: Date | number = Date.UTC(2026, 9, 27)): PayloadItem[] {
+  if (prefixes.length > MAX_PAYLOAD_ITEMS) throw new Error(`at most ${MAX_PAYLOAD_ITEMS} profiles per payload`);
+  const items: PayloadItem[] = [];
+  const problems: string[] = [];
+  for (const prefix of prefixes) {
+    const hits = entries.filter((e) => String(e.profile.student_id ?? '').toLowerCase().startsWith(prefix));
+    if (hits.length === 0) { problems.push(`${prefix}: not found in the input`); continue; }
+    if (hits.length > 1) { problems.push(`${prefix}: ambiguous (${hits.length} profiles)`); continue; }
+    const entry = hits[0];
+    const r = recomputeProfile(entry, now);
+    if (r.tier !== 'missing_v2_columns') { problems.push(`${prefix}: tier ${r.tier}, only missing_v2_columns is written`); continue; }
+    if (r.unsafe) { problems.push(`${prefix}: unsafe (${r.unmatched.length ? `no option match ${r.unmatched.join(',')}` : 'no stored answers'})`); continue; }
+    const profileId = String(entry.profile.id ?? '');
+    const testId = String(entry.profile.welcome_test_id ?? '');
+    if (!UUID_RE.test(profileId) || !UUID_RE.test(testId)) { problems.push(`${prefix}: input lacks the full profile id or welcome_test_id`); continue; }
+    items.push({
+      profile_id: profileId,
+      welcome_test_id: testId,
+      expected: {
+        traits: asObject(entry.profile.traits) ?? null,
+        learning_path: asObject(entry.profile.learning_path) ?? null,
+      },
+      after: {
+        traits: r.after.traits,
+        learning_path: r.after.learning_path,
+        divergences: r.after.divergences,
+        answer_behaviour: r.after.answer_behaviour,
+        signal_coverage: r.after.signal_coverage,
+        trait_evidence: r.afterRaw.trait_evidence,
+      },
+    });
+  }
+  if (problems.length) throw new Error(`payload refused:\n  ${problems.join('\n  ')}`);
+  return items;
+}

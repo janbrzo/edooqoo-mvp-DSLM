@@ -32,6 +32,7 @@ const PIPELINE_FUNCTIONS = [
   'worksheet_answers_differ', 'keep_ai_alternative_ratings',
   'log_dslm_decision',
   'dslm_validation_report',
+  'backfill_profile_v2',
 ];
 
 const PIPELINE_TRIGGERS = [
@@ -418,5 +419,51 @@ describe('Iteration 10: validation loop v1 (additive)', () => {
 
   it('keeps execute rights for the 7 argument signature', () => {
     expect(replace).toMatch(/GRANT EXECUTE ON FUNCTION public\.save_mark_done_evaluation\(uuid, uuid, integer, text, text, jsonb, jsonb\) TO authenticated, service_role/);
+  });
+});
+
+describe('Profile v2 backfill function (D15, step G_profile_v2)', () => {
+  const body = readFileSync(join(MIGRATIONS, '20261028090000_backfill_profile_v2.sql'), 'utf8');
+
+  it('is service only: SECURITY DEFINER, pinned search_path, REVOKE then GRANT to service_role only', () => {
+    expect(body).toMatch(/CREATE OR REPLACE FUNCTION public\.backfill_profile_v2\(\s*p_run_id text,\s*p_items jsonb,\s*p_dry_run boolean DEFAULT true\s*\)/);
+    expect(body).toMatch(/SECURITY DEFINER/);
+    expect(body).toMatch(/SET search_path = public/);
+    expect(body).toMatch(/REVOKE ALL ON FUNCTION public\.backfill_profile_v2\(text, jsonb, boolean\) FROM PUBLIC, anon, authenticated;/);
+    expect(body).toMatch(/GRANT EXECUTE ON FUNCTION public\.backfill_profile_v2\(text, jsonb, boolean\) TO service_role;/);
+    expect(body).not.toMatch(/GRANT[^;]*(anon|authenticated|PUBLIC)/);
+    // inside a definer function current_user is the owner, so the caller is judged by session_user and the JWT role
+    expect(body).toMatch(/auth\.role\(\), ''\) = 'service_role'/);
+    expect(body).toMatch(/session_user <> 'authenticator'/);
+    expect(body.split('\n').filter((l) => !/^\s*--/.test(l)).join('\n')).not.toMatch(/current_user/);
+  });
+
+  it('has no destructive words anywhere and no apostrophes in comments', () => {
+    expect(body).not.toMatch(/\b(DROP|DELETE|TRUNCATE)\b/i);
+    for (const line of body.split('\n')) {
+      if (/^\s*--/.test(line)) expect(line).not.toContain("'");
+    }
+    expect(body).not.toContain('\u2014');
+  });
+
+  it('rejects more than 50 items and records every change in dslm_backfill_audit before the UPDATE', () => {
+    expect(body).toMatch(/c_max_items CONSTANT integer := 50/);
+    expect(body).toMatch(/jsonb_array_length\(p_items\) > c_max_items/);
+    expect(body).toMatch(/c_step CONSTANT text := 'G_profile_v2'/);
+    const insert = body.indexOf('INSERT INTO public.dslm_backfill_audit');
+    const update = body.indexOf('UPDATE public.student_learning_profiles');
+    expect(insert).toBeGreaterThan(0);
+    expect(update).toBeGreaterThan(insert);
+    expect(body.match(/UPDATE public\.student_learning_profiles/g)).toHaveLength(1);
+    expect(body).toMatch(/IF NOT p_dry_run THEN/);
+  });
+
+  it('only touches the v2 columns and the three raw_answers keys, guarded by the expected state', () => {
+    const set = body.slice(body.indexOf('UPDATE public.student_learning_profiles'), body.indexOf('WHERE id = v_row.id'));
+    const cols = [...set.matchAll(/^\s{10}([a-z_]+) = /gm)].map((m) => m[1]);
+    expect(cols).toEqual(['traits', 'learning_path', 'divergences', 'answer_behaviour', 'signal_coverage', 'raw_answers']);
+    expect(body).toMatch(/'trait_evidence', v_after -> 'trait_evidence', 'learning_path', v_after -> 'learning_path'/);
+    expect(body).toMatch(/IS DISTINCT FROM nullif\(v_expected -> 'traits', 'null'::jsonb\)/);
+    expect(body).toMatch(/v_row\.welcome_test_id IS DISTINCT FROM v_test_id/);
   });
 });
