@@ -58,4 +58,11 @@ describe('server closed ratings match the client buildItemEvaluations', () => {
     expect(src).toContain('buildClosedItemEvaluations(');
     expect(src).not.toContain('storedItemEvaluations:');
   });
+
+  it('the scheduled run also re-rates unsubmitted closed drafts from the key', () => {
+    const src = readFileSync('supabase/functions/process-pending-ai-evaluations/homeworkEval.ts', 'utf8');
+    expect(src).toContain('finalizeClosedRows(supabase, (scan.data || []) as SelectionRow[], submitted)');
+    expect(src).toContain(".eq('is_submitted', false)");
+    expect(src).toContain("'10min_inactivity'");
+  });
 });
