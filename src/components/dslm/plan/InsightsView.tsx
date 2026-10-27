@@ -150,6 +150,7 @@ export const InsightsView: React.FC<InsightsViewProps> = ({
             ))}
           </ul>
         )}
+        {!skillsLoading && summary.ranked.length > 0 && <CompetencyRadarView skills={skills} />}
       </PlanSection>
 
       <PlanSection ref={profileRef} id="insights-profile" title={`How ${firstName} learns`}>
