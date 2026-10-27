@@ -694,7 +694,6 @@
         ],
         "rpcs": [
           "get_homework_by_share_token",
-          "get_homework_status_by_share_token",
           "mark_homework_completed"
         ],
         "edgeFunctions": [],
@@ -4397,7 +4396,6 @@
         ],
         "rpcs": [
           "get_homework_by_share_token",
-          "get_homework_status_by_share_token",
           "mark_homework_completed"
         ],
         "edgeFunctions": [],
@@ -4436,6 +4434,7 @@
         "Auto-submitting in",
         "Check the correct answers above. Discuss any questions with your teacher.",
         "Close",
+        "Closed by your teacher",
         "Continue Working",
         "Created:",
         "Deadline:",
@@ -4448,8 +4447,7 @@
         "Lesson image",
         "Lesson image enlarged",
         "My Hub",
-        "Not all exercises completed",
-        "Open Student Hub"
+        "Not all exercises completed"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -23723,7 +23721,7 @@
         {
           "value": "notifyStudent",
           "setter": "setNotifyStudent",
-          "initial": "true"
+          "initial": "false"
         },
         {
           "value": "emailSentTo",
@@ -24008,7 +24006,6 @@
       "navigateTargets": [],
       "dataDependencies": {
         "tables": [
-          "homework_assignments",
           "homework_notifications"
         ],
         "rpcs": [],
@@ -26840,6 +26837,7 @@
         "handleOpenEmailDialog",
         "handleOpenHomework",
         "handleRenameHomework",
+        "handleReopen",
         "handleUpdateDeadline"
       ],
       "navigateTargets": [],
@@ -26885,6 +26883,7 @@
           "handleOpenEmailDialog",
           "handleOpenHomework",
           "handleRenameHomework",
+          "handleReopen",
           "handleUpdateDeadline"
         ],
         "navigationTargets": []
@@ -41549,7 +41548,6 @@
         "navigateTargets": [],
         "dataDependencies": {
           "tables": [
-            "homework_assignments",
             "homework_notifications"
           ],
           "rpcs": [],
@@ -41661,6 +41659,11 @@
           {
             "value": "isWaitingForAiEval",
             "setter": "setIsWaitingForAiEval",
+            "initial": "false"
+          },
+          {
+            "value": "isLocked",
+            "setter": "setIsLocked",
             "initial": "false"
           },
           {
@@ -49293,16 +49296,6 @@
         "payloadExpressions": []
       },
       {
-        "name": "get_homework_status_by_share_token",
-        "callsites": [
-          "src/pages/HomeworkPage.tsx"
-        ],
-        "payloadFields": [
-          "p_share_token"
-        ],
-        "payloadExpressions": []
-      },
-      {
         "name": "get_learner_mastered_counts",
         "callsites": [
           "src/pages/StudentPortal.tsx"
@@ -52280,14 +52273,12 @@
           "clientFiles": [
             "src/components/dashboard/HomeworkOverviewWidget.tsx",
             "src/components/homework/CreateHomeworkModal.tsx",
-            "src/components/homework/HomeworkNotificationBadge.tsx",
             "src/components/homework/SendHomeworkEmailDialog.tsx",
             "src/components/student-homework/StudentHomeworkTab.tsx",
             "src/hooks/dslm/useBehavioralStats.tsx",
             "src/hooks/useActiveHomeworkCount.ts",
             "src/hooks/useAllWorksheetHomework.tsx",
             "src/hooks/useDashboardAttention.ts",
-            "src/hooks/useHomeworkNotifications.tsx",
             "src/hooks/useOnboardingProgress.tsx",
             "src/hooks/useStudentAttentionDots.tsx",
             "src/hooks/useStudentTimelineSources.ts",
@@ -58677,6 +58668,10 @@
         "migration": "supabase/migrations/20261017100000_welcome_test_server_authority.sql"
       },
       {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261027100100_compute_skill_metric_source_weight.sql"
+      },
+      {
         "name": "consume_newsletter_rate_limit",
         "migration": "supabase/migrations/20260615143000_newsletter_double_opt_in.sql"
       },
@@ -58711,6 +58706,10 @@
       {
         "name": "dslm_effective_mastery",
         "migration": "supabase/migrations/20261017135037_f8cf555a-7b86-47a5-a998-915463827528.sql"
+      },
+      {
+        "name": "dslm_event_weight",
+        "migration": "supabase/migrations/20261027100000_homework_evidence_draft_flag.sql"
       },
       {
         "name": "dslm_validation_report",
@@ -58763,6 +58762,10 @@
       {
         "name": "get_homework_owner_ids",
         "migration": "supabase/migrations/20260728202525_74d9d02e-d674-4a75-955e-7eba54b61291.sql"
+      },
+      {
+        "name": "get_homework_state_by_share_token",
+        "migration": "supabase/migrations/20261027090000_homework_p1_lifecycle.sql"
       },
       {
         "name": "get_homework_status_by_share_token",
@@ -58961,6 +58964,10 @@
         "migration": "supabase/migrations/20261023090000_baseline_homework_prod_only_functions.sql"
       },
       {
+        "name": "mark_homework_completed_internal",
+        "migration": "supabase/migrations/20261027090000_homework_p1_lifecycle.sql"
+      },
+      {
         "name": "mark_homework_completed",
         "migration": "supabase/migrations/20261016100010_w0_b_mark_homework_completed.sql"
       },
@@ -59033,6 +59040,10 @@
         "migration": "supabase/migrations/20261015090000_compute_skill_metric_v3.sql"
       },
       {
+        "name": "reopen_homework",
+        "migration": "supabase/migrations/20261027090000_homework_p1_lifecycle.sql"
+      },
+      {
         "name": "revoke_mcp_token",
         "migration": "supabase/migrations/20260725124453_86489a73-813a-457d-aff2-4f7037b4d6c5.sql"
       },
@@ -59067,6 +59078,10 @@
       {
         "name": "save_homework_answer",
         "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
+        "name": "save_homework_answer",
+        "migration": "supabase/migrations/20261027090000_homework_p1_lifecycle.sql"
       },
       {
         "name": "save_mark_done_evaluation",
@@ -59147,6 +59162,22 @@
       {
         "name": "submit_homework_answers",
         "migration": "supabase/migrations/20261023090100_homework_p0_server_authority.sql"
+      },
+      {
+        "name": "submit_homework_answers",
+        "migration": "supabase/migrations/20261027090000_homework_p1_lifecycle.sql"
+      },
+      {
+        "name": "submit_homework_answers",
+        "migration": "supabase/migrations/20261027100000_homework_evidence_draft_flag.sql"
+      },
+      {
+        "name": "supersede_homework_events_on_homework_delete",
+        "migration": "supabase/migrations/20261027110000_homework_events_on_delete.sql"
+      },
+      {
+        "name": "supersede_homework_events",
+        "migration": "supabase/migrations/20261027110000_homework_events_on_delete.sql"
       },
       {
         "name": "supersede_previous_welcome_test_events",

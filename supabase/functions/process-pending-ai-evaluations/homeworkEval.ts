@@ -10,6 +10,7 @@
  * ai_evaluation is still NULL, so a finished row is never overwritten.
  */
 import { buildClosedItemContext } from '../_shared/closedItemContext.ts';
+import { buildClosedItemEvaluations } from '../_shared/closedRatings.ts';
 import {
   aiAlternativeMastery, applyAiAlternatives, averageScoredMastery, calculateExerciseMastery,
   calculateItemMastery, isClosedExerciseType, isOpenExerciseType, isSelectionType,
@@ -110,16 +111,19 @@ export interface HomeworkWrite {
   mastery: number | null;
 }
 
-/** Ratings and mastery of one evaluated homework exercise, exactly as the client computes them. */
+/**
+ * Ratings and mastery of one evaluated homework exercise, exactly as the client computes them.
+ * The ratings of a closed exercise are rebuilt here from the answers and the homework's exercise
+ * snapshot; the browser's `storedItemEvaluations` are never the source of a closed rating.
+ */
 export function computeHomeworkWrite(params: {
   exerciseType: string;
   exercise: any;
   answers: Record<string, unknown>;
-  storedItemEvaluations: any[] | null;
   evaluations: any[];
   transcribed: (q: number) => boolean;
 }): HomeworkWrite {
-  const { exerciseType, exercise, answers, storedItemEvaluations, evaluations, transcribed } = params;
+  const { exerciseType, exercise, answers, evaluations, transcribed } = params;
   const aiEvaluation = buildQuestionEvaluations({ evaluations, answers, hasAudio: transcribed });
 
   if (isClosedExerciseType(exerciseType)) {
@@ -131,9 +135,8 @@ export function computeHomeworkWrite(params: {
       if (up !== null) raised[qi] = up;
     }
     const hasRaised = Object.keys(raised).length > 0;
-    const items = hasRaised && Array.isArray(storedItemEvaluations) && storedItemEvaluations.length > 0
-      ? applyAiAlternatives(storedItemEvaluations, raised).items
-      : null;
+    const base = buildClosedItemEvaluations(exerciseType, exercise, answers as any);
+    const items = base === null ? null : hasRaised ? applyAiAlternatives(base, raised).items : base;
     return {
       ai_evaluation: aiEvaluation,
       item_evaluations: items,
@@ -285,7 +288,6 @@ async function evaluateHomeworkRow(
     exerciseType: row.exercise_type,
     exercise,
     answers,
-    storedItemEvaluations: row.item_evaluations,
     evaluations: ai.evaluations,
     transcribed: (q) => !!transcriptions[q],
   });
@@ -334,6 +336,52 @@ async function evaluateRows(
   return result;
 }
 
+/** Selection types the AI never reads: their ratings come from the key alone. */
+const SELECTION_TYPE_FILTER = ['multiple-choice', 'true-false', 'matching', 'categorize', 'odd-one-out']
+  .map((p) => `exercise_type.like.${p}%`).join(',');
+
+type SelectionRow = Pick<HomeworkAnswerRow, 'id' | 'homework_id' | 'exercise_index' | 'exercise_type' | 'answers' | 'last_saved_at'>;
+
+/**
+ * Submitted selection rows (multiple choice, true/false, matching, ...) are graded here from the
+ * answer key and the homework snapshot, replacing the ratings the browser sent. `eval_trigger`
+ * 'submit_homework' marks a row as finalised (a student save resets it to NULL); the UPDATE only
+ * applies while the answers are the ones graded.
+ */
+async function finalizeSelectionRows(supabase: any, rows: SelectionRow[]): Promise<RunResult> {
+  const result: RunResult = { processed: 0, failed: 0, skipped: 0 };
+  const metaCache = new Map<string, Promise<HomeworkMeta | null>>();
+  for (const row of rows) {
+    try {
+      if (!metaCache.has(row.homework_id)) metaCache.set(row.homework_id, loadHomeworkMeta(supabase, row.homework_id));
+      const exercise = (await metaCache.get(row.homework_id))?.exercises?.[row.exercise_index];
+      const answers = (row.answers && typeof row.answers === 'object' ? row.answers : {}) as Record<string, unknown>;
+      if (!exercise || !isSelectionType(row.exercise_type) || Object.keys(answers).length === 0) { result.skipped++; continue; }
+      const items = buildClosedItemEvaluations(row.exercise_type, exercise, answers as any);
+      const mastery = calculateExerciseMastery(row.exercise_type, exercise, answers as any);
+      const { data: written, error } = await supabase
+        .from('homework_student_answers')
+        .update({
+          eval_trigger: 'submit_homework',
+          ...(items ? { item_evaluations: items } : {}),
+          ...(mastery !== null ? { mastery } : {}),
+        })
+        .eq('id', row.id)
+        .eq('is_submitted', true)
+        .eq('last_saved_at', row.last_saved_at)
+        .select('id');
+      if (error) throw error;
+      result[Array.isArray(written) && written.length > 0 ? 'processed' : 'skipped']++;
+    } catch (e) {
+      result.failed++;
+      console.error(`[homework-closed] ${row.id} failed:`, (e as Error).message);
+    }
+  }
+  return result;
+}
+
+const SELECTION_COLUMNS = 'id, homework_id, exercise_index, exercise_type, answers, last_saved_at';
+
 /** Scheduled run: submitted answers whose evaluation never arrived. */
 export async function processHomeworkAiEvaluations(
   supabase: any, supabaseUrl: string, serviceKey: string, limit: number,
@@ -343,7 +391,24 @@ export async function processHomeworkAiEvaluations(
     console.warn('[homework-ai] scan unavailable:', error.message);
     return { processed: 0, failed: 0, skipped: 0 };
   }
-  return evaluateRows(supabase, supabaseUrl, serviceKey, rows || [], 'homework-ai');
+  const ai = await evaluateRows(supabase, supabaseUrl, serviceKey, rows || [], 'homework-ai');
+  // Selection rows whose submit-time grading did not run (closed tab, function error).
+  const { data: pending, error: pendingError } = await supabase
+    .from('homework_student_answers')
+    .select(SELECTION_COLUMNS)
+    .eq('is_submitted', true)
+    .is('eval_trigger', null)
+    .or(SELECTION_TYPE_FILTER)
+    .lte('submitted_at', new Date(Date.now() - 3 * 60 * 1000).toISOString())
+    .gte('submitted_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
+    .order('submitted_at')
+    .limit(limit);
+  if (pendingError) {
+    console.warn('[homework-closed] scan unavailable:', pendingError.message);
+    return ai;
+  }
+  const closed = await finalizeSelectionRows(supabase, (pending || []) as SelectionRow[]);
+  return { processed: ai.processed + closed.processed, failed: ai.failed + closed.failed, skipped: ai.skipped + closed.skipped };
 }
 
 /**
@@ -367,5 +432,8 @@ export async function processSubmittedHomework(
   const due = ((rows || []) as HomeworkAnswerRow[]).filter(
     (r) => isHomeworkAiType(r.exercise_type) && (hasContent(r.answers) || hasContent(r.audio_answers)),
   );
-  return evaluateRows(supabase, supabaseUrl, serviceKey, due, 'homework-submit');
+  const ai = await evaluateRows(supabase, supabaseUrl, serviceKey, due, 'homework-submit');
+  const selection = ((rows || []) as HomeworkAnswerRow[]).filter((r) => isSelectionType(r.exercise_type));
+  const closed = await finalizeSelectionRows(supabase, selection);
+  return { processed: ai.processed + closed.processed, failed: ai.failed + closed.failed, skipped: ai.skipped + closed.skipped };
 }
