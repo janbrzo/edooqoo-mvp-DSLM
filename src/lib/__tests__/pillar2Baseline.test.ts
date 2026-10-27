@@ -15,6 +15,12 @@ import { join } from 'node:path';
 
 const read = (rel: string) => readFileSync(join(__dirname, '../..', rel), 'utf8');
 
+/** Code without comments: intent documented in comments must not trip guards. */
+const codeOnly = (rel: string) =>
+  read(rel)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
 const PURE_MODULES = [
   'lib/dslm/recommendationExplainability.ts',
   'lib/dslm/recommendationEvidenceView.ts',
@@ -63,7 +69,7 @@ describe('Evidence UI is read-only (Stages 2.2 and 2.3)', () => {
 
   it('CompetencyRadarView writes only the approved prefill sessionStorage keys', () => {
     const body = read('components/dslm/CompetencyRadarView.tsx');
-    const writes = [...body.matchAll(/sessionStorage\.(setItem|removeItem)\('([^']+)'/g)].map((m) => m[2]);
+    const writes = [...body.matchAll(/sessionStorage\.(setItem|removeItem)\(\s*'([^']+)'/g)].map((m) => m[2]);
     expect([...new Set(writes)].sort()).toEqual(['forceNewWorksheet', 'prefillSuggestionId', 'prefillWorksheet']);
     // Manual prefill only: it must never arm the auto-generation bootstrap.
     expect(body).not.toMatch(/autoGenerateWorksheet/);
@@ -114,12 +120,12 @@ describe('Honest-evidence contract (Stage 2.1)', () => {
     expect(body).toMatch(/linkedNoteIds/);
     expect(body).toMatch(/linkedDiagnosticTestId/);
     // Provenance is never inferred from generated prose.
-    expect(body).not.toMatch(/rationale/i);
+    expect(codeOnly('lib/dslm/recommendationExplainability.ts')).not.toMatch(/rationale/i);
   });
 
   it('no percentage match or confidence score is computed for display', () => {
     for (const rel of EVIDENCE_UI) {
-      expect(read(rel)).not.toMatch(/confidence/i);
+      expect(codeOnly(rel)).not.toMatch(/confidence/i);
     }
   });
 });
