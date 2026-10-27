@@ -17,13 +17,13 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 399,
+    "componentModules": 402,
     "hookModules": 99,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 80,
-    "typedTables": 66,
-    "typedRpcs": 123,
+    "typedTables": 70,
+    "typedRpcs": 125,
     "migrationIndexes": 26
   },
   "routes": [
@@ -12295,6 +12295,16 @@
               "name": "onApplyPreset",
               "type": "(preset: PresetPayload) => void",
               "optional": false
+            },
+            {
+              "name": "appliedEvidenceSource",
+              "type": "AppliedEvidenceSource | null",
+              "optional": true
+            },
+            {
+              "name": "lessonFields",
+              "type": "AppliedLessonFields",
+              "optional": true
             }
           ]
         }
@@ -12323,6 +12333,7 @@
         "useFutureTimeline",
         "useMemo",
         "useNavigate",
+        "usePlanEvidenceMetrics",
         "useState",
         "useSuggestion"
       ],
@@ -12345,8 +12356,8 @@
         "Open student context",
         "Previous suggestion",
         "Step #",
+        "Suggested rationale:",
         "View plan",
-        "Why:",
         "yet."
       ],
       "userFacingBehavior": {
@@ -12570,6 +12581,11 @@
           "initial": "() => (initialAutoIntentRef.current?.studentId as string) || preSelectedStudent?.id || \"no-student\""
         },
         {
+          "value": "appliedEvidenceSource",
+          "setter": "setAppliedEvidenceSource",
+          "initial": "() => { try { const suggestionId = sessionStorage.getItem('prefillSuggestionId'); return suggestionId ? { suggestionId, studentId: initialAutoIntentRef.current?.studentId || preSelectedStudent?.id || 'no-student' } : null; } catch { return null; } }"
+        },
+        {
           "value": "selectedExercises",
           "setter": "setSelectedExercises",
           "initial": "() => { // v6.9.41: when an auto-generate intent exists, prefer the DSLM exercises // saved in sessionStorage so the readiness gate sees them on first render. if (initialAutoIntentRef.current) { const exFromStorage = readPrefillField<string[]>('prefillExercises', []); if (Array.isArray(exFromStorage) && exFromStorage.length > 0) return exFromStorage; } return getInitialExercises(); }"
@@ -12685,6 +12701,12 @@
           "storage": "sessionStorage",
           "operation": "getItem",
           "key": "autoGenerateWorksheetRequest",
+          "file": "src/components/WorksheetForm/index.tsx"
+        },
+        {
+          "storage": "sessionStorage",
+          "operation": "getItem",
+          "key": "prefillSuggestionId",
           "file": "src/components/WorksheetForm/index.tsx"
         },
         {
@@ -17309,6 +17331,75 @@
       }
     },
     {
+      "path": "src/components/dslm/CompetencyRadarView.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Competency Radar View behavior in the dslm domain.",
+      "exports": [
+        "CompetencyRadarView"
+      ],
+      "props": [
+        {
+          "name": "CompetencyRadarViewProps",
+          "fields": [
+            {
+              "name": "skills",
+              "type": "readonly SkillMetric[]",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [
+        "useDemoGuard",
+        "useMemo",
+        "useNavigate"
+      ],
+      "actions": [],
+      "navigateTargets": [
+        "/"
+      ],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [
+        {
+          "storage": "sessionStorage",
+          "operation": "setItem",
+          "key": "prefillWorksheet",
+          "file": "src/components/dslm/CompetencyRadarView.tsx"
+        },
+        {
+          "storage": "sessionStorage",
+          "operation": "removeItem",
+          "key": "prefillSuggestionId",
+          "file": "src/components/dslm/CompetencyRadarView.tsx"
+        },
+        {
+          "storage": "sessionStorage",
+          "operation": "setItem",
+          "key": "forceNewWorksheet",
+          "file": "src/components/dslm/CompetencyRadarView.tsx"
+        }
+      ],
+      "userFacingText": [
+        "Add to next lesson",
+        "Competency radar",
+        "No critical gaps or fading strengths right now.",
+        "Skills needing attention",
+        "· retention"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": [
+          "/"
+        ]
+      }
+    },
+    {
       "path": "src/components/dslm/ConfidenceBadge.tsx",
       "domain": "dslm",
       "purpose": "Implements Confidence Badge behavior in the dslm domain.",
@@ -17523,6 +17614,65 @@
         "actionHandlers": [
           "handleConfirm"
         ],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/ConnectedWhyThisLesson.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Connected Why This Lesson behavior in the dslm domain.",
+      "exports": [
+        "ConnectedWhyThisLesson"
+      ],
+      "props": [
+        {
+          "name": "ConnectedWhyThisLessonProps",
+          "fields": [
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "teacherId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "suggestion",
+              "type": "ExplainableSuggestion",
+              "optional": false
+            },
+            {
+              "name": "phases",
+              "type": "readonly ExplainabilityPhase[]",
+              "optional": true
+            },
+            {
+              "name": "rationale",
+              "type": "string | null",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [
+        "useDemoContext",
+        "usePlanEvidenceMetrics"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
+      "userFacingBehavior": {
+        "actionHandlers": [],
         "navigationTargets": []
       }
     },
@@ -19176,6 +19326,78 @@
       }
     },
     {
+      "path": "src/components/dslm/WhyThisLessonBanner.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Evidence Badge behavior in the dslm domain.",
+      "exports": [
+        "EvidenceBadge",
+        "WhyThisLessonBanner"
+      ],
+      "props": [
+        {
+          "name": "WhyThisLessonBannerProps",
+          "fields": [
+            {
+              "name": "explanation",
+              "type": "RecommendationExplanation",
+              "optional": false
+            },
+            {
+              "name": "loading",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "error",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "onRetry",
+              "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "rationale",
+              "type": "string | null",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "open",
+          "setter": "setOpen",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useId",
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Loading lesson evidence",
+        "Retry",
+        "Skill evidence is unavailable.",
+        "Suggested rationale",
+        "Why This Lesson?"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/dslm/__tests__/ProfileSignalsV2.test.tsx",
       "domain": "dslm",
       "purpose": "Implements Profile Signals V2 behavior in the dslm domain.",
@@ -20797,6 +21019,16 @@
               "optional": false
             },
             {
+              "name": "teacherId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "phases",
+              "type": "readonly ExplainabilityPhase[]",
+              "optional": false
+            },
+            {
               "name": "items",
               "type": "readonly UpNextItem<PlanSuggestion>[]",
               "optional": false
@@ -20887,8 +21119,7 @@
         "Next lesson",
         "Only the most recent lesson can be restored to the queue.",
         "Taught lessons",
-        "Up next",
-        "Why:"
+        "Up next"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -30426,6 +30657,11 @@
               "optional": false
             },
             {
+              "name": "evidenceContent",
+              "type": "React.ReactNode",
+              "optional": true
+            },
+            {
               "name": "focusAreas",
               "type": "readonly string[]",
               "optional": false
@@ -30520,6 +30756,11 @@
               "name": "rationale",
               "type": "string",
               "optional": false
+            },
+            {
+              "name": "evidenceContent",
+              "type": "React.ReactNode",
+              "optional": true
             },
             {
               "name": "focusAreas",
@@ -39738,6 +39979,7 @@
         "props": [],
         "state": [],
         "hooks": [
+          "useMemo",
           "useQuery"
         ],
         "actions": [],
@@ -45078,6 +45320,7 @@
           "setItem"
         ],
         "files": [
+          "src/components/dslm/CompetencyRadarView.tsx",
           "src/components/worksheet/WorksheetHeader.tsx",
           "src/hooks/useWorksheetState.tsx",
           "src/lib/worksheet/autoGenerateBootstrap.ts",
@@ -45184,6 +45427,8 @@
           "setItem"
         ],
         "files": [
+          "src/components/WorksheetForm/index.tsx",
+          "src/components/dslm/CompetencyRadarView.tsx",
           "src/hooks/useWorksheetGeneration.tsx",
           "src/lib/worksheet/autoGenerateBootstrap.ts",
           "src/pages/StudentPage.tsx"
@@ -45199,6 +45444,7 @@
         ],
         "files": [
           "src/components/WorksheetForm/index.tsx",
+          "src/components/dslm/CompetencyRadarView.tsx",
           "src/hooks/useWorksheetFormPersistence.ts",
           "src/lib/worksheet/autoGenerateBootstrap.ts",
           "src/pages/StudentPage.tsx"
@@ -49695,6 +49941,31 @@
     "source": "src/integrations/supabase/types.ts",
     "tables": [
       {
+        "name": "_mig_parts",
+        "fields": [
+          {
+            "name": "chunk",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "i",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "mig",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
         "name": "admin_activity_log",
         "fields": [
           {
@@ -51288,6 +51559,56 @@
         }
       },
       {
+        "name": "dslm_decision_log",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "decision_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "param_version",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "payload",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "source_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
         "name": "dslm_event_errors",
         "fields": [
           {
@@ -51313,6 +51634,46 @@
           {
             "name": "source",
             "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
+        "name": "dslm_interpretation_params",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "description",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "value",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "version",
+            "type": "number",
             "optional": false
           }
         ],
@@ -52973,6 +53334,11 @@
             "optional": false
           },
           {
+            "name": "param_version",
+            "type": "number",
+            "optional": false
+          },
+          {
             "name": "proposed_pacing",
             "type": "number",
             "optional": false
@@ -53114,6 +53480,68 @@
           "edgeFunctions": [
             "process-pending-ai-evaluations"
           ]
+        }
+      },
+      {
+        "name": "phase_advance_proposals",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "decided_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "decided_by",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "evidence",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "next_phase_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "phase_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [
+            "src/hooks/dslm/usePhaseAdvanceProposals.tsx"
+          ],
+          "edgeFunctions": []
         }
       },
       {
@@ -54328,6 +54756,11 @@
           {
             "name": "micro_skill",
             "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "param_version",
+            "type": "number",
             "optional": false
           },
           {
@@ -56405,6 +56838,11 @@
         "returns": "number"
       },
       {
+        "name": "dslm_validation_report",
+        "args": [],
+        "returns": "Json"
+      },
+      {
         "name": "extract_micro_skill",
         "args": [
           {
@@ -57171,6 +57609,32 @@
         "returns": "{ exercise_index: number exercise_type: string student_email: string worksheet_id: string }[]"
       },
       {
+        "name": "log_dslm_decision",
+        "args": [
+          {
+            "name": "p_decision_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_payload",
+            "type": "Json",
+            "optional": true
+          },
+          {
+            "name": "p_source_id",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_student_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
+      },
+      {
         "name": "log_homework_submitted_event",
         "args": [
           {
@@ -57828,6 +58292,11 @@
             "name": "p_exercise_title",
             "type": "string",
             "optional": false
+          },
+          {
+            "name": "p_prior_verdict",
+            "type": "Json",
+            "optional": true
           },
           {
             "name": "p_ratings",
