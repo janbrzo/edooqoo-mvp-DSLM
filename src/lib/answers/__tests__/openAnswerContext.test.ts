@@ -78,7 +78,7 @@ describe('homework server evaluation', () => {
   });
   it('scores open exercises with scoreToMastery and the average of scored items', () => {
     const w = computeHomeworkWrite({
-      exerciseType: 'reading', exercise: reading, answers: { 0: 'a', 1: 'b' }, storedItemEvaluations: null,
+      exerciseType: 'reading', exercise: reading, answers: { 0: 'a', 1: 'b' },
       evaluations: [{ question_index: 0, quality_score: 0.6, is_acceptable: false, feedback: 'f' }, { question_index: 1, quality_score: 0 }],
       transcribed: () => false,
     });
@@ -103,21 +103,22 @@ describe('homework server evaluation', () => {
     };
     const w = computeHomeworkWrite({
       exerciseType: 'fill-in-blanks', exercise, answers: { 0: 'manager' },
-      storedItemEvaluations: [{ question_index: 0, name: 'x.y', mastery: 0, hasValue: true }],
       evaluations: [{ question_index: 0, quality_score: 0.9, is_acceptable: true, feedback: 'ok' }],
       transcribed: () => false,
     });
     expect(w.item_evaluations![0]).toMatchObject({ mastery: 90, source: 'ai_alternative' });
     expect(w.mastery).toBe(100);
   });
-  it('does not touch closed ratings when nothing is raised', () => {
-    const exercise = { sentences: [{ text: '___', answer: 'boss' }] };
+  it('rebuilds closed ratings from the key, never from what the browser stored', () => {
+    const exercise = { sentences: [{ text: '___', answer: 'boss', nano_skill: { name: 'x.y' } }] };
     const w = computeHomeworkWrite({
       exerciseType: 'fill-in-blanks', exercise, answers: { 0: 'boss' },
-      storedItemEvaluations: [{ question_index: 0, name: 'x', mastery: 100, hasValue: true }],
       evaluations: [{ question_index: 0, quality_score: 1, is_acceptable: true }], transcribed: () => false,
     });
-    expect(w.item_evaluations).toBeNull();
+    expect(w.item_evaluations).toEqual([
+      expect.objectContaining({ question_index: 0, name: 'x.y', mastery: 100, hasValue: true }),
+    ]);
+    expect(w.item_evaluations![0]).not.toHaveProperty('source');
   });
 });
 

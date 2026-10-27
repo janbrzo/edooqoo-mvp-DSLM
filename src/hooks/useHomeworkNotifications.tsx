@@ -38,22 +38,7 @@ export function useHomeworkNotifications() {
 
       if (error) throw error;
 
-      const homeworkIds = (data || []).filter(n => n.homework_id).map(n => n.homework_id as string);
-      let homeworkTokenMap: Record<string, string> = {};
-      if (homeworkIds.length > 0) {
-        const { data: hwData } = await supabase
-          .from('homework_assignments')
-          .select('id, share_token')
-          .in('id', homeworkIds);
-        if (hwData) {
-          homeworkTokenMap = Object.fromEntries(hwData.map(h => [h.id, h.share_token || '']));
-        }
-      }
-
-      const enriched: AppNotification[] = (data || []).map(n => ({
-        ...(n as any),
-        share_token: n.homework_id ? homeworkTokenMap[n.homework_id as string] || null : null,
-      }));
+      const enriched: AppNotification[] = (data || []) as AppNotification[];
 
       setNotifications(enriched);
       setUnreadCount(enriched.filter(n => !n.is_read).length);

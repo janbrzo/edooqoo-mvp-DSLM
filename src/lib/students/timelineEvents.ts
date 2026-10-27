@@ -262,8 +262,10 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
         id: `homework_returned:${hw.id}`,
         type: 'homework_returned',
         at: hw.completed_at,
-        title: `Homework returned: ${label}`,
-        subtitle: needsAction ? 'Waiting for your review' : 'Reviewed',
+        title: hw.completed_by_teacher === true ? `Homework marked done: ${label}` : `Homework returned: ${label}`,
+        subtitle: hw.completed_by_teacher === true
+          ? 'Marked done by you'
+          : needsAction ? 'Waiting for your review' : 'Reviewed',
         needsAction,
         // Student returns open the teacher review page (answers, AI feedback,
         // comments); teacher-marked completion has nothing to review.

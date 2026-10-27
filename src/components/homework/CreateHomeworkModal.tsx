@@ -79,8 +79,8 @@ export function CreateHomeworkModal({
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   });
   const [sendReminder, setSendReminder] = useState<boolean>(true);
-  // P1.6: notify the student by email right after the homework is created
-  const [notifyStudent, setNotifyStudent] = useState<boolean>(true);
+  // Off by default: an email leaves the teacher's name only when the teacher chooses it on purpose
+  const [notifyStudent, setNotifyStudent] = useState<boolean>(false);
   // Address the notification already went to, so the success screen does not invite a duplicate send.
   const [emailSentTo, setEmailSentTo] = useState<string | null>(null);
   const [reminderHours, setReminderHours] = useState<string>("24");
@@ -367,7 +367,7 @@ export function CreateHomeworkModal({
 
       toast.success("Homework assignment created successfully!");
 
-      // P1.6: automatic notification (opt-out via the "Notify student by email" switch)
+      // Optional notification (opt-in via the "Notify student by email" switch)
       if (notifyStudent) {
         if (studentEmail) {
           await sendHomeworkEmail(homework.id, studentEmail);
@@ -397,7 +397,7 @@ export function CreateHomeworkModal({
     setSelectedExercises(new Set());
     setDeadline(new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)); // Reset to +6 days
     setSendReminder(true);
-    setNotifyStudent(true);
+    setNotifyStudent(false);
     setEmailSentTo(null);
     setReminderHours("24");
     setSendToTeacher(false);
@@ -682,7 +682,7 @@ export function CreateHomeworkModal({
                     Send before deadline
                   </Label>
                 </div>
-                {/* P1.6: notify the student right after creation (was fully manual) */}
+                {/* Opt-in: notify the student right after creation */}
                 <div className="flex items-center gap-2">
                   <Switch
                     id="notify-student"

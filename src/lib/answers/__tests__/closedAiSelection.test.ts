@@ -72,7 +72,7 @@ describe('closed items sent to the model (decision D9)', () => {
   });
 
   it('a typed wrong item is still sent from a real exercise, a correct one and an MC one are not', () => {
-    const ex = { sentences: [{ text: 'She ___ a boss.', answer: 'is' }, { text: 'He ___ home.', answer: 'went' }] };
+    const ex = { sentences: [{ text: 'She ___ a boss.', answer: 'is', nano_skill: { name: 'g.a' } }, { text: 'He ___ home.', answer: 'went', nano_skill: { name: 'g.b' } }] };
     const answers = { 0: 'is', 1: 'goed' };
     const sent = buildClosedAnswersToVerify({ exercise_index: 0, exercise_type: 'fill-in-blanks' }, ex, answers);
     expect(sent.map((s) => [s.question_index, s.key_verdict])).toEqual([[0, 'correct'], [1, 'wrong']]);
@@ -86,14 +86,11 @@ describe('closed items sent to the model (decision D9)', () => {
 
   it('stored result is identical with and without the skipped items (typed exercise)', () => {
     const ex = { sentences: [
-      { text: 'She ___ a boss.', answer: 'is' },
-      { text: 'He ___ home.', answer: 'went' },
-      { text: 'My ___ is kind.', answer: 'boss' },
+      { text: 'She ___ a boss.', answer: 'is', nano_skill: { name: 'g.a' } },
+      { text: 'He ___ home.', answer: 'went', nano_skill: { name: 'g.b' } },
+      { text: 'My ___ is kind.', answer: 'boss', nano_skill: { name: 'g.c' } },
     ] };
     const answers: Record<string, unknown> = { 0: 'is', 1: 'goed', 2: 'manager' };
-    const stored = [0, 1, 2].map((q) => ({
-      question_index: q, name: 's', mastery: calculateItemMastery('fill-in-blanks', ex, q, answers[q], answers), hasValue: true,
-    }));
     const full = [
       { question_index: 0, quality_score: 1, is_acceptable: true, key_verdict: 'correct', feedback: 'ok' },
       { question_index: 1, quality_score: 0.1, is_acceptable: false, key_verdict: 'wrong', feedback: 'no' },
@@ -101,7 +98,7 @@ describe('closed items sent to the model (decision D9)', () => {
     ];
     const sentOnly = full.filter((e) => e.question_index !== 0);
     const mk = (evaluations: any[]) => computeHomeworkWrite({
-      exerciseType: 'fill-in-blanks', exercise: ex, answers, storedItemEvaluations: stored, evaluations, transcribed: () => false,
+      exerciseType: 'fill-in-blanks', exercise: ex, answers, evaluations, transcribed: () => false,
     });
     const a = mk(full);
     const b = mk(sentOnly);

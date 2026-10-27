@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { SendHomeworkEmailDialog } from '@/components/homework/SendHomeworkEmailDialog';
 import type { HomeworkAssignment } from '@/hooks/useAllWorksheetHomework';
+import { markDoneOutcome, type LifecycleResult } from '@/lib/homework/homeworkStateRpc';
 
 interface WorksheetHomeworkListProps {
   homework: HomeworkAssignment[];
@@ -22,7 +23,7 @@ export const WorksheetHomeworkList = ({ homework, variant = 'full' }: WorksheetH
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase.rpc('mark_homework_completed', {
+      const { data, error } = await supabase.rpc('mark_homework_completed', {
         p_homework_id: homeworkId,
         p_user_id: user.id,
         p_is_teacher: true
@@ -30,7 +31,16 @@ export const WorksheetHomeworkList = ({ homework, variant = 'full' }: WorksheetH
 
       if (error) throw error;
 
-      toast.success(`Marked "${title}" as completed`);
+      const outcome = markDoneOutcome(data as LifecycleResult | null);
+      if (outcome.kind === 'error') {
+        toast.error(outcome.message);
+        return;
+      }
+      if (outcome.kind === 'already') {
+        toast.info(`"${title}" was already returned by the student. Open the review instead.`);
+        return;
+      }
+      toast.success(`Marked "${title}" as done`);
       
       // Trigger refresh
       window.dispatchEvent(new CustomEvent('homeworkCompleted', { detail: { homeworkId } }));

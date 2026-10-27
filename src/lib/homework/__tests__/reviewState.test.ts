@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   hasStudentReturnedHomework,
   homeworkReviewPath,
+  homeworkState,
   isHomeworkAwaitingReview,
 } from '../reviewState';
 
@@ -45,5 +46,21 @@ describe('hasStudentReturnedHomework', () => {
 describe('homeworkReviewPath', () => {
   it('points at the teacher review page by homework id', () => {
     expect(homeworkReviewPath('hw-1')).toBe('/homework/hw-1/review');
+  });
+});
+
+describe('homeworkState', () => {
+  it('is open until the homework is completed', () => {
+    expect(homeworkState({ completed_at: null, reviewed_at: null })).toBe('open');
+  });
+
+  it('is submitted for a student return waiting for review and reviewed once the review was sent', () => {
+    expect(homeworkState({ completed_at: RETURNED, reviewed_at: null, completed_by_teacher: false })).toBe('submitted');
+    expect(homeworkState({ completed_at: RETURNED, reviewed_at: REVIEWED })).toBe('reviewed');
+  });
+
+  it('is closed when the teacher marked it done, whatever else is set', () => {
+    expect(homeworkState({ completed_at: RETURNED, reviewed_at: null, completed_by_teacher: true })).toBe('closed');
+    expect(homeworkState({ completed_at: RETURNED, reviewed_at: REVIEWED, completed_by_teacher: true })).toBe('closed');
   });
 });

@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { notificationPath } from "@/lib/notifications/notificationRoute";
 
 interface AppNotification {
   id: string;
@@ -72,23 +73,7 @@ export function HomeworkNotificationBadge() {
 
       if (error) throw error;
 
-      // Fetch share_tokens for homework notifications that have homework_id
-      const homeworkIds = (data || []).filter(n => n.homework_id).map(n => n.homework_id);
-      let homeworkTokenMap: Record<string, string> = {};
-      if (homeworkIds.length > 0) {
-        const { data: hwData } = await supabase
-          .from('homework_assignments')
-          .select('id, share_token')
-          .in('id', homeworkIds);
-        if (hwData) {
-          homeworkTokenMap = Object.fromEntries(hwData.map(h => [h.id, h.share_token || '']));
-        }
-      }
-
-      const notificationsWithToken = (data || []).map(n => ({
-        ...n,
-        share_token: n.homework_id ? homeworkTokenMap[n.homework_id] || null : null,
-      }));
+      const notificationsWithToken = data || [];
 
       setNotifications(notificationsWithToken);
       setUnreadCount(notificationsWithToken.filter(n => !n.is_read).length || 0);
@@ -140,15 +125,7 @@ export function HomeworkNotificationBadge() {
     if (!notification.is_read) {
       markAsRead(notification.id);
     }
-
-    if (notification.notification_type === 'welcome_test_completed') {
-      // Navigate to student's Tests tab
-      navigate(`/student/${notification.student_id}?tab=tests`);
-    } else if (notification.share_token) {
-      navigate(`/homework/${notification.share_token}`);
-    } else {
-      navigate(`/student/${notification.student_id}`);
-    }
+    navigate(notificationPath(notification));
     setIsOpen(false);
   };
 

@@ -31,6 +31,7 @@ import {
 import RenameDialog from '@/components/RenameDialog';
 import { devLog } from '@/utils/logger';
 import { hasStudentReturnedHomework, homeworkReviewPath, isHomeworkAwaitingReview } from '@/lib/homework/reviewState';
+import { markDoneOutcome, reopenHomework, type LifecycleResult } from '@/lib/homework/homeworkStateRpc';
 
 interface StudentHomeworkTabProps {
   studentId: string;
@@ -201,11 +202,36 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
 
       if (error) throw error;
 
-      toast.success("Homework marked as completed!");
+      const outcome = markDoneOutcome(data as LifecycleResult | null);
+      if (outcome.kind === 'error') {
+        toast.error(outcome.message);
+        return;
+      }
+      if (outcome.kind === 'already') {
+        toast.info("The student already returned this homework. Open the review instead.");
+      } else {
+        toast.success("Homework marked as done.");
+      }
       refetch(); // Refresh homework list
     } catch (error: any) {
       console.error('Error marking homework as completed:', error);
       toast.error(error.message || "Failed to mark homework as completed");
+    }
+  };
+
+  const handleReopen = async (homeworkId: string) => {
+    if (blockedInDemo('Reopening homework')) return;
+    try {
+      const result = await reopenHomework(homeworkId);
+      if (!result.success) {
+        toast.error(result.error || "Could not reopen this homework");
+        return;
+      }
+      toast.success("Homework reopened. The student can continue.");
+      refetch();
+    } catch (error: any) {
+      console.error('Error reopening homework:', error);
+      toast.error(error.message || "Could not reopen this homework");
     }
   };
   
@@ -483,6 +509,18 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
                           <ClipboardCheck className="h-4 w-4 mr-1" />
                           {isHomeworkAwaitingReview(hw) ? 'Review' : 'View review'}
                         </Link>
+                      </Button>
+                    )}
+
+                    {/* Undo a teacher "Mark done": the student can continue */}
+                    {hw.completed_at && hw.completed_by_teacher === true && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleReopen(hw.id)}
+                        title="Reopen: the student can continue this homework"
+                      >
+                        Reopen
                       </Button>
                     )}
 

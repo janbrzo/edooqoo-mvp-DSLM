@@ -22,6 +22,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useHomeworkNotifications, type AppNotification } from '@/hooks/useHomeworkNotifications';
 import { useTeacherAlerts, type TeacherAlert } from '@/hooks/useTeacherAlerts';
+import { notificationPath } from '@/lib/notifications/notificationRoute';
 
 const severityIcon = (s: TeacherAlert['severity']) => {
   if (s === 'high') return <AlertCircle className="h-4 w-4 text-destructive" />;
@@ -68,13 +69,7 @@ export function UnifiedBell() {
 
   const handleNotifClick = (n: AppNotification) => {
     if (!n.is_read) markNotifRead(n.id);
-    if (n.notification_type === 'welcome_test_completed') {
-      navigate(`/student/${n.student_id}?tab=tests`);
-    } else if (n.share_token) {
-      navigate(`/homework/${n.share_token}`);
-    } else {
-      navigate(`/student/${n.student_id}`);
-    }
+    navigate(notificationPath(n));
     setOpen(false);
   };
 

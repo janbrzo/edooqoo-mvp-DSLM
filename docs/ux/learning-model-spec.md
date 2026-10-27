@@ -241,3 +241,13 @@ Removed (no importers left): `PathwayView`, `NextStepsSection`, `NextStepBanner`
 - Signal feedback: Agree / Partly / Disagree (+ optional note) next to each trait, divergence and the learning-path band, stored in `wt_signal_feedback`; within 14 days of completion a hint asks to rate after 2-4 lessons.
 - Pacing: the first Welcome Test pacing is applied automatically when the teacher never set pacing; an info card shows the change with Undo. Later changes stay proposals.
 - No "Results applied to student's skill ratings" card (ratings are not copied to learning elements).
+
+## 14. Homework as DSLM evidence (2026-10-26)
+
+Owner decision (audit of the homework flow, P1.3):
+
+- Homework answers are DSLM evidence from the first autosave, so work that was done but never sent is not lost.
+- Weight of an event in `current_mastery` (`public.dslm_event_weight`, `DSLM_EVENT_WEIGHT_VERSION 1`): homework **submitted 1.0**, homework **draft 0.8**, every other source 1.0. The weight multiplies the recency decay in the weighted mean; the mastery history and the trend still use the raw per-event points.
+- A draft becomes a submitted event when the student submits: `submit_homework_answers` sets `event_payload.is_submitted = true` for the submitted exercises (the answer trigger ignores a submit-only change).
+- A teacher "Mark done" records no evidence. A rating written by the teacher at review time is a separate, later step (not part of this change).
+- A change of the weights bumps the version here and in the migration, and adds a contract test (`src/lib/__tests__/homeworkEvidenceWeight.test.ts`).
