@@ -59085,6 +59085,10 @@
         "migration": "supabase/migrations/20260626192112_6086f5ef-d4e1-47cf-9691-0666c77e8673.sql"
       },
       {
+        "name": "backfill_profile_v2",
+        "migration": "supabase/migrations/20261028090000_backfill_profile_v2.sql"
+      },
+      {
         "name": "backfill_skill_metrics",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
