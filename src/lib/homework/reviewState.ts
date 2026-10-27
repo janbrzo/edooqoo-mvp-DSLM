@@ -29,3 +29,13 @@ export function hasStudentReturnedHomework(hw: HomeworkReviewFields): boolean {
 export function homeworkReviewPath(homeworkId: string): string {
   return `/homework/${homeworkId}/review`;
 }
+
+/** open: not returned; submitted: returned, waiting for review; reviewed: review sent; closed: the teacher marked it done. */
+export type HomeworkState = 'open' | 'submitted' | 'reviewed' | 'closed';
+
+/** The one lifecycle read used by labels and banners; the server enforces the same rule on writes. */
+export function homeworkState(hw: HomeworkReviewFields): HomeworkState {
+  if (!hw.completed_at) return 'open';
+  if (hw.completed_by_teacher === true) return 'closed';
+  return hw.reviewed_at ? 'reviewed' : 'submitted';
+}

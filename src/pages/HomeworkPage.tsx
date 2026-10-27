@@ -9,6 +9,7 @@ import { Loader2, Calendar, User, Mail, CheckCircle2, FileText, Send, Clock, Arr
 import { format } from "date-fns";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { useInteractiveHomework } from "@/hooks/useInteractiveHomework";
+import { fetchHomeworkState } from '@/lib/homework/homeworkStateRpc';
 import { StudentEmailVerification } from "@/components/homework/StudentEmailVerification";
 import { HomeworkProgressBar } from "@/components/homework/HomeworkProgressBar";
 import { StudyModeButton } from "@/components/shared/StudyModeButton";
@@ -40,6 +41,7 @@ interface HomeworkData {
   student_english_level: string;
   source_worksheet_title: string;
   completed_at?: string | null;
+  completed_by_teacher?: boolean | null;
   reviewed_at?: string | null;
   selected_image?: { url: string; photographer?: string; photographerUrl?: string } | null;
   selected_audio?: { url: string; transcript?: string } | null;
@@ -141,6 +143,7 @@ export default function HomeworkPage() {
     isSubmitted,
     submittedAt,
     isWaitingForAiEval,
+    isLocked,
     updateAnswer,
     updateAudioAnswer,
     saveOnBlur,
@@ -173,6 +176,20 @@ export default function HomeworkPage() {
       setIsCompleted(true);
     }
   }, [homework]);
+
+  // The server refused a write or a submit: re-read why (submitted elsewhere or closed by the teacher).
+  useEffect(() => {
+    if (!isLocked || !token) return;
+    void fetchHomeworkState(token).then((state) => {
+      if (!state) return;
+      setHomework(prev => prev ? {
+        ...prev,
+        reviewed_at: state.reviewed_at,
+        completed_at: state.completed_at,
+        completed_by_teacher: state.completed_by_teacher,
+      } : prev);
+    });
+  }, [isLocked, token]);
 
   // Check if logged-in user is the teacher (skip email verification) and get student email for answer loading
   useEffect(() => {
@@ -335,18 +352,16 @@ export default function HomeworkPage() {
 
       setHomework(fixedData as HomeworkData);
       
-      // Fetch reviewed_at status and source_worksheet_id separately (not in main RPC)
-      // v6.9.83: share-token scoped RPC (public table policy removed for security)
-      const { data: homeworkStatus } = await supabase
-        .rpc('get_homework_status_by_share_token', { p_share_token: token })
-        .maybeSingle();
-      
-      if (homeworkStatus) {
+      // Fetch the lifecycle state (reviewed_at, completed_at, completed_by_teacher) and
+      // source_worksheet_id separately (not in the main RPC); share-token scoped.
+      const homeworkState = await fetchHomeworkState(token);
+      if (homeworkState) {
         setHomework(prev => prev ? {
           ...prev,
-          reviewed_at: homeworkStatus.reviewed_at,
-          completed_at: homeworkStatus.completed_at,
-          source_worksheet_id: homeworkStatus.source_worksheet_id
+          reviewed_at: homeworkState.reviewed_at,
+          completed_at: homeworkState.completed_at,
+          completed_by_teacher: homeworkState.completed_by_teacher,
+          source_worksheet_id: homeworkState.source_worksheet_id
         } : null);
       }
     } catch (error) {
@@ -422,6 +437,15 @@ export default function HomeworkPage() {
       });
 
       if (error) throw error;
+      const result = data as { success?: boolean; error?: string; already_completed?: boolean } | null;
+      if (!result?.success) {
+        toast.error(result?.error || "Failed to mark homework as completed");
+        return;
+      }
+      if (result.already_completed) {
+        toast.info("This homework was already returned. Nothing changed.");
+        return;
+      }
 
       setIsCompleted(true);
       toast.success("Homework marked as completed!");
@@ -581,7 +605,9 @@ export default function HomeworkPage() {
 
   // Get progress for progress bar
   const progress = getProgress();
-  const finalIsSubmitted = isSubmitted || isCompleted;
+  const finalIsSubmitted = isSubmitted || isCompleted || isLocked;
+  // The teacher marked it done and the student never returned it.
+  const closedByTeacher = homework.completed_by_teacher === true && !isSubmitted;
   
   // Student sees correct answers immediately after submitting
   const showCorrectAnswersToStudent = finalIsSubmitted;
@@ -848,7 +874,7 @@ export default function HomeworkPage() {
           )}
           
           {/* Submitted state for students */}
-          {!isTeacher && finalIsSubmitted && (
+          {!isTeacher && finalIsSubmitted && !closedByTeacher && (
             <div className="p-6 bg-green-50 dark:bg-green-900/20 rounded-lg text-center border-2 border-green-500">
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-2" />
               <p className="text-lg font-semibold text-green-700 dark:text-green-300">
@@ -859,12 +885,26 @@ export default function HomeworkPage() {
               </p>
             </div>
           )}
+
+          {!isTeacher && closedByTeacher && (
+            <div className="p-6 bg-muted rounded-lg text-center border-2 border-border">
+              <CheckCircle2 className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+              <p className="text-lg font-semibold text-foreground">
+                Closed by your teacher
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Your teacher marked this homework as done, so it can no longer be changed. The correct answers are shown above.
+              </p>
+            </div>
+          )}
           
           <div className="p-6 bg-muted rounded-lg text-center">
             <p className="text-sm text-muted-foreground">
               {isTeacher 
                 ? "This is a preview of the student homework. Click exercise titles to navigate."
-                : finalIsSubmitted 
+                : closedByTeacher
+                  ? "This homework is closed. Review the correct answers above."
+                  : finalIsSubmitted 
                   ? "Your homework is complete. Review the correct answers above."
                   : "Your answers are automatically saved. Click 'Submit Homework' when you're done."}
             </p>

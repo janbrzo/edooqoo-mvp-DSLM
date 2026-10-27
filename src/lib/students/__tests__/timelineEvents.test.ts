@@ -183,7 +183,7 @@ describe('buildTimelineEvents: homework pairing', () => {
     expect(events[1].needsAction).toBe(false);
   });
 
-  it('marks a teacher-reviewed return as not actionable', () => {
+  it('labels a homework the teacher marked done as such, not as reviewed, and not actionable', () => {
     const events = buildTimelineEvents({
       homework: [
         {
@@ -196,8 +196,9 @@ describe('buildTimelineEvents: homework pairing', () => {
       ],
     });
     const returned = events.find((e) => e.type === 'homework_returned')!;
+    expect(returned.title).toBe('Homework marked done: Drill');
     expect(returned.needsAction).toBe(false);
-    expect(returned.subtitle).toBe('Reviewed');
+    expect(returned.subtitle).toBe('Marked done by you');
     expect(returned.actionLabel).toBeUndefined();
   });
 

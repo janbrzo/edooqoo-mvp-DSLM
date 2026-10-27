@@ -13,6 +13,7 @@ import { questionIndicesOf, hasAnswerForQuestion } from '@/lib/answers/answerKey
 import { callStudentAnswerRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 import { buildHomeworkDelta, parseAiEvaluations } from '@/lib/homework/deltaSave';
+import { isHomeworkClosedError } from '@/lib/homework/homeworkStateRpc';
 
 
 interface UseInteractiveHomeworkProps {
@@ -58,6 +59,9 @@ export const useInteractiveHomework = ({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedAt, setSubmittedAt] = useState<Date | null>(null);
   const [isWaitingForAiEval, setIsWaitingForAiEval] = useState(false);
+  // The server refused a write or a submit: the homework was submitted elsewhere or closed by the teacher.
+  const [isLocked, setIsLocked] = useState(false);
+  const lockedToastShownRef = useRef(false);
   
   const pendingSavesQueueRef = useRef(createPendingSaves());
   const pendingSavesRef = useRef<Set<number>>(new Set());
@@ -170,7 +174,7 @@ export const useInteractiveHomework = ({
       
       const activeTimeMs = getActiveTimeMs(exerciseIndex);
       
-      const { error } = await callStudentAnswerRpc('save_homework_answer', {
+      const { data, error } = await callStudentAnswerRpc('save_homework_answer', {
         p_homework_id: homeworkId,
         p_student_email: studentEmail,
         p_exercise_index: exerciseIndex,
@@ -183,6 +187,25 @@ export const useInteractiveHomework = ({
       }, shareToken);
 
       if (error) throw error;
+
+      // A null id means the server refused the write (the homework is submitted or closed
+      // by the teacher): retrying cannot help and "Saved" would be false.
+      if (data == null) {
+        dirtyKeysRef.current[exerciseIndex]?.clear();
+        dirtyAudioRef.current[exerciseIndex]?.clear();
+        pendingSavesRef.current.delete(exerciseIndex);
+        if (pendingSavesRef.current.size === 0) setIsSaving(false);
+        setIsLocked(true);
+        if (!lockedToastShownRef.current) {
+          lockedToastShownRef.current = true;
+          toast({
+            title: "This homework is no longer open",
+            description: "Your latest changes could not be saved: it was submitted or closed by your teacher.",
+            variant: "destructive"
+          });
+        }
+        return true;
+      }
 
       setLastSavedAt(new Date());
       pendingSavesRef.current.delete(exerciseIndex);
@@ -368,6 +391,15 @@ export const useInteractiveHomework = ({
 
       return true;
     } catch (error: any) {
+      if (isHomeworkClosedError(error)) {
+        setIsLocked(true);
+        toast({
+          title: "This homework is closed",
+          description: "Your teacher marked it as done, so it can no longer be submitted.",
+          variant: "destructive"
+        });
+        return false;
+      }
       console.error('Error submitting homework:', error);
       toast({
         title: "Error submitting homework",
@@ -501,6 +533,7 @@ export const useInteractiveHomework = ({
     isSubmitted,
     submittedAt,
     isWaitingForAiEval,
+    isLocked,
     updateAnswer,
     updateAudioAnswer,
     saveOnBlur,
