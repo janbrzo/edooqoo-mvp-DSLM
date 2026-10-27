@@ -46,7 +46,7 @@ const ExerciseCompleteWord: React.FC<ExerciseCompleteWordProps> = ({
         {words.map((wordItem, wIndex) => {
           const studentAnswer = studentAnswers[wIndex] || '';
           const correctAnswer = wordItem?.complete || wordItem?.complete_word || '';
-          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word', grammar: true });
           const isCorrect = showCorrectAnswers && match.verdict === 'correct';
           const isReview = showCorrectAnswers && match.verdict === 'review';
           const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
