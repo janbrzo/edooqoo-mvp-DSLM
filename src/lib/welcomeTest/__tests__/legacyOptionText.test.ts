@@ -13,9 +13,11 @@ const legacy = Object.entries(LEGACY_OPTION_TEXT).flatMap(([qid, m]) => Object.e
 const traitOf = (qid: string) => Object.entries(TRAIT_QUESTIONS).find(([, c]) => c.questionId === qid);
 
 describe('legacy Welcome Test option text (bf57f19)', () => {
-  it('covers the six known edits', () => {
-    expect(legacy).toHaveLength(6);
-    expect(legacy.every((l) => l.oldText.includes('\u2014'))).toBe(true);
+  it('covers the six em dash edits and the older wordings found by the D15 dry run', () => {
+    const emDash = legacy.filter((l) => l.oldText.includes('\u2014'));
+    expect(emDash).toHaveLength(6);
+    expect(legacy.length - emDash.length).toBe(13);
+    for (const l of legacy.filter((x) => !x.oldText.includes('\u2014'))) expect(['wt_q1', 'wt_q3', 'wt_q7']).toContain(l.qid);
   });
 
   it.each(legacy)('alias target exists in the current question options: $qid', ({ qid, newText }) => {
