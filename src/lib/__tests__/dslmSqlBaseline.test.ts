@@ -139,8 +139,8 @@ describe('Iteration 8: compute_skill_metric v3', () => {
   const fn = latestDefinition('compute_skill_metric');
   const upsert = fn.slice(fn.indexOf('ON CONFLICT (student_id, teacher_id, skill_name) DO UPDATE SET'));
 
-  it('is defined by 20261017100000 (v3 plus the superseded-event filter)', () => {
-    expect(fn).toBe(read('20261017100000_welcome_test_server_authority.sql'));
+  it('is defined by 20261027100100 (v3 plus the superseded-event filter, plus the source weight)', () => {
+    expect(fn).toBe(read('20261027100100_compute_skill_metric_source_weight.sql'));
   });
 
   it('serialises recomputes per student, teacher and skill with an advisory lock before reading events', () => {
@@ -251,7 +251,8 @@ describe('Welcome Test server authority and retake history (2026-10-17 audit)', 
   });
 
   it('compute_skill_metric ignores superseded events and the update trigger recomputes on supersede', () => {
-    expect(latestDefinition('compute_skill_metric')).toBe(file);
+    // 20261027100100 redefines it with the source weight; the superseded filters stay.
+    expect(latestDefinition('compute_skill_metric').match(/AND se\.superseded_at IS NULL/g)?.length).toBe(2);
     expect(file.match(/AND se\.superseded_at IS NULL/g)?.length).toBe(2);
     expect(file).toMatch(/AFTER UPDATE OF event_payload, mastery, created_at, superseded_at ON public\.student_events/);
   });
