@@ -13,7 +13,7 @@ import { reconstructTraits } from '../../../../supabase/functions/_shared/welcom
 import { computeLearningPathScore } from '../../../../supabase/functions/_shared/learningPathScore';
 
 const LIVE = live as Record<string, unknown>;
-const EM = '—';
+const EM = '\u2014';
 const FULL_ID = '4992288d-7ec7-44e4-8f74-f40bf8d1806a';
 
 const legacyProfile = (raw: Record<string, unknown>, extra: Record<string, unknown> = {}) => ({
@@ -176,6 +176,6 @@ describe('renderMarkdown', () => {
     expect(md).not.toContain(FULL_ID);
     expect(md).not.toMatch(/@/);
     expect(md).toContain('Dry run, nothing written');
-    expect(md).not.toContain('—');
+    expect(md).not.toContain('\u2014');
   });
 });

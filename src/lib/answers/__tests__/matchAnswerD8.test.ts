@@ -124,3 +124,16 @@ describe('D8: server scoring (calculateItemMastery) uses the same rules', () => 
     expect(calculateItemMastery('error-correction', ec, 0, 'She goes to school.')).toBe(100);
   });
 });
+
+describe('D8: words with two valid forms are never proven wrong', () => {
+  it.each([
+    ['toward', 'towards'], ['forward', 'forwards'], ['afterward', 'afterwards'], ['upward', 'upwards'],
+    ['hair', 'hairs'], ['anyway', 'anyways'],
+  ])('key %s, answer %s stays review in a grammar item', (key, answer) => {
+    const r = matchAnswer(answer, key, { grammar: true });
+    expect(r.verdict).not.toBe('wrong');
+  });
+  it('a regular ending on an ordinary word is still wrong', () => {
+    expect(matchAnswer('walks', 'walk', { grammar: true }).verdict).toBe('wrong');
+  });
+});

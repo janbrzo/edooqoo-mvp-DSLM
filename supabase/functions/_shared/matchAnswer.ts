@@ -196,9 +196,15 @@ const sameWordSet = (a: string, b: string): boolean => {
 /** Regular endings that make a grammar answer provably the wrong form (D8). */
 const REGULAR_ENDINGS = ['s', 'es', 'ed', 'd', 'ing', 'ly', 'er', 'est'];
 const MIN_STEM_LENGTH = 3;
+/** Words whose s-form is a valid alternative (toward/towards) or the same word (fish/fishes): never proven wrong. */
+const TWO_VALID_FORMS = new Set([
+  'toward', 'afterward', 'forward', 'backward', 'upward', 'downward', 'inward', 'outward', 'onward', 'homeward',
+  'anyway', 'someday', 'fish', 'hair', 'sheep', 'deer', 'series', 'species', 'news',
+]);
 
 const isRegularEndingPair = (shorter: string, longer: string): boolean => {
   if (shorter.length < MIN_STEM_LENGTH || !/^[a-z']+$/.test(shorter) || !/^[a-z']+$/.test(longer)) return false;
+  if (TWO_VALID_FORMS.has(shorter) || TWO_VALID_FORMS.has(longer)) return false;
   // y -> ies: study / studies.
   if (shorter.endsWith('y') && longer === `${shorter.slice(0, -1)}ies`) return true;
   if (!longer.startsWith(shorter)) return false;
