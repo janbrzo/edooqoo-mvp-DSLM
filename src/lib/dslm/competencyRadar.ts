@@ -10,7 +10,7 @@
  *
  * Zone precedence (a category lands in exactly one zone):
  *  1. critical_gap:    effective < 50
- *  2. retention_alert: raw >= 80 and effective < raw (a strong skill is fading)
+ *  2. retention_alert: raw >= 80 and effective < 80 (a mastered skill faded below the bar)
  *  3. mastered:        effective >= 80
  *  4. in_progress:     everything else
  */
@@ -76,7 +76,7 @@ function validSkill(row: CompetencySkillInput): row is CompetencySkillInput & { 
 
 export function classifyZone(rawAvg: number, effectiveAvg: number): CompetencyZone {
   if (effectiveAvg < CRITICAL_GAP_BELOW) return 'critical_gap';
-  if (rawAvg >= MASTERED_AT_OR_ABOVE && effectiveAvg < rawAvg) return 'retention_alert';
+  if (rawAvg >= MASTERED_AT_OR_ABOVE && effectiveAvg < MASTERED_AT_OR_ABOVE) return 'retention_alert';
   if (effectiveAvg >= MASTERED_AT_OR_ABOVE) return 'mastered';
   return 'in_progress';
 }
