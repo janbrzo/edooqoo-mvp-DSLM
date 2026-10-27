@@ -132,6 +132,9 @@ export function useActiveWorksheetGenerationJob() {
   // v6.9.61: periodic stale-running expiry so a dead backend cannot leave
   // a spinner forever in the mini-panel / modal.
   useEffect(() => {
+    // Also run once on mount: a job that went stale while the tab was closed
+    // must not keep the modal up for another full interval after a reload.
+    try { expireStaleRunningJobs(); } catch { /* ignore */ }
     const handle = window.setInterval(() => {
       try { expireStaleRunningJobs(); } catch { /* ignore */ }
     }, 30_000);
@@ -185,6 +188,9 @@ export function useActiveWorksheetGenerationJobs(): WorksheetGenerationJob[] {
 
   // v6.9.61: periodic stale-running expiry (4 min hard timeout).
   useEffect(() => {
+    // Also run once on mount: a job that went stale while the tab was closed
+    // must not keep the modal up for another full interval after a reload.
+    try { expireStaleRunningJobs(); } catch { /* ignore */ }
     const handle = window.setInterval(() => {
       try { expireStaleRunningJobs(); } catch { /* ignore */ }
     }, 30_000);

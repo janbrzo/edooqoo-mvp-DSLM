@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Progress } from "@/components/ui/progress";
-import { Circle, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Circle, Loader2, CheckCircle2, XCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import GenerationContextPanel from "@/components/generation/GenerationContextPanel";
@@ -77,6 +77,14 @@ interface GeneratingModalProps {
    * "checking server" banner instead of the destructive error UI.
    */
   recovering?: boolean;
+  /**
+   * P0.1: lets the teacher dismiss the full-screen modal while the generation
+   * keeps running. The job stays in the registry and continues as a mini
+   * panel card, so closing never cancels anything.
+   */
+  onMinimize?: () => void;
+  /** P0.1: closes the error state (the failed job is dismissed by the caller). */
+  onClose?: () => void;
 }
 
 // Section completion status
@@ -199,6 +207,8 @@ export default function GeneratingModal({
   onSelectIndex,
   jobs,
   recovering = false,
+  onMinimize,
+  onClose,
 }: GeneratingModalProps) {
   // v6.9.58: seed live values from startedAt so a refresh resumes the bar
   // and timer instead of restarting them from zero.
@@ -381,7 +391,7 @@ export default function GeneratingModal({
   if (recovering) {
     return createPortal(
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
-        <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-[520px] mx-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
+        <div className="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-[520px] space-y-6 max-h-[calc(100dvh-2rem)] overflow-y-auto">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-12 w-12 text-primary animate-spin" />
             <h2 className="text-2xl font-semibold text-center text-foreground">
@@ -396,6 +406,13 @@ export default function GeneratingModal({
               No tokens were consumed yet.
             </p>
           </div>
+          {onMinimize ? (
+            <div className="flex justify-center">
+              <Button variant="outline" onClick={onMinimize}>
+                Close
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>,
       document.body,
@@ -406,7 +423,7 @@ export default function GeneratingModal({
   if (errorMessage) {
     return createPortal(
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
-        <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-[520px] mx-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
+        <div className="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-[520px] space-y-6 max-h-[calc(100dvh-2rem)] overflow-y-auto">
           <div className="flex flex-col items-center gap-3">
             <XCircle className="h-16 w-16 text-destructive" />
             <h2 className="text-2xl font-semibold text-center text-foreground">
@@ -428,12 +445,16 @@ export default function GeneratingModal({
           </div>
 
           <div className="flex gap-3 justify-center">
-            <Button variant="outline" onClick={onRetry}>
-              Close
-            </Button>
-            <Button onClick={onRetry}>
-              Try Again
-            </Button>
+            {onClose || onMinimize ? (
+              <Button variant="outline" onClick={onClose ?? onMinimize}>
+                Close
+              </Button>
+            ) : null}
+            {onRetry ? (
+              <Button onClick={onRetry}>
+                Try Again
+              </Button>
+            ) : null}
           </div>
 
           <p className="text-center text-xs text-muted-foreground/60 break-all">
@@ -450,9 +471,12 @@ export default function GeneratingModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto lg:overflow-hidden">
         <div
           className={cn(
-            'bg-white rounded-lg shadow-xl mx-4 w-full',
-            // Mobile: allow internal scroll if needed.
-            'max-h-[calc(100vh-2rem)] overflow-y-auto',
+            // The overlay already pads 1rem on every side; an extra horizontal
+            // margin here pushed the card past a 390 px viewport.
+            'relative bg-white rounded-lg shadow-xl w-full min-w-0',
+            // Mobile: allow internal scroll if needed (dvh follows the
+            // visible viewport when the browser toolbar shows).
+            'max-h-[calc(100dvh-2rem)] overflow-y-auto overflow-x-hidden',
             // Desktop (lg+): cap height AND hide scrollbar, content is sized
             // to fit a 720p viewport without a scrollbar.
             'lg:max-h-[calc(100dvh-2rem)] lg:overflow-hidden',
@@ -469,6 +493,17 @@ export default function GeneratingModal({
           onFocusCapture={() => setIsCarouselPaused(true)}
           onBlurCapture={() => setIsCarouselPaused(false)}
         >
+          {onMinimize ? (
+            <button
+              type="button"
+              onClick={onMinimize}
+              aria-label="Minimize: generation keeps running in the background"
+              title="Minimize: generation keeps running in the background"
+              className="absolute right-2 top-2 z-10 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
           <div className="flex flex-col h-full space-y-2.5 min-w-0 min-h-0">
         <div className="space-y-1 min-w-0">
           {/* v6.9.64: two-row responsive header: title+student, then email+topic. */}

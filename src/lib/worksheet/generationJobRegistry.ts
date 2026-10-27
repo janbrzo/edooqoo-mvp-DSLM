@@ -68,10 +68,13 @@ export interface WorksheetGenerationJob {
 
 const STORAGE_KEY_V2 = 'edooqoo.activeWorksheetGenerations'; // v6.9.58 multi-job map
 const LEGACY_STORAGE_KEY = 'edooqoo.activeWorksheetGeneration'; // v6.9.53 single-job
-// v6.9.61: Hard backend timeout for `running` jobs. After this window, the
-// global poller flips them to `failed` with a clear timeout message so the
-// modal/mini-panel doesn't spin forever when the backend actually crashed.
-const RUNNING_TTL_MS = 4 * 60 * 1000; // 4 minutes
+// v6.9.61: Hard backend timeout for `running` jobs. After this window,
+// `expireStaleRunningJobs` flips them to `failed` (and emits the registry
+// event) so the modal/mini-panel doesn't spin forever when the backend
+// actually crashed. A stale `running` job is never silently deleted: its
+// worksheet row may still be written by the backend, and the poller needs the
+// job to link that row back to the token charge and the suggestion.
+export const RUNNING_TTL_MS = 4 * 60 * 1000; // 4 minutes
 const COMPLETED_TTL_MS = 24 * 60 * 60 * 1000; // keep completed CTA for 24h
 const RECOVERY_WINDOW_MS = 60 * 1000; // failed → DB-poll recovery grace
 
@@ -89,8 +92,10 @@ function safeLocalStorage(): Storage | null {
 type JobMap = Record<string, WorksheetGenerationJob>;
 
 function isExpired(job: WorksheetGenerationJob): boolean {
+  // Running jobs are only ever flipped to `failed` by expireStaleRunningJobs,
+  // never dropped here (see RUNNING_TTL_MS).
+  if (job.status === 'running') return false;
   const age = Date.now() - (job.startedAt ?? 0);
-  if (job.status === 'running') return age > RUNNING_TTL_MS;
   return age > COMPLETED_TTL_MS;
 }
 
@@ -258,12 +263,25 @@ export function completeGenerationJob(
   return next;
 }
 
+export interface FailGenerationJobOptions {
+  /**
+   * Default true: open a short recovery window so the DB poller can still
+   * promote the job to `completed` if the backend saved the worksheet.
+   * Pass false when the request never reached the backend (validation,
+   * media pre-generation, HTTP 4xx): there is nothing to recover and the job
+   * must leave the full-screen modal immediately.
+   */
+  allowRecovery?: boolean;
+}
+
 export function failGenerationJob(
   arg1: string,
   arg2?: string,
+  options: FailGenerationJobOptions = {},
 ): WorksheetGenerationJob | null {
   // Signatures: failGenerationJob(message)  // back-compat
   //             failGenerationJob(jobId, message)
+  //             failGenerationJob(jobId, message, { allowRecovery: false })
   const map = readMap();
   let jobId: string | null;
   let message: string;
@@ -283,7 +301,7 @@ export function failGenerationJob(
     // v6.9.61: open a recovery window so the global DB poller can still
     // promote this job back to `completed` if the backend (running via
     // EdgeRuntime.waitUntil) saves the worksheet within RECOVERY_WINDOW_MS.
-    recoveryDeadlineAt: Date.now() + RECOVERY_WINDOW_MS,
+    recoveryDeadlineAt: options.allowRecovery === false ? null : Date.now() + RECOVERY_WINDOW_MS,
   };
   map[jobId] = next;
   writeMap(map);
@@ -328,9 +346,12 @@ export function getPollableJobs(): WorksheetGenerationJob[] {
 }
 
 /**
- * v6.9.61: Flip `running` jobs older than RUNNING_TTL_MS to `failed` with a
- * timeout message. Called periodically from the global poller so a dead
- * backend does not leave a spinner forever. Returns the jobs that flipped.
+ * Flip `running` jobs older than RUNNING_TTL_MS to `failed` and emit the
+ * registry event so subscribed UI (full-screen modal, mini panel) updates
+ * immediately instead of waiting for a reload. Called periodically from the
+ * global poller. The flipped job keeps a short recovery window: the backend
+ * may still save the worksheet after our timeout, and the poller then links
+ * the row back to its token charge. Returns the jobs that flipped.
  */
 export function expireStaleRunningJobs(): WorksheetGenerationJob[] {
   const map = readMap();
@@ -341,8 +362,9 @@ export function expireStaleRunningJobs(): WorksheetGenerationJob[] {
       map[id] = {
         ...job,
         status: 'failed',
-        errorMessage: 'Backend did not respond within 4 minutes. No tokens were consumed.',
-        recoveryDeadlineAt: null, // hard timeout; no recovery
+        errorMessage:
+          'This generation did not finish within 4 minutes. If the worksheet was saved, it will appear in your worksheet list.',
+        recoveryDeadlineAt: now + RECOVERY_WINDOW_MS,
         updatedAt: now,
       };
       flipped.push(map[id]);
@@ -350,6 +372,15 @@ export function expireStaleRunningJobs(): WorksheetGenerationJob[] {
   }
   if (flipped.length > 0) writeMap(map);
   return flipped;
+}
+
+/**
+ * A job is "resumed" only when it was started before the current page load,
+ * i.e. the modal is rehydrated from storage after a refresh or reopened tab.
+ * A job started in this page load must not claim to be resumed.
+ */
+export function isJobResumed(job: Pick<WorksheetGenerationJob, 'startedAt'>, pageLoadedAt: number): boolean {
+  return (job.startedAt ?? 0) < pageLoadedAt;
 }
 
 export function markTokenConsumed(jobId?: string): WorksheetGenerationJob | null {

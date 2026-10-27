@@ -11,9 +11,9 @@ import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { useEventTracking } from "@/hooks/useEventTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { generateAudioForWorksheet, generateImageForWorksheet } from '@/services/mediaService';
-import { streamWorksheetGeneration } from '@/services/worksheetStreamService';
+import { streamWorksheetGeneration, isDeterministicStreamFailure } from '@/services/worksheetStreamService';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
-import { devLog, devWarn } from '@/utils/logger';
+import { devLog, devWarn, devError } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
 import {
   clearGenerationJob,
@@ -119,7 +119,7 @@ export const useWorksheetGeneration = (
         await supabase.functions.invoke('check-subscription-status');
         devLog('✅ Subscription status synchronized');
       } catch (error) {
-        console.error('⚠️ Warning: Subscription sync failed before generation:', error);
+        devWarn('⚠️ Warning: Subscription sync failed before generation:', error);
       }
     }
 
@@ -212,6 +212,27 @@ export const useWorksheetGeneration = (
       devWarn('[useWorksheetGeneration] failed to start generation job', e);
     }
 
+    // Every exit that happens BEFORE the stream starts must end the job, or
+    // the global modal (fed by the registry) would spin until the TTL. These
+    // exits never reached the backend, so no recovery window is opened.
+    const abortBeforeStream = (message: string) => {
+      setStreamProgress(null);
+      setMediaGenerating(false);
+      setIsGenerating(false);
+      setGenerationError(message);
+      try {
+        if (activeJobId) failGenerationJob(activeJobId, message, { allowRecovery: false });
+        else failGenerationJob(message, undefined, { allowRecovery: false });
+        const reqId = (data as any).__autoGenerateRequestId;
+        if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
+      } catch { /* ignore */ }
+      toast({
+        title: "Worksheet not generated",
+        description: message,
+        variant: "destructive",
+      });
+    };
+
     // Track worksheet generation start
     trackEvent({
       eventType: 'worksheet_generation_start',
@@ -262,10 +283,8 @@ export const useWorksheetGeneration = (
           selectedAudio = await generateAudioForWorksheet(data);
           devLog('✅ Audio pre-generated successfully');
         } catch (error) {
-          console.error('❌ Audio generation failed, aborting (no token consumed):', error);
-          setMediaGenerating(false);
-          setIsGenerating(false);
-          setGenerationError(
+          devError('❌ Audio generation failed, aborting (no token consumed):', error);
+          abortBeforeStream(
             "We couldn't generate the audio for your worksheet. " +
             "No tokens were used. Please try again: your form is ready."
           );
@@ -294,10 +313,8 @@ export const useWorksheetGeneration = (
           selectedImage = await generateImageForWorksheet(data);
           devLog('✅ Image pre-generated successfully');
         } catch (error) {
-          console.error('❌ Image generation failed, aborting (no token consumed):', error);
-          setMediaGenerating(false);
-          setIsGenerating(false);
-          setGenerationError(
+          devError('❌ Image generation failed, aborting (no token consumed):', error);
+          abortBeforeStream(
             "We couldn't generate the image for your worksheet. " +
             "No tokens were used. Please try again: your form is ready."
           );
@@ -332,9 +349,7 @@ export const useWorksheetGeneration = (
           length: fullPrompt.length,
           limit: PROMPT_HARD_LIMIT,
         });
-        setStreamProgress(null);
-        setIsGenerating(false);
-        setGenerationError(
+        abortBeforeStream(
           `Your lesson details are too long (${fullPrompt.length} characters, limit ${PROMPT_HARD_LIMIT}). ` +
           'Please shorten the lesson focus or additional information and try again.'
         );
@@ -346,13 +361,20 @@ export const useWorksheetGeneration = (
       
       // 4-minute safety timeout
       const generationTimeoutId = setTimeout(() => {
-        console.error('⏰ Generation timeout after 4 minutes');
+        devError('⏰ Generation timeout after 4 minutes');
         abortControllerRef.current?.abort();
         setStreamProgress(null);
-        setGenerationError("Generation took too long. Please try again.");
-        // The job registry reports the timeout; release the guard so the
-        // teacher can retry without reloading the page.
+        const timeoutMessage = "Generation took too long. Please try again.";
+        setGenerationError(timeoutMessage);
+        // Release the guard so the teacher can retry without reloading the
+        // page, and end the job so the modal does not outlive the timeout.
+        // The backend may still save the row, so the short recovery window
+        // stays open and the poller can still link it to the token charge.
         setIsGenerating(false);
+        try {
+          if (activeJobId) failGenerationJob(activeJobId, timeoutMessage);
+          else failGenerationJob(timeoutMessage);
+        } catch { /* ignore */ }
       }, 240_000);
 
       abortControllerRef.current = streamWorksheetGeneration(
@@ -405,7 +427,7 @@ export const useWorksheetGeneration = (
             try {
               await handleWorksheetCompletion(worksheetResult, data, startTime);
             } catch (completionError) {
-              console.error('❌ Worksheet completion failed:', completionError);
+              devError('❌ Worksheet completion failed:', completionError);
               setIsGenerating(false);
             }
           },
@@ -427,7 +449,7 @@ export const useWorksheetGeneration = (
               try {
                 await handleWorksheetCompletion(recovered, data, startTime);
               } catch (completionError) {
-                console.error('❌ Worksheet completion failed:', completionError);
+                devError('❌ Worksheet completion failed:', completionError);
                 setIsGenerating(false);
               }
               return;
@@ -480,25 +502,32 @@ export const useWorksheetGeneration = (
           },
           onError: async (error) => {
             clearTimeout(generationTimeoutId);
-            console.error('❌ Stream error:', error);
+            devError('❌ Stream error:', error);
             setStreamProgress(null);
+            // An HTTP 4xx means the server rejected the request itself
+            // (rate limit, prompt budget, bad input): nothing was started or
+            // saved, so skip the 30 s DB reconciliation and the recovery
+            // window and fail the job right away.
+            const rejectedByServer = isDeterministicStreamFailure(error);
             // v6.9.61: Before declaring failure, attempt a single DB recovery
             // pass (covers the case where the SSE socket died but the backend
             // already saved the worksheet via EdgeRuntime.waitUntil).
-            try {
-              const recovered = await recoverWorksheetAfterStreamLoss({
-                clientGenerationId,
-                teacherId: userId,
-                studentId: effectiveStudentId,
-                startedAt: startTime,
-              });
-              if (recovered) {
-                devLog('✅ [v6.9.61] Recovered worksheet after stream onError:', recovered.id);
-                await handleWorksheetCompletion(recovered, data, startTime);
-                return;
+            if (!rejectedByServer) {
+              try {
+                const recovered = await recoverWorksheetAfterStreamLoss({
+                  clientGenerationId,
+                  teacherId: userId,
+                  studentId: effectiveStudentId,
+                  startedAt: startTime,
+                });
+                if (recovered) {
+                  devLog('✅ [v6.9.61] Recovered worksheet after stream onError:', recovered.id);
+                  await handleWorksheetCompletion(recovered, data, startTime);
+                  return;
+                }
+              } catch (e) {
+                devWarn('[useWorksheetGeneration] onError recovery attempt threw', e);
               }
-            } catch (e) {
-              devWarn('[useWorksheetGeneration] onError recovery attempt threw', e);
             }
             setGenerationError(error.message || "Something went wrong during generation.");
             // v6.9.61 moved the error UI to the global job registry (mini
@@ -510,14 +539,23 @@ export const useWorksheetGeneration = (
               // v6.9.61: failGenerationJob now sets a 60s recoveryDeadlineAt
               // so the global DB poller can still promote the job back to
               // completed if the backend persists the worksheet later.
+              const failureMessage = error.message || 'Generation failed';
+              const failOptions = { allowRecovery: !rejectedByServer };
               if (activeJobId) {
-                failGenerationJob(activeJobId, error.message || 'Generation failed');
+                failGenerationJob(activeJobId, failureMessage, failOptions);
               } else {
-                failGenerationJob(error.message || 'Generation failed');
+                failGenerationJob(failureMessage, undefined, failOptions);
               }
               const reqId = (data as any).__autoGenerateRequestId;
               if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
               try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
+              if (rejectedByServer) {
+                toast({
+                  title: "Worksheet not generated",
+                  description: failureMessage,
+                  variant: "destructive",
+                });
+              }
             } catch { /* ignore */ }
           }
         }
@@ -525,7 +563,7 @@ export const useWorksheetGeneration = (
       
       return;
     } catch (error) {
-      console.error("💥 Worksheet generation error:", error);
+      devError("💥 Worksheet generation error:", error);
       
       trackEvent({
         eventType: 'worksheet_generation_complete',
@@ -538,6 +576,16 @@ export const useWorksheetGeneration = (
       });
       
       const errorMessage = error instanceof Error ? error.message : String(error);
+      // The outer catch also covers formatPromptForAI failures. End the job so
+      // the global modal closes; open a recovery window only if the stream had
+      // already started and the backend may still save a row.
+      try {
+        const failureMessage = `Worksheet generation failed: ${errorMessage}`.slice(0, 300);
+        if (activeJobId) failGenerationJob(activeJobId, failureMessage, { allowRecovery: streamingStarted });
+        else failGenerationJob(failureMessage, undefined, { allowRecovery: streamingStarted });
+        const reqId = (data as any).__autoGenerateRequestId;
+        if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
+      } catch { /* ignore */ }
       const isNetworkError = errorMessage.includes('Failed to fetch') || 
                             errorMessage.includes('CORS') || 
                             errorMessage.includes('NetworkError') ||
@@ -648,7 +696,7 @@ export const useWorksheetGeneration = (
     const finalWorksheetId = worksheetResult?.id;
     
     if (!finalWorksheetId) {
-      console.error('❌ CRITICAL: No valid ID received from backend!');
+      devError('❌ CRITICAL: No valid ID received from backend!');
       throw new Error("Failed to save worksheet to database - no ID returned");
     }
 

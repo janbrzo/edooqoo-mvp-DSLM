@@ -18,3 +18,9 @@ export const devWarn = (...args: any[]) => {
     console.warn(...args);
   }
 };
+
+export const devError = (...args: any[]) => {
+  if (import.meta.env.DEV) {
+    console.error(...args);
+  }
+};

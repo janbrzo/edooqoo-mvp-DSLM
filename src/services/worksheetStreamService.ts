@@ -1,4 +1,4 @@
-import { devLog } from '@/utils/logger';
+import { devLog, devError, devWarn } from '@/utils/logger';
 import { edgeFunctionHeaders } from '@/lib/edgeFunctionHeaders';
 /**
  * Worksheet Streaming Service
@@ -31,6 +31,27 @@ interface StreamCallbacks {
 }
 
 /**
+ * Raised when the generateWorksheet endpoint answered with a non-2xx status
+ * before any stream started. The status lets callers tell a deterministic
+ * rejection (4xx: the request will never succeed as sent, nothing was saved)
+ * from a transient server failure (5xx) that may still have produced a row.
+ */
+export class WorksheetStreamHttpError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'WorksheetStreamHttpError';
+    this.status = status;
+  }
+}
+
+/** True for HTTP 4xx rejections: no DB reconciliation can ever find a row. */
+export function isDeterministicStreamFailure(error: unknown): boolean {
+  return error instanceof WorksheetStreamHttpError && error.status >= 400 && error.status < 500;
+}
+
+/**
  * Streams worksheet generation from backend
  * Returns AbortController for cancellation capability
  */
@@ -40,19 +61,21 @@ export function streamWorksheetGeneration(
   callbacks: StreamCallbacks
 ): AbortController {
   // Outer controller: returned to the caller (so they can still abort the
-  // overall request). The inner controller is rebuilt on silent retry.
+  // overall request).
   const outerController = new AbortController();
-  let innerController = new AbortController();
-  let retryAttempted = false;
+  const innerController = new AbortController();
   
   // Use the same URL as regular generation
   const GENERATE_WORKSHEET_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generateWorksheet`;
 
   devLog('🚀 Starting streaming worksheet generation...', { hasUserId: !!userId });
 
-  // H5 (v6.9.27): heartbeat raised to 45s and now backed by a server-side
-  // keepalive comment frame every 15s. Before tearing the stream down we try
-  // a single silent retry if no exercise has streamed yet.
+  // H5 (v6.9.27): heartbeat raised to 45s and backed by a server-side
+  // keepalive comment frame every 15s. There is deliberately NO silent retry:
+  // the server keeps generating after a client disconnect, and a second
+  // request with the same clientGenerationId could save a duplicate row. A
+  // stalled stream is reported through onError, and the caller reconciles
+  // against the database before declaring failure.
   const HEARTBEAT_MS = 45000;
   let lastProgress: { exercisesGenerated: number; expectedTotal: number; phase?: string; percent?: number } = {
     exercisesGenerated: 0,
@@ -68,17 +91,7 @@ export function streamWorksheetGeneration(
   const resetHeartbeat = () => {
     cleanupHeartbeat();
     heartbeatTimer = setTimeout(() => {
-      if (lastProgress.exercisesGenerated === 0 && !retryAttempted) {
-        // Silent retry: nothing was streamed yet, so the user did not see any
-        // partial state. Tear down the inner stream and start a fresh one.
-        retryAttempted = true;
-        console.warn('⏱️ Heartbeat timeout before first exercise, silent retry');
-        try { innerController.abort(); } catch {}
-        innerController = new AbortController();
-        startRequest();
-        return;
-      }
-      console.error('⏱️ Heartbeat timeout: aborting stream after 45s of silence');
+      devError('⏱️ Heartbeat timeout: aborting stream after 45s of silence');
       try { innerController.abort(); } catch {}
       try { outerController.abort(); } catch {}
       const detail = lastProgress.exercisesGenerated > 0
@@ -121,7 +134,10 @@ export function streamWorksheetGeneration(
           serverMessage = text ? text.slice(0, 300) : null;
         } catch { /* ignore */ }
       }
-      throw new Error(serverMessage || `HTTP ${response.status}: ${response.statusText}`);
+      throw new WorksheetStreamHttpError(
+        serverMessage || `HTTP ${response.status}: ${response.statusText}`,
+        response.status,
+      );
     }
     
     const reader = response.body?.getReader();
@@ -187,13 +203,13 @@ export function streamWorksheetGeneration(
               break;
           }
         } catch (parseError) {
-          console.error('❌ Failed to parse SSE data:', parseError, dataStr);
+          devWarn('❌ Failed to parse SSE data:', parseError);
         }
       }
     }
     
     if (!receivedDoneOrError) {
-      console.error('⚠️ Stream ended without done/error event');
+      devWarn('⚠️ Stream ended without done/error event');
       // v6.9.55: if at least one exercise streamed, the worksheet may be
       // saved on the backend already. Hand the decision to the caller, who
       // will reconcile against the `worksheets` table before showing a
@@ -220,7 +236,7 @@ export function streamWorksheetGeneration(
       return;
     }
 
-    console.error('❌ Stream error:', error);
+    devError('❌ Stream error:', error);
     // v6.9.60: Treat network-class transport errors as RECOVERABLE when any
     // progress has streamed and the caller wired the reconciliation callback.
     // The backend `EdgeRuntime.waitUntil(backgroundWork)` keeps the worker
