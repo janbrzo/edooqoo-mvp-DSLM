@@ -19,7 +19,7 @@ const LIVE = live as Record<string, unknown>;
 const EM = '\u2014';
 const FULL_ID = '4992288d-7ec7-44e4-8f74-f40bf8d1806a';
 
-const legacyProfile = (raw: Record<string, unknown>, extra: Record<string, unknown> = {}) => ({
+const legacyProfile = <T extends Record<string, any> = Record<string, any>>(raw: Record<string, unknown>, extra: Record<string, unknown> = {}): T => ({
   student_id: FULL_ID,
   estimated_level: 'A2',
   self_assessed_level: null,
@@ -31,7 +31,7 @@ const legacyProfile = (raw: Record<string, unknown>, extra: Record<string, unkno
   traits: null,
   learning_path: null,
   ...extra,
-});
+} as unknown as T);
 
 describe('classifyProfile', () => {
   it('separates missing columns, pre Stage 4 and current', () => {
@@ -187,7 +187,7 @@ describe('payload emission (--emit-payload / --only)', () => {
   const PROFILE_ID = '11111111-2222-4333-8444-555555555555';
   const TEST_ID = '66666666-7777-4888-8999-000000000000';
   const entry = (raw: Record<string, unknown>, extra: Record<string, unknown> = {}) => ({
-    profile: legacyProfile(raw, { id: PROFILE_ID, welcome_test_id: TEST_ID, ...extra }),
+    profile: legacyProfile<Record<string, any>>(raw, { id: PROFILE_ID, welcome_test_id: TEST_ID, ...extra }),
     test: { total_questions: 49 },
     rows: [] as any[],
   });
