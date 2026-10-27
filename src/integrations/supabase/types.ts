@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      _mig_parts: {
+        Row: {
+          chunk: string | null
+          i: number
+          mig: string
+        }
+        Insert: {
+          chunk?: string | null
+          i: number
+          mig: string
+        }
+        Update: {
+          chunk?: string | null
+          i?: number
+          mig?: string
+        }
+        Relationships: []
+      }
       admin_activity_log: {
         Row: {
           action: string
@@ -963,6 +981,39 @@ export type Database = {
           },
         ]
       }
+      dslm_decision_log: {
+        Row: {
+          created_at: string
+          decision_type: string
+          id: string
+          param_version: number
+          payload: Json
+          source_id: string | null
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          decision_type: string
+          id?: string
+          param_version?: number
+          payload?: Json
+          source_id?: string | null
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          decision_type?: string
+          id?: string
+          param_version?: number
+          payload?: Json
+          source_id?: string | null
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: []
+      }
       dslm_event_errors: {
         Row: {
           created_at: string
@@ -984,6 +1035,33 @@ export type Database = {
           message?: string | null
           row_id?: string | null
           source?: string
+        }
+        Relationships: []
+      }
+      dslm_interpretation_params: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+          value: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name: string
+          value: Json
+          version: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+          value?: Json
+          version?: number
         }
         Relationships: []
       }
@@ -1985,6 +2063,7 @@ export type Database = {
           decided_at: string | null
           decided_by: string | null
           id: string
+          param_version: number
           proposed_pacing: number
           reasoning: Json
           status: string
@@ -1999,6 +2078,7 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           id?: string
+          param_version?: number
           proposed_pacing: number
           reasoning?: Json
           status?: string
@@ -2013,6 +2093,7 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           id?: string
+          param_version?: number
           proposed_pacing?: number
           reasoning?: Json
           status?: string
@@ -2081,6 +2162,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      phase_advance_proposals: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          evidence: Json
+          id: string
+          next_phase_id: string | null
+          phase_id: string
+          status: string
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          evidence?: Json
+          id?: string
+          next_phase_id?: string | null
+          phase_id: string
+          status?: string
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          evidence?: Json
+          id?: string
+          next_phase_id?: string | null
+          phase_id?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: []
       }
       processed_upgrade_sessions: {
         Row: {
@@ -2783,6 +2903,7 @@ export type Database = {
           last_event_at: string | null
           mastery_history: Json | null
           micro_skill: string | null
+          param_version: number
           skill_category: string
           skill_name: string
           student_id: string
@@ -2799,6 +2920,7 @@ export type Database = {
           last_event_at?: string | null
           mastery_history?: Json | null
           micro_skill?: string | null
+          param_version?: number
           skill_category: string
           skill_name: string
           student_id: string
@@ -2815,6 +2937,7 @@ export type Database = {
           last_event_at?: string | null
           mastery_history?: Json | null
           micro_skill?: string | null
+          param_version?: number
           skill_category?: string
           skill_name?: string
           student_id?: string
@@ -3991,6 +4114,7 @@ export type Database = {
         Args: { p_last_event_at: string; p_mastery: number; p_now: string }
         Returns: number
       }
+      dslm_validation_report: { Args: never; Returns: Json }
       extract_micro_skill: { Args: { skill_name: string }; Returns: string }
       extract_skill_category: { Args: { skill_name: string }; Returns: string }
       find_student_by_email: {
@@ -4582,6 +4706,15 @@ export type Database = {
           worksheet_id: string
         }[]
       }
+      log_dslm_decision: {
+        Args: {
+          p_decision_type: string
+          p_payload?: Json
+          p_source_id?: string
+          p_student_id: string
+        }
+        Returns: string
+      }
       log_homework_submitted_event: {
         Args: {
           p_event_payload: Json
@@ -4829,6 +4962,7 @@ export type Database = {
           p_element_type: string
           p_exercise_index: number
           p_exercise_title: string
+          p_prior_verdict?: Json
           p_ratings: Json
           p_student_id: string
           p_worksheet_id: string
