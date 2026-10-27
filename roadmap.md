@@ -107,6 +107,11 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Stage 1.3: owner/service-only read-time state vector RPC, canonical metrics, parity-tested decay, 1056 tests passed; production student reads and <15 ms latency unverified because external Supabase testing has no authorized session (spec: docs/operational/pillar-1-stage-13.md)
 - [x] Stage 1.4: zero-regression baseline — SQL contract tests for Stages 1.1-1.3 in `dslmSqlBaseline.test.ts` + cross-cutting TS/parity guards in `pillar1Baseline.test.ts` (spec: `docs/operational/pillar-1-stage-14.md`); production state-vector reads and latency still unverified (external Supabase)
 
+## AI Defensibility, Pillar 2
+
+- [ ] Stage 2.1: pure recommendation evidence engine and unit tests; no UI integration, network calls, database changes or worksheet engine edits.
+- Stages 2.2-2.4 remain outside this implementation: teacher-facing evidence panels, competency radar and full Pillar 2 closure.
+
 ## SEO/GEO Consolidation, Step 2
 
 - [x] Merged 63 near-duplicate pages (containment 0.65-0.93) into 5 canonical targets: /edooqoo-vs-chatgpt.html, /chatgpt-alternative-for-english-tutors.html, /ai-tools-for-private-english-tutors.html, /edooqoo-vs-twee.html, /edooqoo-vs-busyteacher.html; retired URLs 301 via CONTENT_OVERRIDES + meta-refresh stubs, dropped from sitemap, internal links pruned (Resources, GlobalFooter, citation mesh)
