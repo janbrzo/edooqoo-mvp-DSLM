@@ -178,6 +178,8 @@ describe('explicit source links and safe fallback', () => {
 
   it('uses calendar-day deadline boundaries including today and overdue dates', () => {
     expect(run({ goals: [{ ...goal, target_date: '2026-10-27' }], linkedGoalIds: [goal.id] }).primary).toMatchObject({ days_until_target: 0 });
+    expect(run({ now: Date.parse('2026-10-27T23:00:00Z'), goals: [{ ...goal, target_date: '2026-10-27' }], linkedGoalIds: [goal.id] }).primary)
+      .toMatchObject({ days_until_target: 0 });
     expect(run({ goals: [{ ...goal, target_date: '2026-10-25' }], linkedGoalIds: [goal.id] }).primary).toMatchObject({ days_until_target: -2 });
   });
 
