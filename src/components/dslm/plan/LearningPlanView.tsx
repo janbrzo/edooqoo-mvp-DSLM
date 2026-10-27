@@ -432,6 +432,8 @@ export const LearningPlanView: React.FC<LearningPlanViewProps> = ({
         <>
           <UpNextSection
             studentId={studentId}
+            teacherId={teacherId}
+            phases={phases}
             items={upNext}
             usedSteps={timeline.usedSteps}
             generating={timeline.generating}

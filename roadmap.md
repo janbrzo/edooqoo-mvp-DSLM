@@ -110,7 +110,8 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 ## AI Defensibility, Pillar 2
 
 - [x] Stage 2.1: pure `explainRecommendation` engine with six evidence kinds and 81 unit tests; full suite 1471 tests passed. No UI integration, network calls, database changes or worksheet engine edits; goal/note/diagnostic evidence requires explicit links, diagnostic scored counts are caller-computed from evaluated answers. Two pre-existing shared-function type errors corrected without behavior changes; protected file hashes unchanged.
-- Stages 2.2-2.4 remain outside this implementation: teacher-facing evidence panels, competency radar and full Pillar 2 closure.
+- [x] Stage 2.2: shared Why This Lesson disclosure in Prep, Learning plan and the applied worksheet preset; exact source and learner/teacher guards, evidence badges, loading/error/Retry/empty states. 1485 tests passed, browser fixtures verified all three surfaces, non-first selection, source text edits, learner switch, small-screen/dark/error/retry states with zero writes and page errors; protected engine and llms.txt hashes unchanged. Authenticated production end-to-end checks remain unavailable on external unmanaged Supabase; fixtures are not production-session verification. Spec: docs/ux/explainable-dslm-spec.md.
+- Stages 2.3-2.4 remain outside this implementation: competency radar and full Pillar 2 closure.
 
 ## SEO/GEO Consolidation, Step 2
 

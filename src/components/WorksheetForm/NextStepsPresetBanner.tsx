@@ -23,6 +23,10 @@ import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { SuggestionEditDialog, type SuggestionEditValue } from '@/components/dslm/SuggestionEditDialog';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { orderUpNext } from '@/lib/dslm/learningPlan';
+import { usePlanEvidenceMetrics } from '@/hooks/dslm/usePlanEvidenceMetrics';
+import { explainRecommendation } from '@/lib/dslm/recommendationExplainability';
+import { resolveAppliedEvidenceSuggestion, type AppliedEvidenceSource, type AppliedLessonFields } from '@/lib/dslm/recommendationEvidenceView';
+import { EvidenceBadge, WhyThisLessonBanner } from '@/components/dslm/WhyThisLessonBanner';
 import {
   PICTURE_EXERCISE_IDS,
   AUDIO_EXERCISE_IDS,
@@ -45,6 +49,8 @@ interface NextStepsPresetBannerProps {
   studentName?: string;
   teacherId: string | null;
   onApplyPreset: (preset: PresetPayload) => void;
+  appliedEvidenceSource?: AppliedEvidenceSource | null;
+  lessonFields?: AppliedLessonFields;
 }
 
 /** Infer media family from exercise IDs (picture > audio > none). */
@@ -66,6 +72,8 @@ export function NextStepsPresetBanner({
   studentName,
   teacherId,
   onApplyPreset,
+  appliedEvidenceSource,
+  lessonFields,
 }: NextStepsPresetBannerProps) {
   const navigate = useNavigate();
   const { isDemoMode } = useDemoContext();
@@ -82,19 +90,32 @@ export function NextStepsPresetBanner({
     studentId: enabledStudentId,
     teacherId: enabledTeacherId,
   });
+  // Existing hooks retain their last rows while another learner is loading.
+  const scopedPhaseSteps = phaseSteps.filter(row => row.student_id === studentId && row.teacher_id === teacherId);
+  const scopedNextSteps = nextSteps.filter(row => row.student_id === studentId && row.teacher_id === teacherId);
+  const scopedPhases = phases.filter(row => row.student_id === studentId && row.teacher_id === teacherId);
+  const signals = usePlanEvidenceMetrics(enabledStudentId, enabledTeacherId);
+  const appliedSuggestion = lessonFields ? resolveAppliedEvidenceSuggestion({
+    source: appliedEvidenceSource ?? null, rows: [...phaseSteps, ...nextSteps],
+    studentId: studentId || '', teacherId: teacherId || '', fields: lessonFields,
+  }) : null;
+  const now = Date.now();
+  const explain = (suggestion: typeof phaseSteps[number]) => explainRecommendation({
+    suggestion, now, metrics: signals.error ? [] : signals.rawMetrics, phases: scopedPhases,
+  });
 
   // Same queue as the Prep card and Learning plan Up next (AGENTS.md: orderUpNext).
   const { sortedItems } = useMemo(() => {
     const phaseSeqById: Record<string, number> = {};
-    phases.forEach((p: any) => { phaseSeqById[p.id] = p.sequence_number; });
-    const items = orderUpNext({ phases, phaseSteps, nextSteps }).map((item) => ({
+    scopedPhases.forEach((p) => { phaseSeqById[p.id] = p.sequence_number; });
+    const items = orderUpNext({ phases: scopedPhases, phaseSteps: scopedPhaseSteps, nextSteps: scopedNextSteps }).map((item) => ({
       s: item.suggestion as any,
       displayIndex: item.displayIndex,
       phaseLabel: item.phaseLabel,
       phaseSeq: item.phaseId ? (phaseSeqById[item.phaseId] ?? null) : null,
     }));
     return { sortedItems: items };
-  }, [phaseSteps, nextSteps, phases]);
+  }, [phaseSteps, nextSteps, phases, studentId, teacherId]);
 
   // Sliding-window carousel state (3 visible at a time, advances by 1).
   const [windowStart, setWindowStart] = useState(0);
@@ -164,8 +185,8 @@ export function NextStepsPresetBanner({
   if (total === 0) {
     return (
       <div className="mb-3">
-        <div className="flex flex-wrap items-start justify-between gap-3 rounded-md border border-amber-300/60 bg-amber-50 dark:bg-amber-900/15 dark:border-amber-700/50 px-3 py-2.5">
-          <div className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-100 flex-1 min-w-[260px]">
+        <div className="flex flex-wrap items-start justify-between gap-3 rounded-md border border-warning/30 bg-warning/5 px-3 py-2.5">
+          <div className="flex min-w-0 flex-1 items-start gap-2 text-sm text-foreground">
             <Lightbulb className="h-4 w-4 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <div>
@@ -180,7 +201,7 @@ export function NextStepsPresetBanner({
             type="button"
             variant="outline"
             size="sm"
-            className="h-8 gap-1 border-amber-400 text-amber-900 hover:bg-amber-100 dark:text-amber-100 self-center"
+            className="h-auto min-h-8 gap-1 whitespace-normal self-center"
             onClick={() => navigate(`/student/${studentId}?tab=dslm&view=pathway`)}
           >
             Open student context
@@ -194,20 +215,21 @@ export function NextStepsPresetBanner({
   return (
     <TooltipProvider delayDuration={200}>
       <div className="mb-3">
-        <div className="rounded-md bg-worksheet-purpleLight dark:bg-purple-900/20 border border-worksheet-purple/20 px-3 py-2">
+        <div className="rounded-md bg-primary/5 border border-primary/20 px-3 py-2">
           {/* Header row */}
-          <div className="flex items-center justify-between gap-2 mb-1.5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-worksheet-purpleDark dark:text-purple-200">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+            <div className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-foreground">
               <Map className="h-3.5 w-3.5" />
               1-Minute Prep suggestions from DSLM
             </div>
-            <button
+            <Button
               type="button"
+              variant="link" size="sm"
               onClick={() => navigate(`/student/${studentId}?tab=dslm&view=pathway`)}
-              className="text-[11px] text-worksheet-purpleDark dark:text-purple-200 hover:underline flex items-center gap-0.5"
+              className="h-auto p-0 text-xs flex items-center gap-0.5"
             >
               View plan <ArrowUpRight className="h-3 w-3" />
-            </button>
+            </Button>
           </div>
 
           {/* Carousel row */}
@@ -224,7 +246,7 @@ export function NextStepsPresetBanner({
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
-            <div className="flex flex-wrap items-center gap-1.5 flex-1">
+            <div className="flex min-w-0 flex-wrap items-start gap-2 flex-1">
               {visible.map(({ s: p, displayIndex, phaseLabel, phaseSeq }) => {
                 const exercises: string[] = Array.isArray(p.suggested_exercises) ? p.suggested_exercises : [];
                 const focusMap: Record<string, string> = (p.suggested_exercise_focus_map as Record<string, string>) || {};
@@ -244,24 +266,30 @@ export function NextStepsPresetBanner({
                 return (
                   <Tooltip key={p.id}>
                     <TooltipTrigger asChild>
-                      <div className="inline-flex items-center rounded-md border border-worksheet-purple/30 bg-white/80 dark:bg-background/40 overflow-hidden">
-                        <button
+                      <div className="min-w-0 max-w-full space-y-1">
+                      <div className="flex min-w-0 items-center rounded-md border border-primary/30 bg-background overflow-hidden">
+                        <Button
                           type="button"
-                          className="h-7 px-2 inline-flex items-center gap-1 text-xs hover:bg-worksheet-purple/10"
+                          variant="ghost" size="sm"
+                          className="h-8 min-w-0 px-2 inline-flex items-center gap-1 text-xs rounded-none"
                           onClick={() => { onApplyPreset(payload); setWindowStart(0); }}
+                          aria-label={`Apply suggestion: ${payload.topic}`}
                         >
-                          <Sparkles className="h-3 w-3 text-worksheet-purple" />
-                          <span className="max-w-[180px] truncate">{label}</span>
-                        </button>
-                        <button
+                          <Sparkles className="h-3 w-3 text-primary" />
+                          <span className="min-w-0 max-w-[180px] truncate">{label}</span>
+                        </Button>
+                        <Button
                           type="button"
+                          variant="ghost" size="icon"
                           aria-label="Edit suggestion"
                           title="Edit suggestion"
-                          className="h-7 w-6 inline-flex items-center justify-center border-l border-worksheet-purple/20 text-worksheet-purpleDark hover:bg-worksheet-purple/10"
+                          className="h-8 w-7 shrink-0 rounded-none border-l border-primary/20 text-muted-foreground"
                           onClick={(e) => { e.stopPropagation(); openEdit(p); }}
                         >
                           <Edit2 className="h-3 w-3" />
-                        </button>
+                        </Button>
+                      </div>
+                      {!signals.loading && !signals.error && <EvidenceBadge explanation={explain(p)} />}
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-sm">
@@ -274,7 +302,7 @@ export function NextStepsPresetBanner({
                           <div><span className="opacity-70">Goal:</span> {p.suggested_goal}</div>
                         )}
                         {p.rationale && (
-                          <div className="italic opacity-80"><span className="not-italic opacity-70">Why:</span> {p.rationale}</div>
+                          <div className="italic opacity-80"><span className="not-italic opacity-70">Suggested rationale:</span> {p.rationale}</div>
                         )}
                         <div className="pt-1">
                           <Button
@@ -307,12 +335,19 @@ export function NextStepsPresetBanner({
             </Button>
 
             {total > 3 && (
-              <span className="text-[10px] text-worksheet-purpleDark/70 dark:text-purple-200/70 flex-shrink-0 ml-1">
+              <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-1">
                 {windowStart + 1}–{Math.min(windowStart + 3, total)} of {total}
               </span>
             )}
           </div>
         </div>
+        {!loading && appliedSuggestion && (
+          <div className="mt-3">
+            <WhyThisLessonBanner key={`${studentId}-${appliedSuggestion.id}`} explanation={explain(appliedSuggestion)}
+              loading={signals.loading} error={signals.error} onRetry={() => { void signals.refetch(); }}
+              rationale={appliedSuggestion.rationale} />
+          </div>
+        )}
       </div>
       <SuggestionEditDialog
         open={!!editingId}
