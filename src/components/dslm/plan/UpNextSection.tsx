@@ -16,6 +16,8 @@ import { formatRelativeAgeInline } from '@/lib/students/prepPlan';
 import { PlanSection } from './PlanSection';
 import { SuggestionActionsMenu } from './SuggestionActionsMenu';
 import { SuggestionWhyPanel, type SuggestionLike } from './SuggestionWhyPanel';
+import { ConnectedWhyThisLesson } from '@/components/dslm/ConnectedWhyThisLesson';
+import type { ExplainabilityPhase } from '@/lib/dslm/recommendationExplainability';
 
 export interface PlanSuggestion extends SuggestionLike {
   id: string;
@@ -38,6 +40,8 @@ export interface UpNextActions {
 
 interface UpNextSectionProps extends UpNextActions {
   studentId: string;
+  teacherId: string;
+  phases: readonly ExplainabilityPhase[];
   items: readonly UpNextItem<PlanSuggestion>[];
   usedSteps: readonly PlanSuggestion[];
   generating: boolean;
@@ -52,10 +56,12 @@ const topicOf = (s: PlanSuggestion) => (s.suggested_topic || '').trim() || 'Unti
 
 const FeaturedCard: React.FC<{
   studentId: string;
+  teacherId: string;
+  phases: readonly ExplainabilityPhase[];
   item: UpNextItem<PlanSuggestion>;
   generating: boolean;
   actions: UpNextActions;
-}> = ({ studentId, item, generating, actions }) => {
+}> = ({ studentId, teacherId, phases, item, generating, actions }) => {
   const s = item.suggestion;
   const storageKey = `dslm.nextStep.detailsOpen.${studentId}`;
   const [open, setOpen] = useState(false);
@@ -70,7 +76,6 @@ const FeaturedCard: React.FC<{
     try { localStorage.setItem(storageKey, next ? '1' : '0'); } catch { /* storage unavailable */ }
   };
   const caption = formatPhaseCaption(item);
-  const why = (s.rationale || '').trim() || (s.suggested_goal || '').trim();
 
   return (
     <article
@@ -84,12 +89,9 @@ const FeaturedCard: React.FC<{
         <Badge variant="secondary" className="ml-auto font-normal">Also in Prep</Badge>
       </div>
       <h4 className="mt-2 break-words text-lg font-semibold leading-snug text-foreground">{topicOf(s)}</h4>
-      {why && (
-        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Why: </span>
-          {why}
-        </p>
-      )}
+      <div className="mt-3">
+        <ConnectedWhyThisLesson studentId={studentId} teacherId={teacherId} suggestion={s} phases={phases} rationale={s.rationale} />
+      </div>
       <Collapsible open={open} onOpenChange={toggle}>
         <CollapsibleTrigger asChild>
           <Button variant="link" size="sm" className="h-auto px-0 text-xs" aria-expanded={open}>
@@ -170,6 +172,8 @@ const QueueRow: React.FC<{
 
 export const UpNextSection: React.FC<UpNextSectionProps> = ({
   studentId,
+  teacherId,
+  phases,
   items,
   usedSteps,
   generating,
@@ -194,7 +198,7 @@ export const UpNextSection: React.FC<UpNextSectionProps> = ({
         </Button>
       }
     >
-      {first && <FeaturedCard studentId={studentId} item={first} generating={generating} actions={actions} />}
+      {first && <FeaturedCard studentId={studentId} teacherId={teacherId} phases={phases} item={first} generating={generating} actions={actions} />}
 
       {rest.length > 0 && (
         <ol className="divide-y divide-border rounded-lg border border-border bg-card" aria-label="Later lessons">
