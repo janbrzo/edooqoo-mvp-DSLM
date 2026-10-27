@@ -12,7 +12,7 @@ import {
   answersFromQuestionRows,
   reconstructTraits,
 } from '../../supabase/functions/_shared/welcomeTestTraits';
-import { matchOptionIndex } from '../../supabase/functions/_shared/welcomeTestOptionAliases';
+import { LEGACY_OPTION_TEXT, matchOptionIndex } from '../../supabase/functions/_shared/welcomeTestOptionAliases';
 import { bankOfRowCount, storedQuestionId } from '../../supabase/functions/_shared/welcomeTestBank';
 import { WELCOME_TEST_QUESTION_IDS } from '../../supabase/functions/_shared/welcomeTestTraits';
 import { shownRows } from '../../supabase/functions/_shared/welcomeTestFlow';
@@ -156,6 +156,27 @@ export function findUnmatchedAnswers(answers: Record<string, unknown>): string[]
   return Array.from(out).sort();
 }
 
+/**
+ * WHAT-IF only: merges proposed legacy option texts into the in-memory alias
+ * table of this process (nothing is written anywhere). Returns a function that
+ * restores the original table. Used to show what a profile would look like once
+ * the aliases the dry run asks for exist (E1).
+ */
+export function applyExtraAliases(extra: Record<string, Record<string, string>>): () => void {
+  const table = LEGACY_OPTION_TEXT as Record<string, Record<string, string>>;
+  const snapshot = new Map<string, Record<string, string> | undefined>();
+  for (const [qid, map] of Object.entries(extra)) {
+    snapshot.set(qid, table[qid] ? { ...table[qid] } : undefined);
+    table[qid] = { ...(table[qid] ?? {}), ...map };
+  }
+  return () => {
+    for (const [qid, prev] of snapshot) {
+      if (prev === undefined) delete table[qid];
+      else table[qid] = prev;
+    }
+  };
+}
+
 export interface PacingView {
   intensity: string | null;
   score: number | null;
@@ -277,6 +298,10 @@ export function recomputeProfile(entry: ProfileEntry, now: Date | number = Date.
     if (q.student_answer === '__IDK__' || q.is_correct === false) skillWrongOrIdk++;
   }
   if (rows.length === 0) notes.push('no stored question rows: answer_behaviour is empty');
+  const totalQuestions = Number(entry.test?.total_questions ?? 0);
+  if (totalQuestions > 0 && bankOfRowCount(totalQuestions) === null) {
+    notes.push(`legacy test (${totalQuestions} rows): answers from raw_answers, answer_behaviour counts every stored row`);
+  }
 
   const matrix = asObject(answers.wt_q44) ?? {};
   const divergences = computeDivergences({
@@ -293,7 +318,8 @@ export function recomputeProfile(entry: ProfileEntry, now: Date | number = Date.
   });
 
   const after: Record<V2Column, unknown> = {
-    traits: { version: 1, [INTERPRETATION_VERSION_KEY]: interpretationVersion, ...traits },
+    // An unstamped profile is interpretation v1 by definition: no stamp is added, so the stored reading is not relabelled.
+    traits: { version: 1, ...(interpretationVersion > 1 ? { [INTERPRETATION_VERSION_KEY]: interpretationVersion } : {}), ...traits },
     learning_path: learningPath,
     divergences,
     answer_behaviour: behaviour,
@@ -421,6 +447,7 @@ export function renderMarkdown(results: RecomputeResult[], asOf: string, include
     if (r.traitColumnMismatches.length) flags.push(`trait differs from column: ${r.traitColumnMismatches.join(',')}`);
     if (r.v2Reproduced === false) flags.push('stored LPS v2 NOT reproduced');
     if (r.capacityWarningChanged) flags.push('capacity warning changes');
+    for (const n of r.notes) flags.push(n);
     if (r.currentInterpretationAlt && r.currentInterpretationAlt.traitsChanged.length) {
       flags.push(`interp v2 would change: ${r.currentInterpretationAlt.traitsChanged.join(',')}`);
     }

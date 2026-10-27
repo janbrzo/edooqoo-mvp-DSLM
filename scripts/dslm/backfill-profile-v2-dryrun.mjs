@@ -9,8 +9,10 @@
  *
  * Run (the shared code is TypeScript, so use vite-node):
  *   SUPABASE_URL=https://<ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=<key> \
- *     npx vite-node --config vitest.config.ts scripts/dslm/backfill-profile-v2-dryrun.mjs [--out report.md] [--include-current]
- *   npx vite-node --config vitest.config.ts scripts/dslm/backfill-profile-v2-dryrun.mjs --input export.json [--out report.md]
+ *     npx vite-node scripts/dslm/backfill-profile-v2-dryrun.mjs [--out report.md] [--include-current]
+ *   npx vite-node scripts/dslm/backfill-profile-v2-dryrun.mjs --input export.json [--out report.md]
+ *   add --what-if-aliases aliases.json ({ questionId: { legacyText: currentOptionText } }) to see the table once
+ *   those legacy option texts are accepted; the aliases live in memory only and nothing is written.
  *
  * --input is a JSON array of { profile, test, rows } (a SQL export of
  * student_learning_profiles, its student_tests row and its student_test_questions
@@ -18,7 +20,7 @@
  * arguments or the file, and only GET requests are ever sent.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { recomputeProfile, renderMarkdown } from './profileV2Recompute.ts';
+import { applyExtraAliases, recomputeProfile, renderMarkdown } from './profileV2Recompute.ts';
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -59,8 +61,10 @@ async function loadFromRest() {
 
 const inputPath = opt('--input');
 const entries = inputPath ? JSON.parse(readFileSync(inputPath, 'utf8')) : await loadFromRest();
-const asOf = inputPath ? `export ${inputPath.split('/').pop()}` : new Date().toISOString();
+const asOf = (inputPath ? `export ${inputPath.split('/').pop()}` : new Date().toISOString()) + (opt('--what-if-aliases') ? ' (WHAT-IF: proposed legacy aliases applied in memory)' : '');
 
+const aliasFile = opt('--what-if-aliases');
+if (aliasFile) applyExtraAliases(JSON.parse(readFileSync(aliasFile, 'utf8')));
 const results = entries.map((e) => recomputeProfile(e));
 const markdown = renderMarkdown(results, asOf, flag('--include-current'));
 
