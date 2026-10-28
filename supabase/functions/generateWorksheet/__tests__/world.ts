@@ -35,6 +35,8 @@ export interface GeminiStreamScript {
   chunks: string[];
   /** Thrown from the stream after all chunks were delivered. */
   throwAfter?: Error;
+  /** The stream yields nothing until this promise settles. */
+  gate?: Promise<void>;
 }
 
 export interface World {
@@ -53,7 +55,7 @@ export interface World {
   openaiCalls: number;
   student: { data: unknown };
   profile: { data: unknown; error?: unknown };
-  insertResult: { data: unknown; error: unknown };
+  insertResult: { data: unknown; error: unknown } | Error;
   /** Result of the geolocation cache lookup and the ipapi.co lookup. */
   geoCache: { data: unknown; error: unknown };
   ipapi: { ok: boolean; body: unknown } | Error;
@@ -167,7 +169,10 @@ function makeQuery(table: string) {
       if (p instanceof Error) throw p;
       return { data: p.data, error: p.error ?? null };
     }
-    if (table === 'worksheets') return w.insertResult;
+    if (table === 'worksheets') {
+      if (w.insertResult instanceof Error) throw w.insertResult;
+      return w.insertResult;
+    }
     if (table === 'geolocation_cache' && rec.op === 'select') return w.geoCache;
     return { data: null, error: null };
   };
@@ -280,6 +285,7 @@ export const modules = {
             return {
               response: Promise.resolve({}),
               stream: (async function* () {
+                if (script.gate) await script.gate;
                 for (const c of script.chunks) yield { text: () => c };
                 if (script.throwAfter) throw script.throwAfter;
               })(),
