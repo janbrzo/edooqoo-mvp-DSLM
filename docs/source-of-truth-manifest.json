@@ -34782,7 +34782,9 @@
         }
       ],
       "state": [],
-      "hooks": [],
+      "hooks": [
+        "useTeacherVerdicts"
+      ],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -35144,7 +35146,9 @@
         }
       ],
       "state": [],
-      "hooks": [],
+      "hooks": [
+        "useTeacherVerdicts"
+      ],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -35228,7 +35232,8 @@
       ],
       "state": [],
       "hooks": [
-        "useMemo"
+        "useMemo",
+        "useTeacherVerdicts"
       ],
       "actions": [],
       "navigateTargets": [],
@@ -35335,7 +35340,8 @@
       ],
       "state": [],
       "hooks": [
-        "useMemo"
+        "useMemo",
+        "useTeacherVerdicts"
       ],
       "actions": [],
       "navigateTargets": [],
@@ -35413,7 +35419,9 @@
         }
       ],
       "state": [],
-      "hooks": [],
+      "hooks": [
+        "useTeacherVerdicts"
+      ],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -36216,7 +36224,9 @@
         }
       ],
       "state": [],
-      "hooks": [],
+      "hooks": [
+        "useTeacherVerdicts"
+      ],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -37316,7 +37326,9 @@
         }
       ],
       "state": [],
-      "hooks": [],
+      "hooks": [
+        "useTeacherVerdicts"
+      ],
       "actions": [
         "handleScrambledWordsChange"
       ],

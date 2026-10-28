@@ -2,6 +2,7 @@ import React from "react";
 import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { safeGetText } from "@/utils/textObjectFixer";
 import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { useTeacherVerdicts, applyTeacherVerdict } from "@/lib/answers/teacherVerdicts";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 
 
@@ -25,6 +26,7 @@ const ExerciseErrorCorrection: React.FC<ExerciseErrorCorrectionProps> = ({
   showCorrectAnswers = false,
   disabled = false,
 }) => {
+  const teacherVerdicts = useTeacherVerdicts();
   return (
     <div className="space-y-3">
       {sentences.map((sentence, sIndex) => {
@@ -35,10 +37,11 @@ const ExerciseErrorCorrection: React.FC<ExerciseErrorCorrectionProps> = ({
           sentence.correct ||
           sentence.corrected ||
           sentence.correct_sentence || '';
-        const match = matchAnswer(studentAnswer, correctAnswer, {
+        const rawMatch = matchAnswer(studentAnswer, correctAnswer, {
           mode: 'sentence',
           sourceSentence: safeGetText(sentence.incorrect) || safeGetText(sentence.text),
         });
+        const match = { ...rawMatch, verdict: applyTeacherVerdict(teacherVerdicts, sIndex, rawMatch.verdict) };
         const isCorrect = showCorrectAnswers && match.verdict === 'correct';
         const isReview = showCorrectAnswers && match.verdict === 'review';
         const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';

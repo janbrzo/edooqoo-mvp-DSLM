@@ -20,7 +20,8 @@ import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEv
 import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
 import { isClosedExerciseType } from "@/utils/masteryCalculator";
 import { ItemsToCheckPanel } from "@/components/homework/ItemsToCheckPanel";
-import { findItemsToCheck, type StoredItemRating } from "@/lib/homework/reviewItems";
+import { findItemsToCheck, teacherVerdictsOf, type StoredItemRating } from "@/lib/homework/reviewItems";
+import { TeacherVerdictsContext } from "@/lib/answers/teacherVerdicts";
 import { parseAiEvaluation } from "@/utils/aiEvaluationMapper";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
@@ -487,6 +488,7 @@ export default function HomeworkReviewPage() {
             return (
               <div key={index} className="space-y-4">
                 {/* Exercise */}
+                <TeacherVerdictsContext.Provider value={teacherVerdictsOf(storedRow?.item_evaluations)}>
                 <ExerciseSection
                   exercise={exercise}
                   index={index + 1}
@@ -503,6 +505,7 @@ export default function HomeworkReviewPage() {
                   studentAnswers={studentAnswer as any}
                   showCorrectAnswers={true}
                 />
+                </TeacherVerdictsContext.Provider>
                 
                 {/* AI feedback per question (ai_evaluation.question_evaluations) */}
                 {aiEvaluation && isClosedExerciseType(exercise.type) && (

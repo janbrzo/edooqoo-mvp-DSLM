@@ -73,3 +73,15 @@ export async function setHomeworkItemVerdict(
   if (error) throw error;
   return data as unknown as ItemVerdictResult;
 }
+
+/** question_index -> the teacher's decision stored on the ratings (`source: 'teacher'`). */
+export function teacherVerdictsOf(
+  itemEvaluations: ReadonlyArray<StoredItemRating> | null | undefined,
+): Record<number, 'correct' | 'wrong'> {
+  const out: Record<number, 'correct' | 'wrong'> = {};
+  for (const r of itemEvaluations ?? []) {
+    if (r?.source !== 'teacher' || typeof r.question_index !== 'number' || typeof r.mastery !== 'number' || r.mastery < 0) continue;
+    out[r.question_index] = r.mastery >= 50 ? 'correct' : 'wrong';
+  }
+  return out;
+}
