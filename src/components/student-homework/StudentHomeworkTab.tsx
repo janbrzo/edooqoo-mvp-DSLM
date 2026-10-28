@@ -29,7 +29,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import RenameDialog from '@/components/RenameDialog';
-import { devLog } from '@/utils/logger';
+import { devLog, devWarn } from '@/utils/logger';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 import { hasStudentReturnedHomework, homeworkReviewPath, isHomeworkAwaitingReview } from '@/lib/homework/reviewState';
 import { markDoneOutcome, reopenHomework, type LifecycleResult } from '@/lib/homework/homeworkStateRpc';
 
@@ -670,16 +671,12 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
           worksheetId={selectedWorksheetForHomework || firstWorksheet.id}
           worksheetTitle={firstWorksheet.title || 'Worksheet'}
           exercises={(() => {
-            // Safe parsing with try-catch to prevent crashes on corrupted ai_response
-            if (!firstWorksheet.ai_response) return [];
-            try {
-              const parsed = JSON.parse(firstWorksheet.ai_response);
-              return parsed.exercises || [];
-            } catch (e) {
-              console.error('❌ Failed to parse worksheet ai_response for homework modal:', e);
-              devLog(`⚠️ Worksheet ${firstWorksheet.id} ai_response length: ${firstWorksheet.ai_response?.length || 0}`);
-              return [];
+            // Shared loader: never throws on corrupted ai_response
+            const loaded = loadWorksheetContent(firstWorksheet);
+            if (loaded.degraded) {
+              devWarn(`Worksheet ${firstWorksheet.id} loaded from html_content fallback`, loaded.reason);
             }
+            return Array.isArray(loaded.data?.exercises) ? loaded.data.exercises : [];
           })()}
           teacherId={teacherId}
           students={students.map(s => ({

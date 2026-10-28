@@ -7,6 +7,7 @@ import PublicTopNav from '@/components/public/PublicTopNav';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 import { Button } from '@/components/ui/button';
 import { publicDecisionPath } from '@/lib/gallery/publicExamples';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 
 interface PublicWorksheetRow {
   id: string;
@@ -75,8 +76,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
     );
   }
 
-  let parsed: any = null;
-  try { parsed = worksheet.ai_response ? JSON.parse(worksheet.ai_response) : null; } catch (_) { /* ignore */ }
+  const parsed: any = loadWorksheetContent(worksheet).data;
   // v6.9.36: accept legacy/alternate JSON shapes so the gallery preview is
   // never blank for valid worksheets. Storage is not changed.
   const exercises: any[] = (() => {

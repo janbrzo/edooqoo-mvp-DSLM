@@ -15,7 +15,8 @@ import AnonPostWorksheetLandingPage from '@/components/anon/AnonPostWorksheetLan
 import AnonPreWorksheetBanner from '@/components/anon/AnonPreWorksheetBanner';
 import StickyNav from '@/components/landing/StickyNav';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
-import { devLog } from '@/utils/logger';
+import { devError, devLog, devWarn } from '@/utils/logger';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 import { isValidUUID } from '@/utils/securityUtils';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 import { resolveLessonMedia, withColumnTitle } from '@/lib/worksheetEditor/lessonMedia';
@@ -67,7 +68,7 @@ export default function WorksheetPage() {
     if (!isDemoMode || !demoData || !id) return;
     const demoWs = demoData.worksheets.find((w: any) => w.id === id);
     if (demoWs) {
-      const parsed = demoWs.ai_response ? JSON.parse(demoWs.ai_response) : null;
+      const parsed = loadWorksheetContent(demoWs).data;
       setWorksheetData(demoWs);
       setParsedWorksheet(parsed);
       setEditableWorksheet(parsed);
@@ -173,52 +174,28 @@ export default function WorksheetPage() {
           // Allow access for anonymous users within 24 hours
         }
 
-        // Parse ai_response with fallback to html_content for corrupted data
-        let parsed = null;
-        const aiResponseLength = worksheet.ai_response?.length || 0;
-        devLog(`📊 ai_response length: ${aiResponseLength} characters`);
-        
-        if (worksheet.ai_response) {
-          try {
-            parsed = JSON.parse(worksheet.ai_response);
-            parsed = deepFixTextObjects(parsed, 'worksheetPage');
-            devLog('✅ Successfully parsed and fixed worksheet data from ai_response');
-          } catch (parseError) {
-            console.error('❌ Error parsing ai_response:', parseError);
-            devLog(`⚠️ ai_response was ${aiResponseLength} chars - likely truncated if near 50000 or 200000`);
-            
-            // FALLBACK: Try to parse from html_content (contains full JSON.stringify data)
-            if (worksheet.html_content) {
-              devLog('🔄 Attempting fallback to html_content...');
-              const htmlContentLength = worksheet.html_content?.length || 0;
-              devLog(`📊 html_content length: ${htmlContentLength} characters`);
-              
-              try {
-                parsed = JSON.parse(worksheet.html_content);
-                parsed = deepFixTextObjects(parsed, 'html_content_fallback');
-                devLog('✅ Successfully parsed worksheet from html_content fallback');
-                toast({
-                  title: "Worksheet Loaded",
-                  description: "Loaded from backup data (original was corrupted).",
-                });
-              } catch (htmlParseError) {
-                console.error('❌ html_content fallback also failed:', htmlParseError);
-              }
-            }
-            
-            // If still no parsed data, show error but don't redirect - allow partial display
-            if (!parsed) {
-              console.error('🚨 CRITICAL: Both ai_response and html_content parsing failed');
-              console.error('🚨 MONITORING: This worksheet needs manual review:', worksheet.id);
-              toast({
-                variant: "destructive",
-                title: "Worksheet Data Corrupted",
-                description: "This worksheet's data is corrupted. Please contact support.",
-              });
-              navigate('/');
-              return;
-            }
-          }
+        // ai_response first, html_content only as a degraded fallback (shared loader)
+        const loaded = loadWorksheetContent(worksheet);
+        let parsed = loaded.data ? deepFixTextObjects(loaded.data, loaded.degraded ? 'html_content_fallback' : 'worksheetPage') : null;
+
+        if (loaded.degraded) {
+          devWarn('Worksheet loaded from html_content fallback', { id: worksheet.id, reason: loaded.reason });
+          toast({
+            title: "Worksheet Loaded",
+            description: "Loaded from backup data (original was corrupted).",
+          });
+        }
+
+        // No usable content: show the error but do not crash the page
+        if (!parsed) {
+          devError('Worksheet content unusable', { id: worksheet.id, reason: loaded.reason });
+          toast({
+            variant: "destructive",
+            title: "Worksheet Data Corrupted",
+            description: "This worksheet's data is corrupted. Please contact support.",
+          });
+          navigate('/');
+          return;
         }
 
         // The title column is what a rename from a list changes; start the editor
