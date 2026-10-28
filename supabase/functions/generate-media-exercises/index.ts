@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import OpenAI from "npm:openai@4.77.0";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { loadWorksheetJson } from "../_shared/worksheetContent.ts";
 
 const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY')! });
 
@@ -128,7 +129,7 @@ serve(async (req) => {
     // Get current worksheet
     const { data: worksheet, error: fetchError } = await supabase
       .from('worksheets')
-      .select('ai_response, teacher_id')
+      .select('id, ai_response, html_content, teacher_id')
       .eq('id', worksheetId)
       .single();
 
@@ -140,7 +141,10 @@ serve(async (req) => {
       return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
 
-    const worksheetData = JSON.parse(worksheet.ai_response);
+    const worksheetData = loadWorksheetJson(worksheet).data;
+    if (!worksheetData || !Array.isArray(worksheetData.exercises)) {
+      throw new Error('Worksheet content is not readable');
+    }
     const exercise = worksheetData.exercises[exerciseIndex];
 
     // Determine exercise type for golden prompt
