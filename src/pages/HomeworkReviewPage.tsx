@@ -33,7 +33,7 @@ import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useTeacherAuthRedirect } from "@/hooks/useTeacherAuthRedirect";
 import { useDemoContext } from "@/contexts/DemoContext";
-import { HOMEWORK_OWNER_VIEW_SELECT } from '@/lib/homework/homeworkColumns';
+import { HOMEWORK_OWNER_VIEW_SELECT, type HomeworkOwnerRow } from '@/lib/homework/homeworkColumns';
 
 interface HomeworkData {
   id: string;
@@ -130,7 +130,7 @@ export default function HomeworkReviewPage() {
         `)
         .eq('id', id)
         .eq('teacher_id', user.id)
-        .single();
+        .single<HomeworkOwnerRow & { students: { name: string; student_email: string | null; english_level: string | null } | null }>();
 
       if (homeworkError) throw homeworkError;
 
