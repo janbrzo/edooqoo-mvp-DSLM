@@ -9,7 +9,7 @@ import { resolveModelSegment, resolveTab } from '@/lib/students/workspaceTabs';
 vi.mock('react-dom', () => ({ createPortal: (child: React.ReactNode) => child }));
 
 let renderer: ReactTestRenderer | undefined;
-let preference: MediaQueryList;
+let preference: { -readonly [K in keyof MediaQueryList]: MediaQueryList[K] };
 let events: string[];
 
 beforeEach(() => {
@@ -64,7 +64,7 @@ function click(label: string) {
 }
 
 function advance(ms: number) {
-  act(() => vi.advanceTimersByTime(ms));
+  act(() => { vi.advanceTimersByTime(ms); });
 }
 
 describe('Generation modal conversion', () => {
