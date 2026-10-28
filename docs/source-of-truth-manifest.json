@@ -22,8 +22,8 @@
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 80,
-    "typedTables": 70,
-    "typedRpcs": 125,
+    "typedTables": 74,
+    "typedRpcs": 131,
     "migrationIndexes": 26
   },
   "routes": [
@@ -4418,6 +4418,12 @@
           "storage": "localStorage",
           "operation": "removeItem",
           "key": "storageKey",
+          "file": "src/pages/HomeworkPage.tsx"
+        },
+        {
+          "storage": "localStorage",
+          "operation": "removeItem",
+          "key": "homework_email_${token}",
           "file": "src/pages/HomeworkPage.tsx"
         },
         {
@@ -44883,6 +44889,7 @@
           "src/hooks/usePublicGalleryExamples.ts",
           "src/hooks/useWorksheetAutosave.ts",
           "src/hooks/useWtSignalFeedback.ts",
+          "src/lib/__tests__/pillar2RuntimeBaseline.test.tsx",
           "src/lib/dslm/__tests__/decisionLog.test.ts",
           "src/lib/dslm/decisionLog.ts"
         ]
@@ -44905,6 +44912,17 @@
         ],
         "files": [
           "src/lib/worksheet/__tests__/autoGenerateBootstrap.test.ts"
+        ]
+      },
+      {
+        "storage": "localStorage",
+        "key": "homework_email_${token}",
+        "operations": [
+          "removeItem"
+        ],
+        "files": [
+          "src/lib/__tests__/homeworkEmailGate.test.ts",
+          "src/pages/HomeworkPage.tsx"
         ]
       },
       {
@@ -45326,6 +45344,7 @@
           "src/components/dslm/CompetencyRadarView.tsx",
           "src/components/worksheet/WorksheetHeader.tsx",
           "src/hooks/useWorksheetState.tsx",
+          "src/lib/__tests__/pillar2RuntimeBaseline.test.tsx",
           "src/lib/worksheet/autoGenerateBootstrap.ts",
           "src/pages/AllStudentsPage.tsx",
           "src/pages/Dashboard.tsx",
@@ -45433,6 +45452,7 @@
           "src/components/WorksheetForm/index.tsx",
           "src/components/dslm/CompetencyRadarView.tsx",
           "src/hooks/useWorksheetGeneration.tsx",
+          "src/lib/__tests__/pillar2RuntimeBaseline.test.tsx",
           "src/lib/worksheet/autoGenerateBootstrap.ts",
           "src/pages/StudentPage.tsx"
         ]
@@ -45449,6 +45469,7 @@
           "src/components/WorksheetForm/index.tsx",
           "src/components/dslm/CompetencyRadarView.tsx",
           "src/hooks/useWorksheetFormPersistence.ts",
+          "src/lib/__tests__/pillar2RuntimeBaseline.test.tsx",
           "src/lib/worksheet/autoGenerateBootstrap.ts",
           "src/pages/StudentPage.tsx"
         ]
@@ -49537,6 +49558,17 @@
         ],
         "payloadFields": [
           "p_homework_id",
+          "p_student_email"
+        ],
+        "payloadExpressions": []
+      },
+      {
+        "name": "get_homework_exercises_by_share_token",
+        "callsites": [
+          "src/lib/homework/exercisesRpc.ts"
+        ],
+        "payloadFields": [
+          "p_share_token",
           "p_student_email"
         ],
         "payloadExpressions": []
@@ -53740,6 +53772,61 @@
         }
       },
       {
+        "name": "schema_migrations_twin_backup_20261028",
+        "fields": [
+          {
+            "name": "backed_up_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "created_by",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "idempotency_key",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "kind",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "local_version",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "name",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "rollback",
+            "type": "string[] | null",
+            "optional": false
+          },
+          {
+            "name": "statements",
+            "type": "string[] | null",
+            "optional": false
+          },
+          {
+            "name": "twin_version",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
         "name": "student_events",
         "fields": [
           {
@@ -53841,6 +53928,96 @@
             "loop-student-engagement",
             "process-welcome-test"
           ]
+        }
+      },
+      {
+        "name": "student_events_junk_backup_20261028",
+        "fields": [
+          {
+            "name": "backed_up_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "element_type",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "event_payload",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
+            "name": "event_source",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "event_type",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "is_processed",
+            "type": "boolean | null",
+            "optional": false
+          },
+          {
+            "name": "mastery",
+            "type": "number | null",
+            "optional": false
+          },
+          {
+            "name": "session_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "skill_ids",
+            "type": "string[] | null",
+            "optional": false
+          },
+          {
+            "name": "source_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "student_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "superseded_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "superseded_by",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
         }
       },
       {
@@ -54814,6 +54991,96 @@
             "generate-timeline",
             "mcp"
           ]
+        }
+      },
+      {
+        "name": "student_skill_metrics_junk_backup_20261027",
+        "fields": [
+          {
+            "name": "backed_up_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "current_mastery",
+            "type": "number | null",
+            "optional": false
+          },
+          {
+            "name": "first_event_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "last_event_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "mastery_history",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
+            "name": "micro_skill",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "param_version",
+            "type": "number | null",
+            "optional": false
+          },
+          {
+            "name": "skill_category",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "skill_name",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "student_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "total_events",
+            "type": "number | null",
+            "optional": false
+          },
+          {
+            "name": "trend",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "updated_at",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
         }
       },
       {
@@ -56351,6 +56618,36 @@
         }
       },
       {
+        "name": "worksheets_ai_response_backup_20261027",
+        "fields": [
+          {
+            "name": "ai_response",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "backed_up_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "html_content",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
         "name": "wt_signal_feedback",
         "fields": [
           {
@@ -56602,6 +56899,27 @@
         "returns": "Json"
       },
       {
+        "name": "backfill_profile_v2",
+        "args": [
+          {
+            "name": "p_dry_run",
+            "type": "boolean",
+            "optional": true
+          },
+          {
+            "name": "p_items",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_run_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "backfill_skill_metrics",
         "args": [
           {
@@ -56823,6 +57141,22 @@
           {
             "name": "p_now",
             "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "number"
+      },
+      {
+        "name": "dslm_event_weight",
+        "args": [
+          {
+            "name": "p_event_source",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_payload",
+            "type": "Json",
             "optional": false
           }
         ],
@@ -57059,6 +57393,22 @@
         "returns": "{ comment_text: string created_at: string exercise_index: number id: string updated_at: string }[]"
       },
       {
+        "name": "get_homework_exercises_by_share_token",
+        "args": [
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "{ audio_url: string selected_audio: Json selected_exercises: Json selected_image: Json }[]"
+      },
+      {
         "name": "get_homework_owner_ids",
         "args": [
           {
@@ -57068,6 +57418,17 @@
           }
         ],
         "returns": "{ student_id: string teacher_id: string }[]"
+      },
+      {
+        "name": "get_homework_state_by_share_token",
+        "args": [
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "{ completed_at: string completed_by_teacher: boolean id: string reviewed_at: string source_worksheet_id: string }[]"
       },
       {
         "name": "get_homework_status_by_share_token",
@@ -58102,6 +58463,17 @@
         "returns": "Json"
       },
       {
+        "name": "reopen_homework",
+        "args": [
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "revoke_mcp_token",
         "args": [
           {
@@ -58641,6 +59013,17 @@
           }
         ],
         "returns": "boolean"
+      },
+      {
+        "name": "supersede_homework_events",
+        "args": [
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "number"
       },
       {
         "name": "supersede_previous_welcome_test_events",
@@ -59229,8 +59612,16 @@
         "migration": "supabase/migrations/20261023090000_baseline_homework_prod_only_functions.sql"
       },
       {
+        "name": "get_homework_by_share_token",
+        "migration": "supabase/migrations/20261028100100_homework_link_read_without_exercises.sql"
+      },
+      {
         "name": "get_homework_comments",
         "migration": "supabase/migrations/20261016100015_w0_b_teacher_comments.sql"
+      },
+      {
+        "name": "get_homework_exercises_by_share_token",
+        "migration": "supabase/migrations/20261028100000_homework_exercises_behind_email_gate.sql"
       },
       {
         "name": "get_homework_owner_ids",

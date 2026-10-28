@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { useInteractiveHomework } from "@/hooks/useInteractiveHomework";
 import { fetchHomeworkState } from '@/lib/homework/homeworkStateRpc';
+import { fetchHomeworkExercises, hasHomeworkExercises } from '@/lib/homework/exercisesRpc';
 import { StudentEmailVerification } from "@/components/homework/StudentEmailVerification";
 import { HomeworkProgressBar } from "@/components/homework/HomeworkProgressBar";
 import { StudyModeButton } from "@/components/shared/StudyModeButton";
@@ -130,7 +131,8 @@ export default function HomeworkPage() {
   }
 
   // For teacher: use student's email to load their answers. For student: use verified email
-  const emailForAnswers = isTeacher ? (studentEmailForTeacher || '') : (verifiedEmail || '');
+  const exercisesLoaded = hasHomeworkExercises(homework?.selected_exercises);
+  const emailForAnswers = isTeacher ? (studentEmailForTeacher || '') : (exercisesLoaded ? (verifiedEmail || '') : '');
   
   const {
     answers,
@@ -176,6 +178,36 @@ export default function HomeworkPage() {
       setIsCompleted(true);
     }
   }, [homework]);
+
+  // The link alone does not carry the exercises (and their answer keys): a student gets them once
+  // the assigned email is verified. A remembered email that no longer matches is dropped.
+  const awaitingExercises = !!homework && !!verifiedEmail && verifiedEmail !== 'teacher' && !isTeacher && !exercisesLoaded;
+  useEffect(() => {
+    if (!awaitingExercises || !token || !verifiedEmail) return;
+    let cancelled = false;
+    fetchHomeworkExercises(token, verifiedEmail)
+      .then((payload) => {
+        if (cancelled) return;
+        if (!payload) {
+          try { localStorage.removeItem(`homework_email_${token}`); } catch { /* storage unavailable */ }
+          setVerifiedEmail(null);
+          return;
+        }
+        setHomework(prev => prev ? {
+          ...prev,
+          selected_exercises: deepFixTextObjects(payload.selected_exercises, 'homework.selected_exercises'),
+          selected_image: (payload.selected_image as HomeworkData['selected_image']) ?? null,
+          selected_audio: (payload.selected_audio as HomeworkData['selected_audio']) ?? null,
+          audio_url: payload.audio_url ?? null,
+        } : prev);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error('Error loading homework exercises:', error);
+        setLoadError('network');
+      });
+    return () => { cancelled = true; };
+  }, [awaitingExercises, token, verifiedEmail]);
 
   // The server refused a write or a submit: re-read why (submitted elsewhere or closed by the teacher).
   useEffect(() => {
@@ -582,6 +614,14 @@ export default function HomeworkPage() {
             </Button>
           </div>
         </Card>
+      </div>
+    );
+  }
+
+  if (awaitingExercises) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

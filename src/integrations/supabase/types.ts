@@ -4438,6 +4438,15 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_homework_exercises_by_share_token: {
+        Args: { p_share_token: string; p_student_email: string }
+        Returns: {
+          audio_url: string
+          selected_audio: Json
+          selected_exercises: Json
+          selected_image: Json
+        }[]
+      }
       get_homework_owner_ids: {
         Args: { p_homework_id: string }
         Returns: {
