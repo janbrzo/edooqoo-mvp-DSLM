@@ -20,7 +20,8 @@ import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEv
 import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
 import { isClosedExerciseType } from "@/utils/masteryCalculator";
 import { ItemsToCheckPanel } from "@/components/homework/ItemsToCheckPanel";
-import { findItemsToCheck, teacherVerdictsOf, type StoredItemRating } from "@/lib/homework/reviewItems";
+import { ItemsToScorePanel } from "@/components/homework/ItemsToScorePanel";
+import { findItemsToCheck, findItemsToScore, teacherVerdictsOf, type StoredItemRating } from "@/lib/homework/reviewItems";
 import { TeacherVerdictsContext, withoutDecidedEvaluations } from "@/lib/answers/teacherVerdicts";
 import { parseAiEvaluation } from "@/utils/aiEvaluationMapper";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
@@ -484,11 +485,18 @@ export default function HomeworkReviewPage() {
           {Array.isArray(homework.selected_exercises) && homework.selected_exercises.map((exercise, index) => {
             const studentAnswer = getStudentAnswerForExercise(index);
             const hasAnswer = Object.keys(studentAnswer).length > 0;
-            const aiEvaluation = withoutDecidedEvaluations(getAiEvaluationForExercise(index), teacherVerdictsOf(studentAnswers.find((a) => a.exercise_index === index)?.item_evaluations));
+            // A teacher decision hides the AI explanation of a closed question (it would contradict it);
+            // for an open answer the model's feedback stays useful next to the teacher's rating.
+            const aiEvaluation = isClosedExerciseType(exercise.type)
+              ? withoutDecidedEvaluations(getAiEvaluationForExercise(index), teacherVerdictsOf(studentAnswers.find((a) => a.exercise_index === index)?.item_evaluations))
+              : getAiEvaluationForExercise(index);
             const storedRow = studentAnswers.find((a) => a.exercise_index === index);
             // The server gave up grading this exercise (3 attempts): say so instead of showing a blank.
             const aiGaveUp = !!storedRow?.is_submitted && !storedRow.ai_evaluation && (storedRow.ai_eval_attempts ?? 0) >= 3
               && !!storedRow.ai_eval_note && storedRow.ai_eval_note !== 'no evaluable answers';
+            const itemsToScore = storedRow?.is_submitted
+              ? findItemsToScore(storedRow.exercise_type || exercise.type, exercise, storedRow.answers, storedRow.item_evaluations)
+              : [];
             const itemsToCheck = storedRow?.is_submitted
               ? findItemsToCheck(storedRow.exercise_type || exercise.type, exercise, storedRow.answers, storedRow.item_evaluations)
               : [];
@@ -537,6 +545,13 @@ export default function HomeworkReviewPage() {
                     The automatic evaluation of this exercise did not finish, so it has no score yet. Please read the answers yourself.
                   </p>
                 )}
+                <ItemsToScorePanel
+                  homeworkId={homework.id}
+                  exerciseIndex={index}
+                  items={itemsToScore}
+                  onRated={(rated) => setStudentAnswers((prev) => prev.map((a) =>
+                    a.exercise_index === index ? { ...a, item_evaluations: rated } : a))}
+                />
                 <ItemsToCheckPanel
                   homeworkId={homework.id}
                   exerciseIndex={index}

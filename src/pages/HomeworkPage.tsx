@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { devLog } from '@/utils/logger';
+import { isClosedExerciseType } from '@/utils/masteryCalculator';
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 
 interface HomeworkData {
@@ -839,7 +840,7 @@ export default function HomeworkPage() {
                 showCorrectAnswers={isTeacher || showCorrectAnswersToStudent}
                 disabled={finalIsSubmitted && !isTeacher}
                 viewMode={isTeacher ? "teacher" : "student"}
-                aiEvaluation={withoutDecidedEvaluations(aiEvaluations[index], studentReview?.verdicts[index])}
+                aiEvaluation={isClosedExerciseType(exercise.type) ? withoutDecidedEvaluations(aiEvaluations[index], studentReview?.verdicts[index]) : aiEvaluations[index]}
                 isWaitingForAiEval={isWaitingForAiEval}
                 audioAnswers={audioAnswers[index]}
                 onAudioAnswerChange={

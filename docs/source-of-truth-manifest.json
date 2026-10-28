@@ -17,13 +17,13 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 407,
+    "componentModules": 408,
     "hookModules": 106,
     "contextModules": 1,
     "serviceModules": 19,
     "edgeFunctions": 80,
     "typedTables": 79,
-    "typedRpcs": 137,
+    "typedRpcs": 138,
     "migrationIndexes": 29
   },
   "routes": [
@@ -24727,6 +24727,74 @@
         "Key:",
         "Student:",
         "The answer key could not decide these. Your decision is counted in the student's progress."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/homework/ItemsToScorePanel.tsx",
+      "domain": "homework",
+      "purpose": "Implements Items To Score Panel behavior in the homework domain.",
+      "exports": [
+        "ItemsToScorePanel"
+      ],
+      "props": [
+        {
+          "name": "ItemsToScorePanelProps",
+          "fields": [
+            {
+              "name": "homeworkId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "exerciseIndex",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "items",
+              "type": "ItemToScore[]",
+              "optional": false
+            },
+            {
+              "name": "onRated",
+              "type": "(itemEvaluations: StoredItemRating[]) => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "values",
+          "setter": "setValues",
+          "initial": "{}"
+        },
+        {
+          "value": "busy",
+          "setter": "setBusy",
+          "initial": "null"
+        }
+      ],
+      "hooks": [
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Student:",
+        "The automatic score is only a proposal. Set what you think the answer deserves; it is what the student's progress uses.",
+        "Your rating"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -50417,6 +50485,19 @@
         "payloadExpressions": []
       },
       {
+        "name": "set_homework_item_score",
+        "callsites": [
+          "src/lib/homework/reviewItems.ts"
+        ],
+        "payloadFields": [
+          "p_exercise_index",
+          "p_homework_id",
+          "p_mastery",
+          "p_question_index"
+        ],
+        "payloadExpressions": []
+      },
+      {
         "name": "set_homework_item_verdict",
         "callsites": [
           "src/lib/homework/reviewItems.ts"
@@ -59542,6 +59623,32 @@
         "returns": "string"
       },
       {
+        "name": "set_homework_item_score",
+        "args": [
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_mastery",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_question_index",
+            "type": "number",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "set_homework_item_verdict",
         "args": [
           {
@@ -60938,8 +61045,16 @@
         "migration": "supabase/migrations/20261016110000_w2_merge_answers_on_save.sql"
       },
       {
+        "name": "set_homework_item_score",
+        "migration": "supabase/migrations/20261028140000_homework_teacher_item_score.sql"
+      },
+      {
         "name": "set_homework_item_verdict",
         "migration": "supabase/migrations/20261028110000_homework_teacher_item_verdict.sql"
+      },
+      {
+        "name": "set_homework_item_verdict",
+        "migration": "supabase/migrations/20261028140000_homework_teacher_item_score.sql"
       },
       {
         "name": "set_test_answered_count_by_share_token",
