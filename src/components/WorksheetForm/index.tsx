@@ -15,8 +15,19 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useEventTracking } from "@/hooks/useEventTracking";
 import { useStudents } from "@/hooks/useStudents";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
-import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
+import { useWorksheetFormPersistence, STANDALONE_CONTEXT, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
+import { buildWorksheetRequest, getExerciseTarget } from "@/lib/worksheet/buildWorksheetRequest";
+import { decideLevelBandForStudent, formatStudentLevelLabel, levelMismatchWarning } from "@/lib/worksheet/studentLevel";
+import { getActiveGenerationJobs } from "@/lib/worksheet/generationJobRegistry";
+import {
+  createSuggestionOrigin,
+  parseAppliedPreset,
+  reconcileSuggestionOrigin,
+  serializeAppliedPreset,
+  suggestionIdForSubmit,
+  type SuggestionOrigin,
+} from "@/lib/worksheet/suggestionOrigin";
 import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
 import type { AppliedEvidenceSource } from '@/lib/dslm/recommendationEvidenceView';
 import { StudentContextHint } from "./StudentContextHint";
@@ -45,6 +56,11 @@ interface ExtendedWorksheetFormProps extends WorksheetFormProps {
   /** Stable userId (resolved by parent FormView). Used as persistence key. */
   userId?: string | null;
 }
+const MODE_HINTS: Record<ExerciseSelectionMode, string> = {
+  manual: 'Manual: choose the exercises yourself.',
+  random: 'Random: a random set of exercises.',
+  smart: 'Smart: AI picks exercises and V/G focus from your inputs.',
+};
 export default function WorksheetForm({
   onSubmit,
   onStudentChange,
@@ -109,6 +125,38 @@ export default function WorksheetForm({
   });
   useEffect(() => {
     setAppliedEvidenceSource(previous => previous?.studentId === selectedStudentId ? previous : null);
+  }, [selectedStudentId]);
+
+  // The plan suggestion this form was prefilled from (manual "Use this" / Prep
+  // "Change topic" write sessionStorage `prefillSuggestionId`). Read once at
+  // mount and bound to the student it is used for, so generating marks it as
+  // used (also after the topic was edited) and a different student never does.
+  const suggestionOriginRef = useRef<SuggestionOrigin | null>(null);
+  const suggestionOriginInitRef = useRef(false);
+  if (!suggestionOriginInitRef.current) {
+    suggestionOriginInitRef.current = true;
+    try {
+      suggestionOriginRef.current = createSuggestionOrigin(
+        sessionStorage.getItem('prefillSuggestionId'),
+        initialAutoIntentRef.current?.studentId || preSelectedStudent?.id || null,
+      );
+    } catch { /* ignore */ }
+  }
+  const selectedStudentIdRef = useRef(selectedStudentId);
+  selectedStudentIdRef.current = selectedStudentId;
+  const dropSuggestionOrigin = () => {
+    suggestionOriginRef.current = null;
+    try {
+      sessionStorage.removeItem('prefillSuggestionId');
+      sessionStorage.removeItem('appliedPresetSuggestionId');
+    } catch { /* ignore */ }
+  };
+  useEffect(() => {
+    const current = suggestionOriginRef.current;
+    if (!current) return;
+    const next = reconcileSuggestionOrigin(current, selectedStudentId);
+    if (next === null) dropSuggestionOrigin();
+    else suggestionOriginRef.current = next;
   }, [selectedStudentId]);
 
   // Initialize selectedExercises based on lessonTime and selectionMode
@@ -182,6 +230,7 @@ export default function WorksheetForm({
   const userId = userIdProp ?? null;
   const {
     students,
+    loading: studentsLoading,
     refetch: refetchStudents
   } = useStudents();
   const {
@@ -205,6 +254,21 @@ export default function WorksheetForm({
     selectedStudentId: selectedStudentId && selectedStudentId !== 'no-student' ? selectedStudentId : undefined,
   };
   const persistenceKey = userId || 'anon';
+  // Student id restored from a draft; validated once the students list loads.
+  const restoredStudentIdRef = useRef<string | null>(null);
+  // The context this form was opened for: the student the page navigated with,
+  // `standalone` for a Dashboard "new worksheet", or null (refresh, plain open).
+  const getIntendedContext = (): string | null => {
+    try {
+      const raw = sessionStorage.getItem('preSelectedStudent');
+      const fromSession = raw ? (JSON.parse(raw)?.id as string | undefined) : undefined;
+      const studentId = fromSession || preSelectedStudent?.id || initialAutoIntentRef.current?.studentId;
+      if (studentId) return studentId;
+      return sessionStorage.getItem('forceNewWorksheet') === 'true' ? STANDALONE_CONTEXT : null;
+    } catch {
+      return preSelectedStudent?.id ?? null;
+    }
+  };
   const { clear: clearPersistedDraft, saveDraftNow } = useWorksheetFormPersistence(
     persistenceKey,
     draftSnapshot,
@@ -217,6 +281,7 @@ export default function WorksheetForm({
         if (typeof draft.additionalInformation === 'string') setAdditionalInformation(draft.additionalInformation);
         if (draft.englishLevel === 'A1/A2' || draft.englishLevel === 'B1/B2' || draft.englishLevel === 'C1/C2') {
           setEnglishLevel(draft.englishLevel as EnglishLevel);
+          draftLevelRestoredRef.current = true;
         }
         if (typeof draft.languageStyle === 'number') setLanguageStyle(draft.languageStyle);
         // v4.6: normalize restored draft via the same helper as DSLM prefill so
@@ -239,6 +304,7 @@ export default function WorksheetForm({
         // generation error keeps the same learner context (and the CEFR
         // band / exercise defaults that follow from it).
         if (typeof draft.selectedStudentId === 'string' && draft.selectedStudentId.length > 0) {
+          restoredStudentIdRef.current = draft.selectedStudentId;
           setSelectedStudentId(draft.selectedStudentId);
         }
         if ((draft.lessonGoal?.length ?? 0) > 0 || (draft.grammarFocus?.length ?? 0) > 0 || (draft.additionalInformation?.length ?? 0) > 0) {
@@ -248,9 +314,14 @@ export default function WorksheetForm({
         devWarn('[WorksheetForm] draft hydration failed', e);
       }
     },
+    {
+      context: selectedStudentId && selectedStudentId !== 'no-student' ? selectedStudentId : STANDALONE_CONTEXT,
+      getIntendedContext,
+    },
   );
 
   const clearForm = () => {
+    dropSuggestionOrigin();
     setAppliedEvidenceSource(null);
     setLessonTopic('');
     setLessonGoal('');
@@ -345,6 +416,8 @@ export default function WorksheetForm({
   useEffect(() => {
     const handler = (e: Event) => {
       setAppliedEvidenceSource(null);
+      suggestionOriginRef.current = null;
+      try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
       try {
         clearPersistedDraft();
         devLog('[WorksheetForm] Draft cleared after successful generation');
@@ -354,12 +427,14 @@ export default function WorksheetForm({
       // v6.9.10: if this generation originated from a Next-Step preset chip,
       // propagate to NextStepsPresetBanner so it can mark the suggestion as used.
       try {
-        const sid = sessionStorage.getItem('appliedPresetSuggestionId');
-        if (sid) {
+        const applied = parseAppliedPreset(sessionStorage.getItem('appliedPresetSuggestionId'));
+        // Only for the student the chip was applied to; a stale chip from a
+        // previous student must never mark a suggestion for an unrelated sheet.
+        if (applied && applied.studentId && applied.studentId === selectedStudentIdRef.current) {
           const wsId = ((e as CustomEvent)?.detail?.worksheetId as string | undefined) || null;
-          window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { suggestionId: sid, worksheetId: wsId } }));
-          sessionStorage.removeItem('appliedPresetSuggestionId');
+          window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { suggestionId: applied.suggestionId, worksheetId: wsId } }));
         }
+        sessionStorage.removeItem('appliedPresetSuggestionId');
       } catch (e) {
         devWarn('[WorksheetForm] markPresetUsed dispatch failed', e);
       }
@@ -450,21 +525,55 @@ export default function WorksheetForm({
   // The form only listens for `worksheet:autoGenerateStarted` to stand down and
   // clear sessionStorage flags. Eliminates race conditions where two competing
   // submit paths fought for the same sessionStorage flag and silently dropped it.
+  // The student's level band is applied ONCE per selected student. A students
+  // refetch (e.g. after another generation) must not overwrite a band the
+  // teacher chose by hand, and a student without a level gets the B1/B2 default
+  // plus a visible note instead of silently inheriting the previous band.
+  const levelAppliedForRef = useRef<string | null>(null);
+  const draftLevelRestoredRef = useRef(false);
+  const [levelDefaulted, setLevelDefaulted] = useState(false);
   useEffect(() => {
-    if (selectedStudentId && selectedStudentId !== "no-student") {
-      const selectedStudent = students.find(s => s.id === selectedStudentId);
-      if (selectedStudent) {
-        const studentLevel = selectedStudent.english_level;
-        if (studentLevel === 'A1' || studentLevel === 'A2') {
-          setEnglishLevel('A1/A2');
-        } else if (studentLevel === 'B1' || studentLevel === 'B2') {
-          setEnglishLevel('B1/B2');
-        } else if (studentLevel === 'C1' || studentLevel === 'C2') {
-          setEnglishLevel('C1/C2');
-        }
-      }
+    if (!selectedStudentId || selectedStudentId === "no-student") {
+      levelAppliedForRef.current = null;
+      setLevelDefaulted(false);
+      return;
     }
+    if (levelAppliedForRef.current === selectedStudentId) return;
+    const selectedStudent = students.find(s => s.id === selectedStudentId);
+    if (!selectedStudent) return; // wait for the students list
+    levelAppliedForRef.current = selectedStudentId;
+    if (draftLevelRestoredRef.current) {
+      // The restored draft carries the band the teacher had for this student.
+      draftLevelRestoredRef.current = false;
+      return;
+    }
+    const decision = decideLevelBandForStudent(selectedStudent.english_level);
+    setEnglishLevel(decision.band);
+    setLevelDefaulted(decision.usedDefault);
   }, [selectedStudentId, students]);
+  const chooseLevel = (level: EnglishLevel) => {
+    setEnglishLevel(level);
+    setLevelDefaulted(false);
+  };
+  const selectedStudentLevel = selectedStudentId !== "no-student"
+    ? students.find(s => s.id === selectedStudentId)?.english_level
+    : undefined;
+  const levelWarning = levelMismatchWarning(englishLevel, selectedStudentLevel);
+  // A student restored from a draft may have been deleted since: fall back to
+  // "no student" instead of generating for a soft-deleted learner. Only the
+  // restored id is checked, so a student added a moment ago is never reset.
+  useEffect(() => {
+    const restored = restoredStudentIdRef.current;
+    if (!restored || studentsLoading || !userId) return;
+    if (selectedStudentId !== restored) {
+      restoredStudentIdRef.current = null;
+      return;
+    }
+    if (!students.some(s => s.id === restored)) {
+      restoredStudentIdRef.current = null;
+      setSelectedStudentId('no-student');
+    }
+  }, [students, studentsLoading, selectedStudentId, userId]);
   useEffect(() => {
     if (onStudentChange) {
       const studentId = selectedStudentId === "no-student" ? null : selectedStudentId;
@@ -526,84 +635,76 @@ export default function WorksheetForm({
     }
     submitForm(effectiveTopic);
   };
+  // The generation hook guards against a second run, but the form side effects
+  // (analytics, toasts, draft save) ran twice on a double click. Lock the
+  // button from submit until the job registry shows nothing running.
+  const [submitting, setSubmitting] = useState(false);
+  const submittedAtRef = useRef(0);
+  useEffect(() => {
+    if (!submitting) return;
+    const id = window.setInterval(() => {
+      const settled = Date.now() - submittedAtRef.current > 1500
+        && getActiveGenerationJobs().every(job => job.status !== 'running');
+      if (settled) setSubmitting(false);
+    }, 500);
+    return () => window.clearInterval(id);
+  }, [submitting]);
   const submitForm = (topicOverride?: string) => {
-    const effectiveTopic = topicOverride || lessonTopic;
-    // PROBLEM 2: Media-aware exercise auto-complete
-    const PICTURE_COMPATIBLE_EXERCISES = ['describe-picture', 'answer-questions-picture', 'true-false-picture', 'multiple-choice-picture'];
-    const AUDIO_COMPATIBLE_EXERCISES = ['listening-comprehension', 'answer-questions-audio', 'true-false-audio', 'multiple-choice-audio', 'fill-in-blanks-audio'];
-    // sentence-transformation is currently disabled, never auto-pick it.
-    const GENERAL_EXERCISES = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'multiple-choice', 'dialogue', 'discussion', 'error-correction', 'odd-one-out', 'synonyms', 'antonyms', 'word-order', 'gap-text', 'negative-prefixes', 'categorize', 'paraphrasing', 'complete-word', 'matching-halves'];
-    
-    const isPictureMode = selectedMediaTypes.includes('picture');
-    const isAudioMode = selectedMediaTypes.includes('audio');
-    
-    // Auto-complete exercises if not enough are selected in manual mode
-    const maxExercises = lessonTime === '45min' ? 6 : 8;
-    let finalExercises = [...selectedExercises];
-    if (!finalExercises || finalExercises.length < maxExercises) {
-      devLog(`🔧 [WORKSHEET-FORM] Auto-completing exercises: ${finalExercises.length} < ${maxExercises}`);
-      devLog(`🔧 [WORKSHEET-FORM] Media mode: picture=${isPictureMode}, audio=${isAudioMode}`);
-
-      // PROBLEM 2.2/2.3: Filter available exercises by media type
-      const unusedExercises = GENERAL_EXERCISES.filter(ex => {
-        if (finalExercises.includes(ex)) return false;
-        // Don't add picture exercises if not in picture mode
-        if (!isPictureMode && PICTURE_COMPATIBLE_EXERCISES.includes(ex)) return false;
-        // Don't add audio exercises if not in audio mode
-        if (!isAudioMode && AUDIO_COMPATIBLE_EXERCISES.includes(ex)) return false;
-        return true;
-      });
-
-      // Add random exercises to reach the target count
-      const remainingSlots = maxExercises - finalExercises.length;
-      const shuffledUnused = [...unusedExercises].sort(() => Math.random() - 0.5);
-      const autoSelected = shuffledUnused.slice(0, remainingSlots);
-      finalExercises = [...finalExercises, ...autoSelected];
-      devLog(`🔧 [WORKSHEET-FORM] Auto-completed exercises (media-filtered):`, finalExercises);
-
-      // Update the form state
-      setSelectedExercises(finalExercises);
-
-      // Notify user about auto-completion
-      if (autoSelected.length > 0) {
-        toast({
-          title: "Exercises auto-completed",
-          description: `Added ${autoSelected.length} additional exercise(s) to reach ${maxExercises} total exercises.`,
-          variant: "default"
-        });
-      }
-    }
-    trackEvent({
-      eventType: 'form_submit',
-      eventData: {
-        lessonTime,
-        lessonTopic: effectiveTopic,
-        lessonGoal,
-        grammarFocus,
-        additionalInformation,
-        englishLevel,
-        languageStyle,
-        timestamp: new Date().toISOString()
-      }
-    });
-    const formData = {
+    if (submitting) return;
+    submittedAtRef.current = Date.now();
+    setSubmitting(true);
+    const effectiveTopic = (topicOverride || lessonTopic).trim();
+    // One builder shared with the auto-generate bootstrap: trims every field,
+    // trims/pads the exercise list to 6 (45 min) or 8 (60 min) deterministically
+    // and keeps a single media family.
+    const { request: built, autoCompletedCount } = buildWorksheetRequest({
       lessonTime,
       lessonTopic: effectiveTopic,
       lessonGoal,
-      teachingPreferences: grammarFocus,
+      grammarFocus,
       additionalInformation,
       englishLevel,
       languageStyle,
       studentId: selectedStudentId === "no-student" ? undefined : selectedStudentId || undefined,
-      selectedExercises: finalExercises,
+      selectedExercises,
       selectedMediaTypes,
-      exerciseFocusMap: Object.keys(exerciseFocusMap).length > 0 ? exerciseFocusMap : undefined,
-      selectedImage: selectedImage,
+      exerciseFocusMap,
+      selectedImage,
+    });
+    const finalExercises = built.selectedExercises || [];
+    if (autoCompletedCount > 0) {
+      devLog(`🔧 [WORKSHEET-FORM] Auto-completed ${autoCompletedCount} exercise(s)`, finalExercises);
+      setSelectedExercises(finalExercises);
+      toast({
+        title: "Exercises auto-completed",
+        description: `Added ${autoCompletedCount} additional exercise(s) to reach ${getExerciseTarget(lessonTime)} total exercises.`,
+        variant: "default"
+      });
+    }
+    // Lengths and flags only: free text typed by the teacher is not analytics.
+    trackEvent({
+      eventType: 'form_submit',
+      eventData: {
+        lessonTime,
+        lessonTopicLength: built.lessonTopic.length,
+        hasLessonGoal: built.lessonGoal.length > 0,
+        hasGrammarFocus: built.teachingPreferences.length > 0,
+        hasAdditionalInformation: !!built.additionalInformation,
+        englishLevel,
+        languageStyle,
+        exerciseCount: finalExercises.length,
+        timestamp: new Date().toISOString()
+      }
+    });
+    const formData = {
+      ...built,
       // v6.9.45: flag any submit that originated from the DSLM auto-generate intent
       // so Index.tsx can queue the request until tokens/profile are ready instead of
       // silently dropping it after 2 short retries.
       __autoGenerateFromSuggestion: Boolean(initialAutoIntentRef.current),
       __autoGenerateRequestId: autoRequestIdRef.current || undefined,
+      // Stamped only while the student is the one the prefill was written for.
+      __autoGenerateSuggestionId: suggestionIdForSubmit(suggestionOriginRef.current, selectedStudentId) ?? undefined,
     } as any;
 
     // v6.9.55: attach UI/transport metadata (student name + email) for
@@ -640,8 +741,8 @@ export default function WorksheetForm({
         englishLevel,
         languageStyle,
         selectedExercises: finalExercises,
-        selectedMediaTypes,
-        exerciseFocusMap,
+        selectedMediaTypes: built.selectedMediaTypes,
+        exerciseFocusMap: built.exerciseFocusMap || {},
         selectionMode,
         selectedStudentId:
           selectedStudentId && selectedStudentId !== 'no-student'
@@ -652,6 +753,21 @@ export default function WorksheetForm({
       devWarn('[WorksheetForm] saveDraftNow before submit failed', e);
     }
     onSubmit(formData);
+  };
+  // Switching 60 -> 45 min trims the selection at once (even when the Exercise
+  // tab is closed), so the form never keeps 8 exercises for a 45 min lesson.
+  const changeLessonTime = (next: LessonTime) => {
+    setLessonTime(next);
+    if (next === lessonTime) return;
+    const norm = normalizeSuggestionPrefill({
+      exercises: selectedExercises,
+      focusMap: exerciseFocusMap,
+      mediaTypes: selectedMediaTypes,
+      lessonTime: next,
+    });
+    setSelectedExercises(norm.selectedExercises);
+    setSelectedMediaTypes(norm.selectedMediaTypes as MediaType[]);
+    setExerciseFocusMap(norm.exerciseFocusMap);
   };
   const refreshSuggestions = () => {
     setCurrentPlaceholders(getRandomPlaceholderSet());
@@ -774,7 +890,9 @@ export default function WorksheetForm({
     setExerciseFocusMap(norm.exerciseFocusMap);
     setSelectionMode('manual');
     setActiveTab('exercises');
-    sessionStorage.setItem('appliedPresetSuggestionId', p.sourceSuggestionId);
+    const presetOrigin = createSuggestionOrigin(p.sourceSuggestionId, selectedStudentId);
+    suggestionOriginRef.current = presetOrigin;
+    if (presetOrigin) sessionStorage.setItem('appliedPresetSuggestionId', serializeAppliedPreset(presetOrigin));
     // v6.9.61: persist the preset deterministically so an immediate
     // auto-submit + failure path still recovers the EXACT preset on retry.
     try {
@@ -819,10 +937,10 @@ export default function WorksheetForm({
                 <div className={`flex ${isMobile ? 'flex-col gap-3' : 'gap-14'}`}>
                   <div className={`flex flex-col ${isMobile ? 'items-center' : 'items-start'}`}>
                     <div className={`flex gap-2 ${isMobile ? 'justify-center' : 'w-32'}`}>
-                      <Button type="button" variant={lessonTime === "45min" ? "default" : "outline"} onClick={() => setLessonTime("45min")} className={lessonTime === "45min" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={lessonTime === "45min" ? "default" : "outline"} onClick={() => changeLessonTime("45min")} className={lessonTime === "45min" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         45 min
                       </Button>
-                      <Button type="button" variant={lessonTime === "60min" ? "default" : "outline"} onClick={() => setLessonTime("60min")} className={lessonTime === "60min" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={lessonTime === "60min" ? "default" : "outline"} onClick={() => changeLessonTime("60min")} className={lessonTime === "60min" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         60 min
                       </Button>
                     </div>
@@ -833,19 +951,29 @@ export default function WorksheetForm({
                   
                   <div className={`flex flex-col ${isMobile ? 'items-center' : 'items-end w-80'}`}>
                     <div className={`flex gap-1 mb-1 ${isMobile ? 'flex-wrap justify-center' : ''}`}>
-                      <Button type="button" variant={englishLevel === "A1/A2" ? "default" : "outline"} onClick={() => setEnglishLevel("A1/A2")} className={englishLevel === "A1/A2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={englishLevel === "A1/A2" ? "default" : "outline"} onClick={() => chooseLevel("A1/A2")} className={englishLevel === "A1/A2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         A1/A2
                       </Button>
-                      <Button type="button" variant={englishLevel === "B1/B2" ? "default" : "outline"} onClick={() => setEnglishLevel("B1/B2")} className={englishLevel === "B1/B2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={englishLevel === "B1/B2" ? "default" : "outline"} onClick={() => chooseLevel("B1/B2")} className={englishLevel === "B1/B2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         B1/B2
                       </Button>
-                      <Button type="button" variant={englishLevel === "C1/C2" ? "default" : "outline"} onClick={() => setEnglishLevel("C1/C2")} className={englishLevel === "C1/C2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={englishLevel === "C1/C2" ? "default" : "outline"} onClick={() => chooseLevel("C1/C2")} className={englishLevel === "C1/C2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         C1/C2
                       </Button>
                     </div>
                     <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 ${isMobile ? 'text-center' : ''}`}>
                       CEFR Scale: {englishLevel === "A1/A2" ? "Beginner/Elementary" : englishLevel === "B1/B2" ? "Intermediate/Upper-Intermediate" : "Advanced/Proficiency"}
                     </p>
+                    {levelDefaulted && (
+                      <p className={`${isMobile ? 'text-xs text-center' : 'text-xs text-right'} text-muted-foreground mt-1`}>
+                        This student has no level set, so B1/B2 is preselected. Change it if needed.
+                      </p>
+                    )}
+                    {levelWarning && (
+                      <p className={`${isMobile ? 'text-xs text-center' : 'text-xs text-right'} text-warning mt-1`}>
+                        {levelWarning}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -940,13 +1068,13 @@ export default function WorksheetForm({
                             + Add Student
                           </SelectItem>
                           {students.map(student => <SelectItem key={student.id} value={student.id}>
-                              <span className="truncate">{student.name} ({student.english_level})</span>
+                              <span className="truncate">{student.name} ({formatStudentLevelLabel(student.english_level)})</span>
                             </SelectItem>)}
                         </SelectContent>
                       </Select>
                       {selectedStudentId === 'no-student' && (
                         <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1 leading-tight">
-                          Pick a student to unlock personalized goals, level, and Next Steps.
+                          Pick a student to unlock level matching and Next Steps.
                         </p>
                       )}
                     </div>
@@ -1082,7 +1210,7 @@ export default function WorksheetForm({
                         }} className={`relative flex items-center justify-center gap-1 px-2 py-1 rounded-lg border transition-all text-center group ${selectionMode === 'manual' ? 'border-worksheet-purple bg-worksheet-purple text-white' : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}`}>
                             <MousePointer className="h-3 w-3" />
                             <span className="text-xs font-medium">Manual</span>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-foreground text-background text-xs rounded hidden md:group-hover:block z-10 w-max max-w-[14rem]">
                               Choose exercises manually
                             </div>
                           </button>
@@ -1093,7 +1221,7 @@ export default function WorksheetForm({
                         }} className={`relative flex items-center justify-center gap-1 px-2 py-1 rounded-lg border transition-all text-center group ${selectionMode === 'random' ? 'border-worksheet-purple bg-worksheet-purple text-white' : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}`}>
                             <Shuffle className="h-3 w-3" />
                             <span className="text-xs font-medium">Random</span>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-foreground text-background text-xs rounded hidden md:group-hover:block z-10 w-max max-w-[14rem]">
                               Random exercise selection
                             </div>
                           </button>
@@ -1106,11 +1234,16 @@ export default function WorksheetForm({
                           >
                             <Brain className={`h-3 w-3 ${smartLoading ? 'animate-pulse' : ''}`} />
                             <span className="text-xs font-medium">{smartLoading ? 'Thinking…' : 'Smart'}</span>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-foreground text-background text-xs rounded hidden md:group-hover:block z-10 w-max max-w-[14rem]">
                               AI picks exercises + V/G focus from your inputs
                             </div>
                           </button>
                         </div>
+                        {isMobile && (
+                          <p className="text-xs text-muted-foreground text-center" aria-live="polite">
+                            {MODE_HINTS[selectionMode]}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Card>
@@ -1170,8 +1303,8 @@ export default function WorksheetForm({
                     <Eraser className="h-4 w-4 mr-1" /> Clear form
                   </Button>
                 </div>
-                <Button type="submit" className={`bg-worksheet-purple hover:bg-worksheet-purpleDark ${isMobile ? 'w-full' : ''}`} size={isMobile ? "sm" : "default"}>
-                  Generate Custom Worksheet
+                <Button type="submit" disabled={submitting} className={`bg-worksheet-purple hover:bg-worksheet-purpleDark ${isMobile ? 'w-full' : ''}`} size={isMobile ? "sm" : "default"}>
+                  {submitting ? 'Starting...' : 'Generate Custom Worksheet'}
                 </Button>
               </div>
             </div>

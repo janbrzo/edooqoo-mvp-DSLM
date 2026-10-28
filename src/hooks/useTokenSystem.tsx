@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { isFreeCustomDemoWeek } from '@/utils/promoUtils';
 import { devLog } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
+import { TOKEN_BALANCE_CHANGED_EVENT } from '@/lib/worksheet/tokenBalanceEvents';
 
 export const useTokenSystem = (userId?: string | null) => {
   const [tokenLeft, setTokenLeft] = useState<number>(0);
@@ -126,6 +127,15 @@ export const useTokenSystem = (userId?: string | null) => {
       setLoading(false);
     }
   };
+
+  // A charge made elsewhere (job poller) must refresh this instance's balance.
+  useEffect(() => {
+    if (isDemoMode || !userId || isAnonymousUser !== false) return;
+    const onChanged = () => { void fetchTokenBalance(); };
+    window.addEventListener(TOKEN_BALANCE_CHANGED_EVENT, onChanged);
+    return () => window.removeEventListener(TOKEN_BALANCE_CHANGED_EVENT, onChanged);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, isAnonymousUser, isDemoMode]);
 
   const consumeToken = async (worksheetId: string): Promise<boolean> => {
     devLog('🎯 consumeToken CALLED:', { 

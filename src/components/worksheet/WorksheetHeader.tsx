@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Zap, Database, Clock, GraduationCap, User, Pencil } from "lucide-react";
+import { ArrowLeft, Zap, Clock, GraduationCap, User, Pencil } from "lucide-react";
 import { GCalStatusButton } from "@/components/calendar/GCalStatusButton";
 import { Link, useNavigate } from "react-router-dom";
 import { StudentSelector } from "@/components/StudentSelector";
@@ -207,10 +207,6 @@ function WorksheetHeader({
             <div className="flex items-center gap-1 bg-white/20 px-4 py-2 rounded-md">
               <Zap className="h-4 w-4 text-yellow-300" />
               <span className="text-sm text-white">Generated in {generationTime}s</span>
-            </div>
-            <div className="flex items-center gap-1 bg-white/20 px-4 py-2 rounded-md">
-              <Database className="h-4 w-4 text-blue-300" />
-              <span className="text-sm text-white">Based on {sourceCount} sources</span>
             </div>
             <div className="flex items-center gap-1 bg-white/20 px-4 py-2 rounded-md">
               <Clock className="h-4 w-4 text-green-300" />

@@ -12,12 +12,11 @@
  * The worksheet generation prompt and engine are NOT touched.
  */
 import type { FormData, LessonTime, EnglishLevel, MediaType } from '@/components/WorksheetForm/types';
+import { buildWorksheetRequest } from '@/lib/worksheet/buildWorksheetRequest';
 
 const PICTURE_COMPATIBLE = ['describe-picture', 'answer-questions-picture', 'true-false-picture', 'multiple-choice-picture'];
 const AUDIO_COMPATIBLE = ['listening-comprehension', 'answer-questions-audio', 'true-false-audio', 'multiple-choice-audio', 'fill-in-blanks-audio'];
-const GENERAL_EXERCISES = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'multiple-choice', 'dialogue', 'discussion', 'error-correction', 'odd-one-out', 'synonyms', 'antonyms', 'word-order', 'gap-text', 'negative-prefixes', 'categorize', 'paraphrasing', 'complete-word', 'matching-halves'];
 const MANUAL_60 = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'categorize', 'odd-one-out', 'multiple-choice', 'discussion'];
-const MANUAL_45 = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'categorize', 'odd-one-out'];
 
 /**
  * v6.9.53: Persistent auto-generate intent.
@@ -312,40 +311,25 @@ export function buildAutoGeneratePayload(): (FormData & { __autoGenerateRequestI
   // path bypasses the form, so without it every one-click generation was B1/B2.
   const lessonTime: LessonTime = '60min';
   const englishLevel: EnglishLevel = persistent?.englishLevel || 'B1/B2';
-  const is45 = (lessonTime as LessonTime) === '45min';
-  const maxExercises = is45 ? 6 : 8;
 
-  const seed = Array.isArray(exercises) && exercises.length > 0
-    ? [...exercises]
-    : (is45 ? [...MANUAL_45] : [...MANUAL_60]);
-
-  const isPicture = mediaTypes.includes('picture');
-  const isAudio = mediaTypes.includes('audio');
-
-  let finalExercises = [...seed];
-  if (finalExercises.length < maxExercises) {
-    const unused = GENERAL_EXERCISES.filter(ex => {
-      if (finalExercises.includes(ex)) return false;
-      if (!isPicture && PICTURE_COMPATIBLE.includes(ex)) return false;
-      if (!isAudio && AUDIO_COMPATIBLE.includes(ex)) return false;
-      return true;
-    });
-    const shuffled = [...unused].sort(() => Math.random() - 0.5);
-    finalExercises = [...finalExercises, ...shuffled.slice(0, maxExercises - finalExercises.length)];
-  }
-
-  const payload: FormData & { __autoGenerateRequestId: string } = {
+  // The same builder as WorksheetForm.submitForm: trimming, 6/8 trim,
+  // single media family and deterministic padding live in one place.
+  const { request } = buildWorksheetRequest({
     lessonTime,
     lessonTopic: topic,
     lessonGoal: goal,
-    teachingPreferences: grammarFocus,
+    grammarFocus,
     additionalInformation: additionalInfo,
     englishLevel,
     languageStyle: 3,
-    studentId: studentId,
-    selectedExercises: finalExercises,
+    studentId,
+    selectedExercises: exercises.length > 0 ? exercises : [...MANUAL_60],
     selectedMediaTypes: mediaTypes,
-    exerciseFocusMap: focusMap && Object.keys(focusMap).length > 0 ? focusMap : undefined,
+    exerciseFocusMap: focusMap,
+  });
+
+  const payload: FormData & { __autoGenerateRequestId: string } = {
+    ...request,
     __autoGenerateFromSuggestion: true,
     __autoGenerateRequestId: requestId,
     // v6.9.53: carry suggestionId in the payload so generation hook can

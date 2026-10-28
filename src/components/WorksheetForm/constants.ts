@@ -18,9 +18,11 @@ export const FIELD_LIMITS = {
 /**
  * Characters reserved for the server-side prompt scaffolding built by
  * `format-worksheet-prompt` (language-style ladder + CEFR ladder + exercise
- * list). Measured at ~2.4k for the longest ladder combination.
+ * list). Measured maximum is 1722 characters (1684-1722), so 1900 leaves
+ * headroom without rejecting valid input; the exact post-format check in
+ * useWorksheetGeneration stays authoritative.
  */
-export const PROMPT_SCAFFOLD_RESERVE = 2600;
+export const PROMPT_SCAFFOLD_RESERVE = 1900;
 
 /** Hard limit enforced by the generateWorksheet edge function. */
 export const PROMPT_HARD_LIMIT = 5000;

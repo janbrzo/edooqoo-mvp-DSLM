@@ -238,7 +238,7 @@ const Index = () => {
           
           worksheetState.setWorksheetId(worksheet.id);
           worksheetState.setGenerationTime(worksheet.generation_time_seconds || 5);
-          worksheetState.setSourceCount(75);
+          worksheetState.setSourceCount(0);
         }
         
         sessionStorage.removeItem('restoredWorksheet');
