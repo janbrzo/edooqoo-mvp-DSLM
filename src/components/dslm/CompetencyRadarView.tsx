@@ -57,8 +57,10 @@ export function CompetencyRadarView({ skills }: CompetencyRadarViewProps) {
     () =>
       competencies
         .filter((c) => c.zone === 'critical_gap' || c.zone === 'retention_alert')
-        .map((c) => ({ competency: c, focus: weakestSkillInCategory(skills, c.category) }))
-        .filter((row) => row.focus !== null),
+        .flatMap((competency) => {
+          const focus = weakestSkillInCategory(skills, competency.category);
+          return focus ? [{ competency, focus }] : [];
+        }),
     [competencies, skills],
   );
 
@@ -135,23 +137,23 @@ export function CompetencyRadarView({ skills }: CompetencyRadarViewProps) {
               className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2 text-sm"
             >
               {competency.zone === 'retention_alert' ? (
-                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" aria-hidden="true" />
+                <AlertTriangle className="h-4 w-4 shrink-0 text-warning" aria-hidden="true" />
               ) : (
                 <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
               )}
               <span className="min-w-0 flex-1 break-words text-foreground">
-                <span className="font-medium">{focus!.label}</span>
+                <span className="font-medium">{focus.label}</span>
                 <span className="text-muted-foreground">
                   {' '}
-                  · {ZONE_LABELS[competency.zone]} · retention {focus!.effective_mastery}%
-                  {focus!.raw_mastery !== focus!.effective_mastery ? ` (stored ${focus!.raw_mastery}%)` : ''}
+                  · {ZONE_LABELS[competency.zone]} · retention {focus.effective_mastery}%
+                  {focus.raw_mastery !== focus.effective_mastery ? ` (stored ${focus.raw_mastery}%)` : ''}
                 </span>
               </span>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => addToNextLesson(competency.label, focus!.label, competency.zone)}
+                onClick={() => addToNextLesson(competency.label, focus.label, competency.zone)}
               >
                 Add to next lesson <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
               </Button>

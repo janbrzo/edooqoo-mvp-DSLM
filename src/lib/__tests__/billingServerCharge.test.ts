@@ -11,9 +11,9 @@ import { join } from 'node:path';
 const MIGRATIONS = join(__dirname, '../../../supabase/migrations');
 const read = (f: string) => readFileSync(join(MIGRATIONS, f), 'utf8');
 
-const TRIGGER_FILE = '20261028100000_billing_server_charge_trigger.sql';
-const MONITOR_FILE = '20261028100100_billing_charge_monitoring.sql';
-const CREDIT_FILE = '20261028100200_exercise_credit.sql';
+const TRIGGER_FILE = '20261028101000_billing_server_charge_trigger.sql';
+const MONITOR_FILE = '20261028101100_billing_charge_monitoring.sql';
+const CREDIT_FILE = '20261028101200_exercise_credit.sql';
 
 const fnBody = (src: string, name: string): string => {
   const start = src.search(new RegExp(`CREATE OR REPLACE FUNCTION public\\.${name}\\(`, 'i'));
@@ -22,7 +22,7 @@ const fnBody = (src: string, name: string): string => {
   return src.slice(start, src.indexOf('$function$', open + 10));
 };
 
-describe('P1.1 server-side worksheet charge (20261028100000)', () => {
+describe('P1.1 server-side worksheet charge (20261028101000)', () => {
   const sql = read(TRIGGER_FILE);
   const fn = fnBody(sql, 'charge_worksheet_on_insert');
 
@@ -98,7 +98,7 @@ describe('P1.1 server-side worksheet charge (20261028100000)', () => {
   });
 });
 
-describe('P1.2 daily coverage monitor (20261028100100)', () => {
+describe('P1.2 daily coverage monitor (20261028101100)', () => {
   const sql = read(MONITOR_FILE);
 
   it('compares created worksheets with owner against usage rows per UTC day', () => {
@@ -125,7 +125,7 @@ describe('P1.2 daily coverage monitor (20261028100100)', () => {
   });
 });
 
-describe('Exercise credit, 0.1 token per exercise (20261028100200)', () => {
+describe('Exercise credit, 0.1 token per exercise (20261028101200)', () => {
   const sql = read(CREDIT_FILE);
   const rpc = fnBody(sql, 'consume_exercise_credit');
 

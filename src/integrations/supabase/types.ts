@@ -116,6 +116,63 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_charge_audit: {
+        Row: {
+          created_at: string
+          detail: Json
+          id: string
+          outcome: string
+          reason: string
+          source: string
+          teacher_id: string | null
+          worksheet_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          id?: string
+          outcome: string
+          reason: string
+          source: string
+          teacher_id?: string | null
+          worksheet_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          id?: string
+          outcome?: string
+          reason?: string
+          source?: string
+          teacher_id?: string | null
+          worksheet_id?: string | null
+        }
+        Relationships: []
+      }
+      billing_free_windows: {
+        Row: {
+          created_at: string
+          ends_at: string
+          is_active: boolean
+          label: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          is_active?: boolean
+          label: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          is_active?: boolean
+          label?: string
+          starts_at?: string
+        }
+        Relationships: []
+      }
       bug_reports: {
         Row: {
           admin_note: string | null
@@ -1149,6 +1206,57 @@ export type Database = {
           source_name?: string
           stack?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      exercise_credit_accounts: {
+        Row: {
+          teacher_id: string
+          tokens_settled: number
+          units_accrued: number
+          updated_at: string
+        }
+        Insert: {
+          teacher_id: string
+          tokens_settled?: number
+          units_accrued?: number
+          updated_at?: string
+        }
+        Update: {
+          teacher_id?: string
+          tokens_settled?: number
+          units_accrued?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exercise_credit_actions: {
+        Row: {
+          action: string
+          action_ref: string
+          created_at: string
+          teacher_id: string
+          tokens_charged: number
+          units: number
+          worksheet_id: string | null
+        }
+        Insert: {
+          action: string
+          action_ref: string
+          created_at?: string
+          teacher_id: string
+          tokens_charged?: number
+          units: number
+          worksheet_id?: string | null
+        }
+        Update: {
+          action?: string
+          action_ref?: string
+          created_at?: string
+          teacher_id?: string
+          tokens_charged?: number
+          units?: number
+          worksheet_id?: string | null
         }
         Relationships: []
       }
@@ -2307,6 +2415,69 @@ export type Database = {
         }
         Relationships: []
       }
+      schema_migrations_p1_backup_20261028: {
+        Row: {
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      schema_migrations_twin_backup_20261028: {
+        Row: {
+          backed_up_at: string
+          created_by: string | null
+          idempotency_key: string | null
+          kind: string
+          local_version: string
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          twin_version: string
+        }
+        Insert: {
+          backed_up_at?: string
+          created_by?: string | null
+          idempotency_key?: string | null
+          kind: string
+          local_version: string
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          twin_version: string
+        }
+        Update: {
+          backed_up_at?: string
+          created_by?: string | null
+          idempotency_key?: string | null
+          kind?: string
+          local_version?: string
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          twin_version?: string
+        }
+        Relationships: []
+      }
       student_events: {
         Row: {
           created_at: string
@@ -2368,6 +2539,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_events_junk_backup_20261028: {
+        Row: {
+          backed_up_at: string | null
+          created_at: string | null
+          element_type: string | null
+          event_payload: Json | null
+          event_source: string | null
+          event_type: string | null
+          id: string | null
+          is_processed: boolean | null
+          mastery: number | null
+          session_id: string | null
+          skill_ids: string[] | null
+          source_id: string | null
+          student_id: string | null
+          superseded_at: string | null
+          superseded_by: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          created_at?: string | null
+          element_type?: string | null
+          event_payload?: Json | null
+          event_source?: string | null
+          event_type?: string | null
+          id?: string | null
+          is_processed?: boolean | null
+          mastery?: number | null
+          session_id?: string | null
+          skill_ids?: string[] | null
+          source_id?: string | null
+          student_id?: string | null
+          superseded_at?: string | null
+          superseded_by?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          created_at?: string | null
+          element_type?: string | null
+          event_payload?: Json | null
+          event_source?: string | null
+          event_type?: string | null
+          id?: string | null
+          is_processed?: boolean | null
+          mastery?: number | null
+          session_id?: string | null
+          skill_ids?: string[] | null
+          source_id?: string | null
+          student_id?: string | null
+          superseded_at?: string | null
+          superseded_by?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: []
       }
       student_gcal_tokens: {
         Row: {
@@ -2955,6 +3183,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_skill_metrics_junk_backup_20261027: {
+        Row: {
+          backed_up_at: string | null
+          created_at: string | null
+          current_mastery: number | null
+          first_event_at: string | null
+          id: string | null
+          last_event_at: string | null
+          mastery_history: Json | null
+          micro_skill: string | null
+          param_version: number | null
+          skill_category: string | null
+          skill_name: string | null
+          student_id: string | null
+          teacher_id: string | null
+          total_events: number | null
+          trend: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          created_at?: string | null
+          current_mastery?: number | null
+          first_event_at?: string | null
+          id?: string | null
+          last_event_at?: string | null
+          mastery_history?: Json | null
+          micro_skill?: string | null
+          param_version?: number | null
+          skill_category?: string | null
+          skill_name?: string | null
+          student_id?: string | null
+          teacher_id?: string | null
+          total_events?: number | null
+          trend?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          created_at?: string | null
+          current_mastery?: number | null
+          first_event_at?: string | null
+          id?: string | null
+          last_event_at?: string | null
+          mastery_history?: Json | null
+          micro_skill?: string | null
+          param_version?: number | null
+          skill_category?: string | null
+          skill_name?: string | null
+          student_id?: string | null
+          teacher_id?: string | null
+          total_events?: number | null
+          trend?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       student_test_questions: {
         Row: {
@@ -3832,6 +4117,27 @@ export type Database = {
         }
         Relationships: []
       }
+      worksheets_ai_response_backup_20261027: {
+        Row: {
+          ai_response: string | null
+          backed_up_at: string
+          html_content: string | null
+          id: string
+        }
+        Insert: {
+          ai_response?: string | null
+          backed_up_at?: string
+          html_content?: string | null
+          id: string
+        }
+        Update: {
+          ai_response?: string | null
+          backed_up_at?: string
+          html_content?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       wt_signal_feedback: {
         Row: {
           comment: string | null
@@ -3891,6 +4197,18 @@ export type Database = {
       }
     }
     Views: {
+      billing_daily_charge_coverage: {
+        Row: {
+          chargeable: number | null
+          charged: number | null
+          created_owned: number | null
+          day: string | null
+          excluded: number | null
+          ratio: number | null
+          refused: number | null
+        }
+        Relationships: []
+      }
       conversion_funnel: {
         Row: {
           date: string | null
@@ -4013,9 +4331,23 @@ export type Database = {
         }
         Returns: Json
       }
+      backfill_profile_v2: {
+        Args: { p_dry_run?: boolean; p_items: Json; p_run_id: string }
+        Returns: Json
+      }
       backfill_skill_metrics: {
         Args: { p_student_id?: string }
         Returns: number
+      }
+      billing_days_below_charge_threshold: {
+        Args: { p_days?: number; p_threshold?: number }
+        Returns: {
+          chargeable: number
+          charged: number
+          day: string
+          ratio: number
+          refused: number
+        }[]
       }
       book_public_slot: {
         Args: {
@@ -4077,6 +4409,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      consume_exercise_credit: {
+        Args: {
+          p_action: string
+          p_action_ref: string
+          p_count?: number
+          p_worksheet_id: string
+        }
+        Returns: Json
+      }
       consume_newsletter_rate_limit: {
         Args: {
           p_action: string
@@ -4112,6 +4453,10 @@ export type Database = {
       }
       dslm_effective_mastery: {
         Args: { p_last_event_at: string; p_mastery: number; p_now: string }
+        Returns: number
+      }
+      dslm_event_weight: {
+        Args: { p_event_source: string; p_payload: Json }
         Returns: number
       }
       dslm_validation_report: { Args: never; Returns: Json }
@@ -4259,11 +4604,30 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_homework_exercises_by_share_token: {
+        Args: { p_share_token: string; p_student_email: string }
+        Returns: {
+          audio_url: string
+          selected_audio: Json
+          selected_exercises: Json
+          selected_image: Json
+        }[]
+      }
       get_homework_owner_ids: {
         Args: { p_homework_id: string }
         Returns: {
           student_id: string
           teacher_id: string
+        }[]
+      }
+      get_homework_state_by_share_token: {
+        Args: { p_share_token: string }
+        Returns: {
+          completed_at: string
+          completed_by_teacher: boolean
+          id: string
+          reviewed_at: string
+          source_worksheet_id: string
         }[]
       }
       get_homework_status_by_share_token: {
@@ -4659,6 +5023,7 @@ export type Database = {
               title: string
             }[]
           }
+      is_free_generation_window: { Args: { p_at?: string }; Returns: boolean }
       is_user_anonymous: { Args: { user_id: string }; Returns: boolean }
       keep_ai_alternative_ratings: {
         Args: { p_new: Json; p_old: Json }
@@ -4854,6 +5219,7 @@ export type Database = {
         Args: { p_events: Json; p_test_id: string }
         Returns: Json
       }
+      reopen_homework: { Args: { p_homework_id: string }; Returns: Json }
       revoke_mcp_token: { Args: { _id: string }; Returns: undefined }
       rollback_intake_extraction: {
         Args: { p_extraction_id: string }
@@ -5069,6 +5435,10 @@ export type Database = {
         Args: { p_answered_count: number; p_share_token: string }
         Returns: boolean
       }
+      settle_exercise_credit_token: {
+        Args: { p_reference_id: string; p_teacher_id: string }
+        Returns: string
+      }
       should_show_onboarding: { Args: { user_id: string }; Returns: boolean }
       soft_delete_flashcard_set: {
         Args: { p_set_id: string; p_teacher_id: string }
@@ -5123,6 +5493,10 @@ export type Database = {
           p_student_email: string
         }
         Returns: boolean
+      }
+      supersede_homework_events: {
+        Args: { p_homework_id: string }
+        Returns: number
       }
       supersede_previous_welcome_test_events: {
         Args: { p_test_id: string }

@@ -1,176 +1,124 @@
 import type { LucideIcon } from 'lucide-react';
 import {
-  lessonSignalWorkflowCopy,
-  lessonSignalWorkflowSteps,
-  setupWorkflowSteps,
-  weeklyWorkflowSteps,
-  type WorkflowProofStep,
-} from '@/constants/oneMinutePrepWorkflowProof';
+  Brain, Zap, Target, Clock3, NotebookPen, ChartNoAxesCombined,
+  ClipboardList, MessageSquareText, Lightbulb, RotateCcw, ShieldCheck,
+} from 'lucide-react';
 
 export type GenerationContextVariant = 'anonymous' | 'authenticated';
 
-// v6.9.54: cap items shown in the left WorkflowSummaryCard so the
-// "Lesson-time signal capture" slide (5 items) never grows to 3 rows
-// and the modal does not require an inner scrollbar on 720p viewports.
-export const MAX_LEFT_CARD_ITEMS = 4;
+export const GENERATION_SLIDE_INTERVAL_MS = 8000;
+
+export interface GenerationModalBenefit {
+  icon: LucideIcon;
+  title: string;
+  text: string;
+}
 
 export interface GenerationModalContext {
   eyebrow: string;
   title: string;
-  description: string;
   screenshot: {
     src: string;
     alt: string;
     objectPosition?: string;
   };
-  items: string[];
-  footer?: string;
+  items: GenerationModalBenefit[];
 }
 
 export interface GenerationModalSlide {
   id: string;
-  phaseLabel: string;
-  phaseTitle: string;
-  phaseDescription: string;
-  phaseIcon: LucideIcon;
-  tone: string;
-  eyebrowTone: string;
-  items: WorkflowProofStep[];
   contexts: Record<GenerationContextVariant, GenerationModalContext>;
 }
 
+const radarPreview = {
+  src: '/features/skills-heat-map.png',
+  alt: 'Example learner skill radar and category mastery',
+  objectPosition: 'center bottom',
+};
+const nextPrepPreview = {
+  src: '/features/one-minute-next-steps.png',
+  alt: 'Example next lesson suggestion with a teacher-reviewed focus',
+  objectPosition: 'center top',
+};
+
 export const generationModalSlides: GenerationModalSlide[] = [
   {
-    id: 'setup',
-    phaseLabel: 'Phase 1: One-time student setup',
-    phaseTitle: 'Build the learner context once',
-    phaseDescription: 'First setup creates the student profile, goals, and baseline that recurring prep can use.',
-    phaseIcon: setupWorkflowSteps[0].icon,
-    tone: 'border-violet-200/70 bg-violet-50/80',
-    eyebrowTone: 'text-violet-700',
-    items: setupWorkflowSteps,
+    id: 'memory-and-follow-up',
     contexts: {
       anonymous: {
-        eyebrow: 'Account context',
-        title: 'Save the learner context before next week',
-        description:
-          'A free account lets Edooqoo keep the student profile, goals, and baseline instead of treating each worksheet as a one-off request.',
-        screenshot: {
-          src: '/features/welcome-test-profile-ai.png',
-          alt: 'Welcome Test AI profile summary',
-          objectPosition: 'center top',
-        },
+        eyebrow: 'EDOOQOO DSLM',
+        title: 'A worksheet is just 10% of 1-minute prep.',
+        screenshot: radarPreview,
         items: [
-          'Save the student profile and goals',
-          'Send the Welcome Test when you need a stronger baseline',
-          'Keep the Learning Roadmap attached to the learner',
+          { icon: Brain, title: 'Smart Memory', text: 'Keep weak points and grammar practice in one learner record.' },
+          { icon: Zap, title: 'Next Lesson in 60s', text: 'Start from saved results, then choose your next focus.' },
         ],
       },
       authenticated: {
-        eyebrow: 'Student context',
-        title: 'Attach the worksheet to the right student',
-        description:
-          'Keep generated material connected to the learner record so it can support the next prep decision after the lesson.',
-        screenshot: {
-          src: '/features/student-dashboard.png',
-          alt: 'Student Hub dashboard',
-          objectPosition: 'center top',
-        },
-        items: [
-          'Confirm the worksheet belongs to the right student',
-          'Keep profile goals and baseline visible',
-          'Use the learner record before generating again',
-        ],
-      },
-    },
-  },
-  {
-    id: 'signals',
-    phaseLabel: lessonSignalWorkflowCopy.eyebrow,
-    phaseTitle: lessonSignalWorkflowCopy.title,
-    phaseDescription: lessonSignalWorkflowCopy.description,
-    phaseIcon: lessonSignalWorkflowSteps[4].icon,
-    tone: 'border-blue-200/70 bg-blue-50/80',
-    eyebrowTone: 'text-blue-700',
-    items: lessonSignalWorkflowSteps,
-    contexts: {
-      anonymous: {
-        eyebrow: 'Lesson signals',
-        title: 'Let lesson activity become useful evidence',
-        description:
-          'Account context can connect homework, flashcards, teacher notes, and live worksheet answers to the same student over time.',
-        screenshot: {
-          src: '/features/live-session.png',
-          alt: 'Live Session shared worksheet answers',
-          objectPosition: 'center top',
-        },
-        items: [
-          'Collect live worksheet answers where supported',
-          'Use homework and flashcards as follow-up evidence',
-          'Keep teacher notes attached to the learner',
-        ],
-      },
-      authenticated: {
-        eyebrow: 'Lesson signals',
-        title: 'Turn this lesson into follow-up signals',
-        description:
-          'After teaching, selected activity can become useful context for the next worksheet instead of staying separate from planning.',
+        eyebrow: 'NEXT STEPS',
+        title: 'Close the loop after this lesson',
         screenshot: {
           src: '/features/homework-assignments.png',
-          alt: 'Homework assignments list',
+          alt: 'Example interactive homework assignments and completion status',
           objectPosition: 'center top',
         },
         items: [
-          'Add notes after the lesson',
-          'Turn selected exercises into homework',
-          'Add useful vocabulary to flashcards',
+          { icon: ClipboardList, title: 'Assign Homework', text: 'Turn selected exercises into interactive homework.' },
+          { icon: MessageSquareText, title: 'Capture Signals', text: 'Evaluated student answers feed the learning record.' },
+          { icon: Zap, title: '1-Minute Next Prep', text: 'Choose Next Lesson Ideas instead of starting from scratch.' },
         ],
       },
     },
   },
   {
-    id: 'weekly',
-    phaseLabel: 'Phase 2: Weekly 1-Minute Prep flow',
-    phaseTitle: 'Run the recurring prep loop',
-    phaseDescription: 'Weekly prep uses stored context to choose the next focus before worksheet output.',
-    phaseIcon: weeklyWorkflowSteps[0].icon,
-    tone: 'border-emerald-200/70 bg-emerald-50/80',
-    eyebrowTone: 'text-emerald-700',
-    items: weeklyWorkflowSteps,
+    id: 'next-prep-and-retention',
     contexts: {
       anonymous: {
-        eyebrow: 'Next prep cycle',
-        title: 'Return next week with context already attached',
-        description:
-          'Once the student has saved context, weekly prep can start from the learner record instead of a blank prompt.',
-        screenshot: {
-          src: '/features/one-minute-next-steps.png',
-          alt: '1-Minute Prep next lesson ideas panel',
-          objectPosition: 'center top',
-        },
+        eyebrow: 'CONTINUOUS ADAPTATION',
+        title: 'Never start planning from a blank page again.',
+        screenshot: nextPrepPreview,
         items: [
-          'Use Next Lesson Ideas with saved context',
-          'Review or edit the suggested focus',
-          'Generate the worksheet only after the focus is chosen',
+          { icon: Target, title: 'A Clear Next Focus', text: 'Review lesson ideas informed by your learner\'s progress.' },
+          { icon: Clock3, title: 'Less Prep, More Teaching', text: 'Adjust the idea, then generate your materials.' },
         ],
       },
       authenticated: {
-        eyebrow: 'Next prep cycle',
-        title: 'Use Next Lesson Ideas before the next worksheet',
-        description:
-          'The recurring loop is suggestion-first: review the next focus, adjust it if needed, then generate the worksheet output.',
+        eyebrow: 'DSLM KNOWLEDGE RETENTION',
+        title: 'Track what fades before next week',
+        screenshot: radarPreview,
+        items: [
+          { icon: Brain, title: 'Check Retention', text: 'Compare saved mastery with estimated retention.' },
+          { icon: NotebookPen, title: 'Quick Class Notes', text: 'Save spoken errors and observations to the learner profile.' },
+          { icon: RotateCcw, title: 'Targeted Review', text: 'Choose a skill that needs practice for your next lesson.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'learner-record-and-authority',
+    contexts: {
+      anonymous: {
+        eyebrow: 'THE COMPLETE ECOSYSTEM',
+        title: 'Connect homework, notes, and progress in one profile.',
         screenshot: {
-          src: '/features/one-minute-next-steps.png',
-          alt: '1-Minute Prep next lesson ideas panel',
-          objectPosition: 'center top',
+          src: '/features/welcome-test-profile-ai.png',
+          alt: 'Example learner profile with skill results',
+          objectPosition: 'center bottom',
         },
         items: [
-          'Open Next Lesson Ideas before generating',
-          'Use optional booking context when it is relevant',
-          'Teacher review remains part of the decision',
+          { icon: ClipboardList, title: 'Interactive Homework', text: 'Keep practice connected to the same learner.' },
+          { icon: ChartNoAxesCombined, title: 'Visible Progress', text: 'Bring results, goals, and class notes together.' },
         ],
-        footer:
-          'Teacher review remains part of the loop. Edooqoo uses saved context to support the next focus, not to replace your decision.',
+      },
+      authenticated: {
+        eyebrow: 'RECURRING PREP ENGINE',
+        title: 'Your next lesson starts with what you already know',
+        screenshot: nextPrepPreview,
+        items: [
+          { icon: Lightbulb, title: 'Evidence-Based Ideas', text: 'Review the saved signals supporting a suggested focus.' },
+          { icon: ShieldCheck, title: 'Your Decision', text: 'Accept, adjust, or replace the suggested topic.' },
+          { icon: Zap, title: '1-Minute Execution', text: 'Use the chosen idea to prefill the next worksheet.' },
+        ],
       },
     },
   },

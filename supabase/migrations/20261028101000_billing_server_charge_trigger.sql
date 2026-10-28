@@ -22,7 +22,7 @@
 --
 -- The trigger NEVER aborts the INSERT: every exception is caught. A refused charge
 -- (frozen, no balance, no profile) or an error is written to public.billing_charge_audit
--- (service-only), which the daily coverage monitor (20261028100100) reads.
+-- (service-only), which the daily coverage monitor (20261028101100) reads.
 --
 -- Written off by owner decision: the 16 worksheets of the guard regression window are
 -- not back-charged (no data change here).

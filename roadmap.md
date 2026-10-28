@@ -2,6 +2,10 @@
 
 Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
+## Generation modal conversion
+
+- [x] Remove the redundant left workflow block and deliver three concise visual slides per audience, safe new-tab signup/learner-plan links and eight-second hover/focus-paused rotation. Twelve regression cases and full suite (1757 tests) passed; real anonymous generation produced a saved worksheet, signup opened in a new tab, all six slides rendered, mobile/dark/laptop with 25 exercises passed, no browser errors and protected engine/llms hashes unchanged. Signed-in presentation verified with fixtures only; authenticated end-to-end remains unavailable on external unmanaged Supabase. Spec: docs/ux/generation-modal-conversion-spec.md.
+
 ## UX North Star
 
 Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
@@ -112,7 +116,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Stage 2.1: pure `explainRecommendation` engine with six evidence kinds and 81 unit tests; full suite 1471 tests passed. No UI integration, network calls, database changes or worksheet engine edits; goal/note/diagnostic evidence requires explicit links, diagnostic scored counts are caller-computed from evaluated answers. Two pre-existing shared-function type errors corrected without behavior changes; protected file hashes unchanged.
 - [x] Stage 2.2: shared Why This Lesson disclosure in Prep, Learning plan and the applied worksheet preset; exact source and learner/teacher guards, evidence badges, loading/error/Retry/empty states. 1485 tests passed, browser fixtures verified all three surfaces, non-first selection, source text edits, learner switch, small-screen/dark/error/retry states with zero writes and page errors; protected engine and llms.txt hashes unchanged. Authenticated production end-to-end checks remain unavailable on external unmanaged Supabase; fixtures are not production-session verification. Spec: docs/ux/explainable-dslm-spec.md.
 - [x] Stage 2.3: competency radar in Insights — pure `competencyRadar.ts` zone classifier (critical_gap <50, retention_alert raw>=80 faded below 80, mastered >=80, in_progress), two-layer radar (stored vs estimated retention) and manual "Add to next lesson" prefill behind the demo guard; 15 unit tests.
-- [x] Stage 2.4: `pillar2Baseline.test.ts` (22 tests) guards engine purity, read-only evidence UI, demo protection, semantic tokens, honest-evidence contract and the worksheet-engine boundary. Full suite 1522 tests passed; protected engine and llms.txt unchanged.
+- [x] Stage 2.4 closeout: 19 selected source-boundary cases plus 12 executable hook/demo/manual-handoff cases; removed styling-only tests, tightened the exact evidence union and verified actual bootstrap readers do not recognize the manual prefill as generation intent. Full suite: 1745 tests across 120 files passed; protected engine and root/public llms.txt (15 hashed files) unchanged, automatic build OK. Local radar fixture to anonymous form readback passed without page errors; no authenticated production certification. Independent review completed; spec: docs/ux/explainable-dslm-spec.md.
 - [ ] Pillar 2 production verification: authenticated end-to-end pass on a real account remains unavailable on external unmanaged Supabase.
 
 ## SEO/GEO Consolidation, Step 2

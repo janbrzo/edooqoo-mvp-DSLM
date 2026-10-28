@@ -1,112 +1,167 @@
-import React from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, ExternalLink, Pause, Play } from 'lucide-react';
 import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { studentTabPath } from '@/lib/students/workspaceTabs';
 import {
   generationModalSlides,
+  GENERATION_SLIDE_INTERVAL_MS,
   type GenerationContextVariant,
 } from './generationModalSlides';
 
 interface GenerationContextPanelProps {
   variant: GenerationContextVariant;
-  activeSlideIndex: number;
-  onSlideChange: (index: number) => void;
+  studentName?: string;
+  studentId?: string | null;
 }
 
 const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({
   variant,
-  activeSlideIndex,
-  onSlideChange,
+  studentName,
+  studentId,
 }) => {
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false,
+  );
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(preference.matches);
+    update();
+    preference.addEventListener('change', update);
+    return () => preference.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    setActiveSlideIndex(0);
+  }, [variant, studentId, studentName]);
+
+  useEffect(() => {
+    if (hovered || focused || paused || reducedMotion) return;
+    const interval = window.setInterval(() => {
+      setActiveSlideIndex(current => (current + 1) % generationModalSlides.length);
+    }, GENERATION_SLIDE_INTERVAL_MS);
+    return () => window.clearInterval(interval);
+  }, [hovered, focused, paused, reducedMotion, activeSlideIndex]);
+
   const slide = generationModalSlides[activeSlideIndex] ?? generationModalSlides[0];
+  if (!slide) return null;
   const copy = slide.contexts[variant];
+  const learnerName = studentName?.trim();
+  const learnerId = studentId?.trim();
+  const planPath = variant === 'authenticated' && learnerId
+    ? studentTabPath(learnerId, 'model', { view: 'pathway' })
+    : null;
 
   const goToPrevious = () => {
-    onSlideChange((activeSlideIndex - 1 + generationModalSlides.length) % generationModalSlides.length);
+    setActiveSlideIndex(current => (current - 1 + generationModalSlides.length) % generationModalSlides.length);
   };
 
   const goToNext = () => {
-    onSlideChange((activeSlideIndex + 1) % generationModalSlides.length);
+    setActiveSlideIndex(current => (current + 1) % generationModalSlides.length);
   };
 
   return (
-    <aside className="flex h-full min-h-0 min-w-0 flex-col rounded-xl border border-border bg-secondary/25 p-3 overflow-hidden">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">{copy.eyebrow}</p>
-          <h3 className="mt-1 text-sm lg:text-base font-semibold leading-tight text-foreground">{copy.title}</h3>
-          <p className="mt-1 text-[11px] lg:text-xs leading-snug text-muted-foreground line-clamp-3">{copy.description}</p>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            aria-label="Show previous generation context slide"
-            onClick={goToPrevious}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Show next generation context slide"
-            onClick={goToNext}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          >
-            <ArrowRight className="h-3.5 w-3.5" />
-          </button>
-        </div>
+    <aside
+      aria-label="Lesson preparation ideas"
+      aria-roledescription="carousel"
+      className="flex min-h-0 min-w-0 flex-col rounded-lg bg-muted/40 p-4"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={event => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+      }}
+    >
+      <div className="min-h-24 min-w-0">
+        <p className="text-[11px] font-semibold uppercase text-primary [overflow-wrap:anywhere]">
+          {variant === 'authenticated' && activeSlideIndex === 0
+            ? `NEXT STEPS FOR ${learnerName || 'THIS LEARNER'}`
+            : copy.eyebrow}
+        </p>
+        <h3 className="mt-2 text-xl font-semibold leading-snug text-foreground">{copy.title}</h3>
       </div>
 
       <FeatureScreenshotFrame
         src={copy.screenshot.src}
         alt={copy.screenshot.alt}
-        imageClassName="h-28 sm:h-32 lg:h-32"
+        imageClassName="aspect-[16/8] h-auto"
         objectPosition={copy.screenshot.objectPosition ?? 'center top'}
-        className="mt-2 rounded-lg shadow-none"
+        className="mt-3 rounded-md shadow-none"
         loading="eager"
       />
 
-      <div className="mt-2 space-y-1">
-        {copy.items.map((item) => (
-          <div key={item} className="flex gap-2 rounded-lg border border-border bg-background px-2.5 py-1 text-[12px] leading-snug text-foreground">
-            <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-            <span>{item}</span>
-          </div>
+      <ul className={cn('mt-4 space-y-3', variant === 'anonymous' ? 'min-h-28' : 'min-h-40')}>
+        {copy.items.map(({ icon: Icon, title, text }, index) => (
+          <li key={title} className="flex min-w-0 gap-3">
+            {variant === 'authenticated' && activeSlideIndex === 0
+              ? <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{index + 1}</span>
+              : <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />}
+            <div className="min-w-0 text-sm leading-snug">
+              <p className="font-semibold text-foreground">{title}</p>
+              <p className="mt-0.5 text-muted-foreground">{text}</p>
+            </div>
+          </li>
         ))}
-      </div>
-
-      <div className="mt-2 flex items-center justify-center gap-1.5">
-        {generationModalSlides.map((dot, index) => (
-          <button
-            key={dot.id}
-            type="button"
-            aria-label={`Show ${dot.phaseLabel}`}
-            aria-current={index === activeSlideIndex ? 'true' : undefined}
-            onClick={() => onSlideChange(index)}
-            className={cn(
-              'h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-              index === activeSlideIndex ? 'w-7 bg-primary' : 'w-2 bg-primary/25 hover:bg-primary/40'
-            )}
-          />
-        ))}
-      </div>
+      </ul>
 
       {variant === 'anonymous' ? (
-        // v6.9.54: open signup in a new tab so worksheet generation in
-        // the current tab is not interrupted.
-        <Button asChild className="mt-2 rounded-full h-9">
+        <Button asChild className="mt-4 h-auto min-h-11 w-full whitespace-normal px-3 py-2.5 text-sm leading-snug">
           <a href="/signup" target="_blank" rel="noopener noreferrer">
-            Create free account
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <span>Create free account to track progress</span>
+            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+          </a>
+        </Button>
+      ) : planPath ? (
+        <Button asChild variant="link" className="mt-3 h-auto min-h-10 justify-start whitespace-normal px-0 text-left leading-snug">
+          <a href={planPath} target="_blank" rel="noopener noreferrer">
+            <span>{learnerName ? `Open ${learnerName}'s Learning Plan` : 'Open Learning Plan'}</span>
+            <ExternalLink className="h-4 w-4 shrink-0" aria-hidden="true" />
           </a>
         </Button>
       ) : (
-        <p className="mt-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] leading-snug text-muted-foreground">
-          {copy.footer ?? 'Teacher review remains part of the loop. Edooqoo uses saved context to support the next focus, not to replace your decision.'}
+        <p className="mt-3 min-h-10 text-xs leading-snug text-muted-foreground">
+          Ready to assign right after generation completes.
         </p>
       )}
+
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-2">
+        <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Show previous generation context slide" title="Previous slide" onClick={goToPrevious}>
+          <ArrowLeft aria-hidden="true" />
+        </Button>
+        <div className="flex items-center gap-1">
+          {generationModalSlides.map((dot, index) => (
+            <Button
+              key={dot.id}
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              aria-label={`Show slide ${index + 1}`}
+              title={`Slide ${index + 1}`}
+              aria-current={index === activeSlideIndex ? 'true' : undefined}
+              onClick={() => setActiveSlideIndex(index)}
+            >
+              <span className={cn('h-2 w-2 rounded-full transition-colors motion-reduce:transition-none', index === activeSlideIndex ? 'bg-primary' : 'bg-muted-foreground/30')} />
+            </Button>
+          ))}
+          {!reducedMotion && (
+            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label={paused ? 'Resume slides' : 'Pause slides'} title={paused ? 'Resume slides' : 'Pause slides'} onClick={() => setPaused(current => !current)}>
+              {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+            </Button>
+          )}
+        </div>
+        <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Show next generation context slide" title="Next slide" onClick={goToNext}>
+          <ArrowRight aria-hidden="true" />
+        </Button>
+      </div>
     </aside>
   );
 };

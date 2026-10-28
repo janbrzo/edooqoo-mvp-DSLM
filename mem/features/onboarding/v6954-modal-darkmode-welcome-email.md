@@ -6,15 +6,15 @@ type: feature
 
 ## Generation modal (`src/components/GeneratingModal.tsx`)
 - New optional prop `studentName?: string`. When present, renders "for {name}" under the gradient title. `src/pages/Index.tsx` passes `sessionStorage.worksheetStudentName` in both authenticated and anonymous branches.
-- Carousel interval is 15000 ms (was 8000 ms). Pause-on-hover/focus still applies.
+- The generation modal now uses concise audience-specific slides with an eight-second interval and independent hover/focus pause; see `mem://ux/generation-modal-conversion` for the current design.
 - Grid column gap reduced from `lg:gap-6` to `lg:gap-4` so the right context panel fits without a horizontal scrollbar.
 
-## Left workflow card (`WorkflowSummaryCard.tsx` + `generationModalSlides.ts`)
-- Exported constant `MAX_LEFT_CARD_ITEMS = 4`. The card renders `slide.items.slice(0, 4)` so the 5-item Lesson-time signal slide never grows to 3 rows.
+## Left generation status
+- Keep progress, exercise status and Expected time only; the duplicate workflow card below Expected time is retired.
 
 ## Right context panel (`GenerationContextPanel.tsx`)
 - Anonymous CTA "Create free account" now renders as `<a href="/signup" target="_blank" rel="noopener noreferrer">` to preserve in-progress generation in the current tab.
-- Padding compressed (`p-3`, `mt-3 space-y-1.5`, `py-1.5`), screenshot reduced to `h-36 sm:h-40`, header sized down to `text-base` so the panel does not produce an inner scrollbar at 1280×720.
+- Keep two brief benefits for anonymous visitors and three practical steps for signed-in teachers, with a real product preview and one audience-appropriate next action.
 
 ## Dark mode lockdown
 - `index.html` boot script applies `.dark` ONLY when `localStorage['edooqoo-theme'] === 'dark'`. `prefers-color-scheme` is no longer consulted.
