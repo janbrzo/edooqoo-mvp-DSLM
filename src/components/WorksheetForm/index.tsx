@@ -18,6 +18,7 @@ import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { useWorksheetFormPersistence, STANDALONE_CONTEXT, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
 import { buildWorksheetRequest, getExerciseTarget } from "@/lib/worksheet/buildWorksheetRequest";
+import { decideLevelBandForStudent, formatStudentLevelLabel, levelMismatchWarning } from "@/lib/worksheet/studentLevel";
 import { getActiveGenerationJobs } from "@/lib/worksheet/generationJobRegistry";
 import {
   createSuggestionOrigin,
@@ -275,6 +276,7 @@ export default function WorksheetForm({
         if (typeof draft.additionalInformation === 'string') setAdditionalInformation(draft.additionalInformation);
         if (draft.englishLevel === 'A1/A2' || draft.englishLevel === 'B1/B2' || draft.englishLevel === 'C1/C2') {
           setEnglishLevel(draft.englishLevel as EnglishLevel);
+          draftLevelRestoredRef.current = true;
         }
         if (typeof draft.languageStyle === 'number') setLanguageStyle(draft.languageStyle);
         // v4.6: normalize restored draft via the same helper as DSLM prefill so
@@ -518,21 +520,40 @@ export default function WorksheetForm({
   // The form only listens for `worksheet:autoGenerateStarted` to stand down and
   // clear sessionStorage flags. Eliminates race conditions where two competing
   // submit paths fought for the same sessionStorage flag and silently dropped it.
+  // The student's level band is applied ONCE per selected student. A students
+  // refetch (e.g. after another generation) must not overwrite a band the
+  // teacher chose by hand, and a student without a level gets the B1/B2 default
+  // plus a visible note instead of silently inheriting the previous band.
+  const levelAppliedForRef = useRef<string | null>(null);
+  const draftLevelRestoredRef = useRef(false);
+  const [levelDefaulted, setLevelDefaulted] = useState(false);
   useEffect(() => {
-    if (selectedStudentId && selectedStudentId !== "no-student") {
-      const selectedStudent = students.find(s => s.id === selectedStudentId);
-      if (selectedStudent) {
-        const studentLevel = selectedStudent.english_level;
-        if (studentLevel === 'A1' || studentLevel === 'A2') {
-          setEnglishLevel('A1/A2');
-        } else if (studentLevel === 'B1' || studentLevel === 'B2') {
-          setEnglishLevel('B1/B2');
-        } else if (studentLevel === 'C1' || studentLevel === 'C2') {
-          setEnglishLevel('C1/C2');
-        }
-      }
+    if (!selectedStudentId || selectedStudentId === "no-student") {
+      levelAppliedForRef.current = null;
+      setLevelDefaulted(false);
+      return;
     }
+    if (levelAppliedForRef.current === selectedStudentId) return;
+    const selectedStudent = students.find(s => s.id === selectedStudentId);
+    if (!selectedStudent) return; // wait for the students list
+    levelAppliedForRef.current = selectedStudentId;
+    if (draftLevelRestoredRef.current) {
+      // The restored draft carries the band the teacher had for this student.
+      draftLevelRestoredRef.current = false;
+      return;
+    }
+    const decision = decideLevelBandForStudent(selectedStudent.english_level);
+    setEnglishLevel(decision.band);
+    setLevelDefaulted(decision.usedDefault);
   }, [selectedStudentId, students]);
+  const chooseLevel = (level: EnglishLevel) => {
+    setEnglishLevel(level);
+    setLevelDefaulted(false);
+  };
+  const selectedStudentLevel = selectedStudentId !== "no-student"
+    ? students.find(s => s.id === selectedStudentId)?.english_level
+    : undefined;
+  const levelWarning = levelMismatchWarning(englishLevel, selectedStudentLevel);
   // A student restored from a draft may have been deleted since: fall back to
   // "no student" instead of generating for a soft-deleted learner. Only the
   // restored id is checked, so a student added a moment ago is never reset.
@@ -908,19 +929,29 @@ export default function WorksheetForm({
                   
                   <div className={`flex flex-col ${isMobile ? 'items-center' : 'items-end w-80'}`}>
                     <div className={`flex gap-1 mb-1 ${isMobile ? 'flex-wrap justify-center' : ''}`}>
-                      <Button type="button" variant={englishLevel === "A1/A2" ? "default" : "outline"} onClick={() => setEnglishLevel("A1/A2")} className={englishLevel === "A1/A2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={englishLevel === "A1/A2" ? "default" : "outline"} onClick={() => chooseLevel("A1/A2")} className={englishLevel === "A1/A2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         A1/A2
                       </Button>
-                      <Button type="button" variant={englishLevel === "B1/B2" ? "default" : "outline"} onClick={() => setEnglishLevel("B1/B2")} className={englishLevel === "B1/B2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={englishLevel === "B1/B2" ? "default" : "outline"} onClick={() => chooseLevel("B1/B2")} className={englishLevel === "B1/B2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         B1/B2
                       </Button>
-                      <Button type="button" variant={englishLevel === "C1/C2" ? "default" : "outline"} onClick={() => setEnglishLevel("C1/C2")} className={englishLevel === "C1/C2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={englishLevel === "C1/C2" ? "default" : "outline"} onClick={() => chooseLevel("C1/C2")} className={englishLevel === "C1/C2" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         C1/C2
                       </Button>
                     </div>
                     <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 ${isMobile ? 'text-center' : ''}`}>
                       CEFR Scale: {englishLevel === "A1/A2" ? "Beginner/Elementary" : englishLevel === "B1/B2" ? "Intermediate/Upper-Intermediate" : "Advanced/Proficiency"}
                     </p>
+                    {levelDefaulted && (
+                      <p className={`${isMobile ? 'text-xs text-center' : 'text-xs text-right'} text-muted-foreground mt-1`}>
+                        This student has no level set, so B1/B2 is preselected. Change it if needed.
+                      </p>
+                    )}
+                    {levelWarning && (
+                      <p className={`${isMobile ? 'text-xs text-center' : 'text-xs text-right'} text-warning mt-1`}>
+                        {levelWarning}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1015,7 +1046,7 @@ export default function WorksheetForm({
                             + Add Student
                           </SelectItem>
                           {students.map(student => <SelectItem key={student.id} value={student.id}>
-                              <span className="truncate">{student.name} ({student.english_level})</span>
+                              <span className="truncate">{student.name} ({formatStudentLevelLabel(student.english_level)})</span>
                             </SelectItem>)}
                         </SelectContent>
                       </Select>
