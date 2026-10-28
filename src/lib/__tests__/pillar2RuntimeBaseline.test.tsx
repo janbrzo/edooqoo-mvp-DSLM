@@ -126,6 +126,7 @@ afterEach(async () => {
   await act(async () => { renderer?.unmount(); });
   renderer = undefined;
   client.clear();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
@@ -159,7 +160,6 @@ describe('Pillar 2 metric read boundary', () => {
     await settle();
     expect(boundary.explanation?.primary).toMatchObject({ raw_mastery: 90, effective_mastery: 67.5 });
     expect(boundary.rows[0]?.current_mastery).toBe(90);
-    vi.restoreAllMocks();
   });
 
   it('blocks metric reads in demo even when refetch is explicitly requested', async () => {
