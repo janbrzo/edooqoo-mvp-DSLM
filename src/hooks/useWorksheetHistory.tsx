@@ -64,7 +64,7 @@ export const useWorksheetHistory = (
         return;
       }
 
-      const selectQuery = listView ? LIST_SELECT : OWNER_VIEW_SELECT;
+      const selectQuery: string = listView ? LIST_SELECT : OWNER_VIEW_SELECT;
       
       let query = supabase
         .from('worksheets')

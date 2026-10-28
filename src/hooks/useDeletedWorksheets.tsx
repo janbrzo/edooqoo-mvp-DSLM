@@ -49,7 +49,7 @@ export const useDeletedWorksheets = (
     try {
       if (!user) { setLoading(false); return; }
 
-      const selectQuery = listView ? DELETED_LIST_SELECT : OWNER_VIEW_SELECT;
+      const selectQuery: string = listView ? DELETED_LIST_SELECT : OWNER_VIEW_SELECT;
 
       let query = supabase
         .from('worksheets')

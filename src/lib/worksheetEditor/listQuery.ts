@@ -70,22 +70,26 @@ export function resolveListOrdering(
   }
 }
 
-interface ListQueryBuilder<T> {
-  or(filters: string): T;
-  order(column: string, options: { ascending: boolean }): T;
+interface ListQueryBuilder {
+  or(filters: string): ListQueryBuilder;
+  order(column: string, options: { ascending: boolean }): ListQueryBuilder;
 }
 
-/** Applies search and ordering to a supabase query builder. */
-export function applyWorksheetListOptions<T extends ListQueryBuilder<T>>(
+/**
+ * Applies search and ordering to a supabase query builder. The builder is treated
+ * structurally (no recursive generic constraint), because the typed postgrest builder
+ * made the compiler instantiate its type without bound.
+ */
+export function applyWorksheetListOptions<T>(
   query: T,
   options: WorksheetListOptions | undefined,
   defaultColumn: string,
 ): T {
-  let next = query;
+  let next = query as unknown as ListQueryBuilder;
   const filter = buildSearchFilter(options?.search, options?.studentIdsMatchingSearch);
   if (filter) next = next.or(filter);
   for (const { column, ascending } of resolveListOrdering(options?.sortBy, options?.ascending, defaultColumn)) {
     next = next.order(column, { ascending });
   }
-  return next;
+  return next as unknown as T;
 }
