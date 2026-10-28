@@ -338,6 +338,10 @@ export function installWorld() {
       record.body = body;
     }
     w.calls.push(record);
+    // A real fetch settles after at least one macrotask. Without this the
+    // position of a detached notification's log line among the other log lines
+    // would depend on how many microtask hops the surrounding code takes.
+    await new Promise((resolve) => setTimeout(resolve, 0));
     if (String(url).startsWith('https://ipapi.co/')) {
       const r = w.ipapi;
       if (r instanceof Error) throw r;

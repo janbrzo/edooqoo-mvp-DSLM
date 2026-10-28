@@ -20328,7 +20328,6 @@ lessonGoal: Explain the problem and propos...",
     "log: 📡 SSE sent: progress { exercisesGenerated: 8, expectedTotal: 8, phase: 'saving', percent: 99 }",
     "log: 💾 Saving worksheet to database...",
     "log: 📊 [MONITORING] ai_response length: 61 chars, limit: 200000, truncated: false",
-    "log: 📧 Failure notification sent: parse_recovered",
     "log: ✅ Streaming generation complete, sending done event",
     "log: 📡 SSE sent: done {
   worksheetId: '33333333-3333-4333-8333-333333333333',
@@ -20385,6 +20384,7 @@ lessonGoal: Explain the problem and propos...",
   }
 }",
     "log: ✅ SSE stream closed",
+    "log: 📧 Failure notification sent: parse_recovered",
   ],
   "response": {
     "cacheControl": "no-cache",
@@ -28542,7 +28542,6 @@ exports[`validation, identity and rate limiting > 500 internal error for an unpa
     "error: Error stack: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
     at <stack>",
     "error: Returning error to client: An internal error occurred. Please try again.",
-    "log: 📧 Failure notification sent: parse",
   ],
   "response": {
     "body": {
