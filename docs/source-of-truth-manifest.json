@@ -4300,11 +4300,6 @@
           "initial": "false"
         },
         {
-          "value": "submitCountdown",
-          "setter": "setSubmitCountdown",
-          "initial": "15"
-        },
-        {
           "value": "studentEmailForTeacher",
           "setter": "setStudentEmailForTeacher",
           "initial": "null"
@@ -4447,7 +4442,6 @@
         "%).",
         "AI is evaluating...",
         "All exercises completed! Great work! 🎉",
-        "Auto-submitting in",
         "Check the correct answers above. Discuss any questions with your teacher.",
         "Close",
         "Closed by your teacher",
@@ -4463,7 +4457,8 @@
         "Lesson Audio",
         "Lesson image",
         "Lesson image enlarged",
-        "My Hub"
+        "My Hub",
+        "Not all exercises completed"
       ],
       "userFacingBehavior": {
         "actionHandlers": [

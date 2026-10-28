@@ -332,10 +332,22 @@ export const useInteractiveHomework = ({
     try {
       setIsSaving(true);
 
-      const pendingMap = (window as any).__pendingSpeakingRecordings as Map<string, { save: () => Promise<void> }> | undefined;
+      const pendingMap = (window as any).__pendingSpeakingRecordings as Map<string, { save: () => Promise<boolean | void> }> | undefined;
       if (pendingMap && pendingMap.size > 0) {
         devLog(`[submitHomework] Flushing ${pendingMap.size} pending recordings...`);
-        await Promise.all(Array.from(pendingMap.values()).map(e => e.save().catch(console.error)));
+        const saved = await Promise.all(Array.from(pendingMap.values()).map(async (e) => {
+          try { return (await e.save()) !== false; } catch (error) { console.error(error); return false; }
+        }));
+        if (saved.includes(false)) {
+          // A recording that failed to upload would be submitted as an empty answer.
+          toast({
+            title: "A recording was not saved",
+            description: "Check your connection and press Submit again in a moment.",
+            variant: "destructive"
+          });
+          setIsSaving(false);
+          return false;
+        }
         await new Promise(r => setTimeout(r, 500));
       }
 
