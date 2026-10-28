@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: vi.fn() } }));
 
-import { buildDuplicatePayload, friendlyDuplicateError, DUPLICATE_SOURCE_COLUMNS } from '../worksheetService/duplicateService';
+import { buildDuplicatePayload, friendlyDuplicateError, DUPLICATE_SOURCE_COLUMNS, DUPLICATE_PROMPT_PLACEHOLDER } from '../worksheetService/duplicateService';
 
 const published = {
   title: 'Markets',
@@ -51,6 +51,11 @@ describe('buildDuplicatePayload', () => {
     expect(payload.selected_image).toEqual(published.selected_image);
     expect(payload.form_data).toEqual({ lessonTopic: 'Markets' });
     expect(published.form_data.clientGenerationId).toBe('gen-1');
+  });
+
+  it('never reads or copies the original prompt', () => {
+    expect(DUPLICATE_SOURCE_COLUMNS as readonly string[]).not.toContain('prompt');
+    expect(payload.prompt).toBe(DUPLICATE_PROMPT_PLACEHOLDER);
   });
 
   it('never carries id or sequence_number', () => {

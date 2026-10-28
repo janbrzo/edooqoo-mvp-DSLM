@@ -1,4 +1,5 @@
 import { devLog, devWarn } from '@/utils/logger';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 export const getExpectedExerciseCount = (lessonTime: string): number => {
   if (lessonTime.includes('45')) {
     return 6;
@@ -54,15 +55,12 @@ export const hasImage = (worksheet: any): boolean => {
   let exercises = worksheet?.exercises;
   
   if (!exercises && worksheet?.ai_response) {
-    try {
-      const parsed = typeof worksheet.ai_response === 'string' 
-        ? JSON.parse(worksheet.ai_response) 
-        : worksheet.ai_response;
-      exercises = parsed?.exercises;
-    } catch (e) {
-      devWarn('Failed to parse ai_response for image detection:', e);
+    const parsed = loadWorksheetContent(worksheet).data;
+    if (!parsed) {
+      devWarn('Failed to parse worksheet content for image detection');
       return false;
     }
+    exercises = parsed.exercises;
   } else if (!exercises && !worksheet?.ai_response) {
     // In listView mode, ai_response is not loaded, skip this check
     return false;
@@ -99,15 +97,12 @@ export const hasAudio = (worksheet: any): boolean => {
   let exercises = worksheet?.exercises;
   
   if (!exercises && worksheet?.ai_response) {
-    try {
-      const parsed = typeof worksheet.ai_response === 'string' 
-        ? JSON.parse(worksheet.ai_response) 
-        : worksheet.ai_response;
-      exercises = parsed?.exercises;
-    } catch (e) {
-      devWarn('Failed to parse ai_response for audio detection:', e);
+    const parsed = loadWorksheetContent(worksheet).data;
+    if (!parsed) {
+      devWarn('Failed to parse worksheet content for audio detection');
       return false;
     }
+    exercises = parsed.exercises;
   } else if (!exercises && !worksheet?.ai_response) {
     // In listView mode, ai_response is not loaded, skip this check
     return false;

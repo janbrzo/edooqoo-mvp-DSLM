@@ -14,6 +14,7 @@ import { generateAudioForWorksheet, generateImageForWorksheet } from '@/services
 import { streamWorksheetGeneration, isDeterministicStreamFailure } from '@/services/worksheetStreamService';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
 import { devLog, devWarn, devError } from '@/utils/logger';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 import { useDemoContext } from '@/contexts/DemoContext';
 import {
   clearGenerationJob,
@@ -662,13 +663,8 @@ export const useWorksheetGeneration = (
         const { data, error } = await query;
         if (!error && data && data[0]?.id) {
           const row: any = data[0];
-          let parsed: any = null;
-          if (row.ai_response) {
-            try { parsed = JSON.parse(row.ai_response); } catch { parsed = null; }
-          }
-          if (!parsed && row.html_content) {
-            try { parsed = JSON.parse(row.html_content); } catch { parsed = null; }
-          }
+          const loaded = loadWorksheetContent(row);
+          const parsed: any = loaded.data;
           if (parsed && Array.isArray(parsed.exercises)) {
             parsed.id = row.id;
             return parsed;

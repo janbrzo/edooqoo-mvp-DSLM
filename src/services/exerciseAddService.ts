@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { updateWorksheetAPI } from '@/services/worksheetService/updateService';
 import { isValidExerciseId } from '@/lib/exerciseTaxonomy';
+import { chargeExerciseAction } from '@/services/exerciseCreditService';
 
 /** Longest free-text instruction sent with an add request. */
 export const MAX_ADDITIONAL_INSTRUCTIONS_LENGTH = 500;
@@ -15,9 +16,9 @@ export interface AddExerciseRequest {
 }
 
 /**
- * One call per user action: asking the engine for a single exercise. Any
- * per-exercise charging decided later belongs here (and in the matching
- * regeneration function), not in the UI.
+ * One call per user action: asking the engine for a single exercise. The
+ * per-exercise credit is charged in `persistAddedExercise` (after the exercise
+ * exists and is saved), and for regeneration in `useExerciseRegeneration`.
  */
 export async function requestNewExercise({ exerciseType, additionalInstructions, formData, userId }: AddExerciseRequest) {
   if (!isValidExerciseId(exerciseType)) {
@@ -78,7 +79,12 @@ export function appendExercise<W extends { exercises?: unknown[] }>(
   return { ...worksheet, exercises: [...(worksheet.exercises ?? []), exercise] };
 }
 
-/** Persists through the single worksheet write path (keeps ai_response, html_content and title in sync). */
+/**
+ * Persists through the single worksheet write path (keeps ai_response, html_content and title in sync),
+ * then charges the per-exercise credit once the added exercise is saved. The charge never blocks or throws.
+ */
 export async function persistAddedExercise(worksheetId: string, worksheet: unknown, userId: string) {
-  return updateWorksheetAPI(worksheetId, worksheet, userId);
+  const saved = await updateWorksheetAPI(worksheetId, worksheet, userId);
+  await chargeExerciseAction({ worksheetId, action: 'add_exercise' });
+  return saved;
 }

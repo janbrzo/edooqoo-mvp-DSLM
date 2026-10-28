@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { applyWorksheetListOptions, type WorksheetListOptions } from '@/lib/worksheetEditor/listQuery';
+import { LIST_SELECT, OWNER_VIEW_SELECT } from '@/lib/worksheet/worksheetColumns';
 
 interface WorksheetHistoryItem {
   id: string;
@@ -63,9 +64,7 @@ export const useWorksheetHistory = (
         return;
       }
 
-      const selectQuery = listView 
-        ? 'id, title, created_at, student_id, generation_time_seconds, form_data, audio_url, audio_duration, audio_voice, selected_audio, selected_image, media_metadata, share_token'
-        : '*';
+      const selectQuery = listView ? LIST_SELECT : OWNER_VIEW_SELECT;
       
       let query = supabase
         .from('worksheets')

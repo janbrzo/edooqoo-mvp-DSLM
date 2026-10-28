@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { DELETED_LIST_SELECT, OWNER_VIEW_SELECT } from '@/lib/worksheet/worksheetColumns';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { applyWorksheetListOptions, type WorksheetListOptions } from '@/lib/worksheetEditor/listQuery';
@@ -48,9 +49,7 @@ export const useDeletedWorksheets = (
     try {
       if (!user) { setLoading(false); return; }
 
-      const selectQuery = listView
-        ? 'id, title, created_at, deleted_at, student_id, generation_time_seconds, form_data, audio_url, audio_duration, audio_voice, selected_audio, selected_image, media_metadata'
-        : '*';
+      const selectQuery = listView ? DELETED_LIST_SELECT : OWNER_VIEW_SELECT;
 
       let query = supabase
         .from('worksheets')

@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { isFreeCustomDemoWeek } from '@/utils/promoUtils';
-import { devLog } from '@/utils/logger';
+import { devError, devLog } from '@/utils/logger';
+import { logTokenChargeFailure } from '@/services/clientErrorLogService';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { TOKEN_BALANCE_CHANGED_EVENT } from '@/lib/worksheet/tokenBalanceEvents';
 
@@ -182,8 +183,9 @@ export const useTokenSystem = (userId?: string | null) => {
       });
       
       if (error) {
-        console.error('❌ RPC ERROR:', error);
-        throw error;
+        devError('❌ RPC ERROR:', error.code);
+        void logTokenChargeFailure({ worksheetId, reason: 'rpc_error', origin: 'generation_hook', userId, errorCode: error.code });
+        return false;
       }
       
       if (data === true) {
@@ -192,15 +194,12 @@ export const useTokenSystem = (userId?: string | null) => {
         return true;
       } else {
         devLog('⚠️ Token consumption returned FALSE:', data);
+        void logTokenChargeFailure({ worksheetId, reason: 'rpc_returned_false', origin: 'generation_hook', userId });
         return false;
       }
     } catch (error: any) {
-      console.error('💥 ERROR consuming token:', {
-        error,
-        message: error?.message,
-        code: error?.code,
-        details: error?.details
-      });
+      devError('💥 ERROR consuming token:', error?.code);
+      void logTokenChargeFailure({ worksheetId, reason: 'rpc_threw', origin: 'generation_hook', userId, errorCode: error?.code });
       return false;
     }
   };
