@@ -68,7 +68,6 @@ export default function HomeworkPage() {
   const [isTeacher, setIsTeacher] = useState(false);
   const [showIncompleteModal, setShowIncompleteModal] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
-  const [submitCountdown, setSubmitCountdown] = useState(15);
   const [studentEmailForTeacher, setStudentEmailForTeacher] = useState<string | null>(null);
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [studentIdForTeacher, setStudentIdForTeacher] = useState<string | null>(null);
@@ -114,7 +113,6 @@ export default function HomeworkPage() {
   const [isImageFullScreen, setIsImageFullScreen] = useState(false);
   
   const exerciseRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Interactive homework hook - only active after email verification
   const totalExercises = Array.isArray(homework?.selected_exercises) 
@@ -419,45 +417,22 @@ export default function HomeworkPage() {
     }
   };
 
-  // Check if homework is incomplete before submitting
+  // Submitting is irreversible and always an explicit click: a countdown that submitted by itself
+  // sent work the student had only stopped looking at. Nothing answered yet cannot be submitted.
   const handleSubmitClick = () => {
     const progress = getProgress();
+    if (progress.answeredTasks === 0) {
+      toast.error("Answer at least one question before you submit.");
+      return;
+    }
     if (progress.percentageComplete < 100) {
       setShowIncompleteModal(true);
     } else {
-      // Show complete modal with countdown for 100% complete homework
       setShowCompleteModal(true);
-      setSubmitCountdown(15);
     }
   };
 
-  // Countdown effect for complete modal
-  useEffect(() => {
-    if (showCompleteModal && submitCountdown > 0) {
-      countdownIntervalRef.current = setInterval(() => {
-        setSubmitCountdown(prev => prev - 1);
-      }, 1000);
-      
-      return () => {
-        if (countdownIntervalRef.current) {
-          clearInterval(countdownIntervalRef.current);
-        }
-      };
-    } else if (showCompleteModal && submitCountdown === 0) {
-      // Auto-submit when countdown reaches 0
-      handleMarkCompleted();
-      setShowCompleteModal(false);
-    }
-  }, [showCompleteModal, submitCountdown]);
-
-  // Reset countdown when modal closes
-  const handleCloseCompleteModal = () => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-    }
-    setShowCompleteModal(false);
-    setSubmitCountdown(15);
-  };
+  const handleCloseCompleteModal = () => setShowCompleteModal(false);
 
   const handleMarkCompleted = async () => {
     if (!homework) return;
@@ -1133,14 +1108,6 @@ export default function HomeworkPage() {
                 ⚠️ After submission you will NOT be able to edit your answers.
                 You will see the correct answers immediately.
               </p>
-              <div className="text-center py-4">
-                <div className="text-4xl font-bold text-primary tabular-nums">
-                  {submitCountdown}
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Auto-submitting in {submitCountdown} seconds...
-                </p>
-              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

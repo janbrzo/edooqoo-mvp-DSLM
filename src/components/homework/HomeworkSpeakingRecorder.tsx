@@ -166,8 +166,9 @@ export function HomeworkSpeakingRecorder({
   }, [audioUrl]);
 
 
-  const uploadAndSave = useCallback(async () => {
-    if (!blobRef.current) return;
+  /** True when the recording is stored (or there is nothing to store); false when the upload failed. */
+  const uploadAndSave = useCallback(async (): Promise<boolean> => {
+    if (!blobRef.current) return true;
     setStatus('uploading');
     setErrorMsg(null);
     // Clear countdown on manual save
@@ -178,6 +179,7 @@ export function HomeworkSpeakingRecorder({
       const url = await uploadRecording(blobRef.current, { filenamePrefix: 'homework-speaking' });
       setAudioUrl(url); setStatus('done'); onAudioSavedRef.current(url);
       toast.success('Recording saved!');
+      return true;
     } catch (err) {
       // Keep the recorded blob so the student can retry, never fake a success.
       console.error('[HomeworkSpeakingRecorder] Upload failed:', err);
@@ -185,6 +187,7 @@ export function HomeworkSpeakingRecorder({
       setStatus('recorded');
       setErrorMsg('Upload failed. Check your connection and tap Save again.');
       toast.error('Recording not saved: please try again.');
+      return false;
     }
 
   }, []); // STABLE - no dependency on onAudioSaved
