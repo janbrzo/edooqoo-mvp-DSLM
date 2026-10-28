@@ -1,4 +1,4 @@
-# Homework — Specification (audit iteration 12, October 2026)
+# Homework: Specification (audit iteration 12, October 2026)
 
 Status: AS-BUILT 2026-10-28. Parent: `docs/ux/target-teacher-experience.md`. Routes: `/homework/:token` (student), `/homework/:id/review` (teacher), Student tab of `/student/:id`.
 
