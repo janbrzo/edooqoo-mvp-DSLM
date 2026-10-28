@@ -178,6 +178,16 @@ TECHNICAL MECHANICS: Form fields include lessonTime, lessonTopic, lessonGoal, gr
 
 RAG KEYWORDS: 1-Minute Prep, worksheet form, ESL worksheet generator, CEFR selector, language style, exercise selector, smart exercises, lesson goal, grammar focus, adult ESL prep, private tutor prep, student context, session prefill, worksheet request
 
+### Generation waiting-time presentation
+
+PROBLEM: Duplicate workflow explanations during generation distracted from worksheet status and obscured the next action for anonymous visitors and signed-in teachers.
+
+EDOOQOO SOLUTION: GeneratingModal keeps the left side limited to status and Expected time; GenerationContextPanel presents three concise, screenshot-led slides per audience, promoting signup or practical learner follow-up without fetching private evidence.
+
+TECHNICAL MECHANICS: generationModalSlides supplies typed benefits and existing public product previews. The panel owns its eight-second rotation, independent hover/focus pause, explicit pause control, reduced-motion preference and manual navigation. It consumes explicit isAnonymous-derived variant and optional learner metadata from the active modal. Anonymous signup and canonical studentTabPath(studentId, 'model', { view: 'pathway' }) actions open protected new tabs. Closed, error and recovery renders unmount the carousel without changing progress, job events, retry handlers or generation transport. Tests include executable timer, audience-link and lifecycle checks; teacher presentation fixtures do not certify authenticated production behavior.
+
+RAG KEYWORDS: generation modal, signup conversion, DSLM adoption, learning plan, rotating slides, reduced motion, new-tab CTA, presentation-only learner context
+
 ## Worksheet Generation Runtime and Media Pipeline
 STATUS: PRODUCTION
 

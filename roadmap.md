@@ -2,6 +2,10 @@
 
 Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
+## Generation modal conversion
+
+- [x] Remove the redundant left workflow block and deliver three concise visual slides per audience, safe new-tab signup/learner-plan links and eight-second hover/focus-paused rotation. Twelve regression cases and full suite (1757 tests) passed; real anonymous generation produced a saved worksheet, signup opened in a new tab, all six slides rendered, mobile/dark/laptop with 25 exercises passed, no browser errors and protected engine/llms hashes unchanged. Signed-in presentation verified with fixtures only; authenticated end-to-end remains unavailable on external unmanaged Supabase. Spec: docs/ux/generation-modal-conversion-spec.md.
+
 ## UX North Star
 
 Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).

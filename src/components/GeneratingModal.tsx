@@ -5,8 +5,6 @@ import { Circle, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import GenerationContextPanel from "@/components/generation/GenerationContextPanel";
-import WorkflowSummaryCard from "@/components/generation/WorkflowSummaryCard";
-import { generationModalSlides } from "@/components/generation/generationModalSlides";
 import { computeGenerationProgress } from "@/lib/worksheet/computeProgress";
 
 interface GeneratingModalProps {
@@ -205,8 +203,6 @@ export default function GeneratingModal({
   const initialElapsed = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0;
   const [elapsedTime, setElapsedTime] = useState(initialElapsed);
   const [sections, setSections] = useState<SectionStatus[]>([]);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const [isCarouselPaused, setIsCarouselPaused] = useState(false);
 
   // PROBLEM 3: Calculate expected time based on configuration
   const exerciseCount = selectedExercises?.length || 6;
@@ -232,8 +228,6 @@ export default function GeneratingModal({
     if (!isOpen) {
       setElapsedTime(0);
       setSections([]);
-      setActiveSlideIndex(0);
-      setIsCarouselPaused(false);
       return;
     }
 
@@ -275,16 +269,6 @@ export default function GeneratingModal({
     },
     elapsedTime,
   );
-
-  useEffect(() => {
-    if (!isOpen || errorMessage || isCarouselPaused) return;
-
-    const carouselInterval = setInterval(() => {
-      setActiveSlideIndex((current) => (current + 1) % generationModalSlides.length);
-    }, 15000);
-
-    return () => clearInterval(carouselInterval);
-  }, [isOpen, errorMessage, isCarouselPaused]);
 
   // Update sections based on progress - SEQUENTIAL ACTIVATION with exercise details
   useEffect(() => {
@@ -380,8 +364,8 @@ export default function GeneratingModal({
   // RECOVERY STATE (v6.9.61): backend may still save the worksheet.
   if (recovering) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
-        <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-[520px] mx-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
+      <div className="fixed inset-0 bg-foreground/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
+        <div className="bg-card p-8 rounded-lg shadow-xl w-full max-w-[520px] mx-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-12 w-12 text-primary animate-spin" />
             <h2 className="text-2xl font-semibold text-center text-foreground">
@@ -405,8 +389,8 @@ export default function GeneratingModal({
   // ERROR STATE
   if (errorMessage) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
-        <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-[520px] mx-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
+      <div className="fixed inset-0 bg-foreground/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
+        <div className="bg-card p-8 rounded-lg shadow-xl w-full max-w-[520px] mx-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
           <div className="flex flex-col items-center gap-3">
             <XCircle className="h-16 w-16 text-destructive" />
             <h2 className="text-2xl font-semibold text-center text-foreground">
@@ -447,33 +431,27 @@ export default function GeneratingModal({
 
   // NORMAL PROGRESS STATE
   return createPortal(
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto lg:overflow-hidden">
+    <div role="dialog" aria-modal="true" aria-label="Worksheet generation" className="fixed inset-0 bg-foreground/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
         <div
           className={cn(
-            'bg-white rounded-lg shadow-xl mx-4 w-full',
+            'bg-card rounded-lg shadow-xl w-full',
             // Mobile: allow internal scroll if needed.
             'max-h-[calc(100vh-2rem)] overflow-y-auto',
-            // Desktop (lg+): cap height AND hide scrollbar, content is sized
-            // to fit a 720p viewport without a scrollbar.
-            'lg:max-h-[calc(100dvh-2rem)] lg:overflow-hidden',
+            'lg:max-h-[calc(100dvh-2rem)]',
             'max-w-[520px] lg:max-w-[1080px]'
           )}
         >
         <div
           className={cn(
             'p-6',
-            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.88fr)] lg:gap-4 lg:space-y-0 lg:p-5 lg:min-h-0'
+            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.88fr)] lg:gap-6 lg:space-y-0 lg:p-5 lg:min-h-0'
           )}
-          onMouseEnter={() => setIsCarouselPaused(true)}
-          onMouseLeave={() => setIsCarouselPaused(false)}
-          onFocusCapture={() => setIsCarouselPaused(true)}
-          onBlurCapture={() => setIsCarouselPaused(false)}
         >
           <div className="flex flex-col h-full space-y-2.5 min-w-0 min-h-0">
         <div className="space-y-1 min-w-0">
           {/* v6.9.64: two-row responsive header: title+student, then email+topic. */}
           <div className="flex flex-col items-center justify-center gap-1 lg:flex-row lg:gap-2 min-w-0">
-            <h2 className="shrink-0 text-xl lg:text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
+            <h2 className="min-w-0 text-center text-xl lg:text-2xl font-semibold text-primary">
               Generating Your Worksheet
             </h2>
             {studentName ? (
@@ -507,15 +485,16 @@ export default function GeneratingModal({
                     ? `${meta.progress.exercisesGenerated}/${meta.progress.expectedTotal}`
                     : null;
                   return (
-                    <button
+                    <Button
                       key={meta?.jobId ?? i}
                       type="button"
                       onClick={() => onSelectIndex?.(i)}
                       aria-pressed={isActive}
+                      variant="outline"
                       className={cn(
-                        'shrink-0 text-left rounded-lg border px-2.5 py-1.5 transition min-w-[140px]',
+                        'block h-auto shrink-0 text-left rounded-lg border px-2.5 py-1.5 transition min-w-[140px]',
                         isActive
-                          ? 'border-violet-500 bg-violet-50 text-foreground shadow-sm'
+                          ? 'border-primary bg-primary/10 text-foreground shadow-sm'
                           : 'border-muted-foreground/20 bg-background hover:border-muted-foreground/40 text-muted-foreground hover:text-foreground'
                       )}
                     >
@@ -539,7 +518,7 @@ export default function GeneratingModal({
                           “{topicLabel}”
                         </div>
                       ) : null}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -566,24 +545,24 @@ export default function GeneratingModal({
 
         <Progress
           value={progress}
-          className="h-3 bg-gray-200"
-          indicatorClassName="bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500"
+          className="h-3 bg-muted"
+          indicatorClassName="bg-primary"
         />
 
-        <div className="flex justify-between items-center text-sm text-gray-500">
+        <div className="flex justify-between items-center text-sm text-muted-foreground">
           <span>Time: {formatTime(elapsedTime)}</span>
           <span>{Math.round(progress)}%</span>
         </div>
 
         <div
           className={cn(
-            'rounded-md border px-3 py-2 text-xs flex items-center justify-between gap-3',
+            'rounded-md border px-3 py-2 text-xs flex flex-wrap items-center justify-between gap-2',
             isResumed
-              ? 'border-amber-300/60 bg-amber-50/80 text-amber-900'
+              ? 'border-warning/60 bg-warning/10 text-foreground'
               : 'border-muted bg-muted/40 text-muted-foreground',
           )}
         >
-          <span className="leading-snug">
+          <span className="min-w-0 flex-1 basis-44 leading-snug">
             {isResumed && <strong className="mr-1">Generation resumed.</strong>}
             Generation runs in the background, keep prepping for
             {studentName ? (
@@ -614,7 +593,7 @@ export default function GeneratingModal({
           </Button>
         </div>
 
-        <div className="space-y-1 bg-muted/30 p-2 rounded-lg max-h-[44vh] lg:max-h-[46vh] overflow-y-auto">
+        <div className="space-y-1 bg-muted/30 p-2 rounded-lg max-h-[44vh] lg:max-h-[min(46vh,24rem)] overflow-y-auto">
           {sections.map((section, index) => (
             <div 
               key={index} 
@@ -628,15 +607,15 @@ export default function GeneratingModal({
                   <Loader2 className={`${section.isExerciseItem ? 'h-4 w-4' : 'h-5 w-5'} text-primary animate-spin`} />
                 )}
                 {section.status === 'done' && (
-                  <CheckCircle2 className={`${section.isExerciseItem ? 'h-4 w-4' : 'h-5 w-5'} text-green-600`} />
+                  <CheckCircle2 className={`${section.isExerciseItem ? 'h-4 w-4' : 'h-5 w-5'} text-success`} />
                 )}
               </div>
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <div className={`font-medium ${section.isExerciseItem ? 'text-xs' : 'text-sm'} ${
                   section.status === 'generating' 
                     ? 'text-primary' 
                     : section.status === 'done'
-                      ? 'text-green-600'
+                      ? 'text-success'
                       : 'text-muted-foreground'
                 }`}>
                   {section.label}
@@ -651,13 +630,13 @@ export default function GeneratingModal({
                 <div className="text-xs text-primary animate-pulse">Generating...</div>
               )}
               {section.status === 'done' && !section.isExerciseItem && (
-                <div className="text-xs text-green-600">Done</div>
+                <div className="text-xs text-success">Done</div>
               )}
             </div>
           ))}
         </div>
 
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs text-muted-foreground">
           Expected time: {formatExpectedTime(expectedSeconds)}
           {(requiresAudio || requiresImage) && (
             <span className="ml-1">
@@ -665,16 +644,11 @@ export default function GeneratingModal({
             </span>
           )}
         </p>
-        <WorkflowSummaryCard
-          activeSlideIndex={activeSlideIndex}
-          onSlideChange={setActiveSlideIndex}
-          className="mt-auto"
-        />
           </div>
           <GenerationContextPanel
             variant={isAnonymous ? 'anonymous' : 'authenticated'}
-            activeSlideIndex={activeSlideIndex}
-            onSlideChange={setActiveSlideIndex}
+            studentName={studentName}
+            studentId={studentId}
           />
         </div>
       </div>

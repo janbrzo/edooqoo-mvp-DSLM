@@ -116,6 +116,63 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_charge_audit: {
+        Row: {
+          created_at: string
+          detail: Json
+          id: string
+          outcome: string
+          reason: string
+          source: string
+          teacher_id: string | null
+          worksheet_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          id?: string
+          outcome: string
+          reason: string
+          source: string
+          teacher_id?: string | null
+          worksheet_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          id?: string
+          outcome?: string
+          reason?: string
+          source?: string
+          teacher_id?: string | null
+          worksheet_id?: string | null
+        }
+        Relationships: []
+      }
+      billing_free_windows: {
+        Row: {
+          created_at: string
+          ends_at: string
+          is_active: boolean
+          label: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          is_active?: boolean
+          label: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          is_active?: boolean
+          label?: string
+          starts_at?: string
+        }
+        Relationships: []
+      }
       bug_reports: {
         Row: {
           admin_note: string | null
@@ -1149,6 +1206,57 @@ export type Database = {
           source_name?: string
           stack?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      exercise_credit_accounts: {
+        Row: {
+          teacher_id: string
+          tokens_settled: number
+          units_accrued: number
+          updated_at: string
+        }
+        Insert: {
+          teacher_id: string
+          tokens_settled?: number
+          units_accrued?: number
+          updated_at?: string
+        }
+        Update: {
+          teacher_id?: string
+          tokens_settled?: number
+          units_accrued?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exercise_credit_actions: {
+        Row: {
+          action: string
+          action_ref: string
+          created_at: string
+          teacher_id: string
+          tokens_charged: number
+          units: number
+          worksheet_id: string | null
+        }
+        Insert: {
+          action: string
+          action_ref: string
+          created_at?: string
+          teacher_id: string
+          tokens_charged?: number
+          units: number
+          worksheet_id?: string | null
+        }
+        Update: {
+          action?: string
+          action_ref?: string
+          created_at?: string
+          teacher_id?: string
+          tokens_charged?: number
+          units?: number
+          worksheet_id?: string | null
         }
         Relationships: []
       }
@@ -2304,6 +2412,33 @@ export type Database = {
           total_tokens_received?: number | null
           total_worksheets_created?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      schema_migrations_p1_backup_20261028: {
+        Row: {
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
         }
         Relationships: []
       }
@@ -4062,6 +4197,18 @@ export type Database = {
       }
     }
     Views: {
+      billing_daily_charge_coverage: {
+        Row: {
+          chargeable: number | null
+          charged: number | null
+          created_owned: number | null
+          day: string | null
+          excluded: number | null
+          ratio: number | null
+          refused: number | null
+        }
+        Relationships: []
+      }
       conversion_funnel: {
         Row: {
           date: string | null
@@ -4192,6 +4339,16 @@ export type Database = {
         Args: { p_student_id?: string }
         Returns: number
       }
+      billing_days_below_charge_threshold: {
+        Args: { p_days?: number; p_threshold?: number }
+        Returns: {
+          chargeable: number
+          charged: number
+          day: string
+          ratio: number
+          refused: number
+        }[]
+      }
       book_public_slot: {
         Args: {
           p_slot_id: string
@@ -4251,6 +4408,15 @@ export type Database = {
           p_teacher_id: string
         }
         Returns: undefined
+      }
+      consume_exercise_credit: {
+        Args: {
+          p_action: string
+          p_action_ref: string
+          p_count?: number
+          p_worksheet_id: string
+        }
+        Returns: Json
       }
       consume_newsletter_rate_limit: {
         Args: {
@@ -4436,6 +4602,15 @@ export type Database = {
           exercise_index: number
           id: string
           updated_at: string
+        }[]
+      }
+      get_homework_exercises_by_share_token: {
+        Args: { p_share_token: string; p_student_email: string }
+        Returns: {
+          audio_url: string
+          selected_audio: Json
+          selected_exercises: Json
+          selected_image: Json
         }[]
       }
       get_homework_owner_ids: {
@@ -4848,6 +5023,7 @@ export type Database = {
               title: string
             }[]
           }
+      is_free_generation_window: { Args: { p_at?: string }; Returns: boolean }
       is_user_anonymous: { Args: { user_id: string }; Returns: boolean }
       keep_ai_alternative_ratings: {
         Args: { p_new: Json; p_old: Json }
@@ -5258,6 +5434,10 @@ export type Database = {
       set_test_answered_count_by_share_token: {
         Args: { p_answered_count: number; p_share_token: string }
         Returns: boolean
+      }
+      settle_exercise_credit_token: {
+        Args: { p_reference_id: string; p_teacher_id: string }
+        Returns: string
       }
       should_show_onboarding: { Args: { user_id: string }; Returns: boolean }
       soft_delete_flashcard_set: {

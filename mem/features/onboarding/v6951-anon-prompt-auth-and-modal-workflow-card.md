@@ -15,16 +15,9 @@ type: feature
    using their real access token, so no regression. Retry-once-after-250ms
    behaviour is preserved.
 
-2. **`src/components/generation/WorkflowSummaryCard.tsx`** — new presentational
-   component. Renders the three Edooqoo phases (Phase 1: One-time student setup,
-   Lesson-time signal capture, Phase 2: Weekly 1-Minute Prep) as equal-height
-   columns with compact item rows. Tailwind tones: violet/blue/emerald.
-
-3. **`src/components/GeneratingModal.tsx`** — the left column wrapper switched
-   from `space-y-4` to `flex flex-col h-full space-y-4` and renders
-   `<WorkflowSummaryCard className="mt-auto" />` after the "Expected time"
-   paragraph. The card fills the previously empty bottom area (red rectangle
-   in the user screenshot) and keeps both columns visually balanced.
+2. The former left workflow card is retired. Keep the left side focused on
+   generation status and Expected time; use only the concise right-side,
+   audience-specific rotating slides described in `mem://ux/generation-modal-conversion`.
 
 ## Sanctity
 
