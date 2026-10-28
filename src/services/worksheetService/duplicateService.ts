@@ -6,12 +6,13 @@ import { devLog, devWarn } from '@/utils/logger';
  * `select('*')` spread also copied `public_slug` (unique, so duplicating any
  * published worksheet failed with a 409), `is_public`, share and view counters.
  * Publication, sharing, soft-delete and analytics columns are never copied.
+ * `prompt` is not selected either (the client cannot read it); the copy gets a
+ * neutral placeholder for the NOT NULL column.
  */
 export const DUPLICATE_SOURCE_COLUMNS = [
   'title',
   'ai_response',
   'html_content',
-  'prompt',
   'form_data',
   'generation_time_seconds',
   'selected_image',
@@ -24,6 +25,9 @@ export const DUPLICATE_SOURCE_COLUMNS = [
   'teacher_email',
   'user_id',
 ] as const;
+
+/** `worksheets.prompt` is NOT NULL, but the original prompt is not readable by the client. */
+export const DUPLICATE_PROMPT_PLACEHOLDER = 'Duplicated worksheet';
 
 type SourceRow = Record<(typeof DUPLICATE_SOURCE_COLUMNS)[number], unknown>;
 
@@ -54,6 +58,7 @@ export function buildDuplicatePayload(
 
   return {
     ...copied,
+    prompt: DUPLICATE_PROMPT_PLACEHOLDER,
     form_data: copyFormData(original.form_data),
     student_id: newStudentId,
     teacher_id: userId,

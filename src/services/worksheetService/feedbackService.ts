@@ -81,7 +81,7 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
               title: 'Generated Worksheet'
             }
           ])
-          .select();
+          .select('id');
           
         if (placeholderError) {
           console.error('Error creating placeholder worksheet:', placeholderError);

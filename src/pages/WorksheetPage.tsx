@@ -19,6 +19,7 @@ import { devLog } from '@/utils/logger';
 import { isValidUUID } from '@/utils/securityUtils';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 import { resolveLessonMedia, withColumnTitle } from '@/lib/worksheetEditor/lessonMedia';
+import { OWNER_VIEW_SELECT, type WorksheetOwnerRow } from '@/lib/worksheet/worksheetColumns';
 
 // PROBLEM 3 FIX: Calculate source count deterministically based on worksheet parameters
 const calculateSourceCount = (formData: any): number => {
@@ -114,10 +115,10 @@ export default function WorksheetPage() {
         // Fetch worksheet
         const { data: worksheet, error } = await supabase
           .from('worksheets')
-          .select('*')
+          .select(OWNER_VIEW_SELECT)
           .eq('id', id)
           .is('deleted_at', null)
-          .maybeSingle();
+          .maybeSingle<WorksheetOwnerRow>();
 
         if (error) {
           console.error('Error fetching worksheet:', error);
