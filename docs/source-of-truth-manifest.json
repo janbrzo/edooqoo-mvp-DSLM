@@ -60829,6 +60829,10 @@
         "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
       },
       {
+        "name": "log_homework_answer_to_events",
+        "migration": "supabase/migrations/20261028130000_homework_events_follow_student_id.sql"
+      },
+      {
         "name": "log_homework_submitted_event",
         "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
       },

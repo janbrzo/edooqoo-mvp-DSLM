@@ -367,7 +367,7 @@ export function CreateHomeworkModal({
           title: `${worksheetTitle} - Homework for ${student?.name}`,
           selected_exercises: exercisesData,
           deadline: finalDeadline,
-          reminder_hours: sendReminder ? parseInt(reminderHours) : null,
+          reminder_hours: sendReminder && deadline ? parseInt(reminderHours) : null,
           prompt: lastPrompt || null
         })
         .select()
@@ -722,12 +722,16 @@ export function CreateHomeworkModal({
                 <div className="flex items-center gap-2">
                   <Switch
                     id="send-reminder"
-                    checked={sendReminder}
+                    checked={sendReminder && !!deadline}
                     onCheckedChange={setSendReminder}
+                    disabled={!deadline}
                   />
                   <Label htmlFor="send-reminder" className="cursor-pointer text-sm font-normal">
                     Send before deadline
                   </Label>
+                  {!deadline && (
+                    <span className="text-xs text-muted-foreground">Pick a deadline to send a reminder.</span>
+                  )}
                 </div>
                 {/* Opt-in: notify the student right after creation */}
                 <div className="flex items-center gap-2">
@@ -740,7 +744,7 @@ export function CreateHomeworkModal({
                     Notify student by email
                   </Label>
                 </div>
-                {sendReminder && (
+                {sendReminder && !!deadline && (
                   <Select value={reminderHours} onValueChange={setReminderHours}>
                     <SelectTrigger id="reminder-hours" className="h-8 w-44 text-sm">
                       <SelectValue />
