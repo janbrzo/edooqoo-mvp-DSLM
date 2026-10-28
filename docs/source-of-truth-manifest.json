@@ -17,13 +17,13 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 402,
+    "componentModules": 403,
     "hookModules": 99,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 80,
-    "typedTables": 74,
-    "typedRpcs": 131,
+    "typedTables": 79,
+    "typedRpcs": 136,
     "migrationIndexes": 26
   },
   "routes": [
@@ -9920,16 +9920,6 @@
           "value": "sections",
           "setter": "setSections",
           "initial": "[]"
-        },
-        {
-          "value": "activeSlideIndex",
-          "setter": "setActiveSlideIndex",
-          "initial": "0"
-        },
-        {
-          "value": "isCarouselPaused",
-          "setter": "setIsCarouselPaused",
-          "initial": "false"
         }
       ],
       "hooks": [
@@ -9964,6 +9954,7 @@
         "The connection dropped, but your worksheet might still be saving in the background.",
         "Time:",
         "Try Again",
+        "Worksheet generation",
         "or another student while you wait."
       ],
       "userFacingBehavior": {
@@ -23449,20 +23440,49 @@
               "optional": false
             },
             {
-              "name": "activeSlideIndex",
-              "type": "number",
-              "optional": false
+              "name": "studentName",
+              "type": "string",
+              "optional": true
             },
             {
-              "name": "onSlideChange",
-              "type": "(index: number) => void",
-              "optional": false
+              "name": "studentId",
+              "type": "string | null",
+              "optional": true
             }
           ]
         }
       ],
-      "state": [],
-      "hooks": [],
+      "state": [
+        {
+          "value": "activeSlideIndex",
+          "setter": "setActiveSlideIndex",
+          "initial": "0"
+        },
+        {
+          "value": "hovered",
+          "setter": "setHovered",
+          "initial": "false"
+        },
+        {
+          "value": "focused",
+          "setter": "setFocused",
+          "initial": "false"
+        },
+        {
+          "value": "paused",
+          "setter": "setPaused",
+          "initial": "false"
+        },
+        {
+          "value": "reducedMotion",
+          "setter": "setReducedMotion",
+          "initial": "() => typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useState"
+      ],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -23473,7 +23493,11 @@
       },
       "storage": [],
       "userFacingText": [
-        "Create free account",
+        "Create free account to track progress",
+        "Lesson preparation ideas",
+        "Next slide",
+        "Previous slide",
+        "Ready to assign right after generation completes.",
         "Show next generation context slide",
         "Show previous generation context slide"
       ],
@@ -23526,34 +23550,11 @@
       }
     },
     {
-      "path": "src/components/generation/WorkflowSummaryCard.tsx",
+      "path": "src/components/generation/__tests__/generationConversion.test.tsx",
       "domain": "generation",
-      "purpose": "Implements Workflow Summary Card behavior in the generation domain.",
-      "exports": [
-        "WorkflowSummaryCard"
-      ],
-      "props": [
-        {
-          "name": "WorkflowSummaryCardProps",
-          "fields": [
-            {
-              "name": "activeSlideIndex",
-              "type": "number",
-              "optional": false
-            },
-            {
-              "name": "onSlideChange",
-              "type": "(index: number) => void",
-              "optional": false
-            },
-            {
-              "name": "className",
-              "type": "string",
-              "optional": true
-            }
-          ]
-        }
-      ],
+      "purpose": "Implements generation Conversion behavior in the generation domain.",
+      "exports": [],
+      "props": [],
       "state": [],
       "hooks": [],
       "actions": [],
@@ -23565,10 +23566,7 @@
         "fetchTargets": []
       },
       "storage": [],
-      "userFacingText": [
-        "1-Minute Prep workflow phase",
-        "One phase at a time"
-      ],
+      "userFacingText": [],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -24515,6 +24513,72 @@
       "userFacingText": [
         "Answered",
         "Teacher's Comment"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/homework/ItemsToCheckPanel.tsx",
+      "domain": "homework",
+      "purpose": "Implements Items To Check Panel behavior in the homework domain.",
+      "exports": [
+        "ItemsToCheckPanel"
+      ],
+      "props": [
+        {
+          "name": "ItemsToCheckPanelProps",
+          "fields": [
+            {
+              "name": "homeworkId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "exerciseIndex",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "items",
+              "type": "ItemToCheck[]",
+              "optional": false
+            },
+            {
+              "name": "onRated",
+              "type": "(itemEvaluations: StoredItemRating[]) => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "busy",
+          "setter": "setBusy",
+          "initial": "null"
+        }
+      ],
+      "hooks": [
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Answers to check (",
+        "Correct",
+        "Incorrect",
+        "Key:",
+        "Student:",
+        "The answer key could not decide these. Your decision is counted in the student's progress."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -49841,6 +49905,19 @@
         "payloadExpressions": []
       },
       {
+        "name": "set_homework_item_verdict",
+        "callsites": [
+          "src/lib/homework/reviewItems.ts"
+        ],
+        "payloadFields": [
+          "p_correct",
+          "p_exercise_index",
+          "p_homework_id",
+          "p_question_index"
+        ],
+        "payloadExpressions": []
+      },
+      {
         "name": "set_test_answered_count_by_share_token",
         "callsites": [
           "src/hooks/useWelcomeTest.tsx"
@@ -50109,6 +50186,91 @@
           },
           {
             "name": "updated_at",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
+        "name": "billing_charge_audit",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "detail",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "outcome",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "source",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "worksheet_id",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
+        "name": "billing_free_windows",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "ends_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "is_active",
+            "type": "boolean",
+            "optional": false
+          },
+          {
+            "name": "label",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "starts_at",
             "type": "string",
             "optional": false
           }
@@ -51849,6 +52011,81 @@
             "process-welcome-test",
             "send-welcome-test-completion-email"
           ]
+        }
+      },
+      {
+        "name": "exercise_credit_accounts",
+        "fields": [
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "tokens_settled",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "units_accrued",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "updated_at",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
+        "name": "exercise_credit_actions",
+        "fields": [
+          {
+            "name": "action",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "action_ref",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "tokens_charged",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "units",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "worksheet_id",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
         }
       },
       {
@@ -53769,6 +54006,46 @@
             "submit-bug-report",
             "verify-subscription-payment"
           ]
+        }
+      },
+      {
+        "name": "schema_migrations_p1_backup_20261028",
+        "fields": [
+          {
+            "name": "created_by",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "idempotency_key",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "name",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "rollback",
+            "type": "string[] | null",
+            "optional": false
+          },
+          {
+            "name": "statements",
+            "type": "string[] | null",
+            "optional": false
+          },
+          {
+            "name": "version",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
         }
       },
       {
@@ -56931,6 +57208,22 @@
         "returns": "number"
       },
       {
+        "name": "billing_days_below_charge_threshold",
+        "args": [
+          {
+            "name": "p_days",
+            "type": "number",
+            "optional": true
+          },
+          {
+            "name": "p_threshold",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returns": "{ chargeable: number charged: number day: string ratio: number refused: number }[]"
+      },
+      {
         "name": "book_public_slot",
         "args": [
           {
@@ -57029,6 +57322,32 @@
           }
         ],
         "returns": "undefined"
+      },
+      {
+        "name": "consume_exercise_credit",
+        "args": [
+          {
+            "name": "p_action",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_action_ref",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_count",
+            "type": "number",
+            "optional": true
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
       },
       {
         "name": "consume_newsletter_rate_limit",
@@ -57875,6 +58194,17 @@
         "returns": "string"
       },
       {
+        "name": "is_free_generation_window",
+        "args": [
+          {
+            "name": "p_at",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
         "name": "is_user_anonymous",
         "args": [
           {
@@ -58680,6 +59010,32 @@
         "returns": "string"
       },
       {
+        "name": "set_homework_item_verdict",
+        "args": [
+          {
+            "name": "p_correct",
+            "type": "boolean",
+            "optional": false
+          },
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_question_index",
+            "type": "number",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "save_teacher_comment",
         "args": [
           {
@@ -58812,6 +59168,22 @@
           }
         ],
         "returns": "boolean"
+      },
+      {
+        "name": "settle_exercise_credit_token",
+        "args": [
+          {
+            "name": "p_reference_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_teacher_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
       },
       {
         "name": "should_show_onboarding",
@@ -59986,6 +60358,10 @@
       {
         "name": "save_worksheet_answer",
         "migration": "supabase/migrations/20261016110000_w2_merge_answers_on_save.sql"
+      },
+      {
+        "name": "set_homework_item_verdict",
+        "migration": "supabase/migrations/20261028110000_homework_teacher_item_verdict.sql"
       },
       {
         "name": "set_test_answered_count_by_share_token",

@@ -5335,6 +5335,15 @@ export type Database = {
         }
         Returns: string
       }
+      set_homework_item_verdict: {
+        Args: {
+          p_correct: boolean
+          p_exercise_index: number
+          p_homework_id: string
+          p_question_index: number
+        }
+        Returns: Json
+      }
       save_teacher_comment: {
         Args: {
           p_comment_text: string

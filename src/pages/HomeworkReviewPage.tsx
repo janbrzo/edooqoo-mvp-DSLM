@@ -19,6 +19,8 @@ import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
 import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
 import { isClosedExerciseType } from "@/utils/masteryCalculator";
+import { ItemsToCheckPanel } from "@/components/homework/ItemsToCheckPanel";
+import { findItemsToCheck, type StoredItemRating } from "@/lib/homework/reviewItems";
 import { parseAiEvaluation } from "@/utils/aiEvaluationMapper";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
@@ -53,6 +55,7 @@ interface StudentAnswer {
   is_submitted: boolean;
   submitted_at: string | null;
   ai_evaluation?: AiEvaluation | null;
+  item_evaluations?: StoredItemRating[] | null;
 }
 
 interface TeacherComment {
@@ -150,7 +153,7 @@ export default function HomeworkReviewPage() {
         // Use direct query to get ai_evaluation which RPC might not return
         const { data: answersData, error: answersError } = await supabase
           .from('homework_student_answers')
-          .select('exercise_index, exercise_type, answers, is_submitted, submitted_at, ai_evaluation')
+          .select('exercise_index, exercise_type, answers, is_submitted, submitted_at, ai_evaluation, item_evaluations')
           .eq('homework_id', id)
           .eq('student_email', studentEmail);
 
@@ -476,6 +479,10 @@ export default function HomeworkReviewPage() {
             const studentAnswer = getStudentAnswerForExercise(index);
             const hasAnswer = Object.keys(studentAnswer).length > 0;
             const aiEvaluation = getAiEvaluationForExercise(index);
+            const storedRow = studentAnswers.find((a) => a.exercise_index === index);
+            const itemsToCheck = storedRow?.is_submitted
+              ? findItemsToCheck(storedRow.exercise_type || exercise.type, exercise, storedRow.answers, storedRow.item_evaluations)
+              : [];
             
             return (
               <div key={index} className="space-y-4">
@@ -514,6 +521,14 @@ export default function HomeworkReviewPage() {
                   </div>
                 )}
                 
+                <ItemsToCheckPanel
+                  homeworkId={homework.id}
+                  exerciseIndex={index}
+                  items={itemsToCheck}
+                  onRated={(rated) => setStudentAnswers((prev) => prev.map((a) =>
+                    a.exercise_index === index ? { ...a, item_evaluations: rated } : a))}
+                />
+
                 {/* Teacher comment section */}
                 <Card className="p-4 bg-muted/30 border-dashed">
                   <div className="space-y-3">
