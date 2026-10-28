@@ -2,7 +2,7 @@
 
 All steps are additive. Apply in this order; each step is safe to repeat.
 
-1. `supabase/migrations/20261027090000_dslm_validation_loop_v1.sql` (connector or SQL Editor).
+1. `supabase/migrations/20261027085900_dslm_validation_loop_v1.sql` (connector or SQL Editor).
    Creates `dslm_interpretation_params` (version 1 seed), `param_version` columns on
    `student_skill_metrics` and `pacing_proposals`, `dslm_decision_log` and `log_dslm_decision`.
    Contains no removal statement.

@@ -59056,7 +59056,7 @@
         "name": "dslm_decision_log_teacher_type_created_idx",
         "table": "dslm_decision_log",
         "unique": false,
-        "migration": "supabase/migrations/20261027090000_dslm_validation_loop_v1.sql"
+        "migration": "supabase/migrations/20261027085900_dslm_validation_loop_v1.sql"
       }
     ],
     "migrationFunctions": [
@@ -59362,7 +59362,7 @@
       },
       {
         "name": "log_dslm_decision",
-        "migration": "supabase/migrations/20261027090000_dslm_validation_loop_v1.sql"
+        "migration": "supabase/migrations/20261027085900_dslm_validation_loop_v1.sql"
       },
       {
         "name": "log_flashcard_review_event",

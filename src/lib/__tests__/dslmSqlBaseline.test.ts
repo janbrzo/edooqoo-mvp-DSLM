@@ -365,7 +365,7 @@ describe('calculate_test_results is owner or service role only (2026-10-18)', ()
 
 describe('Iteration 10: validation loop v1 (additive)', () => {
   const read = (f: string) => readFileSync(join(MIGRATIONS, f), 'utf8');
-  const loop = read('20261027090000_dslm_validation_loop_v1.sql');
+  const loop = read('20261027085900_dslm_validation_loop_v1.sql');
   const replace = read('20261027090200_save_mark_done_replace_signature.sql');
 
   it.each(['dslm_interpretation_params', 'dslm_decision_log'])('table %s is versioned with RLS', (t) => {
