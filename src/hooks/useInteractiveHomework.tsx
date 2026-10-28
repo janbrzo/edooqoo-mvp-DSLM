@@ -14,7 +14,7 @@ import { callStudentAnswerRpc, submitHomeworkAnswers, studentAnswerRpcName } fro
 import { buildKeepaliveSaveRequest } from '@/lib/homework/keepaliveSave';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 import { buildHomeworkDelta, parseAiEvaluations } from '@/lib/homework/deltaSave';
-import { isHomeworkClosedError } from '@/lib/homework/homeworkStateRpc';
+import { isHomeworkClosedError, isAccessRevokedError } from '@/lib/homework/homeworkStateRpc';
 
 
 interface UseInteractiveHomeworkProps {
@@ -62,6 +62,8 @@ export const useInteractiveHomework = ({
   const [isWaitingForAiEval, setIsWaitingForAiEval] = useState(false);
   // The server refused a write or a submit: the homework was submitted elsewhere or closed by the teacher.
   const [isLocked, setIsLocked] = useState(false);
+  /** The server refused this e-mail for this homework (address edited, homework deleted): retrying cannot help. */
+  const [accessRevoked, setAccessRevoked] = useState(false);
   const lockedToastShownRef = useRef(false);
   
   const pendingSavesQueueRef = useRef(createPendingSaves());
@@ -218,6 +220,14 @@ export const useInteractiveHomework = ({
       return true;
     } catch (error: any) {
       console.error('Error saving answer:', error);
+      if (isAccessRevokedError(error)) {
+        dirtyKeysRef.current[exerciseIndex]?.clear();
+        dirtyAudioRef.current[exerciseIndex]?.clear();
+        pendingSavesRef.current.delete(exerciseIndex);
+        setIsSaving(false);
+        setAccessRevoked(true);
+        return true; // terminal: the queue must not retry forever
+      }
       if (!saveErrorShownRef.current) {
         saveErrorShownRef.current = true;
         toast({
@@ -416,6 +426,10 @@ export const useInteractiveHomework = ({
         });
         return false;
       }
+      if (isAccessRevokedError(error)) {
+        setAccessRevoked(true);
+        return false;
+      }
       console.error('Error submitting homework:', error);
       toast({
         title: "Error submitting homework",
@@ -586,6 +600,7 @@ export const useInteractiveHomework = ({
     submittedAt,
     isWaitingForAiEval,
     isLocked,
+    accessRevoked,
     updateAnswer,
     updateAudioAnswer,
     saveOnBlur,
