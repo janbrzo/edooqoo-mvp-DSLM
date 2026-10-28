@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { exerciseRegenerationService } from '@/services/exerciseRegenerationService';
+import { chargeExerciseAction } from '@/services/exerciseCreditService';
 import { devLog, devWarn } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
 import type { LessonMedia } from '@/lib/worksheetEditor/lessonMedia';
@@ -97,6 +98,9 @@ export const useExerciseRegeneration = () => {
         updatedWorksheet,
         userId
       );
+
+      // Charged only now: the new exercise was generated and saved. Never blocks or throws.
+      await chargeExerciseAction({ worksheetId, action: 'regenerate_exercise', isDemo: isDemoMode });
 
       toast.success('Exercise regenerated successfully!');
       

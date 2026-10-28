@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- worksheet JSON is untyped model output; callers narrow it */
 /**
  * Single client loader for the content of a `worksheets` row.
  *
@@ -32,7 +33,7 @@ const isPlainObject = (value: unknown): value is Record<string, any> =>
 
 /** Removes a BOM and one surrounding markdown code fence (```json ... ```). */
 export function stripCodeFence(text: string): string {
-  let out = text.replace(/^﻿/, '').trim();
+  let out = (text.charCodeAt(0) === 0xfeff ? text.slice(1) : text).trim();
   const fenced = out.match(/^```[a-zA-Z0-9_-]*[ \t]*\r?\n?([\s\S]*?)\r?\n?```$/);
   if (fenced) out = fenced[1].trim();
   return out;
