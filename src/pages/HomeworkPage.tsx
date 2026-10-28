@@ -11,6 +11,8 @@ import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { useInteractiveHomework } from "@/hooks/useInteractiveHomework";
 import { fetchHomeworkState } from '@/lib/homework/homeworkStateRpc';
 import { fetchHomeworkExercises, hasHomeworkExercises } from '@/lib/homework/exercisesRpc';
+import { fetchStudentReview, type StudentReview } from '@/lib/homework/reviewForStudent';
+import { TeacherVerdictsContext } from '@/lib/answers/teacherVerdicts';
 import { StudentEmailVerification } from "@/components/homework/StudentEmailVerification";
 import { HomeworkProgressBar } from "@/components/homework/HomeworkProgressBar";
 import { StudyModeButton } from "@/components/shared/StudyModeButton";
@@ -70,6 +72,7 @@ export default function HomeworkPage() {
   const [studentEmailForTeacher, setStudentEmailForTeacher] = useState<string | null>(null);
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [studentIdForTeacher, setStudentIdForTeacher] = useState<string | null>(null);
+  const [studentReview, setStudentReview] = useState<StudentReview | null>(null);
   
   // PROBLEM 2 FIX: Check localStorage for remembered email on mount
   useEffect(() => {
@@ -178,6 +181,18 @@ export default function HomeworkPage() {
       setIsCompleted(true);
     }
   }, [homework]);
+
+  // After the teacher sent the review the student sees the comments and the decisions on items
+  // the answer key could not judge (the server answers null before that or for another email).
+  const reviewedAt = homework?.reviewed_at;
+  useEffect(() => {
+    if (!token || !verifiedEmail || verifiedEmail === 'teacher' || isTeacher || !reviewedAt || !exercisesLoaded) return;
+    let cancelled = false;
+    fetchStudentReview(token, verifiedEmail)
+      .then((review) => { if (!cancelled) setStudentReview(review); })
+      .catch((error) => console.error('Error loading homework review:', error));
+    return () => { cancelled = true; };
+  }, [token, verifiedEmail, isTeacher, reviewedAt, exercisesLoaded]);
 
   // The link alone does not carry the exercises (and their answer keys): a student gets them once
   // the assigned email is verified. A remembered email that no longer matches is dropped.
@@ -814,6 +829,7 @@ export default function HomeworkPage() {
               onBlur={handleExerciseBlur(index, exercise.type)}
               data-exercise-index={index}
             >
+              <TeacherVerdictsContext.Provider value={studentReview?.verdicts[index] ?? {}}>
               <HomeworkExerciseRenderer
                 exercise={exercise}
                 index={index}
@@ -845,6 +861,13 @@ export default function HomeworkPage() {
                     : (qIndex: number, audioUrl: string) => updateAudioAnswer(index, qIndex, audioUrl)
                 }
               />
+              </TeacherVerdictsContext.Provider>
+              {!isTeacher && studentReview?.comments[index] && (
+                <Card className="mt-3 p-4 border-primary/30 bg-primary/5">
+                  <p className="text-sm font-medium text-primary mb-1">Comment from {teacherName}</p>
+                  <p className="text-sm whitespace-pre-wrap">{studentReview.comments[index]}</p>
+                </Card>
+              )}
             </div>
           ))}
         </div>
