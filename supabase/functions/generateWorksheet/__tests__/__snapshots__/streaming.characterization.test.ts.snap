@@ -1,0 +1,609 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`countExercisesInPartialJSON > empty 1`] = `0`;
+
+exports[`countExercisesInPartialJSON > nested item types count as exercises (quirk) 1`] = `3`;
+
+exports[`countExercisesInPartialJSON > no types 1`] = `0`;
+
+exports[`countExercisesInPartialJSON > non-string type values are not counted 1`] = `0`;
+
+exports[`countExercisesInPartialJSON > one exercise 1`] = `1`;
+
+exports[`countExercisesInPartialJSON > partial key at the end is not counted 1`] = `1`;
+
+exports[`countExercisesInPartialJSON > partial value start is counted 1`] = `1`;
+
+exports[`countExercisesInPartialJSON > type inside a text value is counted (quirk) 1`] = `0`;
+
+exports[`countExercisesInPartialJSON > whitespace around the colon 1`] = `2`;
+
+exports[`createSSEStream > a client cancel flips send and close to false 1`] = `
+{
+  "close": false,
+  "logs": [
+    "log: 🔴 SSE stream cancelled by client",
+  ],
+  "send": false,
+}
+`;
+
+exports[`createSSEStream > emits a keepalive comment frame every 15 seconds until closed 1`] = `
+{
+  "endDone": true,
+  "first": ": keepalive 1793181615000
+
+",
+  "second": ": keepalive 1793181630000
+
+",
+}
+`;
+
+exports[`createSSEStream > frames events as "event:" + "data:" JSON and closes idempotently 1`] = `
+{
+  "closed": [
+    true,
+    false,
+  ],
+  "frames": [
+    "event: start
+data: {"a":1}
+
+",
+    "event: progress
+data: {"n":2,"text":"x\\ny"}
+
+",
+  ],
+  "logs": [
+    "log: 📡 SSE sent: start {"a":1}",
+    "log: 📡 SSE sent: progress {"n":2,"text":"x\\ny"}",
+    "log: ✅ SSE stream closed",
+  ],
+  "results": [
+    true,
+    true,
+  ],
+  "sendAfterClose": false,
+}
+`;
+
+exports[`createSSEStream > send logs the event name and payload 1`] = `
+[
+  "log: 📡 SSE sent: progress {"exercisesGenerated":3,"expectedTotal":8}",
+  "log: ✅ SSE stream closed",
+]
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > antonyms picture suffix 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "definition": "cold",
+        "match": "cold",
+        "term": "hot",
+        "word": "hot",
+      },
+    ],
+    "type": "antonyms-picture",
+    "words": [
+      {
+        "match": "cold",
+        "word": "hot",
+      },
+    ],
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > categorize items to words 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "word": "a",
+      },
+    ],
+    "type": "categorize",
+    "words": [
+      {
+        "word": "a",
+      },
+    ],
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > categorize words to items and items to words 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "word": "a",
+      },
+    ],
+    "type": "categorize",
+    "words": [
+      {
+        "word": "a",
+      },
+    ],
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > complete-word items to words 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "word": "a",
+      },
+    ],
+    "type": "complete-word",
+    "words": [
+      {
+        "word": "a",
+      },
+    ],
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > empty arrays are ignored 1`] = `
+{
+  "result": {
+    "items": [],
+    "pairs": [],
+    "type": "matching",
+  },
+  "sameObject": true,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > gap-text items to sentences 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "text": "a",
+      },
+    ],
+    "sentences": [
+      {
+        "text": "a",
+      },
+    ],
+    "type": "gap-text",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching already canonical is returned untouched 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "definition": "b",
+        "term": "a",
+      },
+    ],
+    "type": "matching",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching halves 1`] = `
+{
+  "result": {
+    "halves": [
+      {
+        "left": "a",
+        "right": "b",
+      },
+    ],
+    "items": [
+      {
+        "definition": "b",
+        "left": "a",
+        "right": "b",
+        "term": "a",
+      },
+    ],
+    "type": "matching-halves",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching item that is a string is kept 1`] = `
+{
+  "result": {
+    "items": [
+      "text",
+    ],
+    "type": "matching",
+  },
+  "sameObject": true,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching item with no recognised fields is kept 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "foo": 1,
+      },
+    ],
+    "type": "matching",
+  },
+  "sameObject": true,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching item with question/answer fields 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "answer": "a",
+        "definition": "a",
+        "question": "q",
+        "term": "q",
+      },
+    ],
+    "type": "matching",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching items plus matches merged by position when terms differ 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "definition": "dp",
+        "term": "x",
+      },
+      {
+        "definition": "dq",
+        "term": "y",
+      },
+    ],
+    "matches": [
+      {
+        "definition": "dp",
+        "term": "p",
+      },
+      {
+        "definition": "dq",
+        "term": "q",
+      },
+    ],
+    "type": "matching",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching items plus matches with different length stay unmerged 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "definition": "",
+        "term": "x",
+      },
+      {
+        "definition": "",
+        "term": "y",
+      },
+    ],
+    "matches": [
+      {
+        "definition": "dp",
+        "term": "p",
+      },
+    ],
+    "type": "matching",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching items plus separate matches merged by term 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "definition": "a fruit",
+        "nano_skill": {
+          "name": "s",
+        },
+        "term": "Apple",
+      },
+      {
+        "definition": "another fruit",
+        "term": "pear",
+      },
+    ],
+    "matches": [
+      {
+        "definition": "a fruit",
+        "nano_skill": {
+          "name": "s",
+        },
+        "term": "apple",
+      },
+      {
+        "definition": "another fruit",
+        "term": "pear",
+      },
+    ],
+    "type": "matching",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching with left/right and words 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "definition": "b",
+        "left": "a",
+        "right": "b",
+        "term": "a",
+      },
+    ],
+    "type": "matching",
+    "words": [
+      {
+        "left": "a",
+        "right": "b",
+      },
+    ],
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > matching with pairs word/match 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "definition": "b",
+        "match": "b",
+        "term": "a",
+        "word": "a",
+      },
+      {
+        "definition": "d",
+        "match": "d",
+        "term": "c",
+        "word": "c",
+      },
+    ],
+    "pairs": [
+      {
+        "match": "b",
+        "word": "a",
+      },
+      {
+        "match": "d",
+        "word": "c",
+      },
+    ],
+    "type": "matching",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > negative-prefixes already has words 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "base_word": "b",
+      },
+    ],
+    "type": "negative-prefixes",
+    "words": [
+      {
+        "base_word": "a",
+      },
+    ],
+  },
+  "sameObject": true,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > no type is untouched 1`] = `
+{
+  "result": {
+    "items": [
+      1,
+    ],
+  },
+  "sameObject": true,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > paraphrasing items to sentences 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "text": "a",
+      },
+    ],
+    "sentences": [
+      {
+        "text": "a",
+      },
+    ],
+    "type": "paraphrasing",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > sentence-transformation transformations to sentences 1`] = `
+{
+  "result": {
+    "sentences": [
+      {
+        "original": "a",
+      },
+    ],
+    "transformations": [
+      {
+        "original": "a",
+      },
+    ],
+    "type": "sentence-transformation",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > synonyms with word/match under pairs 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "definition": "large",
+        "match": "large",
+        "term": "big",
+        "word": "big",
+      },
+    ],
+    "pairs": [
+      {
+        "match": "large",
+        "word": "big",
+      },
+    ],
+    "type": "synonyms",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > true-false questions to statements 1`] = `
+{
+  "result": {
+    "questions": [
+      {
+        "isTrue": true,
+        "text": "a",
+      },
+    ],
+    "statements": [
+      {
+        "isTrue": true,
+        "text": "a",
+      },
+    ],
+    "type": "true-false-audio",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > true-false with empty statements array uses questions 1`] = `
+{
+  "result": {
+    "questions": [
+      {
+        "text": "a",
+      },
+    ],
+    "statements": [
+      {
+        "text": "a",
+      },
+    ],
+    "type": "true-false",
+  },
+  "sameObject": false,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > unknown type is untouched 1`] = `
+{
+  "result": {
+    "items": [
+      1,
+    ],
+    "type": "reading",
+  },
+  "sameObject": true,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > word-order sentences kept 1`] = `
+{
+  "result": {
+    "items": [
+      {
+        "correct_order": "b",
+      },
+    ],
+    "sentences": [
+      {
+        "correct_order": "a",
+      },
+    ],
+    "type": "word-order",
+  },
+  "sameObject": true,
+}
+`;
+
+exports[`normalizeWorksheetExercises / normalizeExerciseShape > worksheet level: same object when nothing changes, shallow copy with new exercises otherwise 1`] = `
+{
+  "aSame": true,
+  "b": {
+    "exercises": [
+      {
+        "type": "reading",
+      },
+      {
+        "items": [
+          {
+            "definition": "b",
+            "match": "b",
+            "term": "a",
+            "word": "a",
+          },
+        ],
+        "pairs": [
+          {
+            "match": "b",
+            "word": "a",
+          },
+        ],
+        "type": "synonyms",
+      },
+    ],
+    "other": 1,
+    "title": "x",
+  },
+  "bSame": false,
+  "firstKept": true,
+}
+`;

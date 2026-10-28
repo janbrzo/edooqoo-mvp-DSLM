@@ -1,0 +1,545 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`exercise type helpers > EXERCISE_TYPE_NAMES and getOfficialExerciseName (including the capitalising fallback) 1`] = `
+{
+  "answer-questions": "Answer Questions",
+  "answer-questions-audio": "Answer Questions (Audio)",
+  "answer-questions-picture": "Answer Questions (Picture)",
+  "antonyms": "Antonyms",
+  "categorize": "Categorization",
+  "complete-word": "Complete Word",
+  "describe-picture": "Describe Picture",
+  "dialogue": "Dialogue Practice",
+  "discussion": "Discussion Questions",
+  "error-correction": "Error Correction",
+  "essay": "Essay",
+  "fill-in-blanks": "Fill in the Blanks",
+  "fill-in-blanks-audio": "Fill in the Blanks (Audio)",
+  "gap-text": "Gap Text (Cloze)",
+  "listening-comprehension": "Listening Comprehension",
+  "matching": "Vocabulary Matching",
+  "matching-halves": "Matching Halves",
+  "multiple-choice": "Multiple Choice",
+  "multiple-choice-audio": "Multiple Choice (Audio)",
+  "multiple-choice-picture": "Multiple Choice (Picture)",
+  "negative-prefixes": "Negative Prefixes",
+  "odd-one-out": "Odd One Out",
+  "paraphrasing": "Paraphrasing",
+  "reading": "Reading Comprehension",
+  "sentence-transformation": "Sentence Transformation",
+  "speaking": "Speaking Practice",
+  "synonyms": "Synonyms",
+  "synonyms-antonyms": "Synonyms/Antonyms",
+  "true-false": "True/False Questions",
+  "true-false-audio": "True/False (Audio)",
+  "true-false-picture": "True/False (Picture)",
+  "word-order": "Word Order",
+  "writing-task": "Writing Task",
+}
+`;
+
+exports[`exercise type helpers > EXERCISE_TYPE_NAMES and getOfficialExerciseName (including the capitalising fallback) 2`] = `
+{
+  "empty": "",
+  "fallback": "My New Type",
+  "fallbackSingle": "Essay X",
+  "known": "Gap Text (Cloze)",
+}
+`;
+
+exports[`exercise type helpers > getExerciseTypesForCount 1`] = `
+{
+  "default0": [],
+  "default1": [
+    "reading",
+  ],
+  "default12": [
+    "reading",
+    "true-false",
+    "matching",
+    "fill-in-blanks",
+    "multiple-choice",
+    "dialogue",
+    "discussion",
+    "error-correction",
+  ],
+  "default6": [
+    "reading",
+    "true-false",
+    "matching",
+    "fill-in-blanks",
+    "multiple-choice",
+    "dialogue",
+  ],
+  "default8": [
+    "reading",
+    "true-false",
+    "matching",
+    "fill-in-blanks",
+    "multiple-choice",
+    "dialogue",
+    "discussion",
+    "error-correction",
+  ],
+  "emptySelected": [
+    "reading",
+    "true-false",
+    "matching",
+    "fill-in-blanks",
+    "multiple-choice",
+    "dialogue",
+  ],
+  "pictureAndAudio": [
+    "describe-picture",
+    "listening-comprehension",
+    "true-false-audio",
+  ],
+  "selected": [
+    "gap-text",
+    "word-order",
+    "reading",
+  ],
+  "selectedAllInvalid": [],
+  "selectedWithInvalid": [
+    "gap-text",
+    "reading",
+  ],
+}
+`;
+
+exports[`exercise type helpers > getIconForType 1`] = `
+{
+  "answer-questions": "fa-tasks",
+  "answer-questions-audio": "fa-question-circle",
+  "answer-questions-picture": "fa-tasks",
+  "antonyms": "fa-not-equal",
+  "categorize": "fa-tasks",
+  "complete-word": "fa-tasks",
+  "describe-picture": "fa-tasks",
+  "dialogue": "fa-comments",
+  "discussion": "fa-users",
+  "error-correction": "fa-exclamation-triangle",
+  "essay": "fa-tasks",
+  "fill-in-blanks": "fa-pencil-alt",
+  "fill-in-blanks-audio": "fa-pencil-alt",
+  "gap-text": "fa-text-width",
+  "listening-comprehension": "fa-headphones",
+  "matching": "fa-link",
+  "matching-halves": "fa-tasks",
+  "multiple-choice": "fa-check-square",
+  "multiple-choice-audio": "fa-check-square",
+  "multiple-choice-picture": "fa-tasks",
+  "negative-prefixes": "fa-minus-circle",
+  "odd-one-out": "fa-search",
+  "paraphrasing": "fa-tasks",
+  "reading": "fa-book-open",
+  "sentence-transformation": "fa-random",
+  "speaking": "fa-tasks",
+  "synonyms": "fa-equals",
+  "synonyms-antonyms": "fa-exchange-alt",
+  "true-false": "fa-balance-scale",
+  "true-false-audio": "fa-balance-scale",
+  "true-false-picture": "fa-tasks",
+  "unknown-type": "fa-tasks",
+  "word-order": "fa-sort",
+  "writing-task": "fa-tasks",
+}
+`;
+
+exports[`exercise type helpers > normalizeExerciseId 1`] = `
+{
+  "(empty)": {
+    "baseId": "",
+    "useAudio": false,
+    "usePicture": false,
+  },
+  "answer-questions-picture": {
+    "baseId": "answer-questions",
+    "useAudio": false,
+    "usePicture": true,
+  },
+  "describe-picture": {
+    "baseId": "describe",
+    "useAudio": false,
+    "usePicture": true,
+  },
+  "listening-comprehension": {
+    "baseId": "listening-comprehension",
+    "useAudio": true,
+    "usePicture": false,
+  },
+  "multiple-choice-audio": {
+    "baseId": "multiple-choice",
+    "useAudio": true,
+    "usePicture": false,
+  },
+  "picture-x": {
+    "baseId": "picture-x",
+    "useAudio": false,
+    "usePicture": false,
+  },
+  "reading": {
+    "baseId": "reading",
+    "useAudio": false,
+    "usePicture": false,
+  },
+  "true-false-picture": {
+    "baseId": "true-false",
+    "useAudio": false,
+    "usePicture": true,
+  },
+  "x-audio-y": {
+    "baseId": "x-audio-y",
+    "useAudio": false,
+    "usePicture": false,
+  },
+}
+`;
+
+exports[`extractJSONString > DEL removed 1`] = `"{"a":"xy"}"`;
+
+exports[`extractJSONString > bare fence 1`] = `"{"a":1}"`;
+
+exports[`extractJSONString > bom 1`] = `"{"a":1}"`;
+
+exports[`extractJSONString > control characters removed, newline and tab kept 1`] = `
+"{"a":"xyz
+	"}"
+`;
+
+exports[`extractJSONString > empty 1`] = `""`;
+
+exports[`extractJSONString > json fence 1`] = `"{"a":1}"`;
+
+exports[`extractJSONString > low and prime quotes 1`] = `"{"a":"" x " " " ' ' ' '"}"`;
+
+exports[`extractJSONString > no braces at all 1`] = `"no json here"`;
+
+exports[`extractJSONString > only closing brace before opening 1`] = `"} text {"`;
+
+exports[`extractJSONString > plain 1`] = `"{"a":1}"`;
+
+exports[`extractJSONString > single opening brace 1`] = `"{ never closed"`;
+
+exports[`extractJSONString > smart double quotes inside a valid string (quirk: corrupts valid JSON) 1`] = `"{"a":"He said "hello""}"`;
+
+exports[`extractJSONString > smart quotes used as JSON delimiters 1`] = `"{"a": "b"}"`;
+
+exports[`extractJSONString > smart single quotes become straight apostrophes 1`] = `"{"a":"it's 'fine'"}"`;
+
+exports[`extractJSONString > text around the object 1`] = `"{"a":1}"`;
+
+exports[`extractJSONString > two objects: first brace to last brace 1`] = `"{"a":1} {"b":2}"`;
+
+exports[`extractJSONString > upper-case JSON fence 1`] = `"{"a":1}"`;
+
+exports[`parseAIResponse > JSON array at the top level is not recoverable because the extraction cuts from the first to the last brace (quirk) 1`] = `
+{
+  "errorPosition": 7,
+  "hasRawContent": true,
+  "rawLength": 15,
+  "threw": "Invalid JSON from AI: unable to parse after deterministic repair",
+}
+`;
+
+exports[`parseAIResponse > JSON with only whitespace 1`] = `
+{
+  "errorPosition": -1,
+  "hasRawContent": true,
+  "rawLength": 5,
+  "threw": "Invalid JSON from AI: unable to parse after deterministic repair",
+}
+`;
+
+exports[`parseAIResponse > clean JSON 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "T1",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > document missing its closing braces is balanced 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "T1",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > empty string 1`] = `
+{
+  "errorPosition": -1,
+  "hasRawContent": true,
+  "rawLength": 0,
+  "threw": "Invalid JSON from AI: unable to parse after deterministic repair",
+}
+`;
+
+exports[`parseAIResponse > fenced JSON 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "T1",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > missing comma between exercises (deterministic layer) 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "T1",
+        "type": "reading",
+      },
+      {
+        "title": "T2",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > nested exercises key inside a string is ignored by JSON.parse but not by truncation 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "type": "a",
+      },
+    ],
+    "title": "exercises: [",
+  },
+}
+`;
+
+exports[`parseAIResponse > no JSON at all 1`] = `
+{
+  "errorPosition": -1,
+  "hasRawContent": true,
+  "rawLength": 24,
+  "threw": "Invalid JSON from AI: unable to parse after deterministic repair",
+}
+`;
+
+exports[`parseAIResponse > smart quotes inside a value corrupt valid JSON and are then repaired (quirk) 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "He said "hi"",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > stray quotes (escape-scan layer) 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "He said "hi" there",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > text around the JSON 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "T1",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > trailing commas (deterministic layer) 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "T1",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > truncated before any exercise completes 1`] = `
+{
+  "errorPosition": 39,
+  "hasRawContent": true,
+  "rawLength": 39,
+  "threw": "Invalid JSON from AI: unable to parse after deterministic repair",
+}
+`;
+
+exports[`parseAIResponse > truncated document is silently cut to the complete exercises (quirk) 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "T1",
+        "type": "reading",
+      },
+      {
+        "title": "T2",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > unescaped newline in a value (escape-scan layer) 1`] = `
+{
+  "ok": {
+    "exercises": [
+      {
+        "title": "a
+b",
+        "type": "reading",
+      },
+    ],
+    "title": "x",
+  },
+}
+`;
+
+exports[`parseAIResponse > unrecoverable text 1`] = `
+{
+  "errorPosition": -1,
+  "hasRawContent": true,
+  "rawLength": 23,
+  "threw": "Invalid JSON from AI: unable to parse after deterministic repair",
+}
+`;
+
+exports[`parseAIResponse > value true instead of object parses as is 1`] = `
+{
+  "ok": {
+    "exercises": true,
+  },
+}
+`;
+
+exports[`repairJSONStringDeterministic > adjacent long strings are left alone 1`] = `"{"words":["xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" "beta"]}"`;
+
+exports[`repairJSONStringDeterministic > adjacent strings in an array become a key value pair (quirk) 1`] = `"{"words":["alpha": "beta", "gamma"]}"`;
+
+exports[`repairJSONStringDeterministic > braces inside strings are counted (quirk) 1`] = `"{"a":"{ not a brace"}}"`;
+
+exports[`repairJSONStringDeterministic > brackets inside strings are counted (quirk) 1`] = `"{"a":"[ open"}]"`;
+
+exports[`repairJSONStringDeterministic > missing colon before a boolean 1`] = `"{"a": true}"`;
+
+exports[`repairJSONStringDeterministic > missing colon before a number 1`] = `"{"a": 12}"`;
+
+exports[`repairJSONStringDeterministic > missing colon before an array 1`] = `"{"a": [1,2]}"`;
+
+exports[`repairJSONStringDeterministic > missing colon before an object 1`] = `"{"a": {"b":1}}"`;
+
+exports[`repairJSONStringDeterministic > missing colon between key and string on the same line 1`] = `"{"a": "b"}"`;
+
+exports[`repairJSONStringDeterministic > missing colon with key and value on separate lines 1`] = `
+"{"a":
+"b"}"
+`;
+
+exports[`repairJSONStringDeterministic > missing comma between arrays 1`] = `"{"a":[[1],[2]]}"`;
+
+exports[`repairJSONStringDeterministic > missing comma between objects 1`] = `"{"a":[{"x":1},{"y":2}]}"`;
+
+exports[`repairJSONStringDeterministic > string containing a comma between adjacent strings is left alone 1`] = `"{"words":["a, b" "c"]}"`;
+
+exports[`repairJSONStringDeterministic > trailing comma in array 1`] = `"{"a":[1,2]}"`;
+
+exports[`repairJSONStringDeterministic > trailing comma in object 1`] = `"{"a":1}"`;
+
+exports[`repairJSONStringDeterministic > unbalanced closers are not removed 1`] = `"{"a":1}}]"`;
+
+exports[`repairJSONStringDeterministic > unclosed brackets and braces are appended 1`] = `"{"a":[{"b":1]}}"`;
+
+exports[`repairJSONStringDeterministic > valid JSON is unchanged 1`] = `"{"a":[1,2],"b":{"c":"d"}}"`;
+
+exports[`repairUnescapedQuotes > already escaped quote and backslash 1`] = `"{"a":"x \\"y\\" \\\\"}"`;
+
+exports[`repairUnescapedQuotes > carriage return inside a string is dropped 1`] = `"{"a":"x\\ny"}"`;
+
+exports[`repairUnescapedQuotes > closing quote at the end of input 1`] = `"{"a":"b""`;
+
+exports[`repairUnescapedQuotes > newline outside strings is preserved 1`] = `
+"{
+"a": 1
+}"
+`;
+
+exports[`repairUnescapedQuotes > raw newline inside a string 1`] = `"{"a":"line1\\nline2"}"`;
+
+exports[`repairUnescapedQuotes > stray quote before a comma inside text is taken as the closing quote (quirk) 1`] = `"{"a":"say \\"yes", then go",\\"b":1}"`;
+
+exports[`repairUnescapedQuotes > stray quote inside a value 1`] = `"{"a":"He said \\"hello\\" to me","b":1}"`;
+
+exports[`repairUnescapedQuotes > tab inside a string 1`] = `"{"a":"x\\ty"}"`;
+
+exports[`repairUnescapedQuotes > unterminated string 1`] = `"{"a":"never closed"`;
+
+exports[`repairUnescapedQuotes > valid JSON is unchanged 1`] = `"{"a":"b","c":["d","e"]}"`;
+
+exports[`repairUnescapedQuotes > whitespace between closing quote and colon 1`] = `"{"a" : "b"}"`;
+
+exports[`truncateToLastCompleteExercise > array elements that are not objects are not counted as complete 1`] = `null`;
+
+exports[`truncateToLastCompleteExercise > braces and brackets inside strings do not confuse the scan 1`] = `"{"exercises":[{"type":"reading","title":"T1","questions":[{"q":"a{b"},{"q":"]"}]}]}"`;
+
+exports[`truncateToLastCompleteExercise > complete document keeps only the exercises (drops later properties, quirk) 1`] = `"{"title":"x","exercises":[{"type":"reading","title":"T1","questions":[{"q":"a{b"},{"q":"]"}]},{"type":"reading","title":"T2","questions":[{"q":"a{b"},{"q":"]"}]}]}"`;
+
+exports[`truncateToLastCompleteExercise > cut in the middle of the third exercise 1`] = `"{"title":"x","exercises":[{"type":"reading","title":"T1","questions":[{"q":"a{b"},{"q":"]"}]},{"type":"reading","title":"T2","questions":[{"q":"a{b"},{"q":"]"}]}]}"`;
+
+exports[`truncateToLastCompleteExercise > cut right after a complete exercise 1`] = `"{"title":"x","exercises":[{"type":"reading","title":"T1","questions":[{"q":"a{b"},{"q":"]"}]},{"type":"reading","title":"T2","questions":[{"q":"a{b"},{"q":"]"}]}]}"`;
+
+exports[`truncateToLastCompleteExercise > empty exercises array 1`] = `null`;
+
+exports[`truncateToLastCompleteExercise > escaped quotes inside strings 1`] = `"{"exercises":[{"a":"he said \\"}\\" "}]}"`;
+
+exports[`truncateToLastCompleteExercise > exercises is not an array 1`] = `null`;
+
+exports[`truncateToLastCompleteExercise > no exercise ever completes 1`] = `null`;
+
+exports[`truncateToLastCompleteExercise > no exercises key 1`] = `null`;
+
+exports[`truncateToLastCompleteExercise > whitespace before the colon 1`] = `"{"exercises" :  [{"type":"reading","title":"T1","questions":[{"q":"a{b"},{"q":"]"}]}]}"`;
