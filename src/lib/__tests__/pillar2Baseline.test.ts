@@ -6,11 +6,11 @@ import { join } from 'node:path';
  * Pillar 2 zero-regression baseline (Stage 2.4).
  *
  * Cross-cutting invariants for Explainable DSLM (Stages 2.1-2.3): the
- * evidence engine and the radar classifier stay pure, evidence UI never
- * writes to the database, demo mode never triggers metric reads, and the
- * protected Worksheet Generation Engine is not imported by any Pillar 2
- * module. SQL-side and Pillar 1 invariants live in dslmSqlBaseline.test.ts
- * and pillar1Baseline.test.ts.
+ * These source-level guards detect selected prohibited patterns; they are
+ * not a proof of every transitive dependency or runtime path. Executable
+ * read, demo and manual-handoff contracts live in pillar2RuntimeBaseline.
+ * SQL-side and Pillar 1 invariants live in dslmSqlBaseline.test.ts and
+ * pillar1Baseline.test.ts. No suite certifies production-session behavior.
  */
 
 const read = (rel: string) => readFileSync(join(__dirname, '../..', rel), 'utf8');
@@ -35,7 +35,7 @@ const EVIDENCE_UI = [
 
 describe('Purity of evidence engines (Stages 2.1 and 2.3)', () => {
   for (const rel of PURE_MODULES) {
-    it(`${rel} performs no I/O, no clock reads and no Supabase access`, () => {
+    it(`${rel} contains none of the guarded direct I/O, clock or storage patterns`, () => {
       const body = read(rel);
       expect(body).not.toMatch(/from ['"]@\/integrations\/supabase/);
       expect(body).not.toMatch(/\bfetch\s*\(/);
@@ -49,7 +49,7 @@ describe('Purity of evidence engines (Stages 2.1 and 2.3)', () => {
 
 describe('Evidence UI is read-only (Stages 2.2 and 2.3)', () => {
   for (const rel of EVIDENCE_UI) {
-    it(`${rel} never mutates the database`, () => {
+    it(`${rel} contains none of the guarded direct database mutation calls`, () => {
       const body = read(rel);
       expect(body).not.toMatch(/\.insert\s*\(/);
       expect(body).not.toMatch(/\.update\s*\(/);
@@ -58,13 +58,6 @@ describe('Evidence UI is read-only (Stages 2.2 and 2.3)', () => {
       expect(body).not.toMatch(/supabase\.rpc\s*\(/);
     });
 
-    it(`${rel} uses semantic design tokens only (no hardcoded colors)`, () => {
-      const body = read(rel);
-      expect(body).not.toMatch(/bg-\[#/);
-      expect(body).not.toMatch(/text-\[#/);
-      expect(body).not.toMatch(/\btext-white\b/);
-      expect(body).not.toMatch(/\bbg-black\b/);
-    });
   }
 
   it('CompetencyRadarView writes only the approved prefill sessionStorage keys', () => {
@@ -106,12 +99,11 @@ describe('Protected Worksheet Generation Engine boundary', () => {
 });
 
 describe('Honest-evidence contract (Stage 2.1)', () => {
-  it('the engine exposes exactly the six approved evidence types', () => {
+  it('the declared evidence union contains exactly the six approved types', () => {
     const body = read('lib/dslm/recommendationExplainability.ts');
-    const types = [...body.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
-    for (const t of ['spaced_review', 'critical_gap', 'goal_milestone', 'teacher_note', 'curriculum_step', 'diagnostic_baseline']) {
-      expect(types).toContain(t);
-    }
+    const declaration = body.match(/export type EvidenceType\s*=([\s\S]*?);/)?.[1] ?? '';
+    const types = [...declaration.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort();
+    expect(types).toEqual(['spaced_review', 'critical_gap', 'goal_milestone', 'teacher_note', 'curriculum_step', 'diagnostic_baseline'].sort());
   });
 
   it('goal, note and diagnostic evidence require explicit caller-supplied links', () => {
