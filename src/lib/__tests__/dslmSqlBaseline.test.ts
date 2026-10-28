@@ -277,9 +277,15 @@ describe('Welcome Test server authority and retake history (2026-10-17 audit)', 
 describe('Pillar 1.1: additive micro-skill taxonomy (20261015201345)', () => {
   const body = readFileSync(join(MIGRATIONS, '20261015201345_c5c1929e-6931-46d3-b7bd-444dbf6a607b.sql'), 'utf8');
 
-  it('is the latest extract_micro_skill definition and stays additive', () => {
-    expect(latestDefinition('extract_micro_skill')).toBe(body);
+  it('defines the v2 taxonomy additively', () => {
     expect(body).toMatch(/every v1 rule kept in order/);
+    expect(body).toMatch(/CREATE OR REPLACE FUNCTION public\.extract_micro_skill\(/);
+  });
+
+  it('is redefined only by the P1.5 fallback migration (20261028110000), which keeps every v2 rule', () => {
+    expect(latestDefinition('extract_micro_skill')).toBe(
+      readFileSync(join(MIGRATIONS, '20261028110000_extract_skill_category_fallbacks.sql'), 'utf8'),
+    );
   });
 });
 
@@ -365,7 +371,7 @@ describe('calculate_test_results is owner or service role only (2026-10-18)', ()
 
 describe('Iteration 10: validation loop v1 (additive)', () => {
   const read = (f: string) => readFileSync(join(MIGRATIONS, f), 'utf8');
-  const loop = read('20261027090000_dslm_validation_loop_v1.sql');
+  const loop = read('20261027085900_dslm_validation_loop_v1.sql');
   const replace = read('20261027090200_save_mark_done_replace_signature.sql');
 
   it.each(['dslm_interpretation_params', 'dslm_decision_log'])('table %s is versioned with RLS', (t) => {

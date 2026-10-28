@@ -15,7 +15,7 @@ import {
  * Nothing reads the table yet, so this test is what stops it from drifting.
  */
 const ROOT = join(__dirname, '../../../');
-const migration = readFileSync(join(ROOT, 'supabase/migrations/20261027090000_dslm_validation_loop_v1.sql'), 'utf8');
+const migration = readFileSync(join(ROOT, 'supabase/migrations/20261027085900_dslm_validation_loop_v1.sql'), 'utf8');
 
 const seeded: Record<string, unknown> = {};
 for (const m of migration.matchAll(/\('1', '([a-z_.]+)', '((?:[^']|'')*)',/g)) {

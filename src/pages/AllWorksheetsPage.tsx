@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,8 @@ import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { useWorksheetHistory } from '@/hooks/useWorksheetHistory';
 import { useStudents } from '@/hooks/useStudents';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import type { WorksheetListOptions } from '@/lib/worksheetEditor/listQuery';
 import { useDeletedWorksheets } from '@/hooks/useDeletedWorksheets';
 import { supabase } from '@/integrations/supabase/client';
 import { DeleteWorksheetButton } from '@/components/DeleteWorksheetButton';
@@ -232,41 +234,47 @@ const AllWorksheetsPage = () => {
     ? (selectedStudent === 'unassigned' ? 'unassigned' : undefined)
     : selectedStudent;
 
-  // ✅ Server-side pagination with listView mode and student filtering
-  const { worksheets, loading, deleteWorksheet, restoreWorksheet, totalCount, refetch: refetchWorksheets } = 
-    useWorksheetHistory(studentFilter, false, true, currentPage, itemsPerPage);
+  // Search and sort run in the query (not over the visible page), so every
+  // worksheet is reachable and the counts are totals.
   const { students } = useStudents();
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
+  const studentIdsMatchingSearch = useMemo(() => {
+    const term = debouncedSearch.trim().toLowerCase();
+    if (!term) return [];
+    return students.filter(s => s.name?.toLowerCase().includes(term)).map(s => s.id);
+  }, [students, debouncedSearch]);
+  const studentIdsKey = studentIdsMatchingSearch.join(',');
+  const listOptions = useMemo<WorksheetListOptions>(
+    () => ({
+      search: debouncedSearch,
+      studentIdsMatchingSearch,
+      sortBy: sortBy === 'rating' ? 'date' : sortBy,
+      ascending: sortOrder === 'asc',
+    }),
+    // studentIdsKey stands in for the array identity
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [debouncedSearch, studentIdsKey, sortBy, sortOrder],
+  );
+
+  const { worksheets, loading, deleteWorksheet, restoreWorksheet, totalCount, refetch: refetchWorksheets } = 
+    useWorksheetHistory(studentFilter, false, true, currentPage, itemsPerPage, listOptions);
   
   // Fetch homework for all worksheets
   const worksheetIds = worksheets.map(w => w.id);
   const { homeworkByWorksheet } = useAllWorksheetHomework(worksheetIds);
   
-  // ✅ Server-side pagination for deleted worksheets
   const { deletedWorksheets, loading: deletedLoading, restoreWorksheet: restoreDeleted, totalCount: deletedTotalCount, refetch: refetchDeleted } = 
-    useDeletedWorksheets(studentFilter, false, true, currentPage, itemsPerPage);
+    useDeletedWorksheets(studentFilter, false, true, currentPage, itemsPerPage, listOptions);
   const navigate = useNavigate();
 
   // Authentication check
   useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
-  // Refetch when page or tab changes
-  useEffect(() => {
-    if (activeTab === 'active') {
-      refetchWorksheets();
-    } else {
-      refetchDeleted();
-    }
-  }, [currentPage, activeTab]);
-
-  // Reset to page 1 and refetch when filters change
+  // The hooks refetch when page, student filter, search or sort change; a new
+  // filter starts again from the first page.
   useEffect(() => {
     setCurrentPage(1);
-    if (activeTab === 'active') {
-      refetchWorksheets();
-    } else {
-      refetchDeleted();
-    }
-  }, [activeTab, searchQuery, selectedStudent]);
+  }, [activeTab, debouncedSearch, selectedStudent, sortBy, sortOrder]);
 
   // Helper functions
   const getStudentName = (studentId: string | null) => {
@@ -284,40 +292,9 @@ const AllWorksheetsPage = () => {
     }
   };
 
-  // Filter and sort worksheets based on active tab
+  // Rows arrive already filtered, sorted and paginated by the query.
   const currentWorksheets = activeTab === 'active' ? worksheets : deletedWorksheets;
-  // Student filtering is now server-side, only search filter is client-side
-  const filteredAndSortedWorksheets = currentWorksheets
-    .filter(worksheet => {
-      const matchesSearch = searchQuery === '' || 
-        formatWorksheetTitle(worksheet).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        getStudentName(worksheet.student_id).toLowerCase().includes(searchQuery.toLowerCase());
-      
-      return matchesSearch;
-    })
-    .sort((a, b) => {
-      let comparison = 0;
-      
-      switch (sortBy) {
-        case 'date':
-          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case 'name':
-          comparison = formatWorksheetTitle(a).localeCompare(formatWorksheetTitle(b));
-          break;
-        case 'student':
-          comparison = getStudentName(a.student_id).localeCompare(getStudentName(b.student_id));
-          break;
-        case 'rating':
-          // This would need to be implemented if we track ratings
-          comparison = 0;
-          break;
-        default:
-          comparison = 0;
-      }
-      
-      return sortOrder === 'desc' ? -comparison : comparison;
-    });
+  const filteredAndSortedWorksheets = currentWorksheets;
 
   // Server-side pagination - worksheets are already paginated from the hook
   const currentTotalCount = activeTab === 'active' ? totalCount : deletedTotalCount;
@@ -388,7 +365,7 @@ const AllWorksheetsPage = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">All Worksheets</h1>
               <p className="text-gray-600 mt-1">
-                {filteredAndSortedWorksheets.length} worksheet{filteredAndSortedWorksheets.length !== 1 ? 's' : ''} found
+                {currentTotalCount} worksheet{currentTotalCount !== 1 ? 's' : ''} found
               </p>
             </div>
             <Button asChild>
@@ -404,10 +381,10 @@ const AllWorksheetsPage = () => {
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'active' | 'deleted')} className="mb-6">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="active">
-              Active ({worksheets.length})
+              Active ({totalCount})
             </TabsTrigger>
             <TabsTrigger value="deleted">
-              Deleted ({deletedWorksheets.length})
+              Deleted ({deletedTotalCount})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -457,7 +434,7 @@ const AllWorksheetsPage = () => {
                 <SelectContent>
                   <SelectItem value="date">Sort by Date</SelectItem>
                   <SelectItem value="name">Sort by Name</SelectItem>
-                  <SelectItem value="student">Sort by Student</SelectItem>
+                  <SelectItem value="student">Group by Student</SelectItem>
                 </SelectContent>
               </Select>
 

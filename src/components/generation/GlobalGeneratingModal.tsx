@@ -7,10 +7,11 @@
  * root and feeds it directly from the job registry so it appears on every
  * page in the tab that started the jobs.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import GeneratingModal from '@/components/GeneratingModal';
 import { useActiveWorksheetGenerationJobs } from '@/hooks/useActiveWorksheetGenerationJob';
 import { useTabId } from '@/lib/worksheet/tabId';
+import { isJobResumed } from '@/lib/worksheet/generationJobRegistry';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 
 export default function GlobalGeneratingModal() {
@@ -18,6 +19,19 @@ export default function GlobalGeneratingModal() {
   const tabId = useTabId();
   const { user } = useAuthFlow();
   const [activeJobIdx, setActiveJobIdx] = useState(0);
+  // Jobs the teacher minimized stay in the registry (and show as mini panel
+  // cards); only this full-screen view is dismissed. Page-local on purpose: a
+  // reload shows the modal again for jobs that are still running.
+  const [minimizedJobIds, setMinimizedJobIds] = useState<ReadonlySet<string>>(() => new Set());
+  const pageLoadedAtRef = useRef(Date.now());
+  const minimizeJob = useCallback((jobId: string) => {
+    setMinimizedJobIds((prev) => {
+      if (prev.has(jobId)) return prev;
+      const next = new Set(prev);
+      next.add(jobId);
+      return next;
+    });
+  }, []);
   // Failed jobs stay "recovering" until their recoveryDeadlineAt. Nothing in
   // the registry changes when that deadline passes, so re-render on it, 
   // otherwise the "Checking server…" modal never closes and blocks the page.
@@ -38,12 +52,13 @@ export default function GlobalGeneratingModal() {
       // v6.9.62 P1: accept legacy jobs without an originTabId so multi-job
       // switcher reappears after a refresh on tabs that started >1 job.
       .filter((j) => j.originTabId == null || j.originTabId === tabId)
+      .filter((j) => !minimizedJobIds.has(j.jobId))
       .filter((j) =>
         j.status === 'running'
         || (j.status === 'failed' && !!j.recoveryDeadlineAt && now < j.recoveryDeadlineAt),
       )
       .sort((a, b) => a.startedAt - b.startedAt);
-  }, [allJobs, tabId, clock]);
+  }, [allJobs, tabId, clock, minimizedJobIds]);
 
   // Auto-focus the newest pollable job when the set grows.
   useEffect(() => {
@@ -76,7 +91,8 @@ export default function GlobalGeneratingModal() {
   return (
     <GeneratingModal
       isOpen
-      isResumed
+      isResumed={isJobResumed(activeJob, pageLoadedAtRef.current)}
+      onMinimize={() => minimizeJob(activeJob.jobId)}
       jobId={activeJob.jobId}
       jobsCount={myPollableJobs.length}
       currentIndex={safeIdx}

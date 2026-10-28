@@ -1,8 +1,10 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { useAuthUser } from '@/hooks/useAuthUser';
+import { applyWorksheetListOptions, type WorksheetListOptions } from '@/lib/worksheetEditor/listQuery';
+import { LIST_SELECT, OWNER_VIEW_SELECT } from '@/lib/worksheet/worksheetColumns';
 
 interface WorksheetHistoryItem {
   id: string;
@@ -21,13 +23,17 @@ export const useWorksheetHistory = (
   lightweight: boolean = false, 
   listView: boolean = false,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  listOptions?: WorksheetListOptions
 ) => {
   const [worksheets, setWorksheets] = useState<WorksheetHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const { isDemoMode, demoData } = useDemoContext();
   const { data: user } = useAuthUser();
+  // Only the latest request may update the list (search typing, page and tab changes overlap).
+  const requestIdRef = useRef(0);
+  const listOptionsKey = JSON.stringify(listOptions ?? null);
 
   // Demo mode: return hardcoded worksheets (handles async demoData load)
   useEffect(() => {
@@ -37,13 +43,19 @@ export const useWorksheetHistory = (
     if (studentId) {
       ws = ws.filter(w => w.student_id === studentId);
     }
+    const term = (listOptions?.search ?? '').trim().toLowerCase();
+    if (term) {
+      ws = ws.filter(w => `${w.title ?? ''} ${w.form_data?.lessonTopic ?? ''}`.toLowerCase().includes(term));
+    }
     setWorksheets(ws);
     setTotalCount(ws.length);
     setLoading(false);
-  }, [isDemoMode, demoData, studentId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDemoMode, demoData, studentId, listOptionsKey]);
 
   const fetchWorksheets = async () => {
     if (isDemoMode) return;
+    const requestId = ++requestIdRef.current;
     try {
       setLoading(true);
       if (!user) {
@@ -52,9 +64,7 @@ export const useWorksheetHistory = (
         return;
       }
 
-      const selectQuery = listView 
-        ? 'id, title, created_at, student_id, generation_time_seconds, form_data, audio_url, audio_duration, audio_voice, selected_audio, selected_image, media_metadata, share_token'
-        : '*';
+      const selectQuery: string = listView ? LIST_SELECT : OWNER_VIEW_SELECT;
       
       let query = supabase
         .from('worksheets')
@@ -70,7 +80,7 @@ export const useWorksheetHistory = (
         }
       }
 
-      query = query.order('created_at', { ascending: false });
+      query = applyWorksheetListOptions(query, listOptions, 'created_at');
 
       if (listView) {
         const from = (page - 1) * pageSize;
@@ -83,21 +93,23 @@ export const useWorksheetHistory = (
       }
 
       const { data, error, count } = await query as any;
+      if (requestId !== requestIdRef.current) return;
       if (error) throw error;
       
       setWorksheets(data || []);
       setTotalCount(count || 0);
     } catch (error: any) {
+      if (requestId !== requestIdRef.current) return;
       console.error('[useWorksheetHistory] error:', error);
       setWorksheets([]);
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   };
 
   useEffect(() => {
     if (!isDemoMode) fetchWorksheets();
-  }, [studentId, page, pageSize, user?.id, isDemoMode]);
+  }, [studentId, page, pageSize, user?.id, isDemoMode, listOptionsKey]);
 
   const refetchWorksheets = async () => {
     // Demo data is derived synchronously from context; fetchWorksheets is a no-op

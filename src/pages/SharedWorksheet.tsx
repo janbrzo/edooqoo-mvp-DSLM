@@ -15,7 +15,8 @@ import { useInteractiveSharedWorksheet } from '@/hooks/useInteractiveSharedWorks
 import { ExerciseNavSidebar } from '@/components/worksheet/ExerciseNavSidebar';
 import { useWorksheetNavigation } from '@/hooks/useWorksheetNavigation';
 import { DrawingToggleButton, DrawingToolbar, DrawingOverlay, type DrawingOverlayRef } from '@/components/drawing';
-import { devLog } from '@/utils/logger';
+import { devError, devLog } from '@/utils/logger';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 // useDrawingCanvas not needed - DrawingOverlay handles saving internally
 import type { SharedWorksheetData } from '@/types/interactiveSharedWorksheet';
 import type { DrawingTool, DrawingColor, StrokeWidth, DrawingState } from '@/types/drawing';
@@ -89,13 +90,9 @@ const SharedWorksheet = () => {
 
   // Parse exercises count from worksheet data
   const worksheetData = useMemo(() => {
-    if (!worksheet?.ai_response) return null;
-    try {
-      return JSON.parse(worksheet.ai_response);
-    } catch {
-      return null;
-    }
-  }, [worksheet?.ai_response]);
+    if (!worksheet) return null;
+    return loadWorksheetContent(worksheet).data;
+  }, [worksheet?.ai_response, worksheet?.html_content]);
 
   const totalExercises = worksheetData?.exercises?.length || 0;
   
@@ -240,12 +237,12 @@ const SharedWorksheet = () => {
       setWorksheet(worksheetData);
       
       // PROBLEM 3: Initialize editable worksheet for teacher edit mode
-      try {
-        const parsedContent = JSON.parse(worksheetRow.ai_response);
+      const parsedContent = loadWorksheetContent(worksheetRow).data;
+      if (parsedContent) {
         setEditableWorksheet(parsedContent);
         setOriginalWorksheet(parsedContent);
-      } catch (e) {
-        console.error('Error parsing worksheet content:', e);
+      } else {
+        devError('Shared worksheet content could not be parsed');
       }
       
       toast({

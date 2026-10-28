@@ -51,7 +51,9 @@ export async function updateWorksheetAPI(
     
     const updateData = {
       ai_response: updatedAiResponse,
-      title: editableWorksheet.title || 'Untitled Worksheet',
+      // The title column is the teacher-facing name (a rename from a list only
+      // writes the column): keep it when the worksheet JSON carries no title.
+      title: resolveSavedTitle(editableWorksheet.title, existingWorksheet.title),
       html_content: updatedHtmlContent,
       last_modified_at: new Date().toISOString()
     };
@@ -90,6 +92,17 @@ export async function updateWorksheetAPI(
     console.error('💥 Update worksheet error:', error);
     throw error;
   }
+}
+
+/**
+ * Title written to the `title` column by a worksheet save: the edited title,
+ * else the stored one, never an empty string.
+ */
+export function resolveSavedTitle(editedTitle: unknown, storedTitle: unknown): string {
+  const edited = typeof editedTitle === 'string' ? editedTitle.trim() : '';
+  if (edited) return edited;
+  const stored = typeof storedTitle === 'string' ? storedTitle.trim() : '';
+  return stored || 'Untitled Worksheet';
 }
 
 /**

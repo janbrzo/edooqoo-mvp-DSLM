@@ -15,6 +15,22 @@ import { supabase } from "@/integrations/supabase/client";
  *   2. On network/5xx: 1 retry after 250ms
  *   3. On final failure: throw, caller is expected to surface the error.
  */
+/**
+ * The only fields format-worksheet-prompt reads. Student name/email, ids and
+ * transport flags travel in FormData for the UI, but they are never prompt
+ * input, so they are not sent to the prompt service.
+ */
+export const buildPromptServiceFormData = (data: FormData) => ({
+  lessonTopic: data.lessonTopic,
+  lessonGoal: data.lessonGoal,
+  englishLevel: data.englishLevel,
+  languageStyle: data.languageStyle,
+  teachingPreferences: data.teachingPreferences,
+  additionalInformation: data.additionalInformation,
+  selectedExercises: data.selectedExercises,
+  exerciseFocusMap: data.exerciseFocusMap,
+});
+
 export const formatPromptForAI = async (data: FormData): Promise<string> => {
   devLog('📝 Requesting prompt format from edge fn');
 
@@ -42,7 +58,7 @@ export const formatPromptForAI = async (data: FormData): Promise<string> => {
           Authorization: `Bearer ${token}`,
           apikey: anonKey,
         },
-        body: JSON.stringify({ formData: data }),
+        body: JSON.stringify({ formData: buildPromptServiceFormData(data) }),
       });
       if (!res.ok) {
         const txt = await res.text().catch(() => '');

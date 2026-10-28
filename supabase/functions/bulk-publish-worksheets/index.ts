@@ -6,6 +6,7 @@
 // Idempotent: re-runs simply skip already-public rows.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { loadWorksheetJson } from "../_shared/worksheetContent.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,7 +50,7 @@ serve(async (req) => {
 
   let q = sb
     .from("worksheets")
-    .select("id, title, teacher_id, user_id, form_data, ai_response, public_slug")
+    .select("id, title, teacher_id, user_id, form_data, ai_response, html_content, public_slug")
     .is("deleted_at", null)
     .not("ai_response", "is", null)
     .or("is_public.is.null,is_public.eq.false")
@@ -76,13 +77,12 @@ serve(async (req) => {
         stats.skipped_no_title++;
         continue;
       }
-      let parsed: any = null;
-      try {
-        parsed = ws.ai_response ? JSON.parse(ws.ai_response as unknown as string) : null;
-      } catch (_) {
+      const loaded = loadWorksheetJson(ws);
+      if (loaded.data === null && ws.ai_response) {
         stats.skipped_invalid_json++;
         continue;
       }
+      const parsed: any = loaded.data;
       const exercises = Array.isArray(parsed?.exercises) ? parsed.exercises : [];
       if (exercises.length < 6) {
         stats.skipped_too_short++;
