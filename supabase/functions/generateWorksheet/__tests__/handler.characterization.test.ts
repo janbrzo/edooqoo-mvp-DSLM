@@ -45,7 +45,11 @@ beforeEach(async () => {
   handler = world().handler as Handler;
 });
 
-afterEach(() => uninstallWorld());
+afterEach(async () => {
+  // Detached work (failure notifications) must not leak into the next test.
+  await settle();
+  uninstallWorld();
+});
 
 const PROMPT = [
   'lessonTopic: Negotiating a delivery delay with a supplier',
