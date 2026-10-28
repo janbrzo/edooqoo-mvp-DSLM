@@ -156,7 +156,7 @@ export default function HomeworkReviewPage() {
           .from('homework_student_answers')
           .select('exercise_index, exercise_type, answers, is_submitted, submitted_at, ai_evaluation, item_evaluations')
           .eq('homework_id', id)
-          .eq('student_email', studentEmail);
+          .eq('student_email', studentEmail.trim().toLowerCase());
 
         if (!answersError && answersData) {
           // Cast answers from JSON to Record<number, any>

@@ -147,6 +147,7 @@ export default function HomeworkPage() {
     submittedAt,
     isWaitingForAiEval,
     isLocked,
+    accessRevoked,
     updateAnswer,
     updateAudioAnswer,
     saveOnBlur,
@@ -221,6 +222,17 @@ export default function HomeworkPage() {
       });
     return () => { cancelled = true; };
   }, [awaitingExercises, token, verifiedEmail]);
+
+  // The server no longer accepts the remembered e-mail (the teacher changed the address, or the
+  // homework was removed): forget it and ask for the e-mail again instead of retrying forever.
+  useEffect(() => {
+    if (!accessRevoked || !token || isTeacher) return;
+    try { localStorage.removeItem(`homework_email_${token}`); } catch { /* storage unavailable */ }
+    setVerifiedEmail(null);
+    toast.error("Please confirm your e-mail again", {
+      description: "This link no longer accepts the address you used. Ask your teacher for a new link if it keeps happening.",
+    });
+  }, [accessRevoked, token, isTeacher]);
 
   // The server refused a write or a submit: re-read why (submitted elsewhere or closed by the teacher).
   useEffect(() => {

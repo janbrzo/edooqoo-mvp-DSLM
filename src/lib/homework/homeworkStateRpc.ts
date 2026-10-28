@@ -47,3 +47,7 @@ export function markDoneOutcome(result: LifecycleResult | null | undefined): { k
   if (result.already_completed) return { kind: 'already' };
   return { kind: 'done' };
 }
+
+/** 42501: the server no longer accepts this e-mail for this homework (the address was edited or the homework deleted). */
+export const isAccessRevokedError = (error: { code?: string } | null | undefined): boolean =>
+  !!error && error.code === '42501';
