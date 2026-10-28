@@ -4587,7 +4587,7 @@
         "Sign up free",
         "Student has submitted",
         "Student:",
-        "Submitted:"
+        "Submitted late"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -11825,11 +11825,6 @@
           "initial": "false"
         },
         {
-          "value": "isAiEvalLoading",
-          "setter": "setIsAiEvalLoading",
-          "initial": "false"
-        },
-        {
           "value": "showQuickAddWordModal",
           "setter": "setShowQuickAddWordModal",
           "initial": "false"
@@ -11924,10 +11919,8 @@
       },
       "storage": [],
       "userFacingText": [
-        "AI is evaluating open-ended answers for more accurate homework setup.",
         "Add lesson idea (locked)",
         "Add student note (locked)",
-        "Analyzing student progress...",
         "Goals (locked)",
         "More options (locked)",
         "Quick add flashcard (locked)",
@@ -24162,6 +24155,16 @@
           "initial": "null"
         },
         {
+          "value": "exercisesTouched",
+          "setter": "setExercisesTouched",
+          "initial": "false"
+        },
+        {
+          "value": "suggestedCount",
+          "setter": "setSuggestedCount",
+          "initial": "null"
+        },
+        {
           "value": "checkingDuplicate",
           "setter": "setCheckingDuplicate",
           "initial": "false"
@@ -24204,7 +24207,8 @@
         "tables": [
           "homework_assignments",
           "profiles",
-          "students"
+          "students",
+          "worksheet_student_answers"
         ],
         "rpcs": [
           "generate_homework_share_token"
@@ -24224,6 +24228,7 @@
         "4 days before",
         "5 days before",
         "6 hours before",
+        ": not done or weak in class. Change them if you like.",
         "Additional instructions (optional)",
         "Cancel",
         "Choose a student...",
@@ -24234,8 +24239,7 @@
         "Create Homework Assignment",
         "Create a homework assignment from \"",
         "Creating...",
-        "Deadline",
-        "Exercise types (max 6):"
+        "Deadline"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -57133,7 +57137,9 @@
           }
         ],
         "featureOwnership": {
-          "clientFiles": [],
+          "clientFiles": [
+            "src/components/homework/CreateHomeworkModal.tsx"
+          ],
           "edgeFunctions": [
             "process-pending-ai-evaluations"
           ]
@@ -60714,10 +60720,6 @@
       {
         "name": "log_homework_answer_to_events",
         "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
-      },
-      {
-        "name": "log_homework_answer_to_events",
-        "migration": "supabase/migrations/20261028130000_homework_events_follow_student_id.sql"
       },
       {
         "name": "log_homework_submitted_event",

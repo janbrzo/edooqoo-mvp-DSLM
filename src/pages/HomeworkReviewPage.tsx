@@ -426,6 +426,9 @@ export default function HomeworkReviewPage() {
                 <div className="flex items-center gap-2 text-green-600">
                   <CheckCircle2 className="h-4 w-4" />
                   <span>Submitted: {format(new Date(submittedAt), "PPP HH:mm")}</span>
+                  {homework.deadline && new Date(submittedAt) > new Date(homework.deadline) && (
+                    <Badge variant="outline" className="text-amber-600 border-amber-600">Submitted late</Badge>
+                  )}
                 </div>
               )}
             </div>

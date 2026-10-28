@@ -21,6 +21,8 @@ import { devLog } from '@/utils/logger';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
+import { suggestHomeworkExercises } from "@/lib/homework/suggestExercises";
+
 interface CreateHomeworkModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -96,6 +98,8 @@ export function CreateHomeworkModal({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [createdHomeworkId, setCreatedHomeworkId] = useState<string>('');
   const [existingHomework, setExistingHomework] = useState<any>(null);
+  const [exercisesTouched, setExercisesTouched] = useState(false);
+  const [suggestedCount, setSuggestedCount] = useState<number | null>(null);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [teacherEmail, setTeacherEmail] = useState<string | null>(null);
   const [selectedGeneratedTypes, setSelectedGeneratedTypes] = useState<string[]>([]);
@@ -157,15 +161,46 @@ export function CreateHomeworkModal({
     if (open && worksheetId) {
       checkForExistingHomework();
     }
-  }, [open, worksheetId]);
+  }, [open, worksheetId, selectedStudentId]);
 
+  // Preselect what the student did not do in class or did badly; the teacher only confirms.
+  // Never overrides a selection the teacher already made.
+  useEffect(() => {
+    if (!open || !worksheetId || !selectedStudentId || exercisesTouched) return;
+    const email = students.find((s) => s.id === selectedStudentId)?.student_email?.trim().toLowerCase();
+    if (!email) return;
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase
+        .from('worksheet_student_answers')
+        .select('exercise_index, mastery, answers')
+        .eq('worksheet_id', worksheetId)
+        .eq('student_email', email);
+      if (cancelled || error || !data) return;
+      const originalIndices = (allExercises || [])
+        .map((exercise, original) => (exercise?.deleted ? -1 : original))
+        .filter((original) => original >= 0);
+      const picked = suggestHomeworkExercises(originalIndices, data as any);
+      if (picked.length === 0) { setSuggestedCount(null); return; }
+      setSelectedExercises(new Set(picked));
+      setSuggestedCount(picked.length);
+    })();
+    return () => { cancelled = true; };
+  }, [open, worksheetId, selectedStudentId, exercisesTouched, students, allExercises]);
+
+  // Only this student's earlier homework counts: another student having the worksheet is no duplicate.
   const checkForExistingHomework = async () => {
+    if (!selectedStudentId) {
+      setExistingHomework(null);
+      return;
+    }
     try {
       setCheckingDuplicate(true);
       const { data, error } = await supabase
         .from('homework_assignments')
         .select('id, title, share_token, created_at')
         .eq('source_worksheet_id', worksheetId)
+        .eq('student_id', selectedStudentId)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -180,6 +215,7 @@ export function CreateHomeworkModal({
   };
 
   const toggleExercise = (index: number) => {
+    setExercisesTouched(true);
     const newSelected = new Set(selectedExercises);
     if (newSelected.has(index)) {
       newSelected.delete(index);
@@ -191,9 +227,11 @@ export function CreateHomeworkModal({
 
   // v6.9.44: bulk helpers for the redesigned Exercises section.
   const selectAllExercises = () => {
+    setExercisesTouched(true);
     setSelectedExercises(new Set(exercises.map((_, i) => i)));
   };
   const clearExercisesSelection = () => {
+    setExercisesTouched(true);
     setSelectedExercises(new Set());
   };
 
@@ -401,6 +439,8 @@ export function CreateHomeworkModal({
     setSendReminder(true);
     setNotifyStudent(false);
     setEmailSentTo(null);
+    setExercisesTouched(false);
+    setSuggestedCount(null);
     setReminderHours("24");
     setSendToTeacher(false);
     setIsGenerating(false);
@@ -651,6 +691,11 @@ export function CreateHomeworkModal({
                   </Button>
                 </div>
               </div>
+              {suggestedCount !== null && !exercisesTouched && (
+                <p className="text-xs text-muted-foreground">
+                  Preselected {suggestedCount}: not done or weak in class. Change them if you like.
+                </p>
+              )}
               <div className="border rounded-md p-3 max-h-44 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5">
                 {exercises.map((exercise, index) => (
                   <div key={index} className="flex items-center space-x-2 min-w-0">
