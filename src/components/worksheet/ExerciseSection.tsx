@@ -837,6 +837,10 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   // Calculate showImage: hide if hideExerciseMedia=true OR hasSelectedImage
   const showImage = !hideExerciseMedia && !hasSelectedImage;
 
+  // Regeneration takes long: it must apply to the worksheet as it is when the result arrives.
+  const latestWorksheetRef = React.useRef(editableWorksheet);
+  latestWorksheetRef.current = editableWorksheet;
+
   const handleRegenerateClick = () => {
     devLog('🔄 [REGENERATE] Opening modal:', { 
       displayIndex: index, 
@@ -862,7 +866,8 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
       exercise,
       editableWorksheet,
       setEditableWorksheet,
-      userId
+      userId,
+      { lessonMedia, getLatestWorksheet: () => latestWorksheetRef.current }
     );
   };
 

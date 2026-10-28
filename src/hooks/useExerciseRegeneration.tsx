@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { exerciseRegenerationService } from '@/services/exerciseRegenerationService';
-import { devLog } from '@/utils/logger';
+import { devLog, devWarn } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
+import type { LessonMedia } from '@/lib/worksheetEditor/lessonMedia';
 
 interface RegenerationState {
   isModalOpen: boolean;
@@ -48,7 +49,12 @@ export const useExerciseRegeneration = () => {
     currentExercise: any,
     editableWorksheet: any,
     setEditableWorksheet: React.Dispatch<React.SetStateAction<any>>,
-    userId: string
+    userId: string,
+    options?: {
+      lessonMedia?: LessonMedia | null;
+      /** Latest worksheet state: the regeneration takes long and the teacher may keep editing. */
+      getLatestWorksheet?: () => any;
+    }
   ) => {
     if (isDemoMode) {
       showDemoBlockedToast('Regenerating exercises');
@@ -72,18 +78,19 @@ export const useExerciseRegeneration = () => {
         originalFormData,
         currentExercise,
         state.guidelines,
-        userId
+        userId,
+        options?.lessonMedia
       );
 
-      const updatedExercises = [...editableWorksheet.exercises];
-      updatedExercises[exerciseIndex] = newExercise;
-
-      const updatedWorksheet = {
-        ...editableWorksheet,
-        exercises: updatedExercises
+      const replaceExercise = (worksheet: any) => {
+        const exercises = [...(worksheet?.exercises ?? [])];
+        exercises[exerciseIndex] = newExercise;
+        return { ...worksheet, exercises };
       };
 
-      setEditableWorksheet(updatedWorksheet);
+      const updatedWorksheet = replaceExercise(options?.getLatestWorksheet?.() ?? editableWorksheet);
+
+      setEditableWorksheet((prev: any) => replaceExercise(prev ?? editableWorksheet));
 
       await exerciseRegenerationService.updateWorksheetInDatabase(
         worksheetId,
@@ -94,7 +101,7 @@ export const useExerciseRegeneration = () => {
       toast.success('Exercise regenerated successfully!');
       
     } catch (error) {
-      console.error('Error regenerating exercise:', error);
+      devWarn('Error regenerating exercise:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to regenerate exercise');
     } finally {
       setState(prev => ({ 

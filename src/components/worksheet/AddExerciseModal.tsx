@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -6,44 +6,37 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { useDemoContext } from "@/contexts/DemoContext";
+import { devWarn } from "@/utils/logger";
+import {
+  NO_MEDIA_EXERCISE_IDS,
+  PICTURE_EXERCISE_IDS,
+  AUDIO_EXERCISE_IDS,
+  EXERCISE_LABELS,
+} from "@/lib/exerciseTaxonomy";
+import {
+  MAX_ADDITIONAL_INSTRUCTIONS_LENGTH,
+  MAX_EXERCISES_PER_WORKSHEET,
+  appendExercise,
+  countActiveExercises,
+  persistAddedExercise,
+  requestNewExercise,
+} from "@/services/exerciseAddService";
 
-// Exercise types available for generation
-const GENERAL_EXERCISES: Record<string, string> = {
-  'fill-in-blanks': 'Fill in the Blanks',
-  'multiple-choice': 'Multiple Choice',
-  'matching': 'Matching',
-  'true-false': 'True/False',
-  'word-order': 'Word Order',
-  'gap-text': 'Gap Text',
-  'answer-questions': 'Answer Questions',
-  'paraphrasing': 'Paraphrasing',
-  'sentence-transformation': 'Sentence Transformation',
-  'odd-one-out': 'Odd One Out',
-  'synonyms-antonyms': 'Synonyms & Antonyms',
-  'matching-halves': 'Matching Halves',
-  'complete-word': 'Complete Word',
-  'categorize': 'Categorize',
-  'negative-prefixes': 'Negative Prefixes',
-  'dialogue': 'Dialogue Practice',
-  'discussion': 'Discussion Questions',
-  'error-correction': 'Error Correction',
-  'reading': 'Reading Comprehension',
-};
+const labelled = (ids: readonly string[]): Record<string, string> =>
+  Object.fromEntries(ids.map((id) => [id, EXERCISE_LABELS[id] ?? id]));
 
-const PICTURE_EXERCISES: Record<string, string> = {
-  'describe-picture': 'Describe Picture',
-  'answer-questions-picture': 'Answer Questions (Picture)',
-  'true-false-picture': 'True/False (Picture)',
-  'multiple-choice-picture': 'Multiple Choice (Picture)',
-};
+// Exercise types come from the shared taxonomy (same ids the generator accepts).
+const GENERAL_EXERCISES = labelled(NO_MEDIA_EXERCISE_IDS);
+const PICTURE_EXERCISES = labelled(PICTURE_EXERCISE_IDS);
+const AUDIO_EXERCISES = labelled(AUDIO_EXERCISE_IDS);
 
-const AUDIO_EXERCISES: Record<string, string> = {
-  'listening-comprehension': 'Listening Comprehension',
-  'answer-questions-audio': 'Answer Questions (Audio)',
-  'true-false-audio': 'True/False (Audio)',
-  'multiple-choice-audio': 'Multiple Choice (Audio)',
-  'fill-in-blanks-audio': 'Fill in the Blanks (Audio)',
+const isDemoStorage = () => {
+  try {
+    return localStorage.getItem("edooqoo_demo_mode") === "true";
+  } catch {
+    return false;
+  }
 };
 
 interface AddExerciseModalProps {
@@ -53,7 +46,7 @@ interface AddExerciseModalProps {
   worksheetFormData: any;
   currentExerciseCount: number;
   editableWorksheet: any;
-  setEditableWorksheet: (worksheet: any) => void;
+  setEditableWorksheet: (worksheet: any | ((prev: any) => any)) => void;
   userId: string;
   worksheetHasPicture?: boolean;
   worksheetHasAudio?: boolean;
@@ -76,7 +69,12 @@ export function AddExerciseModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationSeconds, setGenerationSeconds] = useState(0);
 
-  const maxExercises = 12;
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+  // The generation takes a while: always append to the worksheet as it is when the result arrives.
+  const latestWorksheetRef = useRef(editableWorksheet);
+  latestWorksheetRef.current = editableWorksheet;
+
+  const maxExercises = MAX_EXERCISES_PER_WORKSHEET;
   const canAddMore = currentExerciseCount < maxExercises;
 
   // Timer for generation
@@ -97,6 +95,10 @@ export function AddExerciseModal({
   };
 
   const handleGenerate = async () => {
+    if (isDemoMode || isDemoStorage()) {
+      showDemoBlockedToast("Adding exercises");
+      return;
+    }
     if (!selectedType) {
       toast.error("Please select an exercise type");
       return;
@@ -109,63 +111,27 @@ export function AddExerciseModal({
     setIsGenerating(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
-      // Build prompt for single exercise generation
-      const prompt = `Generate a single ${selectedType} exercise for the topic: ${worksheetFormData?.lessonTopic || 'General English'}. 
-Level: ${worksheetFormData?.englishLevel || 'B1'}. 
-${worksheetFormData?.teachingPreferences ? `Grammar focus: ${worksheetFormData.teachingPreferences}.` : ''}
-${additionalInstructions ? `Additional instructions: ${additionalInstructions}` : ''}`;
-
-      const response = await supabase.functions.invoke('generateWorksheet', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-        body: {
-          prompt,
-          formData: {
-            ...worksheetFormData,
-            targetExerciseTypes: [selectedType],
-            exerciseCountPerType: 1,
-          },
-          userId,
-          isBatchGeneration: true,
-        },
+      const generated = await requestNewExercise({
+        exerciseType: selectedType,
+        additionalInstructions: additionalInstructions,
+        formData: worksheetFormData,
+        userId,
       });
 
-      if (response.error) throw new Error(response.error.message || 'Generation failed');
+      const current = latestWorksheetRef.current;
+      if (countActiveExercises(current) >= maxExercises) {
+        throw new Error(`Maximum ${maxExercises} exercises per worksheet`);
+      }
+      const updatedWorksheet = appendExercise(current, generated, availableTypes[selectedType] ?? selectedType);
 
-      const generatedData = response.data;
-      
-      // Extract the first exercise from generated data
-      const newExercise = generatedData?.exercises?.[0];
-      if (!newExercise) throw new Error("No exercise was generated");
-
-      // Update the exercise number
-      const exerciseNumber = currentExerciseCount + 1;
-      newExercise.title = `Exercise ${exerciseNumber}: ${newExercise.title?.replace(/^Exercise\s+\d+:\s*/i, '') || selectedType}`;
-
-      // Add to worksheet - insert before vocabulary_sheet (at the end of exercises array)
-      const updatedExercises = [...(editableWorksheet.exercises || []), newExercise];
-      const updatedWorksheet = { ...editableWorksheet, exercises: updatedExercises };
-
-      // Save to database
-      const aiResponse = JSON.parse(JSON.stringify(updatedWorksheet));
-      const { error: updateError } = await supabase
-        .from('worksheets')
-        .update({ ai_response: aiResponse })
-        .eq('id', worksheetId)
-        .eq('teacher_id', userId);
-
-      if (updateError) throw updateError;
-
-      // Update local state
+      await persistAddedExercise(worksheetId, updatedWorksheet, userId);
       setEditableWorksheet(updatedWorksheet);
 
       toast.success(`Exercise "${availableTypes[selectedType]}" added successfully!`);
       handleClose();
-    } catch (error: any) {
-      console.error('[AddExerciseModal] Error:', error);
-      toast.error(error.message || "Failed to generate exercise");
+    } catch (error) {
+      devWarn("[AddExerciseModal] Error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate exercise");
     } finally {
       setIsGenerating(false);
     }
@@ -225,7 +191,8 @@ ${additionalInstructions ? `Additional instructions: ${additionalInstructions}` 
                 id="add-exercise-instructions"
                 placeholder="e.g., Focus on past tense, use business vocabulary..."
                 value={additionalInstructions}
-                onChange={(e) => setAdditionalInstructions(e.target.value)}
+                onChange={(e) => setAdditionalInstructions(e.target.value.slice(0, MAX_ADDITIONAL_INSTRUCTIONS_LENGTH))}
+                maxLength={MAX_ADDITIONAL_INSTRUCTIONS_LENGTH}
                 rows={2}
                 className="resize-none"
               />
