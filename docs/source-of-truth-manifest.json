@@ -60995,6 +60995,10 @@
         "migration": "supabase/migrations/20261028150000_homework_redo.sql"
       },
       {
+        "name": "request_homework_redo",
+        "migration": "supabase/migrations/20261028160000_homework_redo_settles_notification.sql"
+      },
+      {
         "name": "revoke_mcp_token",
         "migration": "supabase/migrations/20260725124453_86489a73-813a-457d-aff2-4f7037b4d6c5.sql"
       },

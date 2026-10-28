@@ -31,3 +31,11 @@ describe('homework redo', () => {
     expect(review).toMatch(/Let the student do this homework again\?/);
   });
 });
+
+describe('homework redo notification', () => {
+  const follow = readFileSync('supabase/migrations/20261028160000_homework_redo_settles_notification.sql', 'utf8');
+  it('settles the old completed notification so the second return notifies the teacher again', () => {
+    expect(follow).toMatch(/UPDATE public\.homework_notifications SET is_read = true/);
+    expect(follow).toMatch(/notification_type = 'completed' AND is_read = false/);
+  });
+});
