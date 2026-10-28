@@ -39,3 +39,23 @@ describe('findItemsToCheck', () => {
     expect(calculateItemMastery('word-order', wordOrder, 0, 'She is a boss', { 0: 'She is a boss' })).toBe(100);
   });
 });
+
+import { findItemsToScore } from '../reviewItems';
+
+describe('findItemsToScore', () => {
+  const reading = { type: 'reading', questions: [{ question: 'Why?', nano_skill: { name: 'reading.detail.a' } }, { question: 'Who?', nano_skill: { name: 'reading.detail.b' } }] };
+  it('lists open questions with the automatic score, the transcription and the teacher rating', () => {
+    const items = findItemsToScore('reading', reading, { 0: 'Because.', _transcription_1: 'spoken answer' }, [
+      { question_index: 0, mastery: 60, hasValue: true },
+      { question_index: 1, mastery: -1, hasValue: false, source: undefined },
+    ]);
+    expect(items).toEqual([
+      { questionIndex: 0, questionText: 'Why?', studentAnswer: 'Because.', current: 60, source: undefined },
+      { questionIndex: 1, questionText: 'Who?', studentAnswer: 'spoken answer', current: null, source: undefined },
+    ]);
+  });
+  it('ignores closed exercises and missing ratings', () => {
+    expect(findItemsToScore('multiple-choice', reading, {}, [{ question_index: 0, mastery: 100, hasValue: true }])).toEqual([]);
+    expect(findItemsToScore('reading', reading, {}, null)).toEqual([]);
+  });
+});
