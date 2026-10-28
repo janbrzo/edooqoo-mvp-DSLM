@@ -28,6 +28,7 @@ import { clearAutoGenerateFlags, markPersistentAutoGenerateIntentStatus } from '
 import { devLog, devWarn } from '@/utils/logger';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { notifyTokenBalanceChanged } from '@/lib/worksheet/tokenBalanceEvents';
+import { logTokenChargeFailure } from '@/services/clientErrorLogService';
 
 const POLL_INTERVAL_MS = 5000;
 
@@ -94,14 +95,22 @@ async function applyCompletionSideEffects(job: WorksheetGenerationJob, worksheet
       && Math.abs(Date.now() - (claim.tokenConsumedAt ?? 0)) < 2000;
     if (wonClaim) {
       try {
-        const { error } = await supabase.rpc('consume_token', {
+        const { data, error } = await supabase.rpc('consume_token', {
           p_teacher_id: userId,
           p_worksheet_id: worksheetId,
         });
-        if (error) devWarn('[useActiveWorksheetGenerationJob] consume_token error', error);
-        else notifyTokenBalanceChanged();
+        if (error) {
+          devWarn('[useActiveWorksheetGenerationJob] consume_token error', error.code);
+          void logTokenChargeFailure({ worksheetId, reason: 'rpc_error', origin: 'job_poller', userId, errorCode: error.code });
+        } else {
+          if (data === false) {
+            void logTokenChargeFailure({ worksheetId, reason: 'rpc_returned_false', origin: 'job_poller', userId });
+          }
+          notifyTokenBalanceChanged();
+        }
       } catch (e) {
         devWarn('[useActiveWorksheetGenerationJob] consume_token threw', e);
+        void logTokenChargeFailure({ worksheetId, reason: 'rpc_threw', origin: 'job_poller', userId });
       }
     }
   }
