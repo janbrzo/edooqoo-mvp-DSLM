@@ -304,9 +304,10 @@ function formatLogArg(arg: unknown): string {
   const text = typeof arg === 'string' ? arg : inspect(arg, { depth: 8, breakLength: Infinity });
   // Stack traces carry file paths and line numbers that change with any edit.
   // Stacks appear both as real lines and as escaped "\n    at ..." inside inspected objects.
+  // The number of frames depends on how the code is layered, so collapse them.
   return text
-    .replace(/\n\s+at [^\n]*/g, '\n    at <stack>')
-    .replace(/\\n\s+at [^'"]*?(?=\\n|['"]|$)/g, '\\n    at <stack>');
+    .replace(/(\n\s+at [^\n]*)+/g, '\n    at <stack>')
+    .replace(/(\\n\s+at [^'"]*?(?=\\n|['"]|$))+/g, '\\n    at <stack>');
 }
 
 export function installWorld() {
