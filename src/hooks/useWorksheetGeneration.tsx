@@ -184,10 +184,9 @@ export const useWorksheetGeneration = (
     let activeJobId: string | null = null;
     activeJobIdRef.current = null;
     try {
-      const autoSuggestionId =
-        (data as any).__autoGenerateSuggestionId
-        || (typeof window !== 'undefined' && sessionStorage.getItem('prefillSuggestionId'))
-        || null;
+      // Only the id that came with THIS submission. A sessionStorage fallback
+      // used to leak a stale suggestion into unrelated generations.
+      const autoSuggestionId: string | null = (data as any).__autoGenerateSuggestionId || null;
       const startedJob = startGenerationJob({
         teacherId: userId,
         studentId: effectiveStudentId,
@@ -850,6 +849,9 @@ export const useWorksheetGeneration = (
       } catch (e) {
         devWarn('Failed to dispatch worksheetGenerationSuccess', e);
       }
+
+      // A finished generation always consumes the prefill id, whatever its outcome.
+      try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
 
       // v4.8: if this generation originated from a DSLM suggestion, flip is_used.
       try {

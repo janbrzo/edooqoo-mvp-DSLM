@@ -19,6 +19,14 @@ import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWor
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
 import { buildWorksheetRequest, getExerciseTarget } from "@/lib/worksheet/buildWorksheetRequest";
 import { getActiveGenerationJobs } from "@/lib/worksheet/generationJobRegistry";
+import {
+  createSuggestionOrigin,
+  parseAppliedPreset,
+  reconcileSuggestionOrigin,
+  serializeAppliedPreset,
+  suggestionIdForSubmit,
+  type SuggestionOrigin,
+} from "@/lib/worksheet/suggestionOrigin";
 import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
 import type { AppliedEvidenceSource } from '@/lib/dslm/recommendationEvidenceView';
 import { StudentContextHint } from "./StudentContextHint";
@@ -111,6 +119,38 @@ export default function WorksheetForm({
   });
   useEffect(() => {
     setAppliedEvidenceSource(previous => previous?.studentId === selectedStudentId ? previous : null);
+  }, [selectedStudentId]);
+
+  // The plan suggestion this form was prefilled from (manual "Use this" / Prep
+  // "Change topic" write sessionStorage `prefillSuggestionId`). Read once at
+  // mount and bound to the student it is used for, so generating marks it as
+  // used (also after the topic was edited) and a different student never does.
+  const suggestionOriginRef = useRef<SuggestionOrigin | null>(null);
+  const suggestionOriginInitRef = useRef(false);
+  if (!suggestionOriginInitRef.current) {
+    suggestionOriginInitRef.current = true;
+    try {
+      suggestionOriginRef.current = createSuggestionOrigin(
+        sessionStorage.getItem('prefillSuggestionId'),
+        initialAutoIntentRef.current?.studentId || preSelectedStudent?.id || null,
+      );
+    } catch { /* ignore */ }
+  }
+  const selectedStudentIdRef = useRef(selectedStudentId);
+  selectedStudentIdRef.current = selectedStudentId;
+  const dropSuggestionOrigin = () => {
+    suggestionOriginRef.current = null;
+    try {
+      sessionStorage.removeItem('prefillSuggestionId');
+      sessionStorage.removeItem('appliedPresetSuggestionId');
+    } catch { /* ignore */ }
+  };
+  useEffect(() => {
+    const current = suggestionOriginRef.current;
+    if (!current) return;
+    const next = reconcileSuggestionOrigin(current, selectedStudentId);
+    if (next === null) dropSuggestionOrigin();
+    else suggestionOriginRef.current = next;
   }, [selectedStudentId]);
 
   // Initialize selectedExercises based on lessonTime and selectionMode
@@ -253,6 +293,7 @@ export default function WorksheetForm({
   );
 
   const clearForm = () => {
+    dropSuggestionOrigin();
     setAppliedEvidenceSource(null);
     setLessonTopic('');
     setLessonGoal('');
@@ -347,6 +388,8 @@ export default function WorksheetForm({
   useEffect(() => {
     const handler = (e: Event) => {
       setAppliedEvidenceSource(null);
+      suggestionOriginRef.current = null;
+      try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
       try {
         clearPersistedDraft();
         devLog('[WorksheetForm] Draft cleared after successful generation');
@@ -356,12 +399,14 @@ export default function WorksheetForm({
       // v6.9.10: if this generation originated from a Next-Step preset chip,
       // propagate to NextStepsPresetBanner so it can mark the suggestion as used.
       try {
-        const sid = sessionStorage.getItem('appliedPresetSuggestionId');
-        if (sid) {
+        const applied = parseAppliedPreset(sessionStorage.getItem('appliedPresetSuggestionId'));
+        // Only for the student the chip was applied to; a stale chip from a
+        // previous student must never mark a suggestion for an unrelated sheet.
+        if (applied && applied.studentId && applied.studentId === selectedStudentIdRef.current) {
           const wsId = ((e as CustomEvent)?.detail?.worksheetId as string | undefined) || null;
-          window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { suggestionId: sid, worksheetId: wsId } }));
-          sessionStorage.removeItem('appliedPresetSuggestionId');
+          window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { suggestionId: applied.suggestionId, worksheetId: wsId } }));
         }
+        sessionStorage.removeItem('appliedPresetSuggestionId');
       } catch (e) {
         devWarn('[WorksheetForm] markPresetUsed dispatch failed', e);
       }
@@ -579,6 +624,8 @@ export default function WorksheetForm({
       // silently dropping it after 2 short retries.
       __autoGenerateFromSuggestion: Boolean(initialAutoIntentRef.current),
       __autoGenerateRequestId: autoRequestIdRef.current || undefined,
+      // Stamped only while the student is the one the prefill was written for.
+      __autoGenerateSuggestionId: suggestionIdForSubmit(suggestionOriginRef.current, selectedStudentId) ?? undefined,
     } as any;
 
     // v6.9.55: attach UI/transport metadata (student name + email) for
@@ -764,7 +811,9 @@ export default function WorksheetForm({
     setExerciseFocusMap(norm.exerciseFocusMap);
     setSelectionMode('manual');
     setActiveTab('exercises');
-    sessionStorage.setItem('appliedPresetSuggestionId', p.sourceSuggestionId);
+    const presetOrigin = createSuggestionOrigin(p.sourceSuggestionId, selectedStudentId);
+    suggestionOriginRef.current = presetOrigin;
+    if (presetOrigin) sessionStorage.setItem('appliedPresetSuggestionId', serializeAppliedPreset(presetOrigin));
     // v6.9.61: persist the preset deterministically so an immediate
     // auto-submit + failure path still recovers the EXACT preset on retry.
     try {
