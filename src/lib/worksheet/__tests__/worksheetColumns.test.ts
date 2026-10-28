@@ -68,6 +68,25 @@ describe('worksheet column constants', () => {
   });
 });
 
+describe('worksheets column grant (20261028120000)', () => {
+  const migration = fs.readFileSync(
+    path.resolve(SRC_ROOT, '../supabase/migrations/20261028120000_worksheets_hide_prompt_columns.sql'),
+    'utf8',
+  );
+  const granted = (migration.match(/GRANT SELECT \(([\s\S]*?)\)\s*ON public\.worksheets/)?.[1] ?? '')
+    .split(',')
+    .map((column) => column.trim())
+    .filter(Boolean);
+
+  it('grants exactly OWNER_VIEW_COLUMNS to anon and authenticated', () => {
+    expect([...granted].sort()).toEqual([...OWNER_VIEW_COLUMNS].sort());
+  });
+
+  it('never grants prompt or ip_address', () => {
+    for (const forbidden of WORKSHEET_FORBIDDEN_COLUMNS) expect(granted).not.toContain(forbidden);
+  });
+});
+
 describe('client reads of public.worksheets', () => {
   const files = walk(SRC_ROOT).filter((file) => !file.includes(`${path.sep}integrations${path.sep}supabase${path.sep}types`));
   const offenders: string[] = [];
