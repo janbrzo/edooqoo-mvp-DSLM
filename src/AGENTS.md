@@ -9,6 +9,8 @@ One rule per entry with a one-line why. Moved from the root AGENTS.md.
 
 ## Runtime Safety
 
+- Generation conversion slides own presentation-only rotation and use explicit modal audience/learner props plus the canonical `studentTabPath` for new-tab actions; never fetch learner evidence or modify generation-job lifecycle, because waiting-time promotion must not interrupt worksheets or expose private learning records.
+
 - Public Gallery recommendations use only reviewed source links revalidated through the publication-filtered metadata RPC, fetched without a teacher session; never embed worksheet bodies in SEO snapshots or infer learner mastery from worksheet levels, because publication is revocable and private learning evidence is not promotional content.
 
 - Homework and shared worksheet answers are autosaved only through `createPendingSaves` in `src/lib/answers/pendingSaves.ts` (one debounce timer per exercise, `flush()` on submit and unmount), never a single shared timer; a homework save sends only the keys this tab changed (`buildHomeworkDelta` in `src/lib/homework/deltaSave.ts`), a blur without edits writes nothing and the teacher's "View as student" is `readOnly` — because a shared timer dropped the pending save of one exercise whenever another was edited within 1.5 s, and whole-exercise snapshots from a stale tab or a bare blur overwrote the student's newer answers.
