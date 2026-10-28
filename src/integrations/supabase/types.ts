@@ -2307,6 +2307,42 @@ export type Database = {
         }
         Relationships: []
       }
+      schema_migrations_twin_backup_20261028: {
+        Row: {
+          backed_up_at: string
+          created_by: string | null
+          idempotency_key: string | null
+          kind: string
+          local_version: string
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          twin_version: string
+        }
+        Insert: {
+          backed_up_at?: string
+          created_by?: string | null
+          idempotency_key?: string | null
+          kind: string
+          local_version: string
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          twin_version: string
+        }
+        Update: {
+          backed_up_at?: string
+          created_by?: string | null
+          idempotency_key?: string | null
+          kind?: string
+          local_version?: string
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          twin_version?: string
+        }
+        Relationships: []
+      }
       student_events: {
         Row: {
           created_at: string
@@ -2368,6 +2404,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_events_junk_backup_20261028: {
+        Row: {
+          backed_up_at: string | null
+          created_at: string | null
+          element_type: string | null
+          event_payload: Json | null
+          event_source: string | null
+          event_type: string | null
+          id: string | null
+          is_processed: boolean | null
+          mastery: number | null
+          session_id: string | null
+          skill_ids: string[] | null
+          source_id: string | null
+          student_id: string | null
+          superseded_at: string | null
+          superseded_by: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          created_at?: string | null
+          element_type?: string | null
+          event_payload?: Json | null
+          event_source?: string | null
+          event_type?: string | null
+          id?: string | null
+          is_processed?: boolean | null
+          mastery?: number | null
+          session_id?: string | null
+          skill_ids?: string[] | null
+          source_id?: string | null
+          student_id?: string | null
+          superseded_at?: string | null
+          superseded_by?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          created_at?: string | null
+          element_type?: string | null
+          event_payload?: Json | null
+          event_source?: string | null
+          event_type?: string | null
+          id?: string | null
+          is_processed?: boolean | null
+          mastery?: number | null
+          session_id?: string | null
+          skill_ids?: string[] | null
+          source_id?: string | null
+          student_id?: string | null
+          superseded_at?: string | null
+          superseded_by?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: []
       }
       student_gcal_tokens: {
         Row: {
@@ -2955,6 +3048,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_skill_metrics_junk_backup_20261027: {
+        Row: {
+          backed_up_at: string | null
+          created_at: string | null
+          current_mastery: number | null
+          first_event_at: string | null
+          id: string | null
+          last_event_at: string | null
+          mastery_history: Json | null
+          micro_skill: string | null
+          param_version: number | null
+          skill_category: string | null
+          skill_name: string | null
+          student_id: string | null
+          teacher_id: string | null
+          total_events: number | null
+          trend: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          created_at?: string | null
+          current_mastery?: number | null
+          first_event_at?: string | null
+          id?: string | null
+          last_event_at?: string | null
+          mastery_history?: Json | null
+          micro_skill?: string | null
+          param_version?: number | null
+          skill_category?: string | null
+          skill_name?: string | null
+          student_id?: string | null
+          teacher_id?: string | null
+          total_events?: number | null
+          trend?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          created_at?: string | null
+          current_mastery?: number | null
+          first_event_at?: string | null
+          id?: string | null
+          last_event_at?: string | null
+          mastery_history?: Json | null
+          micro_skill?: string | null
+          param_version?: number | null
+          skill_category?: string | null
+          skill_name?: string | null
+          student_id?: string | null
+          teacher_id?: string | null
+          total_events?: number | null
+          trend?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       student_test_questions: {
         Row: {
@@ -3832,6 +3982,27 @@ export type Database = {
         }
         Relationships: []
       }
+      worksheets_ai_response_backup_20261027: {
+        Row: {
+          ai_response: string | null
+          backed_up_at: string
+          html_content: string | null
+          id: string
+        }
+        Insert: {
+          ai_response?: string | null
+          backed_up_at?: string
+          html_content?: string | null
+          id: string
+        }
+        Update: {
+          ai_response?: string | null
+          backed_up_at?: string
+          html_content?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       wt_signal_feedback: {
         Row: {
           comment: string | null
@@ -4013,6 +4184,10 @@ export type Database = {
         }
         Returns: Json
       }
+      backfill_profile_v2: {
+        Args: { p_dry_run?: boolean; p_items: Json; p_run_id: string }
+        Returns: Json
+      }
       backfill_skill_metrics: {
         Args: { p_student_id?: string }
         Returns: number
@@ -4112,6 +4287,10 @@ export type Database = {
       }
       dslm_effective_mastery: {
         Args: { p_last_event_at: string; p_mastery: number; p_now: string }
+        Returns: number
+      }
+      dslm_event_weight: {
+        Args: { p_event_source: string; p_payload: Json }
         Returns: number
       }
       dslm_validation_report: { Args: never; Returns: Json }
@@ -4264,6 +4443,16 @@ export type Database = {
         Returns: {
           student_id: string
           teacher_id: string
+        }[]
+      }
+      get_homework_state_by_share_token: {
+        Args: { p_share_token: string }
+        Returns: {
+          completed_at: string
+          completed_by_teacher: boolean
+          id: string
+          reviewed_at: string
+          source_worksheet_id: string
         }[]
       }
       get_homework_status_by_share_token: {
@@ -4854,6 +5043,7 @@ export type Database = {
         Args: { p_events: Json; p_test_id: string }
         Returns: Json
       }
+      reopen_homework: { Args: { p_homework_id: string }; Returns: Json }
       revoke_mcp_token: { Args: { _id: string }; Returns: undefined }
       rollback_intake_extraction: {
         Args: { p_extraction_id: string }
@@ -5123,6 +5313,10 @@ export type Database = {
           p_student_email: string
         }
         Returns: boolean
+      }
+      supersede_homework_events: {
+        Args: { p_homework_id: string }
+        Returns: number
       }
       supersede_previous_welcome_test_events: {
         Args: { p_test_id: string }
