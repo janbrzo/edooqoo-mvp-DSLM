@@ -13,7 +13,7 @@
  */
 
 import { autoPacingIndex, resolvePromptPacing } from './pacing.ts';
-import { canonicalSkill, isFlashcardSkill, skillLabel } from './skillLabels.ts';
+import { canonicalSkill, grammarMicroSkill, isExcludedSkillKey, isFlashcardSkill, skillLabel } from './skillLabels.ts';
 import { looksLikeInstructionInjection, wrapStudentText } from './promptSafety.ts';
 
 export type PacingLabel = 'Scientific' | 'Balanced' | 'Pragmatic';
@@ -297,17 +297,37 @@ function ageInDays(iso: string | null, now: number): number | null {
  * `now - last_event_at`; `updated_at` is never read (recomputes reset it).
  * Callers pass `withEffectiveMastery` rows (forgetting already applied).
  */
-export function groupSkillMetrics(metrics: any[], now: number = Date.now()): { all: WeakSkillGroup[]; weak: WeakSkillGroup[] } {
-  const groups = new Map<string, { rows: any[] }>();
+/**
+ * Grammar topic pooling by `micro_skill` is OFF by default: measured on production it merges strong
+ * events into weak topics and lowers the number of weak AUTHORITATIVE groups (40 to 34), while
+ * reviewed clusters alone raise it. The helper stays available for reports and later evaluation.
+ */
+export const GROUP_GRAMMAR_BY_MICRO = false;
+
+export function groupSkillMetrics(
+  metrics: any[],
+  now: number = Date.now(),
+  opts: { grammarByMicro?: boolean } = {},
+): { all: WeakSkillGroup[]; weak: WeakSkillGroup[] } {
+  const grammarByMicro = opts.grammarByMicro ?? GROUP_GRAMMAR_BY_MICRO;
+  const groups = new Map<string, { rows: any[]; label: string }>();
   for (const m of metrics || []) {
     if (!m || isFlashcardSkill(m)) continue;
-    const key = canonicalSkill(m.skill_name || m.micro_skill, m.skill_category).key;
-    const g = groups.get(key) || { rows: [] };
+    const c = canonicalSkill(m.skill_name || m.micro_skill, m.skill_category);
+    if (isExcludedSkillKey(c.exactKey)) continue;
+    // Grammar rows with a real micro_skill pool by topic; every other row uses the
+    // exact canonical key, widened to its reviewed cluster (D10 option A).
+    const micro = grammarByMicro ? grammarMicroSkill(m) : null;
+    const key = micro ? `grammar|micro:${micro}` : c.key;
+    const g = groups.get(key) || {
+      rows: [],
+      label: micro ? `grammar: ${micro.replace(/_+/g, ' ').trim()}` : (c.clusterLabel || skillLabel(m.skill_name, m.skill_category, m.micro_skill)),
+    };
     g.rows.push(m);
     groups.set(key, g);
   }
   const all: WeakSkillGroup[] = [];
-  for (const [groupKey, { rows }] of groups.entries()) {
+  for (const [groupKey, { rows, label }] of groups.entries()) {
     const counts = rows.map((r) => {
       const n = Number(r.total_events);
       return Number.isFinite(n) && n > 0 ? n : 1;
@@ -320,9 +340,8 @@ export function groupSkillMetrics(metrics: any[], now: number = Date.now()): { a
     const ageDays = ageInDays(lastEventAt, now);
     const top = rows[counts.indexOf(Math.max(...counts))];
     const trend = events < 4 || !top.trend ? 'insufficient_data' : String(top.trend);
-    const first = rows[0];
     all.push({
-      label: skillLabel(first.skill_name, first.skill_category, first.micro_skill),
+      label,
       key: groupKey,
       mastery: Math.round(mastery),
       events,
