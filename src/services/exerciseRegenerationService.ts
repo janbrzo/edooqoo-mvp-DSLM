@@ -3,8 +3,10 @@ import { updateWorksheetAPI } from './worksheetService/updateService';
 import { devLog } from '@/utils/logger';
 import { edgeFunctionHeaders } from '@/lib/edgeFunctionHeaders';
 
-// URLs for the Edge Functions
-const REGENERATE_EXERCISE_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/generateWorksheet';
+import type { LessonMedia } from '@/lib/worksheetEditor/lessonMedia';
+
+// Same project as the rest of the client; never a hardcoded host (preview and custom domains differ).
+const regenerateExerciseUrl = () => `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generateWorksheet`;
 
 interface RegenerateExerciseRequest {
   worksheetId: string;
@@ -15,6 +17,18 @@ interface RegenerateExerciseRequest {
   userId: string;
 }
 
+/** `form_data` keeps lesson media camelCase (`selectedImage`, `selectedAudio`); the derived lessonMedia covers legacy rows. */
+export function resolveImageDescription(formData: any, lessonMedia?: LessonMedia | null): string | null {
+  const image = lessonMedia?.selectedImage ?? formData?.selectedImage ?? null;
+  const description = image?.detailedDescription || image?.description;
+  return typeof description === 'string' && description.trim() ? description : null;
+}
+
+export function resolveTranscript(formData: any, lessonMedia?: LessonMedia | null): string | null {
+  const transcript = lessonMedia?.audioTranscript ?? formData?.selectedAudio?.transcript ?? formData?.audio_transcript;
+  return typeof transcript === 'string' && transcript.trim() ? transcript : null;
+}
+
 class ExerciseRegenerationService {
   async regenerateExercise(
     worksheetId: string,
@@ -22,7 +36,8 @@ class ExerciseRegenerationService {
     originalFormData: any,
     currentExercise: any,
     additionalGuidelines: string,
-    userId: string
+    userId: string,
+    lessonMedia?: LessonMedia | null
   ) {
     try {
       devLog('📤 [REGENERATE] Sending regeneration request to Edge Function');
@@ -31,15 +46,16 @@ class ExerciseRegenerationService {
       devLog('📝 [REGENERATE] Exercise type:', currentExercise.type);
       devLog('📝 [REGENERATE] Exercise title:', currentExercise.title);
       devLog('📝 [REGENERATE] Additional guidelines:', additionalGuidelines || '(none)');
-      devLog('📝 [REGENERATE] Has audio_transcript:', !!originalFormData.audio_transcript);
-      devLog('📝 [REGENERATE] Has image description:', !!originalFormData.selected_image?.description);
+      devLog('📝 [REGENERATE] Has audio_transcript:', !!resolveTranscript(originalFormData, lessonMedia));
+      devLog('📝 [REGENERATE] Has image description:', !!resolveImageDescription(originalFormData, lessonMedia));
       devLog('📝 [REGENERATE] User ID:', userId);
 
       // Create a specific prompt for single exercise regeneration
       const regenerationPrompt = this.createRegenerationPrompt(
         originalFormData,
         currentExercise,
-        additionalGuidelines
+        additionalGuidelines,
+        lessonMedia
       );
 
       devLog('🔄 Regeneration prompt (length:', regenerationPrompt.length, 'chars)');
@@ -64,7 +80,7 @@ class ExerciseRegenerationService {
         isRegeneration: true
       });
 
-      const response = await fetch(REGENERATE_EXERCISE_URL, {
+      const response = await fetch(regenerateExerciseUrl(), {
         method: 'POST',
         headers: await edgeFunctionHeaders(),
         body: JSON.stringify(requestBody)
@@ -131,7 +147,8 @@ class ExerciseRegenerationService {
   private createRegenerationPrompt(
     originalFormData: any,
     currentExercise: any,
-    additionalGuidelines: string
+    additionalGuidelines: string,
+    lessonMedia?: LessonMedia | null
   ): string {
     const baseInfo = `
 Lesson Topic: ${originalFormData.lessonTopic || 'Not specified'}
@@ -149,17 +166,19 @@ Lesson Duration: ${originalFormData.lessonTime || '60min'}
                            currentExercise.type === 'describe-picture' ||
                            currentExercise.type === 'answer-questions-picture';
 
-    if (isAudioExercise && originalFormData.audio_transcript) {
+    const transcript = resolveTranscript(originalFormData, lessonMedia);
+    if (isAudioExercise && transcript) {
       mediaContext += `
 AUDIO TRANSCRIPT (use this as base for audio-related exercises):
-${originalFormData.audio_transcript}
+${transcript}
 `;
     }
 
-    if (isImageExercise && originalFormData.selected_image?.description) {
+    const imageDescription = resolveImageDescription(originalFormData, lessonMedia);
+    if (isImageExercise && imageDescription) {
       mediaContext += `
 IMAGE DESCRIPTION (use this as base for image-related exercises):
-${originalFormData.selected_image.description}
+${imageDescription}
 `;
     }
 
@@ -203,7 +222,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
 
       devLog('🔄 Warmup regeneration prompt:', regenerationPrompt);
 
-      const response = await fetch(REGENERATE_EXERCISE_URL, {
+      const response = await fetch(regenerateExerciseUrl(), {
         method: 'POST',
         headers: await edgeFunctionHeaders(),
         body: JSON.stringify({
@@ -257,7 +276,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
 
       devLog('🔄 Grammar regeneration prompt:', regenerationPrompt);
 
-      const response = await fetch(REGENERATE_EXERCISE_URL, {
+      const response = await fetch(regenerateExerciseUrl(), {
         method: 'POST',
         headers: await edgeFunctionHeaders(),
         body: JSON.stringify({

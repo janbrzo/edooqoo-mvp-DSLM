@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useDownloadTracking } from "@/hooks/useDownloadTracking";
 import { usePaymentTracking } from "@/hooks/usePaymentTracking";
@@ -22,6 +22,7 @@ import { useStudentKnowledge } from "@/hooks/useStudentKnowledge";
 import { useStudents } from "@/hooks/useStudents";
 import { useFlashcardSets } from "@/hooks/useFlashcardSets";
 import { useLiveSessionAnswers } from "@/hooks/useLiveSessionAnswers";
+import { useWorksheetAnsweredIndexes } from "@/hooks/useWorksheetAnsweredIndexes";
 import { CreateHomeworkModal } from "@/components/homework/CreateHomeworkModal";
 import { AddExerciseModal } from "@/components/worksheet/AddExerciseModal";
 import { QuickAddWordToFlashcardsModal } from "@/components/flashcards/QuickAddWordToFlashcardsModal";
@@ -46,6 +47,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LiveSessionQuickNotes } from "./worksheet/LiveSessionQuickNotes";
 import { DraftTeacherNotes } from "./worksheet/DraftTeacherNotes";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
+import { resolveLessonMedia, type LessonMedia } from "@/lib/worksheetEditor/lessonMedia";
 
 interface Exercise {
   type: string;
@@ -92,6 +94,13 @@ interface WorksheetDisplayProps {
   studentName?: string;
   studentId?: string;
   onStudentChange?: () => void;
+  /**
+   * Lesson media derived from the row columns (see `resolveLessonMedia`).
+   * Callers without a worksheet row (inline view after generation) omit it and
+   * the legacy `selectedImage` / `selectedAudio` / `audioUrl` props plus
+   * `inputParams` are used instead.
+   */
+  lessonMedia?: LessonMedia;
   selectedImage?: any;
   selectedAudio?: any;
   audioUrl?: string;
@@ -117,6 +126,7 @@ export default function WorksheetDisplay({
   studentName,
   studentId,
   onStudentChange,
+  lessonMedia: lessonMediaProp,
   selectedImage,
   selectedAudio,
   audioUrl,
@@ -140,6 +150,30 @@ export default function WorksheetDisplay({
     userId,
     worksheet: editableWorksheet,
   });
+
+  // Every edit made through the UI goes through this setter: it flags the
+  // autosave as "user edited" right before the state changes. Nothing else
+  // (media derivation, state hydration) may ever trigger a database write.
+  const { markUserEdited } = autosave;
+  const handleUserEdit = useCallback(
+    (next: any) => {
+      markUserEdited();
+      setEditableWorksheet(next);
+    },
+    [markUserEdited, setEditableWorksheet],
+  );
+
+  // Lesson media is derived at read time, never injected into editableWorksheet.
+  const lessonMedia = useMemo<LessonMedia>(
+    () =>
+      lessonMediaProp ??
+      resolveLessonMedia({
+        columns: { selected_image: selectedImage, selected_audio: selectedAudio, audio_url: audioUrl },
+        formData: inputParams,
+        worksheetJson: editableWorksheet,
+      }),
+    [lessonMediaProp, selectedImage, selectedAudio, audioUrl, inputParams, editableWorksheet],
+  );
 
   const [expandAllRef, setExpandAllRef] = useState<(() => void) | null>(null);
   // ✅ NEW: Ref for scrollToExercise function from WorksheetContent
@@ -199,53 +233,6 @@ export default function WorksheetDisplay({
   const currentDrawingColor = currentToolSettings.color;
   const currentStrokeWidth = currentToolSettings.strokeWidth;
 
-  // CRITICAL FIX: Inject selectedImage/selectedAudio/audioUrl into editableWorksheet
-  // This ensures Lesson Media renders when opening worksheet from /student → Homework
-  useEffect(() => {
-    if (!editableWorksheet) return;
-    
-    let needsUpdate = false;
-    const updates: any = {};
-
-    // Check if we need to inject selectedImage
-    if (selectedImage && !editableWorksheet.selected_image) {
-      updates.selected_image = selectedImage;
-      needsUpdate = true;
-    }
-
-    // Check if we need to inject selectedAudio
-    if (selectedAudio && !editableWorksheet.selected_audio) {
-      updates.selected_audio = selectedAudio;
-      needsUpdate = true;
-    }
-
-    // Check if we need to inject audio_url
-    if (audioUrl && !editableWorksheet.audio_url) {
-      updates.audio_url = audioUrl;
-      // Also inject other audio fields if available from selectedAudio
-      if (selectedAudio) {
-        if (selectedAudio.transcript && !editableWorksheet.audio_transcript) {
-          updates.audio_transcript = selectedAudio.transcript;
-        }
-        if (selectedAudio.duration && !editableWorksheet.audio_duration) {
-          updates.audio_duration = selectedAudio.duration;
-        }
-        if (selectedAudio.voice && !editableWorksheet.audio_voice) {
-          updates.audio_voice = selectedAudio.voice;
-        }
-      }
-      needsUpdate = true;
-    }
-
-    // Only update if something changed
-    if (needsUpdate) {
-      devLog('[WorksheetDisplay] Injecting media into editableWorksheet:', updates);
-      setEditableWorksheet({
-        ...editableWorksheet,
-        ...updates
-      });
-    }
-  }, [selectedImage, selectedAudio, audioUrl, editableWorksheet, setEditableWorksheet]);
   const [isMiniListOpen, setIsMiniListOpen] = useState(false);
   const [miniListPage, setMiniListPage] = useState(1);
   const [miniListCategoryFilter, setMiniListCategoryFilter] = useState<KnowledgeCategory | null>(null);
@@ -302,57 +289,15 @@ export default function WorksheetDisplay({
     enabled: viewMode === 'live-session'
   });
   
+  // Exercises with student answers are protected from moves and silent content swaps (answers are keyed by position).
+  const loadedAnsweredIndexes = useWorksheetAnsweredIndexes(worksheetId, !!userId);
+  const answeredExerciseIndexes = useMemo(() => {
+    const merged = new Set<number>(loadedAnsweredIndexes);
+    Object.keys(liveAnswers).forEach((key) => merged.add(Number(key)));
+    return merged;
+  }, [loadedAnsweredIndexes, liveAnswers]);
+
   const shouldShowMiniList = shouldShowFAB && (studentKnowledge.entries?.length || 0) > 0;
-  
-  // CRITICAL FIX: Reconstruct selectedAudio/selectedImage from database fields
-  // This fixes Problem 2 - media not loading from Dashboard
-  useEffect(() => {
-    if (!editableWorksheet || !worksheetId) return;
-    
-    devLog('🔍 Media reconstruction check:', {
-      worksheetId,
-      hasSelectedAudio: !!editableWorksheet.selected_audio,
-      hasAudioUrl: !!editableWorksheet.audio_url,
-      hasSelectedImage: !!editableWorksheet.selected_image,
-      hasImageInFormData: !!editableWorksheet.form_data?.selectedImage
-    });
-    
-    let needsUpdate = false;
-    const updatedWorksheet = { ...editableWorksheet };
-    
-    // Reconstruct selectedAudio if NULL but audio_url exists
-    if (!updatedWorksheet.selected_audio && updatedWorksheet.audio_url) {
-      devLog('🎵 Reconstructing selectedAudio from database fields:', {
-        audio_url: updatedWorksheet.audio_url,
-        audio_transcript: updatedWorksheet.audio_transcript,
-        audio_duration: updatedWorksheet.audio_duration,
-        audio_voice: updatedWorksheet.audio_voice
-      });
-      updatedWorksheet.selected_audio = {
-        url: updatedWorksheet.audio_url,
-        ai_generated_audio_url: updatedWorksheet.audio_url,
-        transcript: updatedWorksheet.audio_transcript || null,
-        duration: updatedWorksheet.audio_duration || null,
-        voice: updatedWorksheet.audio_voice || null,
-        source: 'database-reconstructed'
-      };
-      needsUpdate = true;
-    }
-    
-    // Reconstruct selectedImage if NULL but form_data has selectedImage
-    if (!updatedWorksheet.selected_image && updatedWorksheet.form_data?.selectedImage) {
-      devLog('🖼️ Reconstructing selectedImage from form_data');
-      updatedWorksheet.selected_image = updatedWorksheet.form_data.selectedImage;
-      needsUpdate = true;
-    }
-    
-    if (needsUpdate) {
-      devLog('✅ Media reconstructed successfully, updating state');
-      setEditableWorksheet(updatedWorksheet);
-    } else {
-      devLog('✅ No media reconstruction needed');
-    }
-  }, [worksheetId, editableWorksheet?.audio_url, editableWorksheet?.selected_audio, editableWorksheet?.selected_image]); // Run when worksheet or media fields change
   
   // FAZA A: Sprawdź czy istnieją rysunki przy załadowaniu - NAPRAWIONE v2
   // CRITICAL: Uruchamiaj tylko przy zmianie worksheetId (nie viewMode!)
@@ -1002,18 +947,8 @@ export default function WorksheetDisplay({
         isDownloadUnlocked={isDownloadUnlocked}
         viewMode={viewMode}
         editableWorksheet={editableWorksheet}
-        selectedImage={inputParams?.selectedImage || editableWorksheet?.selected_image}
-        selectedAudio={(() => {
-          // Reconstruct selectedAudio from editableWorksheet
-          return (editableWorksheet?.audio_url)
-            ? {
-                url: editableWorksheet.audio_url || null,
-                ai_generated_audio_url: editableWorksheet.audio_url || null,
-                transcript: editableWorksheet.audio_transcript || null,
-                duration: editableWorksheet.audio_duration || null,
-              }
-            : (inputParams?.selectedAudio || editableWorksheet?.selected_audio || null);
-        })()}
+        selectedImage={lessonMedia.selectedImage}
+        selectedAudio={lessonMedia.selectedAudio}
         isPinned={isPinned}
         onTogglePin={() => setIsPinned(!isPinned)}
         isFullScreen={isFullScreen}
@@ -1037,7 +972,7 @@ export default function WorksheetDisplay({
             worksheetTitle={localTitle}
             onTitleChange={(newTitle) => {
               setLocalTitle(newTitle); // Immediate UI update
-              setEditableWorksheet((prev: any) => ({ ...prev, title: newTitle }));
+              handleUserEdit((prev: any) => ({ ...prev, title: newTitle }));
             }}
           />
           <InputParamsCard 
@@ -1131,7 +1066,9 @@ export default function WorksheetDisplay({
               editableWorksheet={editableWorksheet}
               isEditing={isEditing}
               viewMode={viewMode}
-              setEditableWorksheet={setEditableWorksheet}
+              setEditableWorksheet={handleUserEdit}
+              lessonMedia={lessonMedia}
+              answeredExerciseIndexes={answeredExerciseIndexes}
               worksheetId={worksheetId}
               onFeedbackSubmit={onFeedbackSubmit}
               isDownloadUnlocked={isDownloadUnlocked}
@@ -1267,19 +1204,8 @@ export default function WorksheetDisplay({
         preselectedStudent={studentId}
         worksheetFormData={inputParams}
         // PROBLEM 4.1: Include inputParams in media check for immediate detection after generation
-        worksheetHasPicture={!!(
-          selectedImage || 
-          editableWorksheet?.selected_image || 
-          editableWorksheet?.image_url ||
-          inputParams?.selectedImage
-        )}
-        worksheetHasAudio={!!(
-          selectedAudio || 
-          editableWorksheet?.selected_audio || 
-          editableWorksheet?.audio_url || 
-          audioUrl ||
-          inputParams?.selectedAudio
-        )}
+        worksheetHasPicture={lessonMedia.hasImage || !!editableWorksheet?.image_url}
+        worksheetHasAudio={lessonMedia.hasAudio}
       />
       
       {/* Add Exercise Modal - Live Session */}
@@ -1290,10 +1216,10 @@ export default function WorksheetDisplay({
         worksheetFormData={inputParams}
         currentExerciseCount={editableWorksheet?.exercises?.filter((ex: any) => !ex.deleted)?.length || 0}
         editableWorksheet={editableWorksheet}
-        setEditableWorksheet={setEditableWorksheet}
+        setEditableWorksheet={handleUserEdit}
         userId={userId || ''}
-        worksheetHasPicture={!!(selectedImage || editableWorksheet?.selected_image || inputParams?.selectedImage)}
-        worksheetHasAudio={!!(selectedAudio || editableWorksheet?.selected_audio || editableWorksheet?.audio_url || audioUrl || inputParams?.selectedAudio)}
+        worksheetHasPicture={lessonMedia.hasImage}
+        worksheetHasAudio={lessonMedia.hasAudio}
       />
       
       {/* Login Required Modal for anonymous users */}

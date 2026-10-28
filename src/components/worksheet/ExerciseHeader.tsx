@@ -19,6 +19,8 @@ interface ExerciseHeaderProps {
   canMoveDown?: boolean;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
+  /** Tooltip explaining why moving is refused. */
+  moveLockedReason?: string;
   onDelete?: () => void;
   // PROBLEM 5: Live Session Done button props
   viewMode?: "student" | "teacher" | "live-session";
@@ -64,6 +66,7 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
   canMoveDown = false,
   onMoveUp,
   onMoveDown,
+  moveLockedReason,
   onDelete,
   // PROBLEM 5: Live Session props
   viewMode,
@@ -154,7 +157,7 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
           disabled={!canMoveUp}
           data-no-pdf="true"
           className="text-white hover:bg-white/20 h-8 w-8 p-0 transition-colors"
-          title="Move up"
+          title={!canMoveUp && moveLockedReason ? moveLockedReason : "Move up"}
         >
           <ChevronUp className="h-4 w-4" />
         </Button>
@@ -168,7 +171,7 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
           disabled={!canMoveDown}
           data-no-pdf="true"
           className="text-white hover:bg-white/20 h-8 w-8 p-0 transition-colors"
-          title="Move down"
+          title={!canMoveDown && moveLockedReason ? moveLockedReason : "Move down"}
         >
           <ChevronDown className="h-4 w-4" />
         </Button>

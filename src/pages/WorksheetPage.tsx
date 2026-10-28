@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +18,7 @@ import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
 import { devLog } from '@/utils/logger';
 import { isValidUUID } from '@/utils/securityUtils';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
+import { resolveLessonMedia, withColumnTitle } from '@/lib/worksheetEditor/lessonMedia';
 
 // PROBLEM 3 FIX: Calculate source count deterministically based on worksheet parameters
 const calculateSourceCount = (formData: any): number => {
@@ -219,6 +220,10 @@ export default function WorksheetPage() {
           }
         }
 
+        // The title column is what a rename from a list changes; start the editor
+        // from it so a later real edit cannot write a stale JSON title back.
+        parsed = withColumnTitle(parsed, worksheet.title);
+
         setWorksheetData(worksheet);
         setParsedWorksheet(parsed);
         setEditableWorksheet(parsed);
@@ -269,6 +274,20 @@ export default function WorksheetPage() {
     }
   };
 
+  // Lesson media is derived from the row columns at read time (never injected
+  // into the editable JSON, which would look like a user edit to the autosave).
+  const lessonMedia = useMemo(
+    () =>
+      worksheetData
+        ? resolveLessonMedia({
+            columns: worksheetData,
+            formData: worksheetData.form_data,
+            worksheetJson: parsedWorksheet,
+          })
+        : null,
+    [worksheetData, parsedWorksheet],
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -316,9 +335,7 @@ export default function WorksheetPage() {
         userId={worksheetData.teacher_id}
         studentName={studentName}
         studentId={worksheetData.student_id}
-        selectedImage={worksheetData.selected_image}
-        selectedAudio={worksheetData.selected_audio}
-        audioUrl={worksheetData.audio_url}
+        lessonMedia={lessonMedia ?? undefined}
         tokenLeft={tokenLeft}
         // PROBLEM 5: Pass database title (not ai_response title) for proper sync after rename
         worksheetTitle={worksheetData.title}

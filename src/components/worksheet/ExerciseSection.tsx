@@ -63,6 +63,18 @@ import { useStudentEvents } from "@/hooks/dslm/useStudentEvents";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
 import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
 import { resolveAiEvaluations } from "@/utils/aiEvaluationMapper";
+import type { LessonMedia } from "@/lib/worksheetEditor/lessonMedia";
+import { isSubstantialExerciseEdit, REGENERATE_WARNING, SUBSTANTIAL_EDIT_WARNING } from "@/lib/worksheetEditor/answerProtection";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Helper: convert liveItemEvaluations array to Record<number, AiEvaluation> for exercise components
 const convertLiveEvalsToAiEvals = (items: any[] | undefined): Record<number, AiEvaluation> | undefined => {
@@ -181,11 +193,20 @@ interface ExerciseSectionProps {
   setEditableWorksheet: React.Dispatch<React.SetStateAction<any>>;
   worksheetId?: string;
   originalFormData?: any;
+  /** Lesson media derived from the worksheet row (columns first, then form_data, then JSON keys). */
+  lessonMedia?: LessonMedia;
   userId?: string;
   // Exercise management props
   totalExercises?: number;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
+  /** Whether a move is possible on the displayed order; derived from the position when omitted. */
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  /** Why moving is refused (shown as the button tooltip). */
+  moveLockedReason?: string;
+  /** Students already answered this exercise: regeneration and substantial edits need confirmation. */
+  hasAnswers?: boolean;
   onDeleteExercise?: () => void;
   // New collapse functionality
   isCollapsed?: boolean;
@@ -239,13 +260,18 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   isEditing,
   viewMode,
   editableWorksheet,
-  setEditableWorksheet,
+  setEditableWorksheet: setEditableWorksheetRaw,
   worksheetId,
   originalFormData,
+  lessonMedia,
   userId,
   totalExercises = 0,
   onMoveUp,
   onMoveDown,
+  canMoveUp,
+  canMoveDown,
+  moveLockedReason,
+  hasAnswers = false,
   onDeleteExercise,
   isCollapsed = false,
   onToggleCollapse,
@@ -789,6 +815,30 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   const exerciseNanoSkills = extractNanoSkillsFromExercise(exercise);
   // Use originalIndex for array operations, index for display
   const arrayIndex = originalIndex !== undefined ? originalIndex : index - 1;
+
+  // Answers are keyed by position: a substantial edit of an exercise that students already
+  // answered needs one explicit confirmation (then edits flow until the page is left).
+  const [pendingEdit, setPendingEdit] = useState<any>(null);
+  const editConfirmedRef = React.useRef(false);
+  const setEditableWorksheet: React.Dispatch<React.SetStateAction<any>> = (next) => {
+    if (!hasAnswers || editConfirmedRef.current) {
+      setEditableWorksheetRaw(next);
+      return;
+    }
+    const resolved = typeof next === 'function' ? next(editableWorksheet) : next;
+    const before = editableWorksheet?.exercises?.[arrayIndex];
+    const after = resolved?.exercises?.[arrayIndex];
+    if (isSubstantialExerciseEdit(before, after)) {
+      setPendingEdit(resolved);
+      return;
+    }
+    setEditableWorksheetRaw(resolved);
+  };
+  const confirmPendingEdit = () => {
+    editConfirmedRef.current = true;
+    setEditableWorksheetRaw(pendingEdit);
+    setPendingEdit(null);
+  };
   
   // Convert viewMode to exercise-compatible mode (live-session behaves like teacher view)
   const exerciseViewMode: "student" | "teacher" = viewMode === 'live-session' ? 'teacher' : viewMode;
@@ -826,10 +876,16 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   }
   
   // ✅ Check BOTH sources for selected image (Unsplash OR AI-generated)
-  const hasSelectedImage = originalFormData?.selectedImage || editableWorksheet?.selected_image;
+  const hasSelectedImage = lessonMedia
+    ? lessonMedia.selectedImage
+    : originalFormData?.selectedImage || editableWorksheet?.selected_image;
 
   // Calculate showImage: hide if hideExerciseMedia=true OR hasSelectedImage
   const showImage = !hideExerciseMedia && !hasSelectedImage;
+
+  // Regeneration takes long: it must apply to the worksheet as it is when the result arrives.
+  const latestWorksheetRef = React.useRef(editableWorksheet);
+  latestWorksheetRef.current = editableWorksheet;
 
   const handleRegenerateClick = () => {
     devLog('🔄 [REGENERATE] Opening modal:', { 
@@ -855,8 +911,9 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
       originalFormData,
       exercise,
       editableWorksheet,
-      setEditableWorksheet,
-      userId
+      setEditableWorksheetRaw,
+      userId,
+      { lessonMedia, getLatestWorksheet: () => latestWorksheetRef.current }
     );
   };
 
@@ -906,8 +963,9 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
           canRegenerate={!!(worksheetId && originalFormData && userId)}
           isRegenerating={isRegenerating}
           onRegenerateClick={handleRegenerateClick}
-          canMoveUp={index > 0}
-          canMoveDown={index < totalExercises - 1}
+          canMoveUp={canMoveUp ?? index > 1}
+          canMoveDown={canMoveDown ?? index < totalExercises}
+          moveLockedReason={moveLockedReason}
           onMoveUp={onMoveUp}
           onMoveDown={onMoveDown}
           onDelete={onDeleteExercise}
@@ -1915,7 +1973,22 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
         onGuidelinesChange={setGuidelines}
         exerciseType={exercise.type}
         exerciseTitle={exercise.title}
+        answersWarning={hasAnswers ? REGENERATE_WARNING : undefined}
       />
+
+      {/* Substantial edit of an exercise that students already answered */}
+      <AlertDialog open={pendingEdit !== null} onOpenChange={(open) => !open && setPendingEdit(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Edit an exercise with student answers?</AlertDialogTitle>
+            <AlertDialogDescription>{SUBSTANTIAL_EDIT_WARNING}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep as is</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmPendingEdit}>Edit anyway</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       {/* NanoSkill Mastery Evaluation Modal */}
       <NanoSkillMasteryModal
