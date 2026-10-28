@@ -946,7 +946,7 @@ export default function WorksheetForm({
                       </Select>
                       {selectedStudentId === 'no-student' && (
                         <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1 leading-tight">
-                          Pick a student to unlock personalized goals, level, and Next Steps.
+                          Pick a student to unlock level matching and Next Steps.
                         </p>
                       )}
                     </div>

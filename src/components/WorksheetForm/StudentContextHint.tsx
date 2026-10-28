@@ -25,7 +25,7 @@ export const StudentContextHint: React.FC<StudentContextHintProps> = ({ variant,
       <div className={`${base} ${amber}`}>
         <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
         <span>
-          Worksheets without a student are <strong>generic</strong>. Add your first student to unlock personalized goals, level matching, and AI Next Steps.
+          Worksheets without a student are <strong>generic</strong>. Add your first student to unlock level matching and AI Next Steps.
         </span>
       </div>
     );
@@ -36,7 +36,7 @@ export const StudentContextHint: React.FC<StudentContextHintProps> = ({ variant,
       <div className={`${base} ${amber}`}>
         <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
         <span>
-          You have students but none is selected. Pick one above to personalize the worksheet to their level, goals, and pacing.
+          You have students but none is selected. Pick one above to personalize the worksheet to their level and plan step.
         </span>
       </div>
     );

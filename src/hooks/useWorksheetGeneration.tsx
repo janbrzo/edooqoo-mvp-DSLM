@@ -735,7 +735,8 @@ export const useWorksheetGeneration = (
     devLog('⏱️ Generation time:', actualGenerationTime, 'seconds');
     
     worksheetState.setGenerationTime(actualGenerationTime);
-    worksheetState.setSourceCount(worksheetResult.sourceCount || Math.floor(Math.random() * (90 - 65) + 65));
+    // The server value is not a real source count, so nothing is shown for it.
+    worksheetState.setSourceCount(0);
     
     const expectedExerciseCount = getExpectedExerciseCount(data.lessonTime);
     devLog(`🎯 Expected ${expectedExerciseCount} exercises for ${data.lessonTime}`);
