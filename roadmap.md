@@ -2,6 +2,10 @@
 
 Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
+## Generation modal conversion
+
+- [ ] Remove the redundant left workflow block and deliver three concise visual slides per audience, safe new-tab signup/learner-plan links, eight-second hover/focus-paused rotation and regression verification.
+
 ## UX North Star
 
 Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
