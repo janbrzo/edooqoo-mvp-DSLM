@@ -60459,7 +60459,7 @@
       },
       {
         "name": "extract_micro_skill",
-        "migration": "supabase/migrations/20261028110000_extract_skill_category_fallbacks.sql"
+        "migration": "supabase/migrations/20261028111000_extract_skill_category_fallbacks.sql"
       },
       {
         "name": "extract_skill_category",
@@ -60467,7 +60467,7 @@
       },
       {
         "name": "extract_skill_category",
-        "migration": "supabase/migrations/20261028110000_extract_skill_category_fallbacks.sql"
+        "migration": "supabase/migrations/20261028111000_extract_skill_category_fallbacks.sql"
       },
       {
         "name": "generate_homework_share_token",
