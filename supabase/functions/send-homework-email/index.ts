@@ -97,7 +97,7 @@ serve(async (req: Request) => {
     
     const { data: homework, error: homeworkError } = await supabase
       .from("homework_assignments")
-      .select("*")
+      .select("id, teacher_id, student_id, source_worksheet_id, title, selected_exercises, share_token, deadline, reminder_sent_at, viewed_at, view_count, created_at, updated_at, completed_at, completed_by_teacher, reminder_hours, reminder_scheduled_at, reviewed_at, reviewed_by, attempt")
       .eq("id", homeworkId)
       .eq("teacher_id", user.id)
       .single();

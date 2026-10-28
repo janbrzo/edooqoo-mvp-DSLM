@@ -33,6 +33,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 import { hasStudentReturnedHomework, homeworkReviewPath, isHomeworkAwaitingReview } from '@/lib/homework/reviewState';
 import { markDoneOutcome, reopenHomework, type LifecycleResult } from '@/lib/homework/homeworkStateRpc';
+import { HOMEWORK_OWNER_VIEW_SELECT } from '@/lib/homework/homeworkColumns';
 
 interface StudentHomeworkTabProps {
   studentId: string;
@@ -88,7 +89,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
       const { data, error } = await supabase
         .from('homework_assignments')
         .select(`
-          *,
+          ${HOMEWORK_OWNER_VIEW_SELECT},
           students!inner(name, student_email)
         `)
         .eq('student_id', studentId)

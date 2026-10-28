@@ -33,6 +33,7 @@ import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useTeacherAuthRedirect } from "@/hooks/useTeacherAuthRedirect";
 import { useDemoContext } from "@/contexts/DemoContext";
+import { HOMEWORK_OWNER_VIEW_SELECT, type HomeworkOwnerRow } from '@/lib/homework/homeworkColumns';
 
 interface HomeworkData {
   id: string;
@@ -124,12 +125,12 @@ export default function HomeworkReviewPage() {
       const { data: homeworkData, error: homeworkError } = await supabase
         .from('homework_assignments')
         .select(`
-          *,
+          ${HOMEWORK_OWNER_VIEW_SELECT},
           students(name, student_email, english_level)
         `)
         .eq('id', id)
         .eq('teacher_id', user.id)
-        .single();
+        .single<HomeworkOwnerRow & { students: { name: string; student_email: string | null; english_level: string | null } | null }>();
 
       if (homeworkError) throw homeworkError;
 

@@ -53517,6 +53517,7 @@
             "src/hooks/useOnboardingProgress.tsx",
             "src/hooks/useStudentAttentionDots.tsx",
             "src/hooks/useStudentTimelineSources.ts",
+            "src/lib/homework/__tests__/homeworkColumns.test.ts",
             "src/pages/HomeworkPage.tsx",
             "src/pages/HomeworkReviewPage.tsx"
           ],
