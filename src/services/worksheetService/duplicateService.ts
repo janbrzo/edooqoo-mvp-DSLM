@@ -1,8 +1,91 @@
 import { supabase } from '@/integrations/supabase/client';
-import { devLog } from '@/utils/logger';
+import { devLog, devWarn } from '@/utils/logger';
 
 /**
- * Duplicates a worksheet - creates a 1:1 copy with a new student assignment
+ * Columns copied from the original. The list is explicit on purpose: a
+ * `select('*')` spread also copied `public_slug` (unique, so duplicating any
+ * published worksheet failed with a 409), `is_public`, share and view counters.
+ * Publication, sharing, soft-delete and analytics columns are never copied.
+ */
+export const DUPLICATE_SOURCE_COLUMNS = [
+  'title',
+  'ai_response',
+  'html_content',
+  'prompt',
+  'form_data',
+  'generation_time_seconds',
+  'selected_image',
+  'selected_audio',
+  'audio_url',
+  'audio_transcript',
+  'audio_duration',
+  'audio_voice',
+  'media_metadata',
+  'teacher_email',
+  'user_id',
+] as const;
+
+type SourceRow = Record<(typeof DUPLICATE_SOURCE_COLUMNS)[number], unknown>;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** `form_data` of the copy: same inputs, but not the original's generation id (recovery looks rows up by it). */
+function copyFormData(formData: unknown): unknown {
+  if (!isRecord(formData)) return formData;
+  const { clientGenerationId: _omitted, ...rest } = formData;
+  void _omitted;
+  return rest;
+}
+
+/**
+ * Insert payload of a duplicate: explicit columns only, a private unshared copy
+ * owned by the teacher, with the publication state reset.
+ */
+export function buildDuplicatePayload(
+  original: Partial<SourceRow>,
+  newStudentId: string | null,
+  userId: string,
+): Record<string, unknown> {
+  const copied: Record<string, unknown> = {};
+  for (const column of DUPLICATE_SOURCE_COLUMNS) {
+    if (original[column] !== undefined) copied[column] = original[column];
+  }
+
+  return {
+    ...copied,
+    form_data: copyFormData(original.form_data),
+    student_id: newStudentId,
+    teacher_id: userId,
+    status: 'copy',
+    download_count: 0,
+    is_public: false,
+    public_slug: null,
+    published_at: null,
+    public_view_count: 0,
+    deleted_at: null,
+    share_token: null,
+    share_expires_at: null,
+    share_recipient_email: null,
+    last_shared_at: null,
+  };
+}
+
+const FRIENDLY_FAILURE = 'We could not duplicate this worksheet. Please try again in a moment.';
+
+/** Maps a database error to a message a teacher can act on, without raw SQL text. */
+export function friendlyDuplicateError(error: { code?: string; message?: string } | null | undefined): string {
+  if (error?.code === '23505') {
+    return 'This worksheet could not be copied because a unique value clashed. Please try again.';
+  }
+  if (error?.code === '42501') {
+    return 'You do not have permission to duplicate this worksheet.';
+  }
+  return FRIENDLY_FAILURE;
+}
+
+/**
+ * Duplicates a worksheet - creates a private copy with a new student assignment
  */
 export async function duplicateWorksheetAPI(
   originalWorksheetId: string,
@@ -10,74 +93,46 @@ export async function duplicateWorksheetAPI(
   userId: string
 ): Promise<{ success: boolean; worksheetId?: string; error?: string }> {
   try {
-    devLog('🔄 Duplicating worksheet:', { originalWorksheetId, newStudentId, userId });
-    
-    // 1. Fetch the original worksheet
+    devLog('Duplicating worksheet:', { originalWorksheetId, newStudentId });
+
     const { data: original, error: fetchError } = await supabase
       .from('worksheets')
-      .select('*')
+      .select(DUPLICATE_SOURCE_COLUMNS.join(', '))
       .eq('id', originalWorksheetId)
       .eq('teacher_id', userId)
+      .is('deleted_at', null)
       .maybeSingle();
-    
+
     if (fetchError) {
-      console.error('❌ Error fetching original worksheet:', fetchError);
-      return { success: false, error: `Failed to fetch worksheet: ${fetchError.message}` };
+      devWarn('Duplicate: could not fetch original worksheet', fetchError.message);
+      return { success: false, error: friendlyDuplicateError(fetchError) };
     }
-    
+
     if (!original) {
-      console.error('❌ Worksheet not found:', originalWorksheetId);
       return { success: false, error: 'Worksheet not found or access denied' };
     }
-    
-    // 2. Prepare duplicate data - remove id, timestamps, update student_id
-    const { 
-      id, 
-      created_at, 
-      last_modified_at, 
-      sequence_number, 
-      ...worksheetData 
-    } = original;
-    
-    const duplicateData = {
-      ...worksheetData,
-      student_id: newStudentId,
-      teacher_id: userId,
-      title: original.title,
-      status: 'copy',
-      // Reset download count and share token for the copy
-      download_count: 0,
-      share_token: null
-    };
-    
-    devLog('📝 Duplicate data prepared:', { 
-      originalTitle: original.title,
-      newTitle: duplicateData.title,
-      newStudentId
-    });
-    
-    // 3. Insert the duplicate
+
+    const duplicateData = buildDuplicatePayload(original as unknown as Partial<SourceRow>, newStudentId, userId);
+
     const { data: newWorksheet, error: insertError } = await supabase
       .from('worksheets')
-      .insert(duplicateData)
-      .select('id, title, student_id, created_at')
+      .insert(duplicateData as never)
+      .select('id')
       .maybeSingle();
-    
+
     if (insertError) {
-      console.error('❌ Error inserting duplicate worksheet:', insertError);
-      return { success: false, error: `Failed to create duplicate: ${insertError.message}` };
+      devWarn('Duplicate: insert failed', insertError.code, insertError.message);
+      return { success: false, error: friendlyDuplicateError(insertError) };
     }
-    
+
     if (!newWorksheet) {
-      console.error('❌ Insert returned no data');
-      return { success: false, error: 'Failed to create duplicate worksheet' };
+      return { success: false, error: FRIENDLY_FAILURE };
     }
-    
-    devLog('✅ Worksheet duplicated successfully:', newWorksheet);
+
+    devLog('Worksheet duplicated:', newWorksheet.id);
     return { success: true, worksheetId: newWorksheet.id };
-    
-  } catch (error: any) {
-    console.error('💥 Duplicate worksheet error:', error);
-    return { success: false, error: error.message || 'An unexpected error occurred' };
+  } catch (error) {
+    devWarn('Duplicate worksheet error', error);
+    return { success: false, error: FRIENDLY_FAILURE };
   }
 }
