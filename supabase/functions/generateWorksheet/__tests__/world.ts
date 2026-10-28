@@ -303,7 +303,10 @@ export const modules = {
 function formatLogArg(arg: unknown): string {
   const text = typeof arg === 'string' ? arg : inspect(arg, { depth: 8, breakLength: Infinity });
   // Stack traces carry file paths and line numbers that change with any edit.
-  return text.replace(/\n\s+at [^\n]*/g, '\n    at <stack>');
+  // Stacks appear both as real lines and as escaped "\n    at ..." inside inspected objects.
+  return text
+    .replace(/\n\s+at [^\n]*/g, '\n    at <stack>')
+    .replace(/\\n\s+at [^'"]*?(?=\\n|['"]|$)/g, '\\n    at <stack>');
 }
 
 export function installWorld() {
