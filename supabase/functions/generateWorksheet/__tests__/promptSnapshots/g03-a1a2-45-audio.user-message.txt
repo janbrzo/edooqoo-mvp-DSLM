@@ -1,0 +1,18 @@
+lessonTopic: Small talk before a video call
+lessonGoal: Greet colleagues and ask simple questions about the weekend
+englishLevel: A1/A2
+languageStyle: 4/5 (formal - professional tone)
+selectedExercises: listening-comprehension, reading, true-false, matching, fill-in-blanks, discussion
+
+LANGUAGE STYLE GUIDELINES (4/5):
+- Use formal, professional language with proper grammar and structure
+- Prefer full forms over contractions (I am, you are, cannot, will not)
+- Use sophisticated vocabulary and well-constructed sentences
+- Examples: "How are you today?", "That is excellent!", "I would be delighted to", "Shall we arrange a meeting?", "It is quite remarkable"
+
+CEFR LEVEL GUIDELINES (A1/A2):
+- Use simple, basic vocabulary and elementary grammatical structures appropriate for beginners
+- Focus on everyday topics, common situations, and concrete subjects (family, food, weather, hobbies)
+- Keep sentences short and straightforward with present simple, present continuous, and basic past tense
+- Avoid complex clauses, abstract concepts, and advanced vocabulary
+- Examples: "I like pizza", "She is working now", "We went to the park yesterday"

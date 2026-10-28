@@ -1,0 +1,19 @@
+lessonTopic: Describing a team meeting and giving feedback
+lessonGoal: Describe a scene and give polite feedback
+englishLevel: B1/B2
+languageStyle: 5/5 (very formal - academic style)
+selectedExercises: describe-picture, answer-questions-picture, true-false-picture, reading, matching, discussion
+
+LANGUAGE STYLE GUIDELINES (5/5):
+- Use very formal, academic language with sophisticated vocabulary and complex structures
+- Strictly avoid contractions and maintain formal grammatical constructions throughout
+- Employ elevated vocabulary, complex sentence structures, and academic tone
+- Use precise, scholarly language and formal expressions
+- Examples: "How do you do?", "That is most exceptional!", "I would be most honored to", "Shall we schedule a formal appointment?", "It is extraordinarily fascinating"
+
+CEFR LEVEL GUIDELINES (B1/B2):
+- Use intermediate vocabulary with more varied grammatical structures including conditionals and perfect tenses
+- Include topics related to work, travel, personal experiences, opinions, and abstract ideas
+- Use compound and some complex sentences with relative clauses and linking words
+- Introduce phrasal verbs, idiomatic expressions, and more nuanced vocabulary
+- Examples: "If I had known, I would have come earlier", "I've been learning English for five years", "Although it was raining, we decided to go out"
