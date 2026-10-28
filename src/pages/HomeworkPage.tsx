@@ -12,7 +12,7 @@ import { useInteractiveHomework } from "@/hooks/useInteractiveHomework";
 import { fetchHomeworkState } from '@/lib/homework/homeworkStateRpc';
 import { fetchHomeworkExercises, hasHomeworkExercises } from '@/lib/homework/exercisesRpc';
 import { fetchStudentReview, type StudentReview } from '@/lib/homework/reviewForStudent';
-import { TeacherVerdictsContext } from '@/lib/answers/teacherVerdicts';
+import { TeacherVerdictsContext, withoutDecidedEvaluations } from '@/lib/answers/teacherVerdicts';
 import { StudentEmailVerification } from "@/components/homework/StudentEmailVerification";
 import { HomeworkProgressBar } from "@/components/homework/HomeworkProgressBar";
 import { StudyModeButton } from "@/components/shared/StudyModeButton";
@@ -839,7 +839,7 @@ export default function HomeworkPage() {
                 showCorrectAnswers={isTeacher || showCorrectAnswersToStudent}
                 disabled={finalIsSubmitted && !isTeacher}
                 viewMode={isTeacher ? "teacher" : "student"}
-                aiEvaluation={aiEvaluations[index]}
+                aiEvaluation={withoutDecidedEvaluations(aiEvaluations[index], studentReview?.verdicts[index])}
                 isWaitingForAiEval={isWaitingForAiEval}
                 audioAnswers={audioAnswers[index]}
                 onAudioAnswerChange={

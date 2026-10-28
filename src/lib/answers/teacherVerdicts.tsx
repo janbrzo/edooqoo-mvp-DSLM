@@ -21,3 +21,13 @@ export function applyTeacherVerdict<V extends MatchVerdict | string>(
   const decided = verdicts[questionIndex];
   return verdict === 'review' && decided ? decided : verdict;
 }
+
+/** AI feedback of the questions the teacher decided is dropped: it would contradict the decision. */
+export function withoutDecidedEvaluations<T>(
+  evaluations: Record<number, T> | undefined, verdicts: TeacherVerdicts | undefined,
+): Record<number, T> | undefined {
+  if (!evaluations || !verdicts) return evaluations;
+  return Object.fromEntries(
+    Object.entries(evaluations).filter(([q]) => !(Number(q) in verdicts)),
+  ) as Record<number, T>;
+}
