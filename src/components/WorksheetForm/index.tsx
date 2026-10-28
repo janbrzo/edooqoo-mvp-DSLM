@@ -56,6 +56,11 @@ interface ExtendedWorksheetFormProps extends WorksheetFormProps {
   /** Stable userId (resolved by parent FormView). Used as persistence key. */
   userId?: string | null;
 }
+const MODE_HINTS: Record<ExerciseSelectionMode, string> = {
+  manual: 'Manual: choose the exercises yourself.',
+  random: 'Random: a random set of exercises.',
+  smart: 'Smart: AI picks exercises and V/G focus from your inputs.',
+};
 export default function WorksheetForm({
   onSubmit,
   onStudentChange,
@@ -630,7 +635,24 @@ export default function WorksheetForm({
     }
     submitForm(effectiveTopic);
   };
+  // The generation hook guards against a second run, but the form side effects
+  // (analytics, toasts, draft save) ran twice on a double click. Lock the
+  // button from submit until the job registry shows nothing running.
+  const [submitting, setSubmitting] = useState(false);
+  const submittedAtRef = useRef(0);
+  useEffect(() => {
+    if (!submitting) return;
+    const id = window.setInterval(() => {
+      const settled = Date.now() - submittedAtRef.current > 1500
+        && getActiveGenerationJobs().every(job => job.status !== 'running');
+      if (settled) setSubmitting(false);
+    }, 500);
+    return () => window.clearInterval(id);
+  }, [submitting]);
   const submitForm = (topicOverride?: string) => {
+    if (submitting) return;
+    submittedAtRef.current = Date.now();
+    setSubmitting(true);
     const effectiveTopic = (topicOverride || lessonTopic).trim();
     // One builder shared with the auto-generate bootstrap: trims every field,
     // trims/pads the exercise list to 6 (45 min) or 8 (60 min) deterministically
@@ -1188,7 +1210,7 @@ export default function WorksheetForm({
                         }} className={`relative flex items-center justify-center gap-1 px-2 py-1 rounded-lg border transition-all text-center group ${selectionMode === 'manual' ? 'border-worksheet-purple bg-worksheet-purple text-white' : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}`}>
                             <MousePointer className="h-3 w-3" />
                             <span className="text-xs font-medium">Manual</span>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-foreground text-background text-xs rounded hidden md:group-hover:block z-10 w-max max-w-[14rem]">
                               Choose exercises manually
                             </div>
                           </button>
@@ -1199,7 +1221,7 @@ export default function WorksheetForm({
                         }} className={`relative flex items-center justify-center gap-1 px-2 py-1 rounded-lg border transition-all text-center group ${selectionMode === 'random' ? 'border-worksheet-purple bg-worksheet-purple text-white' : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}`}>
                             <Shuffle className="h-3 w-3" />
                             <span className="text-xs font-medium">Random</span>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-foreground text-background text-xs rounded hidden md:group-hover:block z-10 w-max max-w-[14rem]">
                               Random exercise selection
                             </div>
                           </button>
@@ -1212,11 +1234,16 @@ export default function WorksheetForm({
                           >
                             <Brain className={`h-3 w-3 ${smartLoading ? 'animate-pulse' : ''}`} />
                             <span className="text-xs font-medium">{smartLoading ? 'Thinking…' : 'Smart'}</span>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-foreground text-background text-xs rounded hidden md:group-hover:block z-10 w-max max-w-[14rem]">
                               AI picks exercises + V/G focus from your inputs
                             </div>
                           </button>
                         </div>
+                        {isMobile && (
+                          <p className="text-xs text-muted-foreground text-center" aria-live="polite">
+                            {MODE_HINTS[selectionMode]}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Card>
@@ -1276,8 +1303,8 @@ export default function WorksheetForm({
                     <Eraser className="h-4 w-4 mr-1" /> Clear form
                   </Button>
                 </div>
-                <Button type="submit" className={`bg-worksheet-purple hover:bg-worksheet-purpleDark ${isMobile ? 'w-full' : ''}`} size={isMobile ? "sm" : "default"}>
-                  Generate Custom Worksheet
+                <Button type="submit" disabled={submitting} className={`bg-worksheet-purple hover:bg-worksheet-purpleDark ${isMobile ? 'w-full' : ''}`} size={isMobile ? "sm" : "default"}>
+                  {submitting ? 'Starting...' : 'Generate Custom Worksheet'}
                 </Button>
               </div>
             </div>

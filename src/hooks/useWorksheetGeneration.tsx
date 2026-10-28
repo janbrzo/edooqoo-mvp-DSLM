@@ -222,7 +222,7 @@ export const useWorksheetGeneration = (
       try {
         if (activeJobId) failGenerationJob(activeJobId, message, { allowRecovery: false });
         else failGenerationJob(message, undefined, { allowRecovery: false });
-        const reqId = (data as any).__autoGenerateRequestId;
+        const reqId = data.__autoGenerateRequestId;
         if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
       } catch { /* ignore */ }
       toast({
@@ -582,7 +582,7 @@ export const useWorksheetGeneration = (
         const failureMessage = `Worksheet generation failed: ${errorMessage}`.slice(0, 300);
         if (activeJobId) failGenerationJob(activeJobId, failureMessage, { allowRecovery: streamingStarted });
         else failGenerationJob(failureMessage, undefined, { allowRecovery: streamingStarted });
-        const reqId = (data as any).__autoGenerateRequestId;
+        const reqId = data.__autoGenerateRequestId;
         if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
       } catch { /* ignore */ }
       const isNetworkError = errorMessage.includes('Failed to fetch') || 
