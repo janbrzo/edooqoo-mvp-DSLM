@@ -10,7 +10,8 @@ import { ItemEvaluation, OPEN_ENDED_EXERCISE_TYPES } from '@/utils/masteryCalcul
 import { devLog, devWarn } from '@/utils/logger';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { questionIndicesOf, hasAnswerForQuestion } from '@/lib/answers/answerKeys';
-import { callStudentAnswerRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
+import { callStudentAnswerRpc, submitHomeworkAnswers, studentAnswerRpcName } from '@/lib/answers/studentAnswerRpc';
+import { buildKeepaliveSaveRequest } from '@/lib/homework/keepaliveSave';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 import { buildHomeworkDelta, parseAiEvaluations } from '@/lib/homework/deltaSave';
 import { isHomeworkClosedError } from '@/lib/homework/homeworkStateRpc';
@@ -235,17 +236,20 @@ export const useInteractiveHomework = ({
    * runs (also on every retry), so a debounced, blurred or retried save always sends the
    * newest value of exactly the keys this tab changed.
    */
+  /** What exercise `exerciseIndex` still has to send: only the keys changed since the last confirmed save. */
+  const deltaFor = useCallback((exerciseIndex: number, exerciseType: string) => buildHomeworkDelta({
+    exerciseData: { ...exercises[exerciseIndex], worksheetId: sourceWorksheetId || homeworkId },
+    exerciseType,
+    answers: (answersRef.current[exerciseIndex] || {}) as Record<string, any>,
+    audio: audioAnswersRef.current[exerciseIndex] || {},
+    dirtyKeys: dirtyKeysRef.current[exerciseIndex] ?? [],
+    dirtyAudio: dirtyAudioRef.current[exerciseIndex] ?? [],
+  }), [exercises, sourceWorksheetId, homeworkId]);
+
   const runSave = useCallback(async (exerciseIndex: number, exerciseType: string): Promise<boolean> => {
     const dirty = dirtyKeysRef.current[exerciseIndex];
     const dirtyAudio = dirtyAudioRef.current[exerciseIndex];
-    const delta = buildHomeworkDelta({
-      exerciseData: { ...exercises[exerciseIndex], worksheetId: sourceWorksheetId || homeworkId },
-      exerciseType,
-      answers: (answersRef.current[exerciseIndex] || {}) as Record<string, any>,
-      audio: audioAnswersRef.current[exerciseIndex] || {},
-      dirtyKeys: dirty ?? [],
-      dirtyAudio: dirtyAudio ?? [],
-    });
+    const delta = deltaFor(exerciseIndex, exerciseType);
     if (!delta) {
       pendingSavesRef.current.delete(exerciseIndex);
       if (pendingSavesRef.current.size === 0) setIsSaving(false);
@@ -261,7 +265,7 @@ export const useInteractiveHomework = ({
       for (const q of delta.audioKeys) if (sentAudio?.[q] === delta.audio?.[q]) dirtyAudio?.delete(q);
     }
     return ok;
-  }, [exercises, sourceWorksheetId, homeworkId, saveAnswer]);
+  }, [deltaFor, saveAnswer]);
 
   const updateAnswer = useCallback((
     exerciseIndex: number, 
@@ -496,6 +500,42 @@ export const useInteractiveHomework = ({
       void queue.flush();
     };
   }, []);
+
+  // Closing the tab or reloading inside the 1.5 s debounce (or a retry window) must not lose the
+  // changed keys: send them with a keepalive request, which outlives the page. beforeunload and
+  // pagehide both fire on a close, so it is sent once.
+  const lastUnloadWriteRef = useRef(0);
+  useEffect(() => {
+    if (readOnly || !shareToken || !studentEmail) return;
+    const sendPending = () => {
+      if (isSubmitted || isLocked || Date.now() - lastUnloadWriteRef.current < 3000) return;
+      lastUnloadWriteRef.current = Date.now();
+      for (const exerciseIndex of pendingSavesQueueRef.current.pendingIndices()) {
+        const exerciseType = exercises[exerciseIndex]?.type || exercises[exerciseIndex]?.exercise_type || '';
+        const delta = deltaFor(exerciseIndex, exerciseType);
+        if (!delta) continue;
+        const request = buildKeepaliveSaveRequest(studentAnswerRpcName('save_homework_answer', shareToken), {
+          p_share_token: shareToken,
+          p_homework_id: homeworkId,
+          p_student_email: studentEmail,
+          p_exercise_index: exerciseIndex,
+          p_exercise_type: exerciseType,
+          p_answers: delta.answers,
+          p_time_spent_ms: getActiveTimeMs(exerciseIndex),
+          p_mastery: delta.mastery ?? null,
+          p_item_evaluations: delta.itemEvaluations,
+          p_audio_answers: delta.audio,
+        });
+        if (request) fetch(request.url, request.init).catch(() => {});
+      }
+    };
+    window.addEventListener('beforeunload', sendPending);
+    window.addEventListener('pagehide', sendPending);
+    return () => {
+      window.removeEventListener('beforeunload', sendPending);
+      window.removeEventListener('pagehide', sendPending);
+    };
+  }, [readOnly, shareToken, studentEmail, isSubmitted, isLocked, exercises, homeworkId, deltaFor, getActiveTimeMs]);
 
   const updateAudioAnswer = useCallback((exerciseIndex: number, questionIndex: number, audioUrl: string) => {
     if (readOnly || isSubmitted) return;
