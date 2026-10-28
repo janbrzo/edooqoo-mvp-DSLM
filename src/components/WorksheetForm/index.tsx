@@ -17,6 +17,8 @@ import { useStudents } from "@/hooks/useStudents";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
+import { buildWorksheetRequest, getExerciseTarget } from "@/lib/worksheet/buildWorksheetRequest";
+import { getActiveGenerationJobs } from "@/lib/worksheet/generationJobRegistry";
 import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
 import type { AppliedEvidenceSource } from '@/lib/dslm/recommendationEvidenceView';
 import { StudentContextHint } from "./StudentContextHint";
@@ -527,78 +529,51 @@ export default function WorksheetForm({
     submitForm(effectiveTopic);
   };
   const submitForm = (topicOverride?: string) => {
-    const effectiveTopic = topicOverride || lessonTopic;
-    // PROBLEM 2: Media-aware exercise auto-complete
-    const PICTURE_COMPATIBLE_EXERCISES = ['describe-picture', 'answer-questions-picture', 'true-false-picture', 'multiple-choice-picture'];
-    const AUDIO_COMPATIBLE_EXERCISES = ['listening-comprehension', 'answer-questions-audio', 'true-false-audio', 'multiple-choice-audio', 'fill-in-blanks-audio'];
-    // sentence-transformation is currently disabled, never auto-pick it.
-    const GENERAL_EXERCISES = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'multiple-choice', 'dialogue', 'discussion', 'error-correction', 'odd-one-out', 'synonyms', 'antonyms', 'word-order', 'gap-text', 'negative-prefixes', 'categorize', 'paraphrasing', 'complete-word', 'matching-halves'];
-    
-    const isPictureMode = selectedMediaTypes.includes('picture');
-    const isAudioMode = selectedMediaTypes.includes('audio');
-    
-    // Auto-complete exercises if not enough are selected in manual mode
-    const maxExercises = lessonTime === '45min' ? 6 : 8;
-    let finalExercises = [...selectedExercises];
-    if (!finalExercises || finalExercises.length < maxExercises) {
-      devLog(`🔧 [WORKSHEET-FORM] Auto-completing exercises: ${finalExercises.length} < ${maxExercises}`);
-      devLog(`🔧 [WORKSHEET-FORM] Media mode: picture=${isPictureMode}, audio=${isAudioMode}`);
-
-      // PROBLEM 2.2/2.3: Filter available exercises by media type
-      const unusedExercises = GENERAL_EXERCISES.filter(ex => {
-        if (finalExercises.includes(ex)) return false;
-        // Don't add picture exercises if not in picture mode
-        if (!isPictureMode && PICTURE_COMPATIBLE_EXERCISES.includes(ex)) return false;
-        // Don't add audio exercises if not in audio mode
-        if (!isAudioMode && AUDIO_COMPATIBLE_EXERCISES.includes(ex)) return false;
-        return true;
-      });
-
-      // Add random exercises to reach the target count
-      const remainingSlots = maxExercises - finalExercises.length;
-      const shuffledUnused = [...unusedExercises].sort(() => Math.random() - 0.5);
-      const autoSelected = shuffledUnused.slice(0, remainingSlots);
-      finalExercises = [...finalExercises, ...autoSelected];
-      devLog(`🔧 [WORKSHEET-FORM] Auto-completed exercises (media-filtered):`, finalExercises);
-
-      // Update the form state
-      setSelectedExercises(finalExercises);
-
-      // Notify user about auto-completion
-      if (autoSelected.length > 0) {
-        toast({
-          title: "Exercises auto-completed",
-          description: `Added ${autoSelected.length} additional exercise(s) to reach ${maxExercises} total exercises.`,
-          variant: "default"
-        });
-      }
-    }
-    trackEvent({
-      eventType: 'form_submit',
-      eventData: {
-        lessonTime,
-        lessonTopic: effectiveTopic,
-        lessonGoal,
-        grammarFocus,
-        additionalInformation,
-        englishLevel,
-        languageStyle,
-        timestamp: new Date().toISOString()
-      }
-    });
-    const formData = {
+    const effectiveTopic = (topicOverride || lessonTopic).trim();
+    // One builder shared with the auto-generate bootstrap: trims every field,
+    // trims/pads the exercise list to 6 (45 min) or 8 (60 min) deterministically
+    // and keeps a single media family.
+    const { request: built, autoCompletedCount } = buildWorksheetRequest({
       lessonTime,
       lessonTopic: effectiveTopic,
       lessonGoal,
-      teachingPreferences: grammarFocus,
+      grammarFocus,
       additionalInformation,
       englishLevel,
       languageStyle,
       studentId: selectedStudentId === "no-student" ? undefined : selectedStudentId || undefined,
-      selectedExercises: finalExercises,
+      selectedExercises,
       selectedMediaTypes,
-      exerciseFocusMap: Object.keys(exerciseFocusMap).length > 0 ? exerciseFocusMap : undefined,
-      selectedImage: selectedImage,
+      exerciseFocusMap,
+      selectedImage,
+    });
+    const finalExercises = built.selectedExercises || [];
+    if (autoCompletedCount > 0) {
+      devLog(`🔧 [WORKSHEET-FORM] Auto-completed ${autoCompletedCount} exercise(s)`, finalExercises);
+      setSelectedExercises(finalExercises);
+      toast({
+        title: "Exercises auto-completed",
+        description: `Added ${autoCompletedCount} additional exercise(s) to reach ${getExerciseTarget(lessonTime)} total exercises.`,
+        variant: "default"
+      });
+    }
+    // Lengths and flags only: free text typed by the teacher is not analytics.
+    trackEvent({
+      eventType: 'form_submit',
+      eventData: {
+        lessonTime,
+        lessonTopicLength: built.lessonTopic.length,
+        hasLessonGoal: built.lessonGoal.length > 0,
+        hasGrammarFocus: built.teachingPreferences.length > 0,
+        hasAdditionalInformation: !!built.additionalInformation,
+        englishLevel,
+        languageStyle,
+        exerciseCount: finalExercises.length,
+        timestamp: new Date().toISOString()
+      }
+    });
+    const formData = {
+      ...built,
       // v6.9.45: flag any submit that originated from the DSLM auto-generate intent
       // so Index.tsx can queue the request until tokens/profile are ready instead of
       // silently dropping it after 2 short retries.
@@ -640,8 +615,8 @@ export default function WorksheetForm({
         englishLevel,
         languageStyle,
         selectedExercises: finalExercises,
-        selectedMediaTypes,
-        exerciseFocusMap,
+        selectedMediaTypes: built.selectedMediaTypes,
+        exerciseFocusMap: built.exerciseFocusMap || {},
         selectionMode,
         selectedStudentId:
           selectedStudentId && selectedStudentId !== 'no-student'
@@ -652,6 +627,21 @@ export default function WorksheetForm({
       devWarn('[WorksheetForm] saveDraftNow before submit failed', e);
     }
     onSubmit(formData);
+  };
+  // Switching 60 -> 45 min trims the selection at once (even when the Exercise
+  // tab is closed), so the form never keeps 8 exercises for a 45 min lesson.
+  const changeLessonTime = (next: LessonTime) => {
+    setLessonTime(next);
+    if (next === lessonTime) return;
+    const norm = normalizeSuggestionPrefill({
+      exercises: selectedExercises,
+      focusMap: exerciseFocusMap,
+      mediaTypes: selectedMediaTypes,
+      lessonTime: next,
+    });
+    setSelectedExercises(norm.selectedExercises);
+    setSelectedMediaTypes(norm.selectedMediaTypes as MediaType[]);
+    setExerciseFocusMap(norm.exerciseFocusMap);
   };
   const refreshSuggestions = () => {
     setCurrentPlaceholders(getRandomPlaceholderSet());
@@ -819,10 +809,10 @@ export default function WorksheetForm({
                 <div className={`flex ${isMobile ? 'flex-col gap-3' : 'gap-14'}`}>
                   <div className={`flex flex-col ${isMobile ? 'items-center' : 'items-start'}`}>
                     <div className={`flex gap-2 ${isMobile ? 'justify-center' : 'w-32'}`}>
-                      <Button type="button" variant={lessonTime === "45min" ? "default" : "outline"} onClick={() => setLessonTime("45min")} className={lessonTime === "45min" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={lessonTime === "45min" ? "default" : "outline"} onClick={() => changeLessonTime("45min")} className={lessonTime === "45min" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         45 min
                       </Button>
-                      <Button type="button" variant={lessonTime === "60min" ? "default" : "outline"} onClick={() => setLessonTime("60min")} className={lessonTime === "60min" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
+                      <Button type="button" variant={lessonTime === "60min" ? "default" : "outline"} onClick={() => changeLessonTime("60min")} className={lessonTime === "60min" ? "bg-worksheet-purple hover:bg-worksheet-purpleDark" : ""} size={isMobile ? "sm" : "sm"}>
                         60 min
                       </Button>
                     </div>
