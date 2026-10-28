@@ -7,6 +7,7 @@ import { DEFAULT_ENGLISH_LEVEL, resolveEnglishLevel } from "../_shared/englishLe
 import { resolveCaller } from "../_shared/auth.ts";
 import { hasWorksheetStudentAccess, homeworkIdForStudentAccess, userOwnsHomework, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
 import { hasValidCronSecret } from "../_shared/cronAuth.ts";
+import { loadWorksheetJson, resolveAudioTranscript } from "../_shared/worksheetContent.ts";
 import { buildOpenAnswerContext, openExerciseContextString, openExerciseItems } from "../_shared/openAnswerContext.ts";
 import { buildOpenItemEvaluations, buildQuestionEvaluations } from "./itemBuilder.ts";
 import { processHomeworkAiEvaluations, processSubmittedHomework } from "./homeworkEval.ts";
@@ -694,15 +695,13 @@ async function autoQueueForCreateHomework(
     try {
       const { data: worksheet, error: worksheetError } = await supabase
         .from('worksheets')
-        .select('ai_response')
+        .select('id, ai_response, html_content')
         .eq('id', worksheetId)
         .single();
       if (worksheetError) throw worksheetError;
       
-      if (worksheet?.ai_response) {
-        const parsed = typeof worksheet.ai_response === 'string' 
-          ? JSON.parse(worksheet.ai_response) 
-          : worksheet.ai_response;
+      if (worksheet?.ai_response || worksheet?.html_content) {
+        const parsed = loadWorksheetJson(worksheet).data;
         const exercises = parsed?.exercises || [];
         const exercise = exercises[answer.exercise_index];
         if (exercise) {
@@ -937,10 +936,15 @@ async function loadWorksheetSource(
   supabase: any, worksheetId: string, exerciseIndex: number,
 ): Promise<{ exercise: any | null; audioTranscript: string | null }> {
   try {
-    const { data: worksheet } = await supabase.from('worksheets').select('ai_response').eq('id', worksheetId).single();
-    if (!worksheet?.ai_response) return { exercise: null, audioTranscript: null };
-    const parsed = typeof worksheet.ai_response === 'string' ? JSON.parse(worksheet.ai_response) : worksheet.ai_response;
-    const transcript = typeof parsed?.audio_transcript === 'string' && parsed.audio_transcript.trim() ? parsed.audio_transcript : null;
+    const { data: worksheet } = await supabase
+      .from('worksheets')
+      .select('id, ai_response, html_content, audio_transcript, selected_audio')
+      .eq('id', worksheetId)
+      .single();
+    if (!worksheet) return { exercise: null, audioTranscript: null };
+    const parsed = loadWorksheetJson(worksheet).data;
+    // Columns first (the engine writes the transcript there), JSON keys as fallback.
+    const transcript = resolveAudioTranscript(worksheet, parsed);
     return { exercise: (parsed?.exercises || [])[exerciseIndex] ?? null, audioTranscript: transcript };
   } catch (e) {
     console.error('[process-pending] worksheet source read failed:', (e as Error).message);
@@ -953,11 +957,11 @@ async function loadWorksheetExercise(supabase: any, worksheetId: string, exercis
   try {
     const { data: worksheet } = await supabase
       .from('worksheets')
-      .select('ai_response')
+      .select('id, ai_response, html_content')
       .eq('id', worksheetId)
       .single();
-    if (!worksheet?.ai_response) return null;
-    const parsed = typeof worksheet.ai_response === 'string' ? JSON.parse(worksheet.ai_response) : worksheet.ai_response;
+    if (!worksheet) return null;
+    const parsed = loadWorksheetJson(worksheet).data;
     return (parsed?.exercises || [])[exerciseIndex] ?? null;
   } catch (e) {
     console.error('[process-pending] worksheet exercise read failed:', (e as Error).message);
