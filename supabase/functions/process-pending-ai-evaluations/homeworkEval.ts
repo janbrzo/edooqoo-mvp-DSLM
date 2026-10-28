@@ -391,6 +391,9 @@ async function finalizeClosedRows(supabase: any, rows: SelectionRow[], submitted
       console.error(`[homework-closed] ${row.id} failed:`, (e as Error).message);
     }
   }
+  if (rows.length > 0) {
+    console.log(`[homework-closed] ${submitted ? 'submitted' : 'draft'}: ${result.processed} processed, ${result.skipped} skipped, ${result.failed} failed`);
+  }
   return result;
 }
 
