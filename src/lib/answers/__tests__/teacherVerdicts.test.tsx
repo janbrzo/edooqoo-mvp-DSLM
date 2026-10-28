@@ -45,3 +45,13 @@ describe('exercise renderer with a teacher verdict', () => {
     expect(render({ 0: 'wrong' })).not.toContain('Needs teacher review');
   });
 });
+
+import { withoutDecidedEvaluations } from '../teacherVerdicts';
+
+describe('withoutDecidedEvaluations', () => {
+  it('drops the AI feedback of questions the teacher decided', () => {
+    expect(withoutDecidedEvaluations({ 0: 'a', 1: 'b' }, { 0: 'correct' })).toEqual({ 1: 'b' });
+    expect(withoutDecidedEvaluations({ 0: 'a' }, undefined)).toEqual({ 0: 'a' });
+    expect(withoutDecidedEvaluations(undefined, { 0: 'wrong' })).toBeUndefined();
+  });
+});
