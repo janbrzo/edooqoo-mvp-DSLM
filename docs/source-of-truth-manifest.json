@@ -23,7 +23,7 @@
     "serviceModules": 19,
     "edgeFunctions": 80,
     "typedTables": 79,
-    "typedRpcs": 138,
+    "typedRpcs": 139,
     "migrationIndexes": 29
   },
   "routes": [
@@ -4506,6 +4506,16 @@
           "initial": "[]"
         },
         {
+          "value": "redoOpen",
+          "setter": "setRedoOpen",
+          "initial": "false"
+        },
+        {
+          "value": "redoing",
+          "setter": "setRedoing",
+          "initial": "false"
+        },
+        {
           "value": "teacherComments",
           "setter": "setTeacherComments",
           "initial": "{}"
@@ -4570,24 +4580,24 @@
       "userFacingText": [
         "&apos;s answers next to the correct ones, AI feedback on open and speaking answers, and a comment box for every exercise. One click sends the review back to the student.",
         "Add feedback for the student about this exercise...",
+        "Attempt",
         "Back to Student",
         "Back to dashboard",
+        "Cancel",
         "Deadline:",
         "Exercises answered:",
         "Homework not available",
         "Homework review is not available in demo mode.",
         "In your account this page shows",
+        "Let student redo",
+        "Let the student do this homework again?",
         "Needs Review",
         "No student answer yet",
         "Question",
         "Review Sent!",
         "Reviewed",
         "Save Comment",
-        "Send Review to Student",
-        "Sign up free",
-        "Student has submitted",
-        "Student:",
-        "Submitted late"
+        "Send Review to Student"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -59417,6 +59427,17 @@
         "returns": "Json"
       },
       {
+        "name": "request_homework_redo",
+        "args": [
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "revoke_mcp_token",
         "args": [
           {
@@ -60967,6 +60988,10 @@
       {
         "name": "reopen_homework",
         "migration": "supabase/migrations/20261027090000_homework_p1_lifecycle.sql"
+      },
+      {
+        "name": "request_homework_redo",
+        "migration": "supabase/migrations/20261028150000_homework_redo.sql"
       },
       {
         "name": "revoke_mcp_token",

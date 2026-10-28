@@ -5224,6 +5224,7 @@ export type Database = {
         Returns: Json
       }
       reopen_homework: { Args: { p_homework_id: string }; Returns: Json }
+      request_homework_redo: { Args: { p_homework_id: string }; Returns: Json }
       revoke_mcp_token: { Args: { _id: string }; Returns: undefined }
       rollback_intake_extraction: {
         Args: { p_extraction_id: string }

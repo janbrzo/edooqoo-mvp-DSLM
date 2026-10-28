@@ -21,6 +21,11 @@ import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations
 import { isClosedExerciseType } from "@/utils/masteryCalculator";
 import { ItemsToCheckPanel } from "@/components/homework/ItemsToCheckPanel";
 import { ItemsToScorePanel } from "@/components/homework/ItemsToScorePanel";
+import { requestHomeworkRedo } from "@/lib/homework/homeworkStateRpc";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { findItemsToCheck, findItemsToScore, teacherVerdictsOf, type StoredItemRating } from "@/lib/homework/reviewItems";
 import { TeacherVerdictsContext, withoutDecidedEvaluations } from "@/lib/answers/teacherVerdicts";
 import { parseAiEvaluation } from "@/utils/aiEvaluationMapper";
@@ -39,6 +44,7 @@ interface HomeworkData {
   reviewed_at: string | null;
   reviewed_by: string | null;
   view_count: number;
+  attempt?: number;
   viewed_at: string | null;
   teacher_id: string;
   student_id: string;
@@ -78,6 +84,8 @@ export default function HomeworkReviewPage() {
   const { isDemoMode, demoData } = useDemoContext();
   const [homework, setHomework] = useState<HomeworkData | null>(null);
   const [studentAnswers, setStudentAnswers] = useState<StudentAnswer[]>([]);
+  const [redoOpen, setRedoOpen] = useState(false);
+  const [redoing, setRedoing] = useState(false);
   const [teacherComments, setTeacherComments] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
@@ -255,6 +263,29 @@ export default function HomeworkReviewPage() {
       toast.error("Failed to send review");
     } finally {
       setIsSending(false);
+    }
+  };
+
+  // The returned attempt is archived and the homework opens again, empty, under the same link.
+  const redoHomework = async () => {
+    if (!homework) return;
+    setRedoing(true);
+    try {
+      const result = await requestHomeworkRedo(homework.id);
+      if (!result.success) {
+        toast.error(result.error || "Could not open the homework again");
+        return;
+      }
+      toast.success("The student can do this homework again. Send them the link if they need a reminder.");
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-attention'], refetchType: 'all' });
+      void queryClient.invalidateQueries({ queryKey: ['student-timeline-sources'], refetchType: 'all' });
+      setRedoOpen(false);
+      await loadHomework();
+    } catch (error) {
+      console.error('Error opening homework again:', error);
+      toast.error("Could not open the homework again");
+    } finally {
+      setRedoing(false);
     }
   };
 
@@ -453,6 +484,9 @@ export default function HomeworkReviewPage() {
                   Student has submitted
                 </Badge>
               )}
+              {(homework.attempt ?? 1) > 1 && (
+                <Badge variant="outline">Attempt {homework.attempt}</Badge>
+              )}
             </div>
             
             {homework.share_token && (
@@ -603,6 +637,13 @@ export default function HomeworkReviewPage() {
 
         {/* Footer */}
         <div className="mt-12">
+          {hasStudentSubmitted && (
+            <div className="mb-4 flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setRedoOpen(true)}>
+                Let student redo
+              </Button>
+            </div>
+          )}
           {!isReviewed && hasStudentSubmitted ? (
             <Button 
               onClick={sendReviewToStudent}
@@ -637,6 +678,23 @@ export default function HomeworkReviewPage() {
           )}
         </div>
       </div>
+      <AlertDialog open={redoOpen} onOpenChange={setRedoOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Let the student do this homework again?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The returned answers and your comments are archived. The homework opens again with empty answers
+              under the same link. The student's progress keeps the first attempt until the second one is submitted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={redoing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction disabled={redoing} onClick={(e) => { e.preventDefault(); void redoHomework(); }}>
+              {redoing ? "Opening..." : "Open again"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
