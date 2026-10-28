@@ -19,6 +19,13 @@ import { ChevronDown, ChevronUp, RotateCcw, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { devLog } from '@/utils/logger';
 import { resolveLessonMedia, type LessonMedia } from "@/lib/worksheetEditor/lessonMedia";
+import {
+  MOVE_BLOCKED_REASON,
+  isMoveBlockedByAnswers,
+  planDisplayedMove,
+  sortForDisplay,
+  swapExercises,
+} from "@/lib/worksheetEditor/answerProtection";
 
 interface WorksheetContentProps {
   editableWorksheet: any;
@@ -31,6 +38,8 @@ interface WorksheetContentProps {
   inputParams?: any;
   /** Lesson media derived from the worksheet row; derived from inputParams and the JSON when omitted. */
   lessonMedia?: LessonMedia;
+  /** Raw exercise indices that already have student answers (see answerProtection). */
+  answeredExerciseIndexes?: ReadonlySet<number>;
   userId?: string;
   studentId?: string;
   onExpandAll?: (expandAllFn: () => void) => void;
@@ -62,6 +71,7 @@ export default function WorksheetContent({
   isDownloadUnlocked,
   inputParams,
   lessonMedia: lessonMediaProp,
+  answeredExerciseIndexes,
   userId,
   studentId,
   onExpandAll,
@@ -220,44 +230,24 @@ export default function WorksheetContent({
     });
   };
 
-  // Move exercise up
-  const moveExerciseUp = (index: number) => {
-    if (index <= 0) return;
-    
-    const newExercises = [...editableWorksheet.exercises];
-    [newExercises[index - 1], newExercises[index]] = [newExercises[index], newExercises[index - 1]];
-    
-    // Update exercise numbers
-    const updatedExercises = updateExerciseNumbers(newExercises);
-    
-    const updatedWorksheet = {
-      ...editableWorksheet,
-      exercises: updatedExercises
-    };
-    
-    setEditableWorksheet(updatedWorksheet);
-    saveWorksheetChanges(updatedWorksheet);
-    toast.success('Exercise moved up');
-  };
+  // Move an exercise on the displayed order (not the raw neighbour). Answers are keyed by
+  // position, so a move that touches an exercise with answers is refused.
+  const moveExercise = (rawIndex: number, direction: -1 | 1) => {
+    const plan = planDisplayedMove(editableWorksheet.exercises, rawIndex, direction);
+    if (!plan) return;
+    if (isMoveBlockedByAnswers(answeredExerciseIndexes, plan)) {
+      toast.error(MOVE_BLOCKED_REASON);
+      return;
+    }
 
-  // Move exercise down
-  const moveExerciseDown = (index: number) => {
-    if (index >= editableWorksheet.exercises.length - 1) return;
-    
-    const newExercises = [...editableWorksheet.exercises];
-    [newExercises[index], newExercises[index + 1]] = [newExercises[index + 1], newExercises[index]];
-    
-    // Update exercise numbers
-    const updatedExercises = updateExerciseNumbers(newExercises);
-    
     const updatedWorksheet = {
       ...editableWorksheet,
-      exercises: updatedExercises
+      exercises: updateExerciseNumbers(swapExercises(editableWorksheet.exercises, plan))
     };
-    
+
     setEditableWorksheet(updatedWorksheet);
     saveWorksheetChanges(updatedWorksheet);
-    toast.success('Exercise moved down');
+    toast.success(direction === -1 ? 'Exercise moved up' : 'Exercise moved down');
   };
 
   // Soft delete exercise
@@ -517,29 +507,16 @@ export default function WorksheetContent({
       {/* Active exercises - sorted to show media exercises first (picture > audio > others) */}
         {(() => {
           // Create sorted version for display
-          const sortedExercises = activeExercises
-            .slice()
-            .sort((a: any, b: any) => {
-              // Check if exercise types contain '-picture' or '-audio' suffix
-              const aIsPicture = a.type?.includes('-picture') || a.image_url || a.media_url;
-              const bIsPicture = b.type?.includes('-picture') || b.image_url || b.media_url;
-              
-              const aIsAudio = a.type?.includes('-audio') || a.type === 'listening-comprehension';
-              const bIsAudio = b.type?.includes('-audio') || b.type === 'listening-comprehension';
-              
-              // Priority: picture > audio > others
-              if (aIsPicture && !bIsPicture) return -1;
-              if (!aIsPicture && bIsPicture) return 1;
-              
-              if (aIsAudio && !bIsAudio) return -1;
-              if (!aIsAudio && bIsAudio) return 1;
-              
-              return 0;
-            });
+          const sortedExercises = sortForDisplay<any>(activeExercises);
           
           return sortedExercises.map((exercise: any, sortedIndex: number) => {
             // Find the original index in the full exercises array
             const originalIndex = editableWorksheet.exercises.findIndex((ex: any) => ex === exercise);
+            const upPlan = planDisplayedMove(editableWorksheet.exercises, originalIndex, -1);
+            const downPlan = planDisplayedMove(editableWorksheet.exercises, originalIndex, 1);
+            const moveLocked =
+              (!!upPlan && isMoveBlockedByAnswers(answeredExerciseIndexes, upPlan)) ||
+              (!!downPlan && isMoveBlockedByAnswers(answeredExerciseIndexes, downPlan));
             
             return (
               <div key={originalIndex} className="relative">
@@ -558,8 +535,12 @@ export default function WorksheetContent({
                   lessonMedia={lessonMedia}
                   userId={userId}
                   totalExercises={activeExercises.length}
-                  onMoveUp={() => moveExerciseUp(originalIndex)}
-                  onMoveDown={() => moveExerciseDown(originalIndex)}
+                  hasAnswers={answeredExerciseIndexes?.has(originalIndex) ?? false}
+                  canMoveUp={!!upPlan && !isMoveBlockedByAnswers(answeredExerciseIndexes, upPlan)}
+                  canMoveDown={!!downPlan && !isMoveBlockedByAnswers(answeredExerciseIndexes, downPlan)}
+                  moveLockedReason={moveLocked ? MOVE_BLOCKED_REASON : undefined}
+                  onMoveUp={() => moveExercise(originalIndex, -1)}
+                  onMoveDown={() => moveExercise(originalIndex, 1)}
                   onDeleteExercise={() => softDeleteExercise(originalIndex)}
                   isCollapsed={navigation.collapsedExercises.get(sortedIndex)}
                   onToggleCollapse={() => navigation.toggleExercise(sortedIndex)}

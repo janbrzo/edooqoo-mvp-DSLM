@@ -22,6 +22,7 @@ import { useStudentKnowledge } from "@/hooks/useStudentKnowledge";
 import { useStudents } from "@/hooks/useStudents";
 import { useFlashcardSets } from "@/hooks/useFlashcardSets";
 import { useLiveSessionAnswers } from "@/hooks/useLiveSessionAnswers";
+import { useWorksheetAnsweredIndexes } from "@/hooks/useWorksheetAnsweredIndexes";
 import { CreateHomeworkModal } from "@/components/homework/CreateHomeworkModal";
 import { AddExerciseModal } from "@/components/worksheet/AddExerciseModal";
 import { QuickAddWordToFlashcardsModal } from "@/components/flashcards/QuickAddWordToFlashcardsModal";
@@ -288,6 +289,14 @@ export default function WorksheetDisplay({
     enabled: viewMode === 'live-session'
   });
   
+  // Exercises with student answers are protected from moves and silent content swaps (answers are keyed by position).
+  const loadedAnsweredIndexes = useWorksheetAnsweredIndexes(worksheetId, !!userId);
+  const answeredExerciseIndexes = useMemo(() => {
+    const merged = new Set<number>(loadedAnsweredIndexes);
+    Object.keys(liveAnswers).forEach((key) => merged.add(Number(key)));
+    return merged;
+  }, [loadedAnsweredIndexes, liveAnswers]);
+
   const shouldShowMiniList = shouldShowFAB && (studentKnowledge.entries?.length || 0) > 0;
   
   // FAZA A: Sprawdź czy istnieją rysunki przy załadowaniu - NAPRAWIONE v2
@@ -1059,6 +1068,7 @@ export default function WorksheetDisplay({
               viewMode={viewMode}
               setEditableWorksheet={handleUserEdit}
               lessonMedia={lessonMedia}
+              answeredExerciseIndexes={answeredExerciseIndexes}
               worksheetId={worksheetId}
               onFeedbackSubmit={onFeedbackSubmit}
               isDownloadUnlocked={isDownloadUnlocked}
