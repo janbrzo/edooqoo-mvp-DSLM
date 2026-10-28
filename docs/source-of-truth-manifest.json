@@ -24170,6 +24170,16 @@
           "initial": "false"
         },
         {
+          "value": "deadlineTouched",
+          "setter": "setDeadlineTouched",
+          "initial": "false"
+        },
+        {
+          "value": "lessonHint",
+          "setter": "setLessonHint",
+          "initial": "null"
+        },
+        {
           "value": "suggestedCount",
           "setter": "setSuggestedCount",
           "initial": "null"
@@ -24215,6 +24225,8 @@
       "navigateTargets": [],
       "dataDependencies": {
         "tables": [
+          "calendar_settings",
+          "calendar_slots",
           "homework_assignments",
           "profiles",
           "students",
@@ -24230,6 +24242,7 @@
       },
       "storage": [],
       "userFacingText": [
+        ". Change it if you like.",
         "12 hours before",
         "2 days before",
         "23 hours before",
@@ -24248,8 +24261,7 @@
         "Copy this link or open homework in new tab to preview.",
         "Create Homework Assignment",
         "Create a homework assignment from \"",
-        "Creating...",
-        "Deadline"
+        "Creating..."
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -51633,6 +51645,7 @@
           "clientFiles": [
             "src/components/calendar/SlotDetailModal.tsx",
             "src/components/dashboard/StudentPaymentMeetingCard.tsx",
+            "src/components/homework/CreateHomeworkModal.tsx",
             "src/components/student/MeetingLinkField.tsx",
             "src/hooks/useCalendarSettings.tsx",
             "src/hooks/useCalendarSlots.tsx",
@@ -51903,6 +51916,7 @@
             "src/components/calendar/RecurringBookingModal.tsx",
             "src/components/calendar/SlotDetailModal.tsx",
             "src/components/dashboard/StudentPaymentMeetingCard.tsx",
+            "src/components/homework/CreateHomeworkModal.tsx",
             "src/components/student/MeetingLinkField.tsx",
             "src/hooks/dslm/useBehavioralStats.tsx",
             "src/hooks/useCalendarRecurrence.tsx",
