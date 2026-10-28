@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 /**
  * Phase 1 / P1.5 (audit R14): extract_skill_category and extract_micro_skill gain fallback
- * rules for topics that used to map to 'other' (20261028110000). The rules of both SQL
+ * rules for topics that used to map to 'other' (20261028111000). The rules of both SQL
  * functions are evaluated here from the migration text (first matching WHEN wins), so the
  * contract is checked without a database:
  *   1. a name that already had a real category or micro skill keeps it (additive);
@@ -14,7 +14,7 @@ import { join } from 'node:path';
 const MIGRATIONS = join(__dirname, '../../../supabase/migrations');
 const read = (f: string) => readFileSync(join(MIGRATIONS, f), 'utf8');
 
-const NEW_FILE = '20261028110000_extract_skill_category_fallbacks.sql';
+const NEW_FILE = '20261028111000_extract_skill_category_fallbacks.sql';
 const CATEGORY_BASELINE = read('20261012090000_dslm_pipeline_baseline.sql');
 const MICRO_BASELINE = read('20261015201345_c5c1929e-6931-46d3-b7bd-444dbf6a607b.sql');
 const NEW = read(NEW_FILE);

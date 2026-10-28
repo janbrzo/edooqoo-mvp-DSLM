@@ -1,6 +1,6 @@
 -- DATA SCRIPT (not a migration): recompute skill metrics whose category or micro skill was
 -- other and now maps to a real value (Phase 1 / P1.5, migration
--- 20261028110000_extract_skill_category_fallbacks.sql). Run by an operator in the SQL
+-- 20261028111000_extract_skill_category_fallbacks.sql). Run by an operator in the SQL
 -- Editor AFTER that migration is applied; it is never applied by `supabase db push`.
 --
 -- What it does: for every public.student_skill_metrics row with skill_category = other
@@ -75,7 +75,7 @@ BEGIN
     RAISE EXCEPTION 'compute_skill_metric v3 is not deployed';
   END IF;
   IF public.extract_micro_skill('ns.B1.used_to.affirmative_form_past_tense') = 'other' THEN
-    RAISE EXCEPTION 'Apply 20261028110000_extract_skill_category_fallbacks.sql first';
+    RAISE EXCEPTION 'Apply 20261028111000_extract_skill_category_fallbacks.sql first';
   END IF;
 
   SELECT count(*) INTO v_todo

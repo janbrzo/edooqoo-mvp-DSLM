@@ -282,9 +282,9 @@ describe('Pillar 1.1: additive micro-skill taxonomy (20261015201345)', () => {
     expect(body).toMatch(/CREATE OR REPLACE FUNCTION public\.extract_micro_skill\(/);
   });
 
-  it('is redefined only by the P1.5 fallback migration (20261028110000), which keeps every v2 rule', () => {
+  it('is redefined only by the P1.5 fallback migration (20261028111000), which keeps every v2 rule', () => {
     expect(latestDefinition('extract_micro_skill')).toBe(
-      readFileSync(join(MIGRATIONS, '20261028110000_extract_skill_category_fallbacks.sql'), 'utf8'),
+      readFileSync(join(MIGRATIONS, '20261028111000_extract_skill_category_fallbacks.sql'), 'utf8'),
     );
   });
 });
