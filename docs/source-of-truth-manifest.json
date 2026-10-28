@@ -17,13 +17,13 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 406,
+    "componentModules": 407,
     "hookModules": 106,
     "contextModules": 1,
     "serviceModules": 19,
     "edgeFunctions": 80,
     "typedTables": 79,
-    "typedRpcs": 135,
+    "typedRpcs": 136,
     "migrationIndexes": 29
   },
   "routes": [
@@ -24651,6 +24651,72 @@
       "userFacingText": [
         "Answered",
         "Teacher's Comment"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/homework/ItemsToCheckPanel.tsx",
+      "domain": "homework",
+      "purpose": "Implements Items To Check Panel behavior in the homework domain.",
+      "exports": [
+        "ItemsToCheckPanel"
+      ],
+      "props": [
+        {
+          "name": "ItemsToCheckPanelProps",
+          "fields": [
+            {
+              "name": "homeworkId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "exerciseIndex",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "items",
+              "type": "ItemToCheck[]",
+              "optional": false
+            },
+            {
+              "name": "onRated",
+              "type": "(itemEvaluations: StoredItemRating[]) => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "busy",
+          "setter": "setBusy",
+          "initial": "null"
+        }
+      ],
+      "hooks": [
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Answers to check (",
+        "Correct",
+        "Incorrect",
+        "Key:",
+        "Student:",
+        "The answer key could not decide these. Your decision is counted in the student's progress."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -50313,6 +50379,19 @@
         "payloadExpressions": []
       },
       {
+        "name": "set_homework_item_verdict",
+        "callsites": [
+          "src/lib/homework/reviewItems.ts"
+        ],
+        "payloadFields": [
+          "p_correct",
+          "p_exercise_index",
+          "p_homework_id",
+          "p_question_index"
+        ],
+        "payloadExpressions": []
+      },
+      {
         "name": "set_test_answered_count_by_share_token",
         "callsites": [
           "src/hooks/useWelcomeTest.tsx"
@@ -59407,6 +59486,32 @@
         "returns": "string"
       },
       {
+        "name": "set_homework_item_verdict",
+        "args": [
+          {
+            "name": "p_correct",
+            "type": "boolean",
+            "optional": false
+          },
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_question_index",
+            "type": "number",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "save_teacher_comment",
         "args": [
           {
@@ -60771,6 +60876,10 @@
       {
         "name": "save_worksheet_answer",
         "migration": "supabase/migrations/20261016110000_w2_merge_answers_on_save.sql"
+      },
+      {
+        "name": "set_homework_item_verdict",
+        "migration": "supabase/migrations/20261028110000_homework_teacher_item_verdict.sql"
       },
       {
         "name": "set_test_answered_count_by_share_token",
