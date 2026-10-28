@@ -277,9 +277,15 @@ describe('Welcome Test server authority and retake history (2026-10-17 audit)', 
 describe('Pillar 1.1: additive micro-skill taxonomy (20261015201345)', () => {
   const body = readFileSync(join(MIGRATIONS, '20261015201345_c5c1929e-6931-46d3-b7bd-444dbf6a607b.sql'), 'utf8');
 
-  it('is the latest extract_micro_skill definition and stays additive', () => {
-    expect(latestDefinition('extract_micro_skill')).toBe(body);
+  it('defines the v2 taxonomy additively', () => {
     expect(body).toMatch(/every v1 rule kept in order/);
+    expect(body).toMatch(/CREATE OR REPLACE FUNCTION public\.extract_micro_skill\(/);
+  });
+
+  it('is redefined only by the P1.5 fallback migration (20261028110000), which keeps every v2 rule', () => {
+    expect(latestDefinition('extract_micro_skill')).toBe(
+      readFileSync(join(MIGRATIONS, '20261028110000_extract_skill_category_fallbacks.sql'), 'utf8'),
+    );
   });
 });
 
