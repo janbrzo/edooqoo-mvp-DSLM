@@ -113,8 +113,7 @@ export function CreateHomeworkModal({
     generateSimilarExercises,
     toggleExerciseSelection,
     clearGeneratedExercises,
-    getSelectedGeneratedExercises,
-    lastPrompt
+    getSelectedGeneratedExercises
   } = useHomeworkExerciseGeneration();
   
   // Set preselected student when modal opens
@@ -368,9 +367,10 @@ export function CreateHomeworkModal({
           selected_exercises: exercisesData,
           deadline: finalDeadline,
           reminder_hours: sendReminder && deadline ? parseInt(reminderHours) : null,
-          prompt: lastPrompt || null
+          // Never persist the generation prompt (legacy rows held the engine system message).
+          prompt: null
         })
-        .select()
+        .select('id')
         .single();
 
       if (insertError) throw insertError;
