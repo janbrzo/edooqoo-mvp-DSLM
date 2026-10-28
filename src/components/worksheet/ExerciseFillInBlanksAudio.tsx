@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { safeGetText, safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge from "./NanoSkillBadge";
 import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { useTeacherVerdicts, applyTeacherVerdict } from "@/lib/answers/teacherVerdicts";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 
 interface ExerciseFillInBlanksAudioProps extends Partial<InteractiveExerciseProps> {
@@ -44,6 +45,7 @@ const ExerciseFillInBlanksAudio: React.FC<ExerciseFillInBlanksAudioProps> = ({
   showCorrectAnswers = false,
   disabled = false
 }) => {
+  const teacherVerdicts = useTeacherVerdicts();
   // Use new structure if available, fallback to old
   const useNewStructure = sentences && sentences.length > 0;
 
@@ -105,7 +107,8 @@ const ExerciseFillInBlanksAudio: React.FC<ExerciseFillInBlanksAudioProps> = ({
           {sentences!.map((sentence, sIndex) => {
             const studentAnswer = studentAnswers[sIndex];
             const correctAnswer = sentence.answer;
-            const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+            const rawMatch = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+            const match = { ...rawMatch, verdict: applyTeacherVerdict(teacherVerdicts, sIndex, rawMatch.verdict) };
             const isCorrect = showCorrectAnswers && match.verdict === 'correct';
             const isReview = showCorrectAnswers && match.verdict === 'review';
             const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';

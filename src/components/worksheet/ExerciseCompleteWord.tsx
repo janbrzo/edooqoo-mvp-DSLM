@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { useTeacherVerdicts, applyTeacherVerdict } from "@/lib/answers/teacherVerdicts";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 
 
@@ -34,6 +35,7 @@ const ExerciseCompleteWord: React.FC<ExerciseCompleteWordProps> = ({
   onNanoSkillChange,
   isSharedWorksheet = false
 }) => {
+  const teacherVerdicts = useTeacherVerdicts();
   if (!words || words.length === 0) {
     return <div className="text-gray-500 italic">No words available for this exercise.</div>;
   }
@@ -46,7 +48,8 @@ const ExerciseCompleteWord: React.FC<ExerciseCompleteWordProps> = ({
         {words.map((wordItem, wIndex) => {
           const studentAnswer = studentAnswers[wIndex] || '';
           const correctAnswer = wordItem?.complete || wordItem?.complete_word || '';
-          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word', grammar: true });
+          const rawMatch = matchAnswer(studentAnswer, correctAnswer, { mode: 'word', grammar: true });
+          const match = { ...rawMatch, verdict: applyTeacherVerdict(teacherVerdicts, wIndex, rawMatch.verdict) };
           const isCorrect = showCorrectAnswers && match.verdict === 'correct';
           const isReview = showCorrectAnswers && match.verdict === 'review';
           const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';

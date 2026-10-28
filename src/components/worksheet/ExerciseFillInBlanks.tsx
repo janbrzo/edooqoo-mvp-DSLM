@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Input } from "@/components/ui/input";
 import { matchAnswer, type MatchVerdict } from "@/lib/answers/matchAnswer";
+import { useTeacherVerdicts, applyTeacherVerdict } from "@/lib/answers/teacherVerdicts";
 import { blankAnswers } from "@/lib/answers/blanks";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
@@ -59,6 +60,7 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
   onNanoSkillChange,
   isSharedWorksheet = false
 }) => {
+  const teacherVerdicts = useTeacherVerdicts();
   // PROBLEM 9 FIX: Shuffle word bank with deterministic seed based on content
   const shuffledWordBank = useMemo(() => {
     if (!word_bank || isEditing) return word_bank;
@@ -120,9 +122,10 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
             : blankAnswerOf(0);
           const correctAnswer = multiBlank ? correctParts.join(' / ') : sentence.answer;
           // Use normalized comparison to ignore punctuation and case
-          const match: { verdict: MatchVerdict } = multiBlank
+          const keyMatch: { verdict: MatchVerdict } = multiBlank
             ? { verdict: blankVerdicts.every((v) => v === 'correct') ? 'correct' : blankVerdicts.some((v) => v === 'wrong') ? 'wrong' : 'review' }
             : matchAnswer(studentAnswer, correctAnswer, { mode: 'word', grammar: true });
+          const match: { verdict: MatchVerdict } = { verdict: applyTeacherVerdict(teacherVerdicts, sIndex, keyMatch.verdict) as MatchVerdict };
           const isCorrect = showCorrectAnswers && match.verdict === 'correct';
           const isReview = showCorrectAnswers && match.verdict === 'review';
           const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';

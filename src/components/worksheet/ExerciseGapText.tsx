@@ -1,4 +1,5 @@
 import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { useTeacherVerdicts, applyTeacherVerdict } from "@/lib/answers/teacherVerdicts";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 import React from "react";
 import { InteractiveExerciseProps } from "@/types/interactiveHomework";
@@ -34,6 +35,7 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
   onNanoSkillChange,
   isSharedWorksheet = false
 }) => {
+  const teacherVerdicts = useTeacherVerdicts();
   if (!sentences || sentences.length === 0) {
     return <div className="text-gray-500 italic">No sentences available for this exercise.</div>;
   }
@@ -76,13 +78,14 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
           return matchAnswer(answer, correct, { mode: 'word', grammar: true }).verdict;
         });
         const allBlanksCorrect = blanksCount > 0 && blankVerdicts.every((v) => v === 'correct');
-        const sentenceVerdict: 'correct' | 'review' | 'wrong' | 'empty' = allBlanksCorrect
+        const keyVerdict: 'correct' | 'review' | 'wrong' | 'empty' = allBlanksCorrect
           ? 'correct'
           : blankVerdicts.every((v) => v === 'empty')
             ? 'empty'
             : blankVerdicts.some((v) => v === 'wrong')
               ? 'wrong'
               : 'review';
+        const sentenceVerdict = applyTeacherVerdict(teacherVerdicts, sIndex, keyVerdict);
 
         return (
           <div key={sIndex} className="border rounded-lg p-3 bg-white">
