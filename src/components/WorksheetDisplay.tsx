@@ -32,7 +32,7 @@ import { SelectWordMode } from "@/components/worksheet/SelectWordMode";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { Plus, TextSelect, Layers, Radio, StickyNote, Loader2, Lightbulb, User, Target, MoreHorizontal, Send } from "lucide-react";
+import { Plus, TextSelect, Layers, Radio, StickyNote, Lightbulb, User, Target, MoreHorizontal, Send } from "lucide-react";
 import type { NewKnowledgeEntry, StudentKnowledgeEntry, UpdateKnowledgeEntry, KnowledgeCategory } from "@/types/studentKnowledge";
 import { LoginRequiredModal } from "@/components/LoginRequiredModal";
 import { StudentRequiredModal } from "@/components/StudentRequiredModal";
@@ -239,7 +239,6 @@ export default function WorksheetDisplay({
   const MINI_LIST_PAGE_SIZE = 8;
   const [showHomeworkModal, setShowHomeworkModal] = useState(false);
   const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
-  const [isAiEvalLoading, setIsAiEvalLoading] = useState(false);
   
   // Flashcard FAB buttons state (Problem 4)
   const [showQuickAddWordModal, setShowQuickAddWordModal] = useState(false);
@@ -680,25 +679,15 @@ export default function WorksheetDisplay({
       return;
     }
     
-    // Show loading modal while AI eval runs
-    setIsAiEvalLoading(true);
-    
-    // Trigger AI evaluation BEFORE opening modal (Problem 1A fix)
-    try {
-      devLog('[WorksheetDisplay] Triggering AI eval before Create Homework modal, worksheetId:', worksheetId);
-      const { data, error } = await supabase.functions.invoke('process-pending-ai-evaluations', {
-        body: { worksheet_id: worksheetId, trigger_source: 'create_homework' }
-      });
-      if (error) {
-        console.error('[WorksheetDisplay] AI eval error:', error);
-      } else {
-        devLog('[WorksheetDisplay] AI eval result:', data);
-      }
-    } catch (err) {
-      devWarn('[WorksheetDisplay] AI eval network error:', err);
-    }
-    
-    setIsAiEvalLoading(false);
+    // The modal opens at once: the in-lesson answers are evaluated in the background (their DSLM
+    // evidence is not an input of the modal), so the 1-minute prep never waits for the model.
+    void supabase.functions.invoke('process-pending-ai-evaluations', {
+      body: { worksheet_id: worksheetId, trigger_source: 'create_homework' }
+    }).then(({ data, error }) => {
+      if (error) console.error('[WorksheetDisplay] AI eval error:', error);
+      else devLog('[WorksheetDisplay] AI eval result:', data);
+    }).catch((err) => devWarn('[WorksheetDisplay] AI eval network error:', err));
+
     setShowHomeworkModal(true);
   };
 
@@ -1173,23 +1162,6 @@ export default function WorksheetDisplay({
             </div>
           </div>
         </>
-      )}
-      
-      {/* AI Evaluation Loading Modal */}
-      {isAiEvalLoading && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg p-8 max-w-md mx-4 shadow-xl">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-worksheet-purple" />
-              <p className="text-center font-medium text-gray-700">
-                Analyzing student progress...
-              </p>
-              <p className="text-center text-sm text-gray-500">
-                AI is evaluating open-ended answers for more accurate homework setup.
-              </p>
-            </div>
-          </div>
-        </div>
       )}
       
       {/* Homework Modal */}
