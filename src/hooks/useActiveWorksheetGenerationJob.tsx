@@ -27,6 +27,7 @@ import {
 import { clearAutoGenerateFlags, markPersistentAutoGenerateIntentStatus } from '@/lib/worksheet/autoGenerateBootstrap';
 import { devLog, devWarn } from '@/utils/logger';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { notifyTokenBalanceChanged } from '@/lib/worksheet/tokenBalanceEvents';
 
 const POLL_INTERVAL_MS = 5000;
 
@@ -98,6 +99,7 @@ async function applyCompletionSideEffects(job: WorksheetGenerationJob, worksheet
           p_worksheet_id: worksheetId,
         });
         if (error) devWarn('[useActiveWorksheetGenerationJob] consume_token error', error);
+        else notifyTokenBalanceChanged();
       } catch (e) {
         devWarn('[useActiveWorksheetGenerationJob] consume_token threw', e);
       }
