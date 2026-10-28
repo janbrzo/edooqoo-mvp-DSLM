@@ -61872,6 +61872,7 @@
           "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/hooks/usePublicGalleryExamples.ts",
           "src/lib/edgeFunctionHeaders.ts",
+          "src/lib/homework/keepaliveSave.ts",
           "src/utils/promptFormatter.ts"
         ]
       },
@@ -61880,6 +61881,7 @@
         "callsites": [
           "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/hooks/usePublicGalleryExamples.ts",
+          "src/lib/homework/keepaliveSave.ts",
           "src/services/exerciseRegenerationService.ts",
           "src/services/worksheetStreamService.ts",
           "src/utils/promptFormatter.ts"

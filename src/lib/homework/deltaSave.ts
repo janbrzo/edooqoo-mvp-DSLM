@@ -7,6 +7,7 @@
  */
 import { buildItemEvaluations, calculateOverallMastery, type ItemEvaluation } from '@/utils/masteryCalculator';
 import { questionIndexOfKey } from '@/lib/answers/answerKeys';
+import { sanitizeAnswerValue } from '@/lib/answers/sanitizeAnswer';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 
 export interface HomeworkDeltaInput {
@@ -36,7 +37,7 @@ export function buildHomeworkDelta(input: HomeworkDeltaInput): HomeworkDelta | n
   if (keys.length === 0 && audioKeys.length === 0) return null;
 
   const answers: Record<string, any> = {};
-  for (const k of keys) answers[k] = input.answers[k] ?? '';
+  for (const k of keys) answers[k] = sanitizeAnswerValue(input.answers[k] ?? '');
   const audio: Record<number, string> = {};
   for (const q of audioKeys) if (input.audio[q]) audio[q] = input.audio[q];
 
