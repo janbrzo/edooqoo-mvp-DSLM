@@ -4,6 +4,13 @@
  *
  * Scope: anonymous + authenticated users on the home form. Keyed per-user when possible.
  * NOT used inside DSLM-prefilled flows (those have their own session prefill that wins).
+ *
+ * Context: the slot is one per user, so every draft records the context it was
+ * written in (a student id, or `standalone`). A draft is restored only into the
+ * same context when the form is opened for a known one (student page link,
+ * Dashboard "new worksheet"); a plain open or refresh (unknown context) still
+ * restores it. This stops student A's topic/goal/exercises from showing up in
+ * student B's form.
  */
 import { useEffect, useRef, useCallback } from 'react';
 
@@ -33,14 +40,39 @@ export interface WorksheetDraft {
 
 interface StoredDraft {
   savedAt: number;
+  /** Student id or STANDALONE_CONTEXT. Absent in drafts written before P0.3. */
+  context?: string;
   data: WorksheetDraft;
+}
+
+export const STANDALONE_CONTEXT = 'standalone';
+
+/** Context a draft belongs to; legacy drafts derive it from the saved student. */
+export function resolveDraftContext(stored: { context?: string; data?: WorksheetDraft }): string {
+  return stored.context || stored.data?.selectedStudentId || STANDALONE_CONTEXT;
+}
+
+/**
+ * @param intended the context the form was opened for, or null when unknown
+ *   (refresh / plain navigation), in which case the draft is restored.
+ */
+export function shouldHydrateDraft(storedContext: string, intended: string | null): boolean {
+  return intended === null || intended === storedContext;
 }
 
 export function useWorksheetFormPersistence(
   key: string,
   current: WorksheetDraft,
   apply: (draft: WorksheetDraft) => void,
+  options: {
+    /** Context of the form right now; stored with every save. */
+    context?: string;
+    /** Context the form was opened for (null = unknown), read at hydration. */
+    getIntendedContext?: () => string | null;
+  } = {},
 ) {
+  const contextRef = useRef(options.context ?? STANDALONE_CONTEXT);
+  contextRef.current = options.context ?? STANDALONE_CONTEXT;
   const storageKey = `${STORAGE_PREFIX}.${key || 'anon'}`;
   const hydratedRef = useRef(false);
   const lastKeyRef = useRef<string>(storageKey);
@@ -65,6 +97,8 @@ export function useWorksheetFormPersistence(
         || sessionStorage.getItem('prefillExercises')
         || sessionStorage.getItem('autoGenerateWorksheet');
       if (dslmPrefill) return;
+      const intended = options.getIntendedContext ? options.getIntendedContext() : null;
+      if (!shouldHydrateDraft(resolveDraftContext(parsed), intended)) return;
       if (parsed.data && typeof parsed.data === 'object') {
         apply(parsed.data);
       }
@@ -84,7 +118,7 @@ export function useWorksheetFormPersistence(
           || (current.grammarFocus?.trim()?.length ?? 0) > 0
           || (current.additionalInformation?.trim()?.length ?? 0) > 0;
         if (!hasContent) return;
-        const payload: StoredDraft = { savedAt: Date.now(), data: current };
+        const payload: StoredDraft = { savedAt: Date.now(), context: contextRef.current, data: current };
         localStorage.setItem(storageKey, JSON.stringify(payload));
       } catch {
         // ignore quota errors
@@ -105,7 +139,7 @@ export function useWorksheetFormPersistence(
    */
   const saveDraftNow = useCallback((draft: WorksheetDraft) => {
     try {
-      const payload: StoredDraft = { savedAt: Date.now(), data: draft };
+      const payload: StoredDraft = { savedAt: Date.now(), context: contextRef.current, data: draft };
       localStorage.setItem(storageKey, JSON.stringify(payload));
     } catch { /* ignore quota */ }
   }, [storageKey]);

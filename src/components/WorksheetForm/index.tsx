@@ -15,7 +15,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useEventTracking } from "@/hooks/useEventTracking";
 import { useStudents } from "@/hooks/useStudents";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
-import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
+import { useWorksheetFormPersistence, STANDALONE_CONTEXT, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
 import { buildWorksheetRequest, getExerciseTarget } from "@/lib/worksheet/buildWorksheetRequest";
 import { getActiveGenerationJobs } from "@/lib/worksheet/generationJobRegistry";
@@ -224,6 +224,7 @@ export default function WorksheetForm({
   const userId = userIdProp ?? null;
   const {
     students,
+    loading: studentsLoading,
     refetch: refetchStudents
   } = useStudents();
   const {
@@ -247,6 +248,21 @@ export default function WorksheetForm({
     selectedStudentId: selectedStudentId && selectedStudentId !== 'no-student' ? selectedStudentId : undefined,
   };
   const persistenceKey = userId || 'anon';
+  // Student id restored from a draft; validated once the students list loads.
+  const restoredStudentIdRef = useRef<string | null>(null);
+  // The context this form was opened for: the student the page navigated with,
+  // `standalone` for a Dashboard "new worksheet", or null (refresh, plain open).
+  const getIntendedContext = (): string | null => {
+    try {
+      const raw = sessionStorage.getItem('preSelectedStudent');
+      const fromSession = raw ? (JSON.parse(raw)?.id as string | undefined) : undefined;
+      const studentId = fromSession || preSelectedStudent?.id || initialAutoIntentRef.current?.studentId;
+      if (studentId) return studentId;
+      return sessionStorage.getItem('forceNewWorksheet') === 'true' ? STANDALONE_CONTEXT : null;
+    } catch {
+      return preSelectedStudent?.id ?? null;
+    }
+  };
   const { clear: clearPersistedDraft, saveDraftNow } = useWorksheetFormPersistence(
     persistenceKey,
     draftSnapshot,
@@ -281,6 +297,7 @@ export default function WorksheetForm({
         // generation error keeps the same learner context (and the CEFR
         // band / exercise defaults that follow from it).
         if (typeof draft.selectedStudentId === 'string' && draft.selectedStudentId.length > 0) {
+          restoredStudentIdRef.current = draft.selectedStudentId;
           setSelectedStudentId(draft.selectedStudentId);
         }
         if ((draft.lessonGoal?.length ?? 0) > 0 || (draft.grammarFocus?.length ?? 0) > 0 || (draft.additionalInformation?.length ?? 0) > 0) {
@@ -289,6 +306,10 @@ export default function WorksheetForm({
       } catch (e) {
         devWarn('[WorksheetForm] draft hydration failed', e);
       }
+    },
+    {
+      context: selectedStudentId && selectedStudentId !== 'no-student' ? selectedStudentId : STANDALONE_CONTEXT,
+      getIntendedContext,
     },
   );
 
@@ -512,6 +533,21 @@ export default function WorksheetForm({
       }
     }
   }, [selectedStudentId, students]);
+  // A student restored from a draft may have been deleted since: fall back to
+  // "no student" instead of generating for a soft-deleted learner. Only the
+  // restored id is checked, so a student added a moment ago is never reset.
+  useEffect(() => {
+    const restored = restoredStudentIdRef.current;
+    if (!restored || studentsLoading || !userId) return;
+    if (selectedStudentId !== restored) {
+      restoredStudentIdRef.current = null;
+      return;
+    }
+    if (!students.some(s => s.id === restored)) {
+      restoredStudentIdRef.current = null;
+      setSelectedStudentId('no-student');
+    }
+  }, [students, studentsLoading, selectedStudentId, userId]);
   useEffect(() => {
     if (onStudentChange) {
       const studentId = selectedStudentId === "no-student" ? null : selectedStudentId;
