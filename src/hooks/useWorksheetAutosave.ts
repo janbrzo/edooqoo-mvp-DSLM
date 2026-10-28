@@ -9,6 +9,10 @@
  * - Debounced (2.5s) persistence of `worksheet` through `updateWorksheetAPI`
  *   (the single write path; it keeps `ai_response`, `title` and `html_content` in sync).
  * - Hard early returns: no worksheetId, no userId (anonymous), demo mode, disabled.
+ * - Nothing is written until `markUserEdited()` was called by a genuine user
+ *   interaction; opening a worksheet (media derivation, normalisation, state
+ *   hydration) never reaches the database, because every write moves
+ *   `last_modified_at` and replaces `ai_response` / `html_content`.
  * - "Last write wins": while a save is in flight, further changes are queued and
  *   flushed once the current request settles.
  * - `flush()` forces an immediate save (used by manual Save and before sharing).
@@ -53,6 +57,7 @@ export function useWorksheetAutosave({
   const pendingSnapshotRef = useRef<string | null>(null);
   const latestWorksheetRef = useRef<any>(worksheet);
   const isSavingRef = useRef(false);
+  const userEditedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   latestWorksheetRef.current = worksheet;
@@ -67,6 +72,7 @@ export function useWorksheetAutosave({
 
   const persist = useCallback(async (): Promise<boolean> => {
     if (!active || !worksheetId || !userId) return false;
+    if (!userEditedRef.current) return false;
 
     const snapshot = serialize(latestWorksheetRef.current);
     if (!snapshot || snapshot === 'null') return false;
@@ -109,13 +115,14 @@ export function useWorksheetAutosave({
   // Baseline: the first worksheet we see is considered already persisted.
   useEffect(() => {
     savedSnapshotRef.current = serialize(worksheet);
+    userEditedRef.current = false;
     setStatus(active ? 'idle' : 'disabled');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [worksheetId, active]);
 
   // Debounced autosave on every change.
   useEffect(() => {
-    if (!active) return;
+    if (!active || !userEditedRef.current) return;
     const snapshot = serialize(worksheet);
     if (!snapshot || snapshot === savedSnapshotRef.current) return;
 
@@ -140,7 +147,7 @@ export function useWorksheetAutosave({
   }, [active, persist]);
 
   const hasUnsavedChanges =
-    active && serialize(worksheet) !== savedSnapshotRef.current;
+    active && userEditedRef.current && serialize(worksheet) !== savedSnapshotRef.current;
 
   // Warn before leaving with unsaved edits.
   useEffect(() => {
@@ -160,5 +167,13 @@ export function useWorksheetAutosave({
     setStatus('saved');
   }, []);
 
-  return { status, lastSavedAt, hasUnsavedChanges, flush, markSaved, isActive: active };
+  /**
+   * Call from a user interaction handler (typing, move, delete, add, regenerate),
+   * right before updating the worksheet state. Never call it from an effect.
+   */
+  const markUserEdited = useCallback(() => {
+    userEditedRef.current = true;
+  }, []);
+
+  return { status, lastSavedAt, hasUnsavedChanges, flush, markSaved, markUserEdited, isActive: active };
 }

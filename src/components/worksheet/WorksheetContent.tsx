@@ -18,6 +18,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, ChevronUp, RotateCcw, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { devLog } from '@/utils/logger';
+import { resolveLessonMedia, type LessonMedia } from "@/lib/worksheetEditor/lessonMedia";
 
 interface WorksheetContentProps {
   editableWorksheet: any;
@@ -28,6 +29,8 @@ interface WorksheetContentProps {
   onFeedbackSubmit?: (rating: number, feedback: string) => void;
   isDownloadUnlocked: boolean;
   inputParams?: any;
+  /** Lesson media derived from the worksheet row; derived from inputParams and the JSON when omitted. */
+  lessonMedia?: LessonMedia;
   userId?: string;
   studentId?: string;
   onExpandAll?: (expandAllFn: () => void) => void;
@@ -58,6 +61,7 @@ export default function WorksheetContent({
   onFeedbackSubmit,
   isDownloadUnlocked,
   inputParams,
+  lessonMedia: lessonMediaProp,
   userId,
   studentId,
   onExpandAll,
@@ -77,6 +81,12 @@ export default function WorksheetContent({
   liveAudioAnswers
 }: WorksheetContentProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const lessonMedia = useMemo<LessonMedia>(
+    () =>
+      lessonMediaProp ??
+      resolveLessonMedia({ formData: inputParams, worksheetJson: editableWorksheet }),
+    [lessonMediaProp, inputParams, editableWorksheet],
+  );
   
   // Pass closeSidebar function to parent for toolbar usage
   React.useEffect(() => {
@@ -439,25 +449,13 @@ export default function WorksheetContent({
 
       {/* Media Section - displays image or audio for media-enhanced exercises */}
       {(() => {
-        // Reconstruct selectedAudio from worksheet database fields if needed
-        const reconstructedAudio = (editableWorksheet?.audio_url)
-          ? {
-              url: editableWorksheet.audio_url || null,
-              ai_generated_audio_url: editableWorksheet.audio_url || null,
-              transcript: editableWorksheet.audio_transcript || null,
-              duration: editableWorksheet.audio_duration || null,
-              voice: editableWorksheet.audio_voice || null,
-              source: 'openai-tts-generated',
-              id: editableWorksheet.id
-            }
-          : (inputParams?.selectedAudio || editableWorksheet?.selected_audio || null);
+        const reconstructedAudio = lessonMedia.selectedAudio;
+        const hasMedia = lessonMedia.hasImage || lessonMedia.hasAudio;
 
-        const hasMedia = inputParams?.selectedImage || editableWorksheet?.selected_image || reconstructedAudio;
-        
         return hasMedia ? (
           <>
             <MediaSection
-              selectedImage={inputParams?.selectedImage || editableWorksheet?.selected_image}
+              selectedImage={lessonMedia.selectedImage}
               selectedAudio={reconstructedAudio}
               isDownloadUnlocked={isDownloadUnlocked}
               isPinned={isPinned}
@@ -557,6 +555,7 @@ export default function WorksheetContent({
                   setEditableWorksheet={setEditableWorksheet}
                   worksheetId={worksheetId}
                   originalFormData={inputParams}
+                  lessonMedia={lessonMedia}
                   userId={userId}
                   totalExercises={activeExercises.length}
                   onMoveUp={() => moveExerciseUp(originalIndex)}

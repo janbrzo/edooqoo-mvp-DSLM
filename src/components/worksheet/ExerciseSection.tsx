@@ -63,6 +63,7 @@ import { useStudentEvents } from "@/hooks/dslm/useStudentEvents";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
 import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
 import { resolveAiEvaluations } from "@/utils/aiEvaluationMapper";
+import type { LessonMedia } from "@/lib/worksheetEditor/lessonMedia";
 
 // Helper: convert liveItemEvaluations array to Record<number, AiEvaluation> for exercise components
 const convertLiveEvalsToAiEvals = (items: any[] | undefined): Record<number, AiEvaluation> | undefined => {
@@ -181,6 +182,8 @@ interface ExerciseSectionProps {
   setEditableWorksheet: React.Dispatch<React.SetStateAction<any>>;
   worksheetId?: string;
   originalFormData?: any;
+  /** Lesson media derived from the worksheet row (columns first, then form_data, then JSON keys). */
+  lessonMedia?: LessonMedia;
   userId?: string;
   // Exercise management props
   totalExercises?: number;
@@ -242,6 +245,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   setEditableWorksheet,
   worksheetId,
   originalFormData,
+  lessonMedia,
   userId,
   totalExercises = 0,
   onMoveUp,
@@ -826,7 +830,9 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   }
   
   // ✅ Check BOTH sources for selected image (Unsplash OR AI-generated)
-  const hasSelectedImage = originalFormData?.selectedImage || editableWorksheet?.selected_image;
+  const hasSelectedImage = lessonMedia
+    ? lessonMedia.selectedImage
+    : originalFormData?.selectedImage || editableWorksheet?.selected_image;
 
   // Calculate showImage: hide if hideExerciseMedia=true OR hasSelectedImage
   const showImage = !hideExerciseMedia && !hasSelectedImage;
