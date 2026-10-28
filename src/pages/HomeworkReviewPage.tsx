@@ -238,7 +238,7 @@ export default function HomeworkReviewPage() {
       if (error) throw error;
 
       // Create notification for student (optional - could be email)
-      toast.success("Review sent to student! They can now see correct answers and your comments.");
+      toast.success("Review sent. When your student opens the homework they see your comments and your decisions.");
 
       // The dashboard and timeline caches do not refetch on mount; drop the
       // stale "waiting for your review" entries now.

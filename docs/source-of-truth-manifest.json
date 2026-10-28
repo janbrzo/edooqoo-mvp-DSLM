@@ -23,7 +23,7 @@
     "serviceModules": 19,
     "edgeFunctions": 80,
     "typedTables": 79,
-    "typedRpcs": 136,
+    "typedRpcs": 137,
     "migrationIndexes": 29
   },
   "routes": [
@@ -4320,6 +4320,11 @@
           "initial": "null"
         },
         {
+          "value": "studentReview",
+          "setter": "setStudentReview",
+          "initial": "null"
+        },
+        {
           "value": "presentationMode",
           "setter": "setPresentationMode",
           "initial": "false"
@@ -4446,6 +4451,7 @@
         "Check the correct answers above. Discuss any questions with your teacher.",
         "Close",
         "Closed by your teacher",
+        "Comment from",
         "Continue Working",
         "Created:",
         "Deadline:",
@@ -4457,8 +4463,7 @@
         "Lesson Audio",
         "Lesson image",
         "Lesson image enlarged",
-        "My Hub",
-        "Not all exercises completed"
+        "My Hub"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -50123,6 +50128,17 @@
         "payloadExpressions": []
       },
       {
+        "name": "get_homework_review_by_share_token",
+        "callsites": [
+          "src/lib/homework/reviewForStudent.ts"
+        ],
+        "payloadFields": [
+          "p_share_token",
+          "p_student_email"
+        ],
+        "payloadExpressions": []
+      },
+      {
         "name": "get_learner_mastered_counts",
         "callsites": [
           "src/pages/StudentPortal.tsx"
@@ -58227,6 +58243,22 @@
         "returns": "{ student_id: string teacher_id: string }[]"
       },
       {
+        "name": "get_homework_review_by_share_token",
+        "args": [
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "get_homework_state_by_share_token",
         "args": [
           {
@@ -60524,6 +60556,10 @@
       {
         "name": "get_homework_owner_ids",
         "migration": "supabase/migrations/20260728202525_74d9d02e-d674-4a75-955e-7eba54b61291.sql"
+      },
+      {
+        "name": "get_homework_review_by_share_token",
+        "migration": "supabase/migrations/20261028120000_homework_review_for_student.sql"
       },
       {
         "name": "get_homework_state_by_share_token",

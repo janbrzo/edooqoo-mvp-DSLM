@@ -4620,6 +4620,10 @@ export type Database = {
           teacher_id: string
         }[]
       }
+      get_homework_review_by_share_token: {
+        Args: { p_share_token: string; p_student_email: string }
+        Returns: Json
+      }
       get_homework_state_by_share_token: {
         Args: { p_share_token: string }
         Returns: {
