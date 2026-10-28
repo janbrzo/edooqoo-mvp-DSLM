@@ -50,7 +50,7 @@ describe('regeneration credit', () => {
     updateDbMock.mockResolvedValue(undefined);
     await run();
     expect(chargeMock).toHaveBeenCalledTimes(1);
-    expect(chargeMock).toHaveBeenCalledWith({ worksheetId: 'ws-1', action: 'regenerate_exercise', isDemo: false });
+    expect(chargeMock).toHaveBeenCalledWith({ worksheetId: 'ws-1', action: 'regenerate', isDemo: false });
     expect(updateDbMock.mock.invocationCallOrder[0]).toBeLessThan(chargeMock.mock.invocationCallOrder[0]);
   });
 

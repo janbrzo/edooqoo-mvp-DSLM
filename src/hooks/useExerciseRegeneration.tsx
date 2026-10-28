@@ -100,7 +100,7 @@ export const useExerciseRegeneration = () => {
       );
 
       // Charged only now: the new exercise was generated and saved. Never blocks or throws.
-      await chargeExerciseAction({ worksheetId, action: 'regenerate_exercise', isDemo: isDemoMode });
+      await chargeExerciseAction({ worksheetId, action: 'regenerate', isDemo: isDemoMode });
 
       toast.success('Exercise regenerated successfully!');
       

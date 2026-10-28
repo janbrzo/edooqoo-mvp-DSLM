@@ -61,8 +61,8 @@ describe('chargeExerciseAction', () => {
 
   it('uses a different action ref per call and honours count', async () => {
     rpcMock.mockResolvedValue({ data: { charged: true, tokens_charged: 0.2, remaining_credit: 0, reason: null }, error: null });
-    await chargeExerciseAction({ worksheetId: 'ws-1', action: 'regenerate_exercise', count: 2 });
-    await chargeExerciseAction({ worksheetId: 'ws-1', action: 'regenerate_exercise', count: 2 });
+    await chargeExerciseAction({ worksheetId: 'ws-1', action: 'regenerate', count: 2 });
+    await chargeExerciseAction({ worksheetId: 'ws-1', action: 'regenerate', count: 2 });
     expect(rpcMock.mock.calls[0][1].p_count).toBe(2);
     expect(rpcMock.mock.calls[0][1].p_action_ref).not.toBe(rpcMock.mock.calls[1][1].p_action_ref);
     expect(newActionRef()).toMatch(UUID);
@@ -80,7 +80,7 @@ describe('chargeExerciseAction', () => {
   });
 
   it('stays quiet when the action was already settled', async () => {
-    rpcMock.mockResolvedValue({ data: { charged: false, tokens_charged: 0, remaining_credit: 1, reason: 'already_charged' }, error: null });
+    rpcMock.mockResolvedValue({ data: { charged: false, tokens_charged: 0, remaining_credit: 1, reason: 'already_recorded' }, error: null });
     await chargeExerciseAction({ worksheetId: 'ws-1', action: 'add_exercise' });
     expect(toastInfo).not.toHaveBeenCalled();
   });

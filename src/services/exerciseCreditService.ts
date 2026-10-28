@@ -11,7 +11,7 @@ import { devWarn } from '@/utils/logger';
  * missing function, an RPC error or a network failure only gets logged.
  */
 
-export type ExerciseCreditAction = 'add_exercise' | 'regenerate_exercise';
+export type ExerciseCreditAction = 'add_exercise' | 'regenerate';
 
 /**
  * - `charged`: the RPC charged the credit.
@@ -41,7 +41,7 @@ export interface ChargeExerciseActionParams {
 const MISSING_FUNCTION_CODES = new Set(['PGRST202', '42883']);
 
 /** Reasons that are not worth a message (the credit was already settled for this action). */
-const SILENT_REASONS = new Set(['already_charged', 'duplicate', 'duplicate_action']);
+const SILENT_REASONS = new Set(['already_recorded']);
 
 export const NOT_CHARGED_TOAST_TITLE = 'Exercise ready, no credit used';
 export const NOT_CHARGED_TOAST_DESCRIPTION =
