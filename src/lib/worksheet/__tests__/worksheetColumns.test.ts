@@ -68,9 +68,9 @@ describe('worksheet column constants', () => {
   });
 });
 
-describe('worksheets column grant (20261028120000)', () => {
+describe('worksheets column grant (20261028121000)', () => {
   const migration = fs.readFileSync(
-    path.resolve(SRC_ROOT, '../supabase/migrations/20261028120000_worksheets_hide_prompt_columns.sql'),
+    path.resolve(SRC_ROOT, '../supabase/migrations/20261028121000_worksheets_hide_prompt_columns.sql'),
     'utf8',
   );
   const granted = (migration.match(/GRANT SELECT \(([\s\S]*?)\)\s*ON public\.worksheets/)?.[1] ?? '')
