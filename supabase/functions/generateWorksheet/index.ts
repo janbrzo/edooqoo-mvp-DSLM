@@ -1,8 +1,5 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import OpenAI from "https://esm.sh/openai@4.28.0";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0";
-import { getExerciseTypesForCount, parseAIResponse, getOfficialExerciseName, extractJSONString } from "./helpers.ts";
+import { getExerciseTypesForCount, getOfficialExerciseName } from "./helpers.ts";
 import { validateExercise } from "./validators.ts";
 import { isValidUUID, sanitizeInput, validatePrompt } from "./security.ts";
 import { RateLimiter } from "./rateLimiter.ts";
@@ -14,350 +11,13 @@ import {
   countExercisesInPartialJSON,
   getExpectedExerciseCount as getExpectedCount,
 } from "./streaming.ts";
-
-const openai = new OpenAI({ apiKey: Deno.env.get("OPENAI_API_KEY")! });
-
-// OpenAI fallback model (used only when Gemini fails). gpt-5-mini-2025-08-07 shuts
-// down on 2026-12-11; gpt-5.6-terra is OpenAI's recommended replacement.
-// Keep in sync with supabase/functions/_shared/modelRegistry.ts.
-const OPENAI_FALLBACK_MODEL = "gpt-5.6-terra";
-
-// Initialize Gemini AI (primary model for faster generation)
-const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
-
-const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders, openai, OPENAI_FALLBACK_MODEL, supabase } from "./clients.ts";
+import { buildWorksheetMediaContextImage } from "./media.ts";
+import { classifyErrorType, notifyGenerationFailure } from "./notify.ts";
+import { parseOrRegenerateWithFallback, parseWithRecovery } from "./parse.ts";
+import { generateNonStreaming, generateWithGeminiStream } from "./model.ts";
 
 const rateLimiter = new RateLimiter();
-
-// ============================================================
-// v6.9.64 — Worksheet-local image description sanitizer.
-// Keeps DB row/image metadata intact; only the prompt-context copy
-// of `selectedImage.detailedDescription` is bounded so very long
-// vision outputs do not destabilize JSON-only worksheet generation.
-// ============================================================
-function truncateAtSentenceBoundary(value: string, maxChars: number): string {
-  const clean = String(value || '').replace(/\s+/g, ' ').trim();
-  if (clean.length <= maxChars) return clean;
-  const slice = clean.slice(0, maxChars);
-  const lastBoundary = Math.max(
-    slice.lastIndexOf('. '),
-    slice.lastIndexOf('; '),
-    slice.lastIndexOf(': '),
-  );
-  if (lastBoundary > Math.floor(maxChars * 0.55)) {
-    return slice.slice(0, lastBoundary + 1).trim();
-  }
-  return `${slice.trim()}...`;
-}
-
-function buildWorksheetMediaContextImage(selectedImage: any): any {
-  if (!selectedImage) return null;
-  const rawDescription = selectedImage?.detailedDescription || selectedImage?.description || '';
-  return {
-    ...selectedImage,
-    detailedDescription: truncateAtSentenceBoundary(rawDescription, 1200),
-  };
-}
-
-// ============================================================
-// v6.9.64 — Parse-safe model fallback for picture worksheets.
-// When the streamed Gemini JSON cannot be parsed even after the
-// deterministic + AI repair passes, regenerate the worksheet JSON
-// once via the OpenAI fallback model in strict JSON-object mode. This protects the
-// large picture-worksheet payload without altering the protected
-// worksheet generation prompt.
-// ============================================================
-async function generateFallbackJsonWithOpenAI(
-  systemMessage: string,
-  userMessage: string,
-): Promise<{ content: string; model: string }> {
-  console.log(`🟠 [JSON-FALLBACK] Regenerating worksheet JSON with ${OPENAI_FALLBACK_MODEL} after malformed Gemini JSON`);
-  const response = await (openai.chat.completions.create as any)({
-    model: OPENAI_FALLBACK_MODEL,
-    temperature: 1,
-    messages: [
-      { role: 'system', content: systemMessage },
-      { role: 'user', content: userMessage },
-    ],
-    max_completion_tokens: 30000,
-    response_format: { type: 'json_object' },
-  });
-  return {
-    content: response.choices?.[0]?.message?.content || '',
-    model: `${OPENAI_FALLBACK_MODEL}-json-fallback`,
-  };
-}
-
-async function parseOrRegenerateWithFallback(params: {
-  rawContent: string;
-  expectedExerciseCount: number;
-  systemMessage: string;
-  sanitizedPrompt: string;
-  allowRegenerateFallback: boolean;
-}): Promise<{ data: any; content: string; repairMethod: string; modelOverride?: string }> {
-  try {
-    const parsed = await parseWithRecovery(params.rawContent, params.expectedExerciseCount);
-    return { data: parsed.data, content: params.rawContent, repairMethod: parsed.repairMethod };
-  } catch (firstError) {
-    if (!params.allowRegenerateFallback) throw firstError;
-    console.warn('⚠️ [JSON-FALLBACK] Parse/repair failed; trying full JSON regeneration fallback');
-    const fallback = await generateFallbackJsonWithOpenAI(params.systemMessage, params.sanitizedPrompt);
-    const parsed = await parseWithRecovery(fallback.content, params.expectedExerciseCount);
-    return {
-      data: parsed.data,
-      content: fallback.content,
-      repairMethod: parsed.repairMethod === 'none' ? 'model-fallback' : `model-fallback+${parsed.repairMethod}`,
-      modelOverride: fallback.model,
-    };
-  }
-}
-
-// ============================================================
-// FAILURE NOTIFICATION HELPER
-// Sends email alert on any failed worksheet generation
-// ============================================================
-async function notifyGenerationFailure(errorType: string, errorMessage: string, context: Record<string, any>) {
-  try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    await fetch(`${supabaseUrl}/functions/v1/notify-generation-failure`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ errorType, errorMessage, timestamp: new Date().toISOString(), ...context }),
-    });
-    console.log(`📧 Failure notification sent: ${errorType}`);
-  } catch (e) {
-    console.error("Failed to send failure notification email:", e);
-  }
-}
-
-function classifyErrorType(error: Error | unknown): string {
-  const msg = error instanceof Error ? error.message : String(error);
-  if (msg.includes('quota') || msg.includes('429') || msg.includes('Too Many Requests')) return 'quota';
-  if (msg.includes('timeout') || msg.includes('ETIMEDOUT') || msg.includes('deadline')) return 'timeout';
-  if (msg.includes('JSON') || msg.includes('parse') || msg.includes('Unexpected token')) return 'parse';
-  return 'network';
-}
-
-// ============================================================
-// AI JSON REPAIR PASS
-// Secondary recovery: uses a deterministic model to fix malformed JSON
-// Does NOT re-generate content — only repairs structural JSON issues
-// ============================================================
-async function repairWorksheetJsonWithAI(brokenJson: string, expectedExerciseCount: number): Promise<string> {
-  console.log('🔧 [AI-REPAIR] Starting AI JSON repair pass...');
-  console.log(`🔧 [AI-REPAIR] Input length: ${brokenJson.length}, expected exercises: ${expectedExerciseCount}`);
-  
-  const repairPrompt = `You are a JSON repair tool. Your ONLY job is to fix the broken JSON below so it becomes valid JSON.
-
-RULES:
-- Output ONLY valid JSON. No explanation, no markdown, no code fences.
-- Preserve ALL content exactly as-is. Do not invent, remove, or modify any text/data.
-- Preserve the exact number of exercises (should be ${expectedExerciseCount}).
-- Preserve all exercise types, titles, content, questions, answers, vocabulary.
-- Fix structural issues: missing colons, missing commas, unbalanced brackets, truncated strings.
-- If a string value is clearly truncated mid-sentence, close it with a quote and continue the structure.
-
-BROKEN JSON:
-${brokenJson}`;
-
-  try {
-    const repairResponse = await (openai.chat.completions.create as any)({
-      model: "gpt-4o-mini",
-      temperature: 0,
-      messages: [
-        { role: "system", content: "You are a JSON repair tool. Output ONLY valid JSON. No markdown. No explanation." },
-        { role: "user", content: repairPrompt },
-      ],
-      max_completion_tokens: 16000,
-      response_format: { type: "json_object" },
-    });
-
-    const repairedContent = repairResponse.choices[0]?.message?.content || "";
-    console.log(`🔧 [AI-REPAIR] Repair response length: ${repairedContent.length}`);
-    return repairedContent;
-  } catch (repairError) {
-    console.error('❌ [AI-REPAIR] AI repair call failed:', (repairError as Error).message);
-    throw repairError;
-  }
-}
-
-/**
- * Attempts to parse JSON with full recovery pipeline:
- * 1. parseAIResponse (extract + deterministic repair)
- * 2. AI repair pass if #1 fails
- */
-/**
- * v6.9.84 — Repairs only the broken window around the reported syntax error
- * instead of shipping the whole (often 60KB+) document to the repair model.
- * Keeps the repair call in the ~2-4s range so the client SSE socket survives.
- */
-async function repairJsonWindowWithAI(
-  brokenJson: string,
-  errorPosition: number,
-  radius = 3000,
-): Promise<string | null> {
-  if (!Number.isFinite(errorPosition) || errorPosition < 0) return null;
-  const start = Math.max(0, errorPosition - radius);
-  const end = Math.min(brokenJson.length, errorPosition + radius);
-  const windowText = brokenJson.slice(start, end);
-  console.log(`🔧 [AI-REPAIR-WINDOW] pos=${errorPosition} window=[${start}, ${end}) len=${windowText.length}`);
-
-  try {
-    const res = await (openai.chat.completions.create as any)({
-      model: "gpt-4o-mini",
-      temperature: 0,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You repair JSON fragments. You receive a FRAGMENT cut out of a larger JSON document. " +
-            "Fix only syntax errors (unescaped quotes, missing commas/colons). " +
-            "Do NOT add or remove content. Do NOT close unopened brackets. " +
-            "Return ONLY the corrected fragment as raw text, no markdown, no explanation.",
-        },
-        { role: "user", content: windowText },
-      ],
-      max_completion_tokens: 8000,
-    });
-    const fixed = (res.choices[0]?.message?.content || "").replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/i, '');
-    if (!fixed) return null;
-    console.log(`🔧 [AI-REPAIR-WINDOW] fragment repaired (${windowText.length} → ${fixed.length})`);
-    return brokenJson.slice(0, start) + fixed + brokenJson.slice(end);
-  } catch (e) {
-    console.error('❌ [AI-REPAIR-WINDOW] failed:', (e as Error).message);
-    return null;
-  }
-}
-
-async function parseWithRecovery(rawContent: string, expectedExerciseCount: number): Promise<{ data: any; repairMethod: string }> {
-  // Attempt 1: Local parsing (extract + deterministic repair)
-  try {
-    const data = parseAIResponse(rawContent);
-    return { data, repairMethod: 'none' };
-  } catch (localError) {
-    console.warn('⚠️ Local parse failed, attempting AI repair pass...');
-    
-    // Attempt 2: AI repair pass
-    const rawForRepair = (localError as any).rawContent || extractJSONString(rawContent);
-
-    // Attempt 2a: cheap, fast windowed repair around the reported position.
-    const errorPosition = (localError as any).errorPosition ?? -1;
-    const windowed = await repairJsonWindowWithAI(rawForRepair, errorPosition);
-    if (windowed) {
-      try {
-        const data = parseAIResponse(windowed);
-        console.log('✅ json_repair_ai_window_succeeded');
-        return { data, repairMethod: 'ai-window' };
-      } catch (windowErr) {
-        console.warn('⚠️ json_repair_ai_window_failed:', (windowErr as Error).message);
-      }
-    }
-
-    try {
-      const repairedJson = await repairWorksheetJsonWithAI(rawForRepair, expectedExerciseCount);
-      const data = parseAIResponse(repairedJson);
-      console.log('✅ json_repair_ai_succeeded');
-      return { data, repairMethod: 'ai' };
-    } catch (aiRepairError) {
-      console.error('❌ json_repair_ai_failed:', (aiRepairError as Error).message);
-      throw new Error(`Invalid JSON from AI: all repair attempts failed. Original: ${(localError as Error).message}`);
-    }
-  }
-}
-
-// ============================================================
-// GEMINI HELPER FUNCTIONS
-// ============================================================
-
-/**
- * Generate content using Gemini 2.5 Flash (primary model - faster)
- */
-async function generateWithGemini(
-  systemMessage: string,
-  userMessage: string,
-  maxTokens: number = 30000
-): Promise<{ content: string; model: string }> {
-  if (!genAI) {
-    throw new Error("GEMINI_API_KEY not configured");
-  }
-
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    generationConfig: {
-      maxOutputTokens: maxTokens,
-      temperature: 1,
-      responseMimeType: "application/json", // FORCE valid JSON output
-    },
-  });
-
-  // Gemini uses a single prompt, combine system + user message
-  const fullPrompt = `${systemMessage}\n\n---\n\nUser Request:\n${userMessage}`;
-
-  console.log("🔵 Gemini 2.5 Flash with JSON mode enabled...");
-  const result = await model.generateContent(fullPrompt);
-  const response = result.response;
-  const text = response.text();
-
-  // Validate JSON before returning
-  try {
-    JSON.parse(text);
-    console.log("✅ Gemini returned valid JSON");
-  } catch (jsonError) {
-    console.warn("⚠️ Gemini JSON validation failed, will attempt repair in parseAIResponse");
-  }
-
-  return { content: text, model: "gemini-2.5-flash" };
-}
-
-/**
- * Generate content with streaming using Gemini 2.5 Flash
- */
-async function generateWithGeminiStream(
-  systemMessage: string,
-  userMessage: string,
-  onChunk: (text: string) => void,
-  maxTokens: number = 30000
-): Promise<{ content: string; model: string }> {
-  if (!genAI) {
-    throw new Error("GEMINI_API_KEY not configured");
-  }
-
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    generationConfig: {
-      maxOutputTokens: maxTokens,
-      temperature: 1,
-      responseMimeType: "application/json", // FORCE valid JSON output
-    },
-  });
-
-  const fullPrompt = `${systemMessage}\n\n---\n\nUser Request:\n${userMessage}`;
-
-  console.log("🔵 Gemini 2.5 Flash streaming with JSON mode enabled...");
-  const result = await model.generateContentStream(fullPrompt);
-  // v6.9.96 — the SDK's aggregated `response` promise rejects with the same
-  // "Failed to parse stream" error as `result.stream`. Nobody awaits it, so it
-  // surfaced as an unhandled rejection ("event loop error") that killed the
-  // worker before the DB insert. The stream loop below still throws and
-  // triggers recovery/fallback; this only marks the rejection as observed.
-  result.response.catch(() => {});
-
-  let fullContent = "";
-  for await (const chunk of result.stream) {
-    const chunkText = chunk.text();
-    fullContent += chunkText;
-    onChunk(chunkText);
-  }
-
-  return { content: fullContent, model: "gemini-2.5-flash" };
-}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -526,30 +186,14 @@ serve(async (req) => {
       );
 
       // Try Gemini first, fallback to OpenAI
-      let batchContent: string;
-      let usedModel: string;
-
-      try {
-        console.log("🔵 [BATCH-MODE] Trying Gemini 2.5 Flash as primary model...");
-        const geminiResult = await generateWithGemini(batchSystemMessage, sanitizedPrompt, 30000);
-        batchContent = geminiResult.content;
-        usedModel = geminiResult.model;
-        console.log(`✅ [BATCH-MODE] Gemini 2.5 Flash succeeded`);
-      } catch (geminiError) {
-        console.warn("⚠️ [BATCH-MODE] Gemini failed, falling back to OpenAI fallback model:", (geminiError as Error).message);
-        const batchResponse = await (openai.chat.completions.create as any)({
-          model: OPENAI_FALLBACK_MODEL,
-          temperature: 1,
-          messages: [
-            { role: "system", content: batchSystemMessage },
-            { role: "user", content: sanitizedPrompt },
-          ],
-          max_completion_tokens: 30000,
-        });
-        batchContent = batchResponse.choices[0].message.content || "";
-        usedModel = OPENAI_FALLBACK_MODEL;
-        console.log(`✅ [BATCH-MODE] OpenAI fallback succeeded`);
-      }
+      const batchModelResult = await generateNonStreaming(batchSystemMessage, sanitizedPrompt, {
+        trying: "🔵 [BATCH-MODE] Trying Gemini 2.5 Flash as primary model...",
+        geminiSucceeded: `✅ [BATCH-MODE] Gemini 2.5 Flash succeeded`,
+        geminiFailed: "⚠️ [BATCH-MODE] Gemini failed, falling back to OpenAI fallback model:",
+        openaiSucceeded: `✅ [BATCH-MODE] OpenAI fallback succeeded`,
+      });
+      const batchContent: string = batchModelResult.content || "";
+      const usedModel: string = batchModelResult.model;
 
       const batchGenerationTime = ((Date.now() - batchStartTime) / 1000).toFixed(2);
       console.log(`📊 [BATCH-MODE] Used model: ${usedModel}`);
@@ -1080,29 +724,14 @@ serve(async (req) => {
     console.log("📄 Using REGULAR (non-streaming) mode");
 
     // Generate worksheet - Try Gemini first, fallback to OpenAI
-    let jsonContent: string | null = null;
-
-    try {
-      console.log("🔵 Trying Gemini 2.5 Flash for regular generation...");
-      const geminiResult = await generateWithGemini(systemMessage, sanitizedPrompt, 30000);
-      jsonContent = geminiResult.content;
-      usedModel = geminiResult.model;
-      console.log(`✅ Gemini 2.5 Flash succeeded`);
-    } catch (geminiError) {
-      console.warn("⚠️ Gemini failed, falling back to OpenAI fallback model:", (geminiError as Error).message);
-      const aiResponse = await (openai.chat.completions.create as any)({
-        model: OPENAI_FALLBACK_MODEL,
-        temperature: 1,
-        messages: [
-          { role: "system", content: systemMessage },
-          { role: "user", content: sanitizedPrompt },
-        ],
-        max_completion_tokens: 30000,
-      });
-      jsonContent = aiResponse.choices[0].message.content;
-      usedModel = OPENAI_FALLBACK_MODEL;
-      console.log(`✅ OpenAI fallback succeeded`);
-    }
+    const regularModelResult = await generateNonStreaming(systemMessage, sanitizedPrompt, {
+      trying: "🔵 Trying Gemini 2.5 Flash for regular generation...",
+      geminiSucceeded: `✅ Gemini 2.5 Flash succeeded`,
+      geminiFailed: "⚠️ Gemini failed, falling back to OpenAI fallback model:",
+      openaiSucceeded: `✅ OpenAI fallback succeeded`,
+    });
+    let jsonContent: string | null = regularModelResult.content;
+    usedModel = regularModelResult.model;
 
     // HEARTBEAT LOG: After AI API call
     const openaiEndTime = Date.now();

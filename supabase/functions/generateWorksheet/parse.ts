@@ -1,0 +1,182 @@
+import { parseAIResponse, extractJSONString } from "./helpers.ts";
+import { openai, OPENAI_FALLBACK_MODEL } from "./clients.ts";
+
+// ============================================================
+// v6.9.64 — Parse-safe model fallback for picture worksheets.
+// When the streamed Gemini JSON cannot be parsed even after the
+// deterministic + AI repair passes, regenerate the worksheet JSON
+// once via the OpenAI fallback model in strict JSON-object mode. This protects the
+// large picture-worksheet payload without altering the protected
+// worksheet generation prompt.
+// ============================================================
+export async function generateFallbackJsonWithOpenAI(
+  systemMessage: string,
+  userMessage: string,
+): Promise<{ content: string; model: string }> {
+  console.log(`🟠 [JSON-FALLBACK] Regenerating worksheet JSON with ${OPENAI_FALLBACK_MODEL} after malformed Gemini JSON`);
+  const response = await (openai.chat.completions.create as any)({
+    model: OPENAI_FALLBACK_MODEL,
+    temperature: 1,
+    messages: [
+      { role: 'system', content: systemMessage },
+      { role: 'user', content: userMessage },
+    ],
+    max_completion_tokens: 30000,
+    response_format: { type: 'json_object' },
+  });
+  return {
+    content: response.choices?.[0]?.message?.content || '',
+    model: `${OPENAI_FALLBACK_MODEL}-json-fallback`,
+  };
+}
+
+export async function parseOrRegenerateWithFallback(params: {
+  rawContent: string;
+  expectedExerciseCount: number;
+  systemMessage: string;
+  sanitizedPrompt: string;
+  allowRegenerateFallback: boolean;
+}): Promise<{ data: any; content: string; repairMethod: string; modelOverride?: string }> {
+  try {
+    const parsed = await parseWithRecovery(params.rawContent, params.expectedExerciseCount);
+    return { data: parsed.data, content: params.rawContent, repairMethod: parsed.repairMethod };
+  } catch (firstError) {
+    if (!params.allowRegenerateFallback) throw firstError;
+    console.warn('⚠️ [JSON-FALLBACK] Parse/repair failed; trying full JSON regeneration fallback');
+    const fallback = await generateFallbackJsonWithOpenAI(params.systemMessage, params.sanitizedPrompt);
+    const parsed = await parseWithRecovery(fallback.content, params.expectedExerciseCount);
+    return {
+      data: parsed.data,
+      content: fallback.content,
+      repairMethod: parsed.repairMethod === 'none' ? 'model-fallback' : `model-fallback+${parsed.repairMethod}`,
+      modelOverride: fallback.model,
+    };
+  }
+}
+
+// ============================================================
+// AI JSON REPAIR PASS
+// Secondary recovery: uses a deterministic model to fix malformed JSON
+// Does NOT re-generate content — only repairs structural JSON issues
+// ============================================================
+async function repairWorksheetJsonWithAI(brokenJson: string, expectedExerciseCount: number): Promise<string> {
+  console.log('🔧 [AI-REPAIR] Starting AI JSON repair pass...');
+  console.log(`🔧 [AI-REPAIR] Input length: ${brokenJson.length}, expected exercises: ${expectedExerciseCount}`);
+
+  const repairPrompt = `You are a JSON repair tool. Your ONLY job is to fix the broken JSON below so it becomes valid JSON.
+
+RULES:
+- Output ONLY valid JSON. No explanation, no markdown, no code fences.
+- Preserve ALL content exactly as-is. Do not invent, remove, or modify any text/data.
+- Preserve the exact number of exercises (should be ${expectedExerciseCount}).
+- Preserve all exercise types, titles, content, questions, answers, vocabulary.
+- Fix structural issues: missing colons, missing commas, unbalanced brackets, truncated strings.
+- If a string value is clearly truncated mid-sentence, close it with a quote and continue the structure.
+
+BROKEN JSON:
+${brokenJson}`;
+
+  try {
+    const repairResponse = await (openai.chat.completions.create as any)({
+      model: "gpt-4o-mini",
+      temperature: 0,
+      messages: [
+        { role: "system", content: "You are a JSON repair tool. Output ONLY valid JSON. No markdown. No explanation." },
+        { role: "user", content: repairPrompt },
+      ],
+      max_completion_tokens: 16000,
+      response_format: { type: "json_object" },
+    });
+
+    const repairedContent = repairResponse.choices[0]?.message?.content || "";
+    console.log(`🔧 [AI-REPAIR] Repair response length: ${repairedContent.length}`);
+    return repairedContent;
+  } catch (repairError) {
+    console.error('❌ [AI-REPAIR] AI repair call failed:', (repairError as Error).message);
+    throw repairError;
+  }
+}
+
+/**
+ * Attempts to parse JSON with full recovery pipeline:
+ * 1. parseAIResponse (extract + deterministic repair)
+ * 2. AI repair pass if #1 fails
+ */
+/**
+ * v6.9.84 — Repairs only the broken window around the reported syntax error
+ * instead of shipping the whole (often 60KB+) document to the repair model.
+ * Keeps the repair call in the ~2-4s range so the client SSE socket survives.
+ */
+async function repairJsonWindowWithAI(
+  brokenJson: string,
+  errorPosition: number,
+  radius = 3000,
+): Promise<string | null> {
+  if (!Number.isFinite(errorPosition) || errorPosition < 0) return null;
+  const start = Math.max(0, errorPosition - radius);
+  const end = Math.min(brokenJson.length, errorPosition + radius);
+  const windowText = brokenJson.slice(start, end);
+  console.log(`🔧 [AI-REPAIR-WINDOW] pos=${errorPosition} window=[${start}, ${end}) len=${windowText.length}`);
+
+  try {
+    const res = await (openai.chat.completions.create as any)({
+      model: "gpt-4o-mini",
+      temperature: 0,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You repair JSON fragments. You receive a FRAGMENT cut out of a larger JSON document. " +
+            "Fix only syntax errors (unescaped quotes, missing commas/colons). " +
+            "Do NOT add or remove content. Do NOT close unopened brackets. " +
+            "Return ONLY the corrected fragment as raw text, no markdown, no explanation.",
+        },
+        { role: "user", content: windowText },
+      ],
+      max_completion_tokens: 8000,
+    });
+    const fixed = (res.choices[0]?.message?.content || "").replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/i, '');
+    if (!fixed) return null;
+    console.log(`🔧 [AI-REPAIR-WINDOW] fragment repaired (${windowText.length} → ${fixed.length})`);
+    return brokenJson.slice(0, start) + fixed + brokenJson.slice(end);
+  } catch (e) {
+    console.error('❌ [AI-REPAIR-WINDOW] failed:', (e as Error).message);
+    return null;
+  }
+}
+
+export async function parseWithRecovery(rawContent: string, expectedExerciseCount: number): Promise<{ data: any; repairMethod: string }> {
+  // Attempt 1: Local parsing (extract + deterministic repair)
+  try {
+    const data = parseAIResponse(rawContent);
+    return { data, repairMethod: 'none' };
+  } catch (localError) {
+    console.warn('⚠️ Local parse failed, attempting AI repair pass...');
+
+    // Attempt 2: AI repair pass
+    const rawForRepair = (localError as any).rawContent || extractJSONString(rawContent);
+
+    // Attempt 2a: cheap, fast windowed repair around the reported position.
+    const errorPosition = (localError as any).errorPosition ?? -1;
+    const windowed = await repairJsonWindowWithAI(rawForRepair, errorPosition);
+    if (windowed) {
+      try {
+        const data = parseAIResponse(windowed);
+        console.log('✅ json_repair_ai_window_succeeded');
+        return { data, repairMethod: 'ai-window' };
+      } catch (windowErr) {
+        console.warn('⚠️ json_repair_ai_window_failed:', (windowErr as Error).message);
+      }
+    }
+
+    try {
+      const repairedJson = await repairWorksheetJsonWithAI(rawForRepair, expectedExerciseCount);
+      const data = parseAIResponse(repairedJson);
+      console.log('✅ json_repair_ai_succeeded');
+      return { data, repairMethod: 'ai' };
+    } catch (aiRepairError) {
+      console.error('❌ json_repair_ai_failed:', (aiRepairError as Error).message);
+      throw new Error(`Invalid JSON from AI: all repair attempts failed. Original: ${(localError as Error).message}`);
+    }
+  }
+}
