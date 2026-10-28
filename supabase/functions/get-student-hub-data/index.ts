@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { signHubSession, verifyHubSession } from '../_shared/hubSession.ts';
+import { loadWorksheetJson } from '../_shared/worksheetContent.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -432,7 +433,7 @@ Deno.serve(async (req) => {
     // 6. Shared worksheets: by student_id OR share_recipient_email
     const { data: sharedByStudentId } = await supabase
       .from('worksheets')
-      .select('id, title, share_token, created_at, form_data, ai_response')
+      .select('id, title, share_token, created_at, form_data, ai_response, html_content')
       .eq('student_id', studentId)
       .eq('teacher_id', teacherId)
       .not('share_token', 'is', null)
@@ -440,7 +441,7 @@ Deno.serve(async (req) => {
 
     const { data: sharedByEmail } = await supabase
       .from('worksheets')
-      .select('id, title, share_token, created_at, form_data, ai_response')
+      .select('id, title, share_token, created_at, form_data, ai_response, html_content')
       .eq('teacher_id', teacherId)
       .ilike('share_recipient_email', emailPattern)
       .not('share_token', 'is', null)
@@ -472,7 +473,7 @@ Deno.serve(async (req) => {
       let formData: any = null;
       let aiResponse: any = null;
       try { formData = typeof w.form_data === 'string' ? JSON.parse(w.form_data) : w.form_data; } catch {}
-      try { aiResponse = typeof w.ai_response === 'string' ? JSON.parse(w.ai_response) : w.ai_response; } catch {}
+      aiResponse = loadWorksheetJson(w).data;
       const exercises = aiResponse?.exercises || [];
       return {
         id: w.id,
