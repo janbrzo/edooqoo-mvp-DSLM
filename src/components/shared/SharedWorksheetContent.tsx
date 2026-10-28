@@ -34,7 +34,8 @@ import { getIconComponent } from '../../utils/iconUtils';
 import { getOfficialExerciseName } from '../../utils/exerciseProcessor';
 import { HomeworkSpeakingRecorder } from '@/components/homework/HomeworkSpeakingRecorder';
 import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea';
-import { devLog } from '@/utils/logger';
+import { devError, devLog, devWarn } from '@/utils/logger';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 
 interface SharedWorksheetContentProps {
   worksheet: {
@@ -209,41 +210,18 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
   devLog('🔧 ai_response length:', worksheet.ai_response?.length || 0);
   devLog('🔧 html_content length:', worksheet.html_content?.length || 0);
 
-  let worksheetData = null;
-
-  // Try ai_response first (contains complete data), then html_content as fallback
-  if (worksheet.ai_response && worksheet.ai_response.trim()) {
-    try {
-      devLog('🔧 Attempting to parse ai_response...');
-      const rawData = JSON.parse(worksheet.ai_response);
-      devLog('✅ Successfully parsed ai_response, now fixing text objects:', rawData);
-      
-      // CRITICAL FIX: Apply deepFixTextObjects to fix {text: "..."} objects
-      worksheetData = deepFixTextObjects(rawData, 'ai_response');
-      devLog('✅ Text objects fixed:', worksheetData);
-    } catch (error) {
-      console.error('❌ Error parsing ai_response:', error);
-    }
-  }
-
-  // Fallback to html_content if ai_response failed
-  if (!worksheetData && worksheet.html_content && worksheet.html_content.trim()) {
-    try {
-      devLog('🔧 Fallback: Attempting to parse html_content...');
-      const rawData = JSON.parse(worksheet.html_content);
-      devLog('✅ Successfully parsed html_content, now fixing text objects:', rawData);
-      
-      // CRITICAL FIX: Apply deepFixTextObjects to fix {text: "..."} objects
-      worksheetData = deepFixTextObjects(rawData, 'html_content');
-      devLog('✅ Text objects fixed:', worksheetData);
-    } catch (error) {
-      console.error('❌ Error parsing html_content:', error);
-    }
+  // ai_response first, html_content as a degraded fallback (shared loader)
+  const loadedContent = loadWorksheetContent(worksheet);
+  const worksheetData = loadedContent.data
+    ? deepFixTextObjects(loadedContent.data, loadedContent.source)
+    : null;
+  if (loadedContent.degraded) {
+    devWarn('Shared worksheet loaded from html_content fallback', { id: worksheet.id, reason: loadedContent.reason });
   }
 
   // If no valid data found, show error
   if (!worksheetData) {
-    console.error('❌ No valid worksheet data found');
+    devError('No valid worksheet data found', { id: worksheet.id, reason: loadedContent.reason });
     return (
       <div className="text-center py-8">
         <AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-4" />

@@ -17,14 +17,14 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 402,
-    "hookModules": 99,
+    "componentModules": 406,
+    "hookModules": 106,
     "contextModules": 1,
-    "serviceModules": 11,
+    "serviceModules": 19,
     "edgeFunctions": 80,
-    "typedTables": 74,
-    "typedRpcs": 131,
-    "migrationIndexes": 26
+    "typedTables": 79,
+    "typedRpcs": 135,
+    "migrationIndexes": 29
   },
   "routes": [
     {
@@ -562,9 +562,11 @@
       "hooks": [
         "useAllWorksheetHomework",
         "useAuthFlow",
+        "useDebouncedValue",
         "useDeletedWorksheets",
         "useDemoContext",
         "useEffect",
+        "useMemo",
         "useNavigate",
         "useState",
         "useStudents",
@@ -638,6 +640,7 @@
         "useDemoContext",
         "useEffect",
         "useForceLightTheme",
+        "useMemo",
         "useNavigate",
         "useParams",
         "useState",
@@ -3155,9 +3158,11 @@
       "hooks": [
         "useAllWorksheetHomework",
         "useAuthFlow",
+        "useDebouncedValue",
         "useDeletedWorksheets",
         "useDemoContext",
         "useEffect",
+        "useMemo",
         "useNavigate",
         "useState",
         "useStudents",
@@ -3192,14 +3197,14 @@
         "Filters & Search",
         "Generate New",
         "Generate Worksheet",
+        "Group by Student",
         "Homework Assignments (",
         "ID:",
         "Newest First",
         "No worksheets found",
         "Oldest First",
         "Restore",
-        "Search worksheets...",
-        "Showing"
+        "Search worksheets..."
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -6977,6 +6982,12 @@
         },
         {
           "storage": "sessionStorage",
+          "operation": "removeItem",
+          "key": "prefillSuggestionId",
+          "file": "src/pages/StudentPage.tsx"
+        },
+        {
+          "storage": "sessionStorage",
           "operation": "setItem",
           "key": "forceNewWorksheet",
           "file": "src/pages/StudentPage.tsx"
@@ -7747,6 +7758,7 @@
         "useDemoContext",
         "useEffect",
         "useForceLightTheme",
+        "useMemo",
         "useNavigate",
         "useParams",
         "useState",
@@ -9906,6 +9918,16 @@
               "name": "recovering",
               "type": "boolean",
               "optional": true
+            },
+            {
+              "name": "onMinimize",
+              "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "onClose",
+              "type": "() => void",
+              "optional": true
             }
           ]
         }
@@ -9920,16 +9942,6 @@
           "value": "sections",
           "setter": "setSections",
           "initial": "[]"
-        },
-        {
-          "value": "activeSlideIndex",
-          "setter": "setActiveSlideIndex",
-          "initial": "0"
-        },
-        {
-          "value": "isCarouselPaused",
-          "setter": "setIsCarouselPaused",
-          "initial": "false"
         }
       ],
       "hooks": [
@@ -9958,13 +9970,14 @@
         "Generation",
         "Generation resumed.",
         "Generation runs in the background, keep prepping for",
+        "Minimize: generation keeps running in the background",
         "No token was consumed. Your form data is preserved.",
         "No tokens were consumed yet.",
         "Open dashboard ↗",
         "The connection dropped, but your worksheet might still be saving in the background.",
         "Time:",
         "Try Again",
-        "or another student while you wait."
+        "Worksheet generation"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -11637,6 +11650,11 @@
               "optional": true
             },
             {
+              "name": "lessonMedia",
+              "type": "LessonMedia",
+              "optional": true
+            },
+            {
               "name": "selectedImage",
               "type": "any",
               "optional": true
@@ -11852,6 +11870,7 @@
         }
       ],
       "hooks": [
+        "useCallback",
         "useDownloadStatus",
         "useDownloadTracking",
         "useEffect",
@@ -11859,12 +11878,14 @@
         "useHardLightSurface",
         "useIsMobile",
         "useLiveSessionAnswers",
+        "useMemo",
         "usePaymentTracking",
         "useRef",
         "useState",
         "useStudentKnowledge",
         "useStudents",
         "useToast",
+        "useWorksheetAnsweredIndexes",
         "useWorksheetAutosave"
       ],
       "actions": [
@@ -12405,11 +12426,11 @@
       },
       "storage": [],
       "userFacingText": [
-        ". Add your first student to unlock personalized goals, level matching, and AI Next Steps.",
+        ". Add your first student to unlock level matching and AI Next Steps.",
         "Open Pathway →",
         "This student has no Next Steps yet. Open their Pathway to generate AI-recommended next worksheets, or continue with manual setup below.",
         "Worksheets without a student are",
-        "You have students but none is selected. Pick one above to personalize the worksheet to their level, goals, and pacing.",
+        "You have students but none is selected. Pick one above to personalize the worksheet to their level and plan step.",
         "generic"
       ],
       "userFacingBehavior": {
@@ -12499,6 +12520,29 @@
         "useRef",
         "useState"
       ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/WorksheetForm/__tests__/StudentContextHint.test.tsx",
+      "domain": "WorksheetForm",
+      "purpose": "Implements Student Context Hint behavior in the Worksheet Form domain.",
+      "exports": [],
+      "props": [],
+      "state": [],
+      "hooks": [],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -12645,6 +12689,16 @@
           "initial": "false"
         },
         {
+          "value": "levelDefaulted",
+          "setter": "setLevelDefaulted",
+          "initial": "false"
+        },
+        {
+          "value": "submitting",
+          "setter": "setSubmitting",
+          "initial": "false"
+        },
+        {
           "value": "smartLoading",
           "setter": "setSmartLoading",
           "initial": "false"
@@ -12715,6 +12769,24 @@
         },
         {
           "storage": "sessionStorage",
+          "operation": "getItem",
+          "key": "prefillSuggestionId",
+          "file": "src/components/WorksheetForm/index.tsx"
+        },
+        {
+          "storage": "sessionStorage",
+          "operation": "removeItem",
+          "key": "prefillSuggestionId",
+          "file": "src/components/WorksheetForm/index.tsx"
+        },
+        {
+          "storage": "sessionStorage",
+          "operation": "removeItem",
+          "key": "appliedPresetSuggestionId",
+          "file": "src/components/WorksheetForm/index.tsx"
+        },
+        {
+          "storage": "sessionStorage",
           "operation": "removeItem",
           "key": "autoGenerateWorksheet",
           "file": "src/components/WorksheetForm/index.tsx"
@@ -12723,6 +12795,24 @@
           "storage": "sessionStorage",
           "operation": "removeItem",
           "key": "autoGenerateWorksheetRequest",
+          "file": "src/components/WorksheetForm/index.tsx"
+        },
+        {
+          "storage": "sessionStorage",
+          "operation": "getItem",
+          "key": "preSelectedStudent",
+          "file": "src/components/WorksheetForm/index.tsx"
+        },
+        {
+          "storage": "sessionStorage",
+          "operation": "getItem",
+          "key": "forceNewWorksheet",
+          "file": "src/components/WorksheetForm/index.tsx"
+        },
+        {
+          "storage": "sessionStorage",
+          "operation": "removeItem",
+          "key": "prefillSuggestionId",
           "file": "src/components/WorksheetForm/index.tsx"
         },
         {
@@ -12890,6 +12980,37 @@
         "Thank you for your feedback!",
         "Your feedback helps us improve our AI-generated worksheets"
       ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/__tests__/WorksheetDisplayWriteOnOpen.test.tsx",
+      "domain": "__tests__",
+      "purpose": "Implements Worksheet Display Write On Open behavior in the tests domain.",
+      "exports": [],
+      "props": [],
+      "state": [
+        {
+          "value": "editable",
+          "setter": "setEditable",
+          "initial": "parsed"
+        }
+      ],
+      "hooks": [
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -23449,20 +23570,49 @@
               "optional": false
             },
             {
-              "name": "activeSlideIndex",
-              "type": "number",
-              "optional": false
+              "name": "studentName",
+              "type": "string",
+              "optional": true
             },
             {
-              "name": "onSlideChange",
-              "type": "(index: number) => void",
-              "optional": false
+              "name": "studentId",
+              "type": "string | null",
+              "optional": true
             }
           ]
         }
       ],
-      "state": [],
-      "hooks": [],
+      "state": [
+        {
+          "value": "activeSlideIndex",
+          "setter": "setActiveSlideIndex",
+          "initial": "0"
+        },
+        {
+          "value": "hovered",
+          "setter": "setHovered",
+          "initial": "false"
+        },
+        {
+          "value": "focused",
+          "setter": "setFocused",
+          "initial": "false"
+        },
+        {
+          "value": "paused",
+          "setter": "setPaused",
+          "initial": "false"
+        },
+        {
+          "value": "reducedMotion",
+          "setter": "setReducedMotion",
+          "initial": "() => typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useState"
+      ],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -23473,7 +23623,11 @@
       },
       "storage": [],
       "userFacingText": [
-        "Create free account",
+        "Create free account to track progress",
+        "Lesson preparation ideas",
+        "Next slide",
+        "Previous slide",
+        "Ready to assign right after generation completes.",
         "Show next generation context slide",
         "Show previous generation context slide"
       ],
@@ -23497,6 +23651,11 @@
           "initial": "0"
         },
         {
+          "value": "minimizedJobIds",
+          "setter": "setMinimizedJobIds",
+          "initial": "() => new Set()"
+        },
+        {
           "value": "clock",
           "setter": "setClock",
           "initial": "() => Date.now()"
@@ -23505,8 +23664,10 @@
       "hooks": [
         "useActiveWorksheetGenerationJobs",
         "useAuthFlow",
+        "useCallback",
         "useEffect",
         "useMemo",
+        "useRef",
         "useState",
         "useTabId"
       ],
@@ -23526,34 +23687,11 @@
       }
     },
     {
-      "path": "src/components/generation/WorkflowSummaryCard.tsx",
+      "path": "src/components/generation/__tests__/generationConversion.test.tsx",
       "domain": "generation",
-      "purpose": "Implements Workflow Summary Card behavior in the generation domain.",
-      "exports": [
-        "WorkflowSummaryCard"
-      ],
-      "props": [
-        {
-          "name": "WorkflowSummaryCardProps",
-          "fields": [
-            {
-              "name": "activeSlideIndex",
-              "type": "number",
-              "optional": false
-            },
-            {
-              "name": "onSlideChange",
-              "type": "(index: number) => void",
-              "optional": false
-            },
-            {
-              "name": "className",
-              "type": "string",
-              "optional": true
-            }
-          ]
-        }
-      ],
+      "purpose": "Implements generation Conversion behavior in the generation domain.",
+      "exports": [],
+      "props": [],
       "state": [],
       "hooks": [],
       "actions": [],
@@ -23565,10 +23703,7 @@
         "fetchTargets": []
       },
       "storage": [],
-      "userFacingText": [
-        "1-Minute Prep workflow phase",
-        "One phase at a time"
-      ],
+      "userFacingText": [],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -24049,6 +24184,7 @@
       "hooks": [
         "useEffect",
         "useHomeworkExerciseGeneration",
+        "useMemo",
         "useState"
       ],
       "actions": [
@@ -33756,7 +33892,7 @@
             },
             {
               "name": "setEditableWorksheet",
-              "type": "(worksheet: any) => void",
+              "type": "(worksheet: any | ((prev: any) => any)) => void",
               "optional": false
             },
             {
@@ -33800,7 +33936,9 @@
         }
       ],
       "hooks": [
+        "useDemoContext",
         "useEffect",
+        "useRef",
         "useState"
       ],
       "actions": [
@@ -33809,16 +33947,19 @@
       ],
       "navigateTargets": [],
       "dataDependencies": {
-        "tables": [
-          "worksheets"
-        ],
+        "tables": [],
         "rpcs": [],
-        "edgeFunctions": [
-          "generateWorksheet"
-        ],
+        "edgeFunctions": [],
         "fetchTargets": []
       },
-      "storage": [],
+      "storage": [
+        {
+          "storage": "localStorage",
+          "operation": "getItem",
+          "key": "edooqoo_demo_mode",
+          "file": "src/components/worksheet/AddExerciseModal.tsx"
+        }
+      ],
       "userFacingText": [
         "Add Exercise to Worksheet",
         "Additional Instructions (Optional)",
@@ -35298,6 +35439,11 @@
               "optional": true
             },
             {
+              "name": "moveLockedReason",
+              "type": "string",
+              "optional": true
+            },
+            {
               "name": "onDelete",
               "type": "() => void",
               "optional": true
@@ -35338,8 +35484,6 @@
       "storage": [],
       "userFacingText": [
         "Delete exercise",
-        "Move down",
-        "Move up",
         "Regenerate",
         "min"
       ],
@@ -36355,12 +36499,26 @@
               "name": "exerciseTitle",
               "type": "string",
               "optional": false
+            },
+            {
+              "name": "answersWarning",
+              "type": "string",
+              "optional": true
             }
           ]
         }
       ],
-      "state": [],
-      "hooks": [],
+      "state": [
+        {
+          "value": "acknowledged",
+          "setter": "setAcknowledged",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useState"
+      ],
       "actions": [
         "handleSubmit"
       ],
@@ -36378,6 +36536,7 @@
         "Cancel",
         "Examples: \"Make it more challenging\", \"Focus on present perfect tense\", \"Use business vocabulary\"",
         "Exercise:",
+        "I understand, regenerate anyway",
         "Regenerate Exercise",
         "Type:"
       ],
@@ -36446,6 +36605,11 @@
               "optional": true
             },
             {
+              "name": "lessonMedia",
+              "type": "LessonMedia",
+              "optional": true
+            },
+            {
               "name": "userId",
               "type": "string",
               "optional": true
@@ -36463,6 +36627,26 @@
             {
               "name": "onMoveDown",
               "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "canMoveUp",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "canMoveDown",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "moveLockedReason",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "hasAnswers",
+              "type": "boolean",
               "optional": true
             },
             {
@@ -36583,6 +36767,11 @@
           "value": "isLoadingAiEvaluation",
           "setter": "setIsLoadingAiEvaluation",
           "initial": "false"
+        },
+        {
+          "value": "pendingEdit",
+          "setter": "setPendingEdit",
+          "initial": "null"
         }
       ],
       "hooks": [
@@ -36665,6 +36854,9 @@
       ],
       "userFacingText": [
         "Discussion Questions:",
+        "Edit an exercise with student answers?",
+        "Edit anyway",
+        "Keep as is",
         "Type your answer...",
         "[Student:"
       ],
@@ -38982,6 +39174,16 @@
               "optional": true
             },
             {
+              "name": "lessonMedia",
+              "type": "LessonMedia",
+              "optional": true
+            },
+            {
+              "name": "answeredExerciseIndexes",
+              "type": "ReadonlySet<number>",
+              "optional": true
+            },
+            {
               "name": "userId",
               "type": "string",
               "optional": true
@@ -39238,7 +39440,6 @@
       ],
       "userFacingText": [
         "Back",
-        "Based on",
         "Dashboard",
         "Generate New Worksheet",
         "Generated in",
@@ -39246,8 +39447,7 @@
         "Rename worksheet",
         "Tokens Left:",
         "for",
-        "lesson",
-        "sources"
+        "lesson"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -39644,6 +39844,52 @@
         ],
         "navigationTargets": []
       }
+    },
+    {
+      "path": "src/components/worksheet/__tests__/WorksheetContentAnswers.test.tsx",
+      "domain": "worksheet",
+      "purpose": "Implements Worksheet Content Answers behavior in the worksheet domain.",
+      "exports": [],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/worksheet/__tests__/WorksheetContentMedia.test.tsx",
+      "domain": "worksheet",
+      "purpose": "Implements Worksheet Content Media behavior in the worksheet domain.",
+      "exports": [],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
     }
   ],
   "state": {
@@ -39679,6 +39925,136 @@
         "props": [],
         "state": [],
         "hooks": [],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
+        "path": "src/hooks/__tests__/useExerciseRegeneration.charge.test.tsx",
+        "domain": "__tests__",
+        "purpose": "Implements use Exercise Regeneration.charge behavior in the tests domain.",
+        "exports": [],
+        "props": [],
+        "state": [],
+        "hooks": [
+          "useExerciseRegeneration"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
+        "path": "src/hooks/__tests__/useTokenSystem.consumeToken.test.tsx",
+        "domain": "__tests__",
+        "purpose": "Implements use Token System.consume Token behavior in the tests domain.",
+        "exports": [],
+        "props": [],
+        "state": [],
+        "hooks": [
+          "useTokenSystem"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
+        "path": "src/hooks/__tests__/useWorksheetAutosave.test.tsx",
+        "domain": "__tests__",
+        "purpose": "Implements use Worksheet Autosave behavior in the tests domain.",
+        "exports": [],
+        "props": [],
+        "state": [
+          {
+            "value": "worksheet",
+            "setter": "setWorksheet",
+            "initial": "() => withColumnTitle({ title: loadedTitle, exercises: [{ type: 'reading' }] }, columnTitle)"
+          }
+        ],
+        "hooks": [
+          "useState",
+          "useWorksheetAutosave"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
+        "path": "src/hooks/__tests__/useWorksheetFormPersistence.test.ts",
+        "domain": "__tests__",
+        "purpose": "Implements use Worksheet Form Persistence behavior in the tests domain.",
+        "exports": [],
+        "props": [],
+        "state": [],
+        "hooks": [],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
+        "path": "src/hooks/__tests__/useWorksheetGeneration.earlyExit.test.tsx",
+        "domain": "__tests__",
+        "purpose": "Implements use Worksheet Generation.early Exit behavior in the tests domain.",
+        "exports": [],
+        "props": [],
+        "state": [],
+        "hooks": [
+          "useWorksheetGeneration"
+        ],
         "actions": [],
         "navigateTargets": [],
         "dataDependencies": {
@@ -40910,6 +41286,40 @@
         }
       },
       {
+        "path": "src/hooks/useDebouncedValue.ts",
+        "domain": "state",
+        "purpose": "Implements use Debounced Value behavior in the state domain.",
+        "exports": [
+          "useDebouncedValue"
+        ],
+        "props": [],
+        "state": [
+          {
+            "value": "debounced",
+            "setter": "setDebounced",
+            "initial": "value"
+          }
+        ],
+        "hooks": [
+          "useEffect",
+          "useState"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
         "path": "src/hooks/useDeletedWorksheets.tsx",
         "domain": "state",
         "purpose": "Implements use Deleted Worksheets behavior in the state domain.",
@@ -40938,6 +41348,7 @@
           "useAuthUser",
           "useDemoContext",
           "useEffect",
+          "useRef",
           "useState"
         ],
         "actions": [],
@@ -43612,7 +44023,9 @@
           "useState",
           "useToast"
         ],
-        "actions": [],
+        "actions": [
+          "onChanged"
+        ],
         "navigateTargets": [],
         "dataDependencies": {
           "tables": [
@@ -43627,7 +44040,9 @@
         "storage": [],
         "userFacingText": [],
         "userFacingBehavior": {
-          "actionHandlers": [],
+          "actionHandlers": [
+            "onChanged"
+          ],
           "navigationTargets": []
         }
       },
@@ -43934,6 +44349,43 @@
         }
       },
       {
+        "path": "src/hooks/useWorksheetAnsweredIndexes.ts",
+        "domain": "state",
+        "purpose": "Implements use Worksheet Answered Indexes behavior in the state domain.",
+        "exports": [
+          "useWorksheetAnsweredIndexes"
+        ],
+        "props": [],
+        "state": [
+          {
+            "value": "indexes",
+            "setter": "setIndexes",
+            "initial": "() => new Set()"
+          }
+        ],
+        "hooks": [
+          "useDemoContext",
+          "useEffect",
+          "useState"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [
+            "get_worksheet_live_answers"
+          ],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
         "path": "src/hooks/useWorksheetAutosave.ts",
         "domain": "state",
         "purpose": "Implements use Worksheet Autosave behavior in the state domain.",
@@ -44044,8 +44496,11 @@
       {
         "path": "src/hooks/useWorksheetFormPersistence.ts",
         "domain": "state",
-        "purpose": "Implements use Worksheet Form Persistence behavior in the state domain.",
+        "purpose": "Implements STANDALONE CONTEXT behavior in the state domain.",
         "exports": [
+          "STANDALONE_CONTEXT",
+          "resolveDraftContext",
+          "shouldHydrateDraft",
           "useWorksheetFormPersistence"
         ],
         "props": [],
@@ -44180,7 +44635,7 @@
         "storage": [
           {
             "storage": "sessionStorage",
-            "operation": "getItem",
+            "operation": "removeItem",
             "key": "prefillSuggestionId",
             "file": "src/hooks/useWorksheetGeneration.tsx"
           },
@@ -44262,6 +44717,7 @@
           "useAuthUser",
           "useDemoContext",
           "useEffect",
+          "useRef",
           "useState"
         ],
         "actions": [],
@@ -44879,10 +45335,12 @@
         "key": "edooqoo_demo_mode",
         "operations": [
           "getItem",
+          "removeItem",
           "setItem"
         ],
         "files": [
           "src/components/calendar/SlotDetailModal.tsx",
+          "src/components/worksheet/AddExerciseModal.tsx",
           "src/components/worksheet/WorksheetContent.tsx",
           "src/hooks/dslm/usePhaseAdvanceProposals.tsx",
           "src/hooks/dslm/usePlanEvidenceMetrics.ts",
@@ -44891,7 +45349,9 @@
           "src/hooks/useWtSignalFeedback.ts",
           "src/lib/__tests__/pillar2RuntimeBaseline.test.tsx",
           "src/lib/dslm/__tests__/decisionLog.test.ts",
-          "src/lib/dslm/decisionLog.ts"
+          "src/lib/dslm/decisionLog.ts",
+          "src/services/__tests__/exerciseCreditService.test.ts",
+          "src/services/exerciseCreditService.ts"
         ]
       },
       {
@@ -45060,6 +45520,7 @@
           "src/hooks/useStudentHubData.tsx",
           "src/hooks/useTheme.ts",
           "src/hooks/useWorksheetClaim.ts",
+          "src/lib/worksheet/__tests__/generationJobRegistry.test.ts",
           "src/pages/BookLandingPage.tsx"
         ]
       },
@@ -45341,6 +45802,7 @@
           "setItem"
         ],
         "files": [
+          "src/components/WorksheetForm/index.tsx",
           "src/components/dslm/CompetencyRadarView.tsx",
           "src/components/worksheet/WorksheetHeader.tsx",
           "src/hooks/useWorksheetState.tsx",
@@ -45483,6 +45945,7 @@
           "setItem"
         ],
         "files": [
+          "src/components/WorksheetForm/index.tsx",
           "src/pages/Index.tsx",
           "src/pages/StudentPage.tsx"
         ]
@@ -48967,7 +49430,7 @@
       {
         "name": "generateWorksheet",
         "callsites": [
-          "src/components/worksheet/AddExerciseModal.tsx"
+          "src/services/exerciseAddService.ts"
         ],
         "payloadFields": [
           "formData",
@@ -49413,6 +49876,14 @@
         "payloadExpressions": []
       },
       {
+        "name": "consume_exercise_credit",
+        "callsites": [
+          "src/services/exerciseCreditService.ts"
+        ],
+        "payloadFields": [],
+        "payloadExpressions": []
+      },
+      {
         "name": "consume_token",
         "callsites": [
           "src/hooks/useActiveWorksheetGenerationJob.tsx",
@@ -49694,7 +50165,8 @@
       {
         "name": "get_worksheet_live_answers",
         "callsites": [
-          "src/hooks/useLiveSessionAnswers.tsx"
+          "src/hooks/useLiveSessionAnswers.tsx",
+          "src/hooks/useWorksheetAnsweredIndexes.ts"
         ],
         "payloadFields": [
           "p_worksheet_id"
@@ -50109,6 +50581,91 @@
           },
           {
             "name": "updated_at",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
+        "name": "billing_charge_audit",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "detail",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "outcome",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "source",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "worksheet_id",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
+        "name": "billing_free_windows",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "ends_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "is_active",
+            "type": "boolean",
+            "optional": false
+          },
+          {
+            "name": "label",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "starts_at",
             "type": "string",
             "optional": false
           }
@@ -51843,12 +52400,89 @@
         ],
         "relationships": [],
         "featureOwnership": {
-          "clientFiles": [],
+          "clientFiles": [
+            "src/services/clientErrorLogService.ts"
+          ],
           "edgeFunctions": [
             "audit-llm-models",
             "process-welcome-test",
             "send-welcome-test-completion-email"
           ]
+        }
+      },
+      {
+        "name": "exercise_credit_accounts",
+        "fields": [
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "tokens_settled",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "units_accrued",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "updated_at",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
+        "name": "exercise_credit_actions",
+        "fields": [
+          {
+            "name": "action",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "action_ref",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "tokens_charged",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "units",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "worksheet_id",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
         }
       },
       {
@@ -53769,6 +54403,46 @@
             "submit-bug-report",
             "verify-subscription-payment"
           ]
+        }
+      },
+      {
+        "name": "schema_migrations_p1_backup_20261028",
+        "fields": [
+          {
+            "name": "created_by",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "idempotency_key",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "name",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "rollback",
+            "type": "string[] | null",
+            "optional": false
+          },
+          {
+            "name": "statements",
+            "type": "string[] | null",
+            "optional": false
+          },
+          {
+            "name": "version",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
         }
       },
       {
@@ -56569,7 +57243,6 @@
             "src/components/calendar/SlotDetailModal.tsx",
             "src/components/calendar/UnifiedSlotModal.tsx",
             "src/components/flashcards/ImportFromVocabularyModal.tsx",
-            "src/components/worksheet/AddExerciseModal.tsx",
             "src/components/worksheet/PublishWorksheetButton.tsx",
             "src/components/worksheet/WorksheetHeader.tsx",
             "src/components/worksheet/WorksheetToolbar.tsx",
@@ -56585,6 +57258,7 @@
             "src/hooks/useWorksheetStats.tsx",
             "src/lib/mcp/tools/get_student_summary.ts",
             "src/lib/mcp/tools/list_recent_worksheets.ts",
+            "src/lib/worksheet/__tests__/worksheetColumns.test.ts",
             "src/pages/Dashboard.tsx",
             "src/pages/HomeworkReviewPage.tsx",
             "src/pages/SharedWorksheet.tsx",
@@ -56931,6 +57605,22 @@
         "returns": "number"
       },
       {
+        "name": "billing_days_below_charge_threshold",
+        "args": [
+          {
+            "name": "p_days",
+            "type": "number",
+            "optional": true
+          },
+          {
+            "name": "p_threshold",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returns": "{ chargeable: number charged: number day: string ratio: number refused: number }[]"
+      },
+      {
         "name": "book_public_slot",
         "args": [
           {
@@ -57029,6 +57719,32 @@
           }
         ],
         "returns": "undefined"
+      },
+      {
+        "name": "consume_exercise_credit",
+        "args": [
+          {
+            "name": "p_action",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_action_ref",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_count",
+            "type": "number",
+            "optional": true
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
       },
       {
         "name": "consume_newsletter_rate_limit",
@@ -57873,6 +58589,17 @@
           }
         ],
         "returns": "string"
+      },
+      {
+        "name": "is_free_generation_window",
+        "args": [
+          {
+            "name": "p_at",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returns": "boolean"
       },
       {
         "name": "is_user_anonymous",
@@ -58814,6 +59541,22 @@
         "returns": "boolean"
       },
       {
+        "name": "settle_exercise_credit_token",
+        "args": [
+          {
+            "name": "p_reference_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_teacher_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
+      },
+      {
         "name": "should_show_onboarding",
         "args": [
           {
@@ -59439,7 +60182,25 @@
         "name": "dslm_decision_log_teacher_type_created_idx",
         "table": "dslm_decision_log",
         "unique": false,
-        "migration": "supabase/migrations/20261027090000_dslm_validation_loop_v1.sql"
+        "migration": "supabase/migrations/20261027085900_dslm_validation_loop_v1.sql"
+      },
+      {
+        "name": "idx_billing_charge_audit_created_at",
+        "table": "billing_charge_audit",
+        "unique": false,
+        "migration": "supabase/migrations/20261028101000_billing_server_charge_trigger.sql"
+      },
+      {
+        "name": "idx_billing_charge_audit_worksheet",
+        "table": "billing_charge_audit",
+        "unique": false,
+        "migration": "supabase/migrations/20261028101000_billing_server_charge_trigger.sql"
+      },
+      {
+        "name": "idx_token_transactions_reference",
+        "table": "token_transactions",
+        "unique": false,
+        "migration": "supabase/migrations/20261028101000_billing_server_charge_trigger.sql"
       }
     ],
     "migrationFunctions": [
@@ -59476,6 +60237,10 @@
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
+        "name": "billing_days_below_charge_threshold",
+        "migration": "supabase/migrations/20261028101100_billing_charge_monitoring.sql"
+      },
+      {
         "name": "book_public_slot",
         "migration": "supabase/migrations/20260807134305_4fefd413-26a5-465b-af2f-30820627dde8.sql"
       },
@@ -59494,6 +60259,10 @@
       {
         "name": "calculate_test_results",
         "migration": "supabase/migrations/20261018100000_calculate_test_results_owner_only.sql"
+      },
+      {
+        "name": "charge_worksheet_on_insert",
+        "migration": "supabase/migrations/20261028101000_billing_server_charge_trigger.sql"
       },
       {
         "name": "claim_homework_answer_ai_attempt",
@@ -59526,6 +60295,10 @@
       {
         "name": "compute_skill_metric",
         "migration": "supabase/migrations/20261027100100_compute_skill_metric_source_weight.sql"
+      },
+      {
+        "name": "consume_exercise_credit",
+        "migration": "supabase/migrations/20261028101200_exercise_credit.sql"
       },
       {
         "name": "consume_newsletter_rate_limit",
@@ -59580,8 +60353,16 @@
         "migration": "supabase/migrations/20261015201345_c5c1929e-6931-46d3-b7bd-444dbf6a607b.sql"
       },
       {
+        "name": "extract_micro_skill",
+        "migration": "supabase/migrations/20261028110000_extract_skill_category_fallbacks.sql"
+      },
+      {
         "name": "extract_skill_category",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "extract_skill_category",
+        "migration": "supabase/migrations/20261028110000_extract_skill_category_fallbacks.sql"
       },
       {
         "name": "generate_homework_share_token",
@@ -59732,6 +60513,10 @@
         "migration": "supabase/migrations/20260806201028_02ebb7c9-8cd2-4bb0-8599-492c78b6ae3e.sql"
       },
       {
+        "name": "is_free_generation_window",
+        "migration": "supabase/migrations/20261028101000_billing_server_charge_trigger.sql"
+      },
+      {
         "name": "keep_ai_alternative_ratings",
         "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
       },
@@ -59753,7 +60538,7 @@
       },
       {
         "name": "log_dslm_decision",
-        "migration": "supabase/migrations/20261027090000_dslm_validation_loop_v1.sql"
+        "migration": "supabase/migrations/20261027085900_dslm_validation_loop_v1.sql"
       },
       {
         "name": "log_flashcard_review_event",
@@ -59992,6 +60777,10 @@
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
       },
       {
+        "name": "settle_exercise_credit_token",
+        "migration": "supabase/migrations/20261028101200_exercise_credit.sql"
+      },
+      {
         "name": "soft_delete_worksheet",
         "migration": "supabase/migrations/20261016100000_w0_a_consume_token_live_answers_soft_delete.sql"
       },
@@ -60188,7 +60977,6 @@
           "src/integrations/supabase/client.ts",
           "src/pages/NewsletterAction.tsx",
           "src/pages/settings/McpTokensPage.tsx",
-          "src/services/exerciseRegenerationService.ts",
           "src/services/worksheetService/apiService.ts",
           "src/services/worksheetService/feedbackService.ts",
           "supabase/functions/create-subscription/index.ts",
@@ -60200,6 +60988,17 @@
         "callsites": [
           "src/pages/StudentHubDashboard.tsx",
           "supabase/functions/send-calendar-notification-email/index.ts"
+        ]
+      },
+      {
+        "host": "cdn.example.com",
+        "callsites": [
+          "src/components/__tests__/WorksheetDisplayWriteOnOpen.test.tsx",
+          "src/components/worksheet/__tests__/WorksheetContentMedia.test.tsx",
+          "src/hooks/__tests__/useWorksheetAutosave.test.tsx",
+          "src/lib/worksheetEditor/__tests__/lessonMedia.test.ts",
+          "src/services/__tests__/duplicateService.test.ts",
+          "src/services/__tests__/exerciseEditing.test.ts"
         ]
       },
       {
@@ -60924,6 +61723,7 @@
         "callsites": [
           "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/hooks/usePublicGalleryExamples.ts",
+          "src/services/exerciseRegenerationService.ts",
           "src/services/worksheetStreamService.ts",
           "src/utils/promptFormatter.ts"
         ]

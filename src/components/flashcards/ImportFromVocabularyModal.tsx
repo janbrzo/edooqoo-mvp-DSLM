@@ -9,6 +9,7 @@ import { normalizeVocabularySheet } from '@/types/flashcards';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { devLog } from '@/utils/logger';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 
 interface ImportFromVocabularyModalProps {
   open: boolean;
@@ -47,7 +48,7 @@ export function ImportFromVocabularyModal({
     try {
       const { data, error } = await supabase
         .from('worksheets')
-        .select('id, title, ai_response, created_at')
+        .select('id, title, ai_response, html_content, created_at')
         .eq('student_id', studentId)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
@@ -56,15 +57,11 @@ export function ImportFromVocabularyModal({
 
       // Filter worksheets that have vocabulary_sheet
       const worksheetsWithVocab = data.filter(w => {
-        try {
-          const parsed = JSON.parse(w.ai_response);
-          return parsed.vocabulary_sheet && (
-            Array.isArray(parsed.vocabulary_sheet) ||
-            (parsed.vocabulary_sheet.words && Array.isArray(parsed.vocabulary_sheet.words))
-          );
-        } catch {
-          return false;
-        }
+        const parsed = loadWorksheetContent(w).data;
+        return Boolean(parsed?.vocabulary_sheet && (
+          Array.isArray(parsed.vocabulary_sheet) ||
+          (parsed.vocabulary_sheet.words && Array.isArray(parsed.vocabulary_sheet.words))
+        ));
       });
 
       setWorksheets(worksheetsWithVocab);
@@ -80,7 +77,8 @@ export function ImportFromVocabularyModal({
     if (!worksheet) return;
 
     try {
-      const parsed = JSON.parse(worksheet.ai_response);
+      const parsed = loadWorksheetContent(worksheet).data;
+      if (!parsed) throw new Error('Worksheet content could not be read');
       const normalized = normalizeVocabularySheet(parsed.vocabulary_sheet);
       setVocabularyItems(normalized);
       setSelectedWorksheet(worksheetId);
@@ -116,7 +114,8 @@ export function ImportFromVocabularyModal({
 
     setLoading(true);
     try {
-      const parsed = JSON.parse(worksheet.ai_response);
+      const parsed = loadWorksheetContent(worksheet).data;
+      if (!parsed) throw new Error('Worksheet content could not be read');
       const itemsToImport = vocabularyItems.filter((_, i) => selectedItems.has(i));
 
       // If backType is 'translation', auto-translate definitions

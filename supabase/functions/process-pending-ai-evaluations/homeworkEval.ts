@@ -17,6 +17,7 @@ import {
   calculateItemMastery, CLOSED_EXERCISE_TYPES, isClosedExerciseType, isOpenExerciseType, isSelectionType,
 } from '../_shared/itemMastery.ts';
 import { resolveEnglishLevel } from '../_shared/englishLevel.ts';
+import { loadWorksheetJson, resolveAudioTranscript } from '../_shared/worksheetContent.ts';
 import { buildOpenAnswerContext, openExerciseContextString, openExerciseItems } from '../_shared/openAnswerContext.ts';
 import { buildOpenItemEvaluations, buildQuestionEvaluations, validNanoSkills } from './itemBuilder.ts';
 
@@ -174,9 +175,13 @@ async function loadHomeworkMeta(supabase: any, homeworkId: string): Promise<Home
   let transcript: string | null = null;
   if (hw.source_worksheet_id) {
     try {
-      const { data: ws } = await supabase.from('worksheets').select('ai_response').eq('id', hw.source_worksheet_id).maybeSingle();
-      const parsed = typeof ws?.ai_response === 'string' ? JSON.parse(ws.ai_response) : ws?.ai_response;
-      if (typeof parsed?.audio_transcript === 'string' && parsed.audio_transcript.trim()) transcript = parsed.audio_transcript;
+      const { data: ws } = await supabase
+        .from('worksheets')
+        .select('id, ai_response, html_content, audio_transcript, selected_audio')
+        .eq('id', hw.source_worksheet_id)
+        .maybeSingle();
+      // Columns first (the engine writes the transcript there), JSON keys as fallback.
+      if (ws) transcript = resolveAudioTranscript(ws, loadWorksheetJson(ws).data);
     } catch { /* source worksheet unreadable: graded without the transcript */ }
   }
   return { exercises: hw.selected_exercises, studentLevel, worksheetAudioTranscript: transcript };

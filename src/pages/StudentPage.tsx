@@ -426,6 +426,9 @@ const StudentPage = () => {
       id: student.id,
       name: student.name
     }));
+    // Plain "Generate worksheet": no suggestion is being used, so a leftover
+    // id from an earlier prefill must not mark one.
+    sessionStorage.removeItem('prefillSuggestionId');
     sessionStorage.setItem('forceNewWorksheet', 'true');
     navigate('/');
   };

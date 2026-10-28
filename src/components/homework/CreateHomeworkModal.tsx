@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -57,7 +57,7 @@ export function CreateHomeworkModal({
   onOpenChange,
   worksheetId,
   worksheetTitle,
-  exercises,
+  exercises: allExercises,
   teacherId,
   students,
   preselectedStudent,
@@ -65,6 +65,8 @@ export function CreateHomeworkModal({
   worksheetHasPicture = false,
   worksheetHasAudio = false
 }: CreateHomeworkModalProps) {
+  // Soft-deleted exercises (`deleted: true`) stay in the worksheet JSON but must not be assignable.
+  const exercises = useMemo(() => (allExercises || []).filter((exercise) => !exercise?.deleted), [allExercises]);
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<Set<number>>(new Set());
   const [deadline, setDeadline] = useState<Date | undefined>(() => {

@@ -30,7 +30,8 @@ import AnonPreWorksheetBanner from "@/components/anon/AnonPreWorksheetBanner";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDialog";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
-import { devLog, devWarn } from '@/utils/logger';
+import { devError, devLog, devWarn } from '@/utils/logger';
+import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
@@ -200,17 +201,12 @@ const Index = () => {
         devLog('🔄 Restoring worksheet from dashboard:', worksheet);
         
         let parsedWorksheet = null;
-        if (worksheet.ai_response) {
-          try {
-            parsedWorksheet = JSON.parse(worksheet.ai_response);
-            devLog('✅ Successfully parsed ai_response:', parsedWorksheet);
-            
-            parsedWorksheet = deepFixTextObjects(parsedWorksheet, 'restoredWorksheet');
-            devLog('✅ Successfully fixed {text} objects in restored worksheet');
-            
-          } catch (parseError) {
-            console.error('❌ Failed to parse ai_response:', parseError);
-          }
+        const loadedContent = loadWorksheetContent(worksheet);
+        if (loadedContent.data) {
+          parsedWorksheet = deepFixTextObjects(loadedContent.data, 'restoredWorksheet');
+          devLog('✅ Parsed and fixed {text} objects in restored worksheet');
+        } else {
+          devError('Failed to load restored worksheet content', loadedContent.reason);
         }
         
         if (parsedWorksheet) {
@@ -238,7 +234,7 @@ const Index = () => {
           
           worksheetState.setWorksheetId(worksheet.id);
           worksheetState.setGenerationTime(worksheet.generation_time_seconds || 5);
-          worksheetState.setSourceCount(75);
+          worksheetState.setSourceCount(0);
         }
         
         sessionStorage.removeItem('restoredWorksheet');

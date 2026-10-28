@@ -4,6 +4,7 @@
 // Caller: authenticated teacher who owns the worksheet.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { loadWorksheetJson } from "../_shared/worksheetContent.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,7 +44,7 @@ serve(async (req) => {
     const sbAdmin = createClient(supabaseUrl, serviceKey);
     const { data: ws, error: fetchErr } = await sbAdmin
       .from("worksheets")
-      .select("id, title, teacher_id, user_id, form_data, ai_response, public_slug")
+      .select("id, title, teacher_id, user_id, form_data, ai_response, html_content, public_slug")
       .eq("id", worksheetId)
       .maybeSingle();
     if (fetchErr || !ws) return json({ error: "Worksheet not found" }, 404);
@@ -54,11 +55,8 @@ serve(async (req) => {
     if (!ws.title || ws.title.trim().length < 3) {
       return json({ error: "Worksheet needs a meaningful title before publishing." }, 400);
     }
-    let exerciseCount = 0;
-    try {
-      const parsed = ws.ai_response ? JSON.parse(ws.ai_response) : null;
-      exerciseCount = Array.isArray(parsed?.exercises) ? parsed.exercises.length : 0;
-    } catch (_) { /* keep 0 */ }
+    const parsed = loadWorksheetJson(ws).data;
+    const exerciseCount = Array.isArray(parsed?.exercises) ? parsed.exercises.length : 0;
     if (exerciseCount < 6) {
       return json({ error: `Need at least 6 exercises (found ${exerciseCount}).` }, 400);
     }
@@ -71,13 +69,9 @@ serve(async (req) => {
     const fd = (ws.form_data || {}) as Record<string, any>;
     const publicTopic = String(fd.topic || "general").slice(0, 120);
     const publicLevel = String(fd.englishLevel || fd.cefr || "B1").slice(0, 20);
-    let exerciseTypes: string[] = [];
-    try {
-      const parsed = ws.ai_response ? JSON.parse(ws.ai_response) : null;
-      exerciseTypes = Array.isArray(parsed?.exercises)
-        ? Array.from(new Set(parsed.exercises.map((e: any) => String(e?.type || "")).filter(Boolean))).slice(0, 12)
-        : [];
-    } catch (_) { /* keep [] */ }
+    const exerciseTypes: string[] = Array.isArray(parsed?.exercises)
+      ? Array.from(new Set(parsed.exercises.map((e: any) => String(e?.type || "")).filter(Boolean))).slice(0, 12) as string[]
+      : [];
 
     // Slug: reuse existing if already set, else generate
     let slug = ws.public_slug;

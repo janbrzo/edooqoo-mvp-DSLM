@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { DELETED_LIST_SELECT, OWNER_VIEW_SELECT } from '@/lib/worksheet/worksheetColumns';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { useDemoContext } from '@/contexts/DemoContext';
+import { applyWorksheetListOptions, type WorksheetListOptions } from '@/lib/worksheetEditor/listQuery';
 
 interface DeletedWorksheetItem {
   id: string;
@@ -20,13 +22,16 @@ export const useDeletedWorksheets = (
   lightweight: boolean = false, 
   listView: boolean = false,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  listOptions?: WorksheetListOptions
 ) => {
   const [deletedWorksheets, setDeletedWorksheets] = useState<DeletedWorksheetItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const { data: user } = useAuthUser();
   const { isDemoMode } = useDemoContext();
+  const requestIdRef = useRef(0);
+  const listOptionsKey = JSON.stringify(listOptions ?? null);
 
   useEffect(() => {
     if (isDemoMode) {
@@ -37,15 +42,14 @@ export const useDeletedWorksheets = (
       return;
     }
     fetchDeletedWorksheets();
-  }, [studentId, page, pageSize, user?.id, isDemoMode]);
+  }, [studentId, page, pageSize, user?.id, isDemoMode, listOptionsKey]);
 
   const fetchDeletedWorksheets = async () => {
+    const requestId = ++requestIdRef.current;
     try {
       if (!user) { setLoading(false); return; }
 
-      const selectQuery = listView
-        ? 'id, title, created_at, deleted_at, student_id, generation_time_seconds, form_data, audio_url, audio_duration, audio_voice, selected_audio, selected_image, media_metadata'
-        : '*';
+      const selectQuery: string = listView ? DELETED_LIST_SELECT : OWNER_VIEW_SELECT;
 
       let query = supabase
         .from('worksheets')
@@ -61,7 +65,7 @@ export const useDeletedWorksheets = (
         }
       }
 
-      query = query.order('deleted_at', { ascending: false });
+      query = applyWorksheetListOptions(query, listOptions, 'deleted_at');
 
       if (listView) {
         const from = (page - 1) * pageSize;
@@ -74,13 +78,15 @@ export const useDeletedWorksheets = (
       }
 
       const { data, error, count } = await query as any;
+      if (requestId !== requestIdRef.current) return;
       if (error) throw error;
       setDeletedWorksheets(data || []);
       setTotalCount(count || 0);
     } catch (error: any) {
+      if (requestId !== requestIdRef.current) return;
       console.error('Error fetching deleted worksheets:', error);
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   };
 
