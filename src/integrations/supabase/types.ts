@@ -1158,6 +1158,27 @@ export type Database = {
         }
         Relationships: []
       }
+      engine_rate_limits: {
+        Row: {
+          bucket: string
+          key: string
+          request_count: number
+          window_started_at: string
+        }
+        Insert: {
+          bucket: string
+          key: string
+          request_count?: number
+          window_started_at?: string
+        }
+        Update: {
+          bucket?: string
+          key?: string
+          request_count?: number
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       error_logs: {
         Row: {
           component: string | null
@@ -1672,6 +1693,7 @@ export type Database = {
       }
       homework_assignments: {
         Row: {
+          attempt: number
           completed_at: string | null
           completed_by_teacher: boolean | null
           created_at: string
@@ -1694,6 +1716,7 @@ export type Database = {
           viewed_at: string | null
         }
         Insert: {
+          attempt?: number
           completed_at?: string | null
           completed_by_teacher?: boolean | null
           created_at?: string
@@ -1716,6 +1739,7 @@ export type Database = {
           viewed_at?: string | null
         }
         Update: {
+          attempt?: number
           completed_at?: string | null
           completed_by_teacher?: boolean | null
           created_at?: string
@@ -1757,6 +1781,50 @@ export type Database = {
             columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_attempts: {
+        Row: {
+          answers: Json
+          archived_at: string
+          attempt: number
+          comments: Json
+          homework_id: string
+          id: string
+          reviewed_at: string | null
+          student_email: string | null
+          submitted_at: string | null
+        }
+        Insert: {
+          answers?: Json
+          archived_at?: string
+          attempt: number
+          comments?: Json
+          homework_id: string
+          id?: string
+          reviewed_at?: string | null
+          student_email?: string | null
+          submitted_at?: string | null
+        }
+        Update: {
+          answers?: Json
+          archived_at?: string
+          attempt?: number
+          comments?: Json
+          homework_id?: string
+          id?: string
+          reviewed_at?: string | null
+          student_email?: string | null
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_attempts_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "homework_assignments"
             referencedColumns: ["id"]
           },
         ]
@@ -1811,6 +1879,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      homework_prompt_backup_20261029: {
+        Row: {
+          backed_up_at: string
+          id: string
+          prompt: string
+        }
+        Insert: {
+          backed_up_at?: string
+          id: string
+          prompt: string
+        }
+        Update: {
+          backed_up_at?: string
+          id?: string
+          prompt?: string
+        }
+        Relationships: []
       }
       homework_student_answers: {
         Row: {
@@ -2415,6 +2501,36 @@ export type Database = {
         }
         Relationships: []
       }
+      schema_migrations_historical_backup_20261028: {
+        Row: {
+          backed_up_at: string
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string
+        }
+        Insert: {
+          backed_up_at?: string
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version: string
+        }
+        Update: {
+          backed_up_at?: string
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string
+        }
+        Relationships: []
+      }
       schema_migrations_p1_backup_20261028: {
         Row: {
           created_by: string | null
@@ -2439,6 +2555,198 @@ export type Database = {
           rollback?: string[] | null
           statements?: string[] | null
           version?: string | null
+        }
+        Relationships: []
+      }
+      schema_migrations_p2_backup_20261028: {
+        Row: {
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      schema_migrations_p3_backup_20261028: {
+        Row: {
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      schema_migrations_p4_backup_20261028: {
+        Row: {
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      schema_migrations_p5_backup_20261028: {
+        Row: {
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string
+        }
+        Insert: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version: string
+        }
+        Update: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string
+        }
+        Relationships: []
+      }
+      schema_migrations_p6_backup_20261029: {
+        Row: {
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string
+        }
+        Insert: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version: string
+        }
+        Update: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string
+        }
+        Relationships: []
+      }
+      schema_migrations_p8_backup_20261029: {
+        Row: {
+          backed_up_at: string | null
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string
+        }
+        Insert: {
+          backed_up_at?: string | null
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version: string
+        }
+        Update: {
+          backed_up_at?: string | null
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string
+        }
+        Relationships: []
+      }
+      schema_migrations_p9_backup_20261029: {
+        Row: {
+          created_by: string | null
+          idempotency_key: string | null
+          name: string | null
+          rollback: string[] | null
+          statements: string[] | null
+          version: string
+        }
+        Insert: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version: string
+        }
+        Update: {
+          created_by?: string | null
+          idempotency_key?: string | null
+          name?: string | null
+          rollback?: string[] | null
+          statements?: string[] | null
+          version?: string
         }
         Relationships: []
       }
@@ -3725,6 +4033,30 @@ export type Database = {
         }
         Relationships: []
       }
+      test_cleanup_backup_20261028: {
+        Row: {
+          backed_up_at: string
+          id: number
+          row_data: Json
+          row_id: string
+          tbl: string
+        }
+        Insert: {
+          backed_up_at?: string
+          id?: number
+          row_data: Json
+          row_id: string
+          tbl: string
+        }
+        Update: {
+          backed_up_at?: string
+          id?: number
+          row_data?: Json
+          row_id?: string
+          tbl?: string
+        }
+        Relationships: []
+      }
       test_skill_results: {
         Row: {
           applied_at: string | null
@@ -4395,6 +4727,10 @@ export type Database = {
         }
       }
       clean_old_geolocation_cache: { Args: never; Returns: undefined }
+      cleanup_engine_rate_limits: {
+        Args: { p_older_than_seconds?: number }
+        Returns: number
+      }
       cleanup_worksheet_base64: {
         Args: never
         Returns: {
@@ -4411,6 +4747,15 @@ export type Database = {
           p_teacher_id: string
         }
         Returns: undefined
+      }
+      consume_engine_rate_limit: {
+        Args: {
+          p_bucket: string
+          p_key: string
+          p_limit: number
+          p_window_seconds: number
+        }
+        Returns: Json
       }
       consume_exercise_credit: {
         Args: {
@@ -4463,6 +4808,7 @@ export type Database = {
         Returns: number
       }
       dslm_validation_report: { Args: never; Returns: Json }
+      engine_pre_check: { Args: { p_user_id: string }; Returns: Json }
       extract_micro_skill: { Args: { skill_name: string }; Returns: string }
       extract_skill_category: { Args: { skill_name: string }; Returns: string }
       find_student_by_email: {
@@ -5343,24 +5689,6 @@ export type Database = {
         }
         Returns: string
       }
-      set_homework_item_score: {
-        Args: {
-          p_exercise_index: number
-          p_homework_id: string
-          p_mastery: number
-          p_question_index: number
-        }
-        Returns: Json
-      }
-      set_homework_item_verdict: {
-        Args: {
-          p_correct: boolean
-          p_exercise_index: number
-          p_homework_id: string
-          p_question_index: number
-        }
-        Returns: Json
-      }
       save_teacher_comment: {
         Args: {
           p_comment_text: string
@@ -5456,6 +5784,24 @@ export type Database = {
           p_worksheet_id: string
         }
         Returns: string
+      }
+      set_homework_item_score: {
+        Args: {
+          p_exercise_index: number
+          p_homework_id: string
+          p_mastery: number
+          p_question_index: number
+        }
+        Returns: Json
+      }
+      set_homework_item_verdict: {
+        Args: {
+          p_correct: boolean
+          p_exercise_index: number
+          p_homework_id: string
+          p_question_index: number
+        }
+        Returns: Json
       }
       set_test_answered_count_by_share_token: {
         Args: { p_answered_count: number; p_share_token: string }
