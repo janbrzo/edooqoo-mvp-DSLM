@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { canTranslate, readTranslationResult, TRANSLATION_UNAVAILABLE_MESSAGE } from '@/lib/flashcards/translationResult';
 
 interface UseFlashcardDefinitionProps {
   enabled: boolean;
@@ -10,12 +12,13 @@ export const useFlashcardDefinition = ({ enabled }: UseFlashcardDefinitionProps)
   const [cefrLevel, setCefrLevel] = useState<string | null>(null);
   const [isLoadingDefinition, setIsLoadingDefinition] = useState(false);
 
-  const cacheRef = useRef<Map<string, { definition: string; cefr_level: string }>>(new Map());
+  const { toast } = useToast();
+  const cacheRef = useRef<Map<string, { definition: string; cefr_level: string | null }>>(new Map());
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchDefinition = useCallback(
     async (englishTerm: string) => {
-      if (!enabled || !(englishTerm || '').trim()) {
+      if (!enabled || !canTranslate(englishTerm)) {
         setDefinition('');
         setCefrLevel(null);
         return;
@@ -47,11 +50,16 @@ export const useFlashcardDefinition = ({ enabled }: UseFlashcardDefinitionProps)
 
           if (error) throw error;
 
-          const definitionText = data?.translation || '';
-          const level = data?.cefr_level || 'A2';
-          setDefinition(definitionText);
-          setCefrLevel(level);
-          cacheRef.current.set(cacheKey, { definition: definitionText, cefr_level: level });
+          const result = readTranslationResult(data);
+          if (!result) {
+            setDefinition('');
+            setCefrLevel(null);
+            toast({ title: 'No definition suggested', description: TRANSLATION_UNAVAILABLE_MESSAGE });
+            return;
+          }
+          setDefinition(result.translation);
+          setCefrLevel(result.cefrLevel);
+          cacheRef.current.set(cacheKey, { definition: result.translation, cefr_level: result.cefrLevel });
         } catch (error: any) {
           console.error('Definition fetch error:', error);
           setDefinition('');
@@ -61,7 +69,7 @@ export const useFlashcardDefinition = ({ enabled }: UseFlashcardDefinitionProps)
         }
       }, 800);
     },
-    [enabled]
+    [enabled, toast]
   );
 
   const clearDefinition = useCallback(() => {

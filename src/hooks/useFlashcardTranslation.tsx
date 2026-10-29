@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { canTranslate, readTranslationResult, TRANSLATION_UNAVAILABLE_MESSAGE } from '@/lib/flashcards/translationResult';
 
 interface UseFlashcardTranslationProps {
   targetLanguage: string;
@@ -13,12 +14,12 @@ export const useFlashcardTranslation = ({ targetLanguage, enabled }: UseFlashcar
   const [isTranslating, setIsTranslating] = useState(false);
   const { toast } = useToast();
 
-  const cacheRef = useRef<Map<string, { translation: string; cefr_level: string }>>(new Map());
+  const cacheRef = useRef<Map<string, { translation: string; cefr_level: string | null }>>(new Map());
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const translateText = useCallback(
     async (englishText: string) => {
-      if (!enabled || !(englishText || '').trim()) {
+      if (!enabled || !canTranslate(englishText)) {
         setTranslation('');
         setCefrLevel(null);
         return;
@@ -49,11 +50,17 @@ export const useFlashcardTranslation = ({ targetLanguage, enabled }: UseFlashcar
 
           if (error) throw error;
 
-          const translatedText = data?.translation || '';
-          const level = data?.cefr_level || 'A2';
-          setTranslation(translatedText);
-          setCefrLevel(level);
-          cacheRef.current.set(cacheKey, { translation: translatedText, cefr_level: level });
+          const result = readTranslationResult(data);
+          if (!result) {
+            // Refusal or junk from the model: never fill the card back.
+            setTranslation('');
+            setCefrLevel(null);
+            toast({ title: 'No translation suggested', description: TRANSLATION_UNAVAILABLE_MESSAGE });
+            return;
+          }
+          setTranslation(result.translation);
+          setCefrLevel(result.cefrLevel);
+          cacheRef.current.set(cacheKey, { translation: result.translation, cefr_level: result.cefrLevel });
         } catch (error: any) {
           console.error('Translation error:', error);
           setTranslation('');

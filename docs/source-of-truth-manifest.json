@@ -792,6 +792,7 @@
       "hooks": [
         "useEffect",
         "useFlashcardLearning",
+        "useNavigate",
         "useParams",
         "useSearchParams",
         "useState"
@@ -4057,6 +4058,7 @@
       "hooks": [
         "useEffect",
         "useFlashcardLearning",
+        "useNavigate",
         "useParams",
         "useSearchParams",
         "useState"
@@ -23151,6 +23153,11 @@
               "optional": true
             },
             {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
               "name": "studentName",
               "type": "string",
               "optional": false
@@ -41965,7 +41972,8 @@
         "hooks": [
           "useCallback",
           "useRef",
-          "useState"
+          "useState",
+          "useToast"
         ],
         "actions": [],
         "navigateTargets": [],
@@ -48326,30 +48334,34 @@
         ],
         "requestFields": [
           "isAllSets",
-          "portalUrl",
           "recipientEmail",
-          "setTitle",
           "shareToken",
+          "studentId",
           "teacherName"
         ],
         "visibleResponseFields": [
-          "emailId",
-          "error",
           "from",
           "html",
           "subject",
-          "success",
           "to"
         ],
         "dataDependencies": {
-          "tables": [],
-          "rpcs": [],
+          "tables": [
+            "calendar_settings",
+            "flashcard_sets",
+            "profiles",
+            "students"
+          ],
+          "rpcs": [
+            "consume_newsletter_rate_limit"
+          ],
           "edgeFunctions": [],
           "fetchTargets": [
             "https://api.resend.com/emails"
           ]
         },
         "environmentVariables": [
+          "APP_BASE_URL",
           "RESEND_API_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
@@ -49148,16 +49160,9 @@
           "POST"
         ],
         "requestFields": [
-          "choices",
-          "mode",
-          "target_language",
-          "text"
+          "choices"
         ],
-        "visibleResponseFields": [
-          "cefr_level",
-          "error",
-          "translation"
-        ],
+        "visibleResponseFields": [],
         "dataDependencies": {
           "tables": [],
           "rpcs": [],
@@ -49848,10 +49853,10 @@
         ],
         "payloadFields": [
           "isAllSets",
-          "portalUrl",
           "recipientEmail",
           "setTitle",
           "shareToken",
+          "studentId",
           "teacherName"
         ],
         "payloadExpressions": []
@@ -51699,6 +51704,7 @@
             "get-student-hub-data",
             "get-student-self-profile",
             "send-calendar-notification-email",
+            "send-flashcard-email",
             "student-gcal-auth-callback",
             "student-gcal-sync",
             "update-student-self-profile"
@@ -53188,7 +53194,8 @@
             "src/pages/StudentPortal.tsx"
           ],
           "edgeFunctions": [
-            "get-student-hub-data"
+            "get-student-hub-data",
+            "send-flashcard-email"
           ]
         }
       },
@@ -54662,6 +54669,7 @@
             "process-welcome-test",
             "repair-subscriptions",
             "send-calendar-notification-email",
+            "send-flashcard-email",
             "send-homework-email",
             "send-worksheet-email",
             "stripe-webhook",
@@ -56501,6 +56509,7 @@
             "process-welcome-test",
             "recalculate-pacing",
             "send-calendar-notification-email",
+            "send-flashcard-email",
             "send-homework-email",
             "send-worksheet-email",
             "track-student-event",
@@ -60595,6 +60604,10 @@
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
+        "name": "backfill_skill_metrics",
+        "migration": "supabase/migrations/20261029090100_flashcard_security_guards.sql"
+      },
+      {
         "name": "billing_days_below_charge_threshold",
         "migration": "supabase/migrations/20261028101100_billing_charge_monitoring.sql"
       },
@@ -60735,6 +60748,10 @@
         "migration": "supabase/migrations/20261028111000_extract_skill_category_fallbacks.sql"
       },
       {
+        "name": "generate_flashcard_share_token",
+        "migration": "supabase/migrations/20261029090100_flashcard_security_guards.sql"
+      },
+      {
         "name": "generate_homework_share_token",
         "migration": "supabase/migrations/20261023090000_baseline_homework_prod_only_functions.sql"
       },
@@ -60753,6 +60770,14 @@
       {
         "name": "get_flashcard_cards_by_share_token",
         "migration": "supabase/migrations/20260728202525_74d9d02e-d674-4a75-955e-7eba54b61291.sql"
+      },
+      {
+        "name": "get_flashcard_cards_by_share_token",
+        "migration": "supabase/migrations/20261029090100_flashcard_security_guards.sql"
+      },
+      {
+        "name": "get_flashcard_set_by_share_token",
+        "migration": "supabase/migrations/20261029090100_flashcard_security_guards.sql"
       },
       {
         "name": "get_flashcard_set_is_bidirectional",
@@ -61179,6 +61204,10 @@
         "migration": "supabase/migrations/20261028101200_exercise_credit.sql"
       },
       {
+        "name": "soft_delete_flashcard_set",
+        "migration": "supabase/migrations/20261029090100_flashcard_security_guards.sql"
+      },
+      {
         "name": "soft_delete_worksheet",
         "migration": "supabase/migrations/20261016100000_w0_a_consume_token_live_answers_soft_delete.sql"
       },
@@ -61445,7 +61474,6 @@
           "supabase/functions/recalculate-pacing/index.ts",
           "supabase/functions/regenerate-gallery-sitemap/index.ts",
           "supabase/functions/repair-subscriptions/index.ts",
-          "supabase/functions/send-flashcard-email/index.ts",
           "supabase/functions/send-homework-email/index.ts",
           "supabase/functions/send-model-audit-email/index.ts",
           "supabase/functions/send-test-email/index.ts",
@@ -61544,7 +61572,8 @@
       {
         "host": "evil.com",
         "callsites": [
-          "src/lib/answers/__tests__/audioFetchGuard.test.ts"
+          "src/lib/answers/__tests__/audioFetchGuard.test.ts",
+          "src/lib/flashcards/__tests__/safeReturnTo.test.ts"
         ]
       },
       {
@@ -61683,12 +61712,6 @@
         ]
       },
       {
-        "host": "worksheetgenerator.lovable.app",
-        "callsites": [
-          "supabase/functions/send-flashcard-email/index.ts"
-        ]
-      },
-      {
         "host": "www.googleapis.com",
         "callsites": [
           "supabase/functions/gcal-auth-start/index.ts",
@@ -61730,6 +61753,7 @@
           "supabase/functions/publish-worksheet/index.ts",
           "supabase/functions/regenerate-gallery-sitemap/index.ts",
           "supabase/functions/send-calendar-notification-email/index.ts",
+          "supabase/functions/send-flashcard-email/index.ts",
           "supabase/functions/send-homework-email/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/send-next-lesson-newsletter/index.ts",

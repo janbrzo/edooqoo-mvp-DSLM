@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Globe, BookOpen, Loader2 } from 'lucide-react';
 import { NATIVE_LANGUAGES } from '@/types/flashcards';
+import { readTranslationResult } from '@/lib/flashcards/translationResult';
 
 interface QuickImportToFlashcardsModalProps {
   open: boolean;
@@ -250,16 +251,16 @@ export function QuickImportToFlashcardsModal({
           },
         });
 
-        if (!error && data?.translation) {
-          setTranslations(prev => ({ ...prev, [originalIndex]: data.translation }));
-        }
-        if (data?.cefr_level) {
-          setCefrLevels(prev => ({ ...prev, [originalIndex]: data.cefr_level }));
+        const result = error ? null : readTranslationResult(data);
+        if (result) {
+          setTranslations(prev => ({ ...prev, [originalIndex]: result.translation }));
+          if (result.cefrLevel) {
+            setCefrLevels(prev => ({ ...prev, [originalIndex]: result.cefrLevel as string }));
+          }
         }
       } catch (error) {
         console.error('Translation error for:', item.word, error);
-        // Fallback to original word
-        setTranslations(prev => ({ ...prev, [originalIndex]: item.word }));
+        // Leave the field empty so the teacher types it; never copy the English word.
       } finally {
         // Decrement loading count
         setTranslationsLoading(prev => Math.max(0, prev - 1));
@@ -280,15 +281,16 @@ export function QuickImportToFlashcardsModal({
         },
       });
 
-      if (!error && data?.translation) {
-        setTranslations(prev => ({ ...prev, [index]: data.translation }));
-      }
-      if (data?.cefr_level) {
-        setCefrLevels(prev => ({ ...prev, [index]: data.cefr_level }));
+      const result = error ? null : readTranslationResult(data);
+      if (result) {
+        setTranslations(prev => ({ ...prev, [index]: result.translation }));
+        if (result.cefrLevel) {
+          setCefrLevels(prev => ({ ...prev, [index]: result.cefrLevel as string }));
+        }
       }
     } catch (error) {
       console.error('Translation error for:', item.word, error);
-      setTranslations(prev => ({ ...prev, [index]: item.word }));
+      // Leave the field empty for manual entry; never copy the English word.
     }
   };
 

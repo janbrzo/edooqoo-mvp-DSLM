@@ -11,6 +11,7 @@ interface ShareAllFlashcardSetsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   studentEmail?: string;
+  studentId: string;
   studentName: string;
   teacherName?: string;
   teacherCalendarToken?: string | null;
@@ -20,6 +21,7 @@ export function ShareAllFlashcardSetsModal({
   open,
   onOpenChange,
   studentEmail = '',
+  studentId,
   studentName,
   teacherName = '',
   teacherCalendarToken,
@@ -69,12 +71,10 @@ export function ShareAllFlashcardSetsModal({
     try {
       const { error } = await supabase.functions.invoke('send-flashcard-email', {
         body: {
-          shareToken: 'all-sets',
           recipientEmail: email,
-          setTitle: `All Flashcard Sets for ${studentName}`,
           teacherName,
           isAllSets: true,
-          portalUrl,
+          studentId,
         },
       });
 

@@ -245,6 +245,7 @@ export function FlashcardSetsSection({
         open={isShareAllModalOpen}
         onOpenChange={setIsShareAllModalOpen}
         studentEmail={student?.student_email}
+        studentId={studentId}
         studentName={studentName}
         teacherName={profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : ''}
         teacherCalendarToken={teacherCalendarToken}
