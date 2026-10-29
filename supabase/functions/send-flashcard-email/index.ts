@@ -69,37 +69,47 @@ Deno.serve(async (req) => {
     let auditId = '';
 
     if (isAllSets) {
+      // studentId is optional: the hub link is teacher level, so older clients that
+      // do not send it still work. With it the student is verified and named.
       const studentId = typeof body.studentId === 'string' ? body.studentId.trim() : '';
-      if (!studentId) {
-        return jsonResponse({ error: 'Missing studentId' }, 400, corsHeaders);
+      let hubTeacherId: string | null = callerTeacherId;
+      let studentName = '';
+      if (studentId) {
+        const { data: student, error: studentError } = await admin
+          .from('students')
+          .select('id, name, teacher_id')
+          .eq('id', studentId)
+          .is('deleted_at', null)
+          .maybeSingle();
+        if (studentError) {
+          console.error('[send-flashcard-email] student lookup failed', studentError.message);
+          return jsonResponse({ error: 'Lookup failed' }, 500, corsHeaders);
+        }
+        if (!student || (callerTeacherId && student.teacher_id !== callerTeacherId)) {
+          return jsonResponse({ error: 'Student not found' }, 404, corsHeaders);
+        }
+        hubTeacherId = student.teacher_id;
+        studentName = cleanText(student.name);
+        auditId = `student:${student.id}`;
+      } else {
+        if (!hubTeacherId) {
+          return jsonResponse({ error: 'Missing studentId' }, 400, corsHeaders);
+        }
+        auditId = `teacher:${hubTeacherId}`;
       }
-      const { data: student, error: studentError } = await admin
-        .from('students')
-        .select('id, name, teacher_id')
-        .eq('id', studentId)
-        .is('deleted_at', null)
-        .maybeSingle();
-      if (studentError) {
-        console.error('[send-flashcard-email] student lookup failed', studentError.message);
-        return jsonResponse({ error: 'Lookup failed' }, 500, corsHeaders);
-      }
-      if (!student || (callerTeacherId && student.teacher_id !== callerTeacherId)) {
-        return jsonResponse({ error: 'Student not found' }, 404, corsHeaders);
-      }
-      ownerTeacherId = student.teacher_id;
+      ownerTeacherId = hubTeacherId;
 
       // Same token the teacher UI uses for /my/:token/flashcards.
       const { data: settings } = await admin
         .from('calendar_settings')
         .select('public_calendar_token')
-        .eq('teacher_id', student.teacher_id)
+        .eq('teacher_id', hubTeacherId)
         .maybeSingle();
       if (!settings?.public_calendar_token) {
         return jsonResponse({ error: 'Student portal link is not set up' }, 409, corsHeaders);
       }
       url = buildHubUrl(baseUrl, settings.public_calendar_token);
-      setTitle = `All Flashcard Sets for ${cleanText(student.name)}`;
-      auditId = `student:${student.id}`;
+      setTitle = studentName ? `All Flashcard Sets for ${studentName}` : 'All Flashcard Sets';
     } else {
       const shareToken = typeof body.shareToken === 'string' ? body.shareToken.trim() : '';
       if (!shareToken || shareToken.length > 200) {
