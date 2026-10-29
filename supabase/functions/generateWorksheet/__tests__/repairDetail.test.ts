@@ -52,6 +52,24 @@ describe('parseAIResponseDetailed', () => {
   });
 });
 
+describe('typographic quotes are rewritten only when the parse fails', () => {
+  it('valid JSON with curly quotes and apostrophes needs no repair step and its values are flattened', () => {
+    const input = JSON.stringify({ title: 'He said “hi” and it’s fine', exercises: [] });
+    const detailed = parseAIResponseDetailed(input);
+    expect(detailed.step).toBe('none');
+    expect(detailed.curly).toEqual([]);
+    expect(detailed.data.title).toBe('He said "hi" and it\'s fine');
+  });
+
+  it('JSON broken by curly double quotes is normalised and repaired as before', () => {
+    const input = '{"title":"x","exercises":[{"type":"reading","content":"He said "hi" and “ok” now"}]}';
+    const detailed = parseAIResponseDetailed(input);
+    expect(detailed.curly).toEqual(['curly-quotes']);
+    expect(detailed.step).toBe('escape-scan');
+    expect(detailed.data.exercises[0].content).toBe('He said "hi" and "ok" now');
+  });
+});
+
 describe('detectCurlyQuotes and joinRepairDetail', () => {
   it('names the curly-quote normalisation that will be applied', () => {
     expect(detectCurlyQuotes('{"a":"plain"}')).toEqual([]);

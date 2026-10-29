@@ -39,6 +39,8 @@ export interface GeminiStreamScript {
   chunks: string[];
   /** Thrown from the stream after all chunks were delivered. */
   throwAfter?: Error;
+  /** Reported by the last chunk (candidates[0].finishReason). */
+  finishReason?: string;
   /** The stream yields nothing until this promise settles. */
   gate?: Promise<void>;
 }
@@ -63,6 +65,8 @@ export interface World {
   /** Result of the geolocation cache lookup and the ipapi.co lookup. */
   geoCache: { data: unknown; error: unknown };
   ipapi: { ok: boolean; body: unknown } | Error;
+  /** The ipapi.co answer waits for this promise (geolocation off the critical path). */
+  ipapiGate?: Promise<void>;
   user: { id: string; is_anonymous: boolean } | null;
   /** Scripted RPC results (limits.handler.test.ts); unscripted calls fail like an unreachable database. */
   rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
@@ -124,7 +128,6 @@ export function summariseText(text: string) {
 }
 
 const GEMINI_SEP = '\n\n---\n\nUser Request:\n';
-const DB_SYSTEM = 'SYSTEM MESSAGE:\n';
 const DB_USER = '\n\nUSER MESSAGE:\n';
 
 export function summariseGeminiPrompt(prompt: string) {
@@ -137,10 +140,11 @@ export function summariseGeminiPrompt(prompt: string) {
 }
 
 export function summariseDbPrompt(prompt: string) {
-  if (!prompt.startsWith(DB_SYSTEM)) return { whole: summariseText(prompt) };
+  // worksheets.prompt = "engine_prompt_version=...; system_sha256=<hex>" + user message
   const i = prompt.lastIndexOf(DB_USER);
+  if (i < 0) return { whole: summariseText(prompt) };
   return {
-    system: summariseText(prompt.slice(DB_SYSTEM.length, i)),
+    header: prompt.slice(0, i),
     user: prompt.slice(i + DB_USER.length),
   };
 }
@@ -300,7 +304,13 @@ export const modules = {
               response: Promise.resolve({}),
               stream: (async function* () {
                 if (script.gate) await script.gate;
-                for (const c of script.chunks) yield { text: () => c };
+                for (let i = 0; i < script.chunks.length; i++) {
+                  const c = script.chunks[i];
+                  const last = i === script.chunks.length - 1;
+                  yield last && script.finishReason
+                    ? { text: () => c, candidates: [{ finishReason: script.finishReason }] }
+                    : { text: () => c };
+                }
                 if (script.throwAfter) throw script.throwAfter;
               })(),
             };
@@ -336,6 +346,13 @@ export function installWorld() {
     () => `00000000-0000-4000-8000-${String(++uuid).padStart(12, '0')}` as `${string}-${string}-${string}-${string}-${string}`,
   );
 
+  // The real digest completes on a later event-loop turn; hashing synchronously keeps
+  // the order of the log lines independent of machine load (same bytes, same hex).
+  vi.spyOn(globalThis.crypto.subtle, 'digest').mockImplementation(async (_algorithm: unknown, data: any) => {
+    const hash = createHash('sha256').update(Buffer.from(data as ArrayBuffer)).digest();
+    return hash.buffer.slice(hash.byteOffset, hash.byteOffset + hash.byteLength);
+  });
+
   vi.stubGlobal('Deno', {
     env: { get: (key: string) => ENV[key] },
     serve: (handler: any) => {
@@ -355,8 +372,11 @@ export function installWorld() {
     // A real fetch settles after at least one macrotask. Without this the
     // position of a detached notification's log line among the other log lines
     // would depend on how many microtask hops the surrounding code takes.
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    // The geolocation lookup runs beside the model call; answering it without a
+    // macrotask keeps the order of the log lines independent of machine load.
+    if (!String(url).startsWith('https://ipapi.co/')) await new Promise((resolve) => setTimeout(resolve, 0));
     if (String(url).startsWith('https://ipapi.co/')) {
+      if (w.ipapiGate) await w.ipapiGate;
       const r = w.ipapi;
       if (r instanceof Error) throw r;
       return { ok: r.ok, status: r.ok ? 200 : 500, json: async () => r.body };

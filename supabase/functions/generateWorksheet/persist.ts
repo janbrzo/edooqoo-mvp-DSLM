@@ -2,11 +2,29 @@
 // the service role. The caller decides what a failed insert means (streaming
 // throws, regular logs and carries on).
 import { supabase } from "./clients.ts";
+import { ENGINE_PROMPT_VERSION } from "./engineVersion.ts";
+import { replaceEmDashesInJsonText } from "./emDash.ts";
 import type { GenerationRequest, WorksheetPlan } from "./composeRequest.ts";
 
 export interface InsertedWorksheet {
   data: any;
   error: any;
+}
+
+/** Lowercase hex SHA-256 of a text. */
+export async function sha256Hex(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * What `worksheets.prompt` stores: a version header (which engine prompt and
+ * which exact system message produced the row) and the teacher's request. The
+ * system message itself is core IP and is not copied into every row.
+ */
+export async function buildStoredPrompt(systemMessage: string, userMessage: string): Promise<string> {
+  const header = `engine_prompt_version=${ENGINE_PROMPT_VERSION}; system_sha256=${await sha256Hex(systemMessage)}`;
+  return `${header}\n\nUSER MESSAGE:\n${userMessage}`;
 }
 
 export async function insertWorksheetRow(
@@ -17,9 +35,11 @@ export async function insertWorksheetRow(
   generationTimeSeconds: number,
 ): Promise<InsertedWorksheet> {
   const { formData, userId, studentId, teacherEmail, ip, geoData, sanitizedPrompt } = request;
+  // The lookup ran beside the model call; it is long settled unless the model was very fast.
+  await request.geoReady;
   const { selectedImage, selectedAudio, systemMessage } = plan;
 
-  const fullPrompt = `SYSTEM MESSAGE:\n${systemMessage}\n\nUSER MESSAGE:\n${sanitizedPrompt}`;
+  const storedPrompt = await buildStoredPrompt(systemMessage, sanitizedPrompt);
   const sanitizedFormData = formData ? JSON.parse(JSON.stringify(formData)) : {};
 
   // 🧹 OPTIMIZATION 3A: Remove base64 data URLs before saving to database
@@ -46,7 +66,9 @@ export async function insertWorksheetRow(
     : null;
 
   // 📊 MONITORING: Log ai_response length for truncation tracking
-  const aiResponseLength = aiContent?.length || 0;
+  // ai_response is what a reopened worksheet displays first, so the em dash cleanup applies to it too.
+  const cleanAiContent = aiContent === null ? null : replaceEmDashesInJsonText(aiContent);
+  const aiResponseLength = cleanAiContent?.length || 0;
   const aiResponseLimit = 200000;
   const wasTruncated = aiResponseLength > aiResponseLimit;
   console.log(`📊 [MONITORING] ai_response length: ${aiResponseLength} chars, limit: ${aiResponseLimit}, truncated: ${wasTruncated}`);
@@ -60,9 +82,9 @@ export async function insertWorksheetRow(
   const { data, error } = await supabase
     .from("worksheets")
     .insert({
-      prompt: fullPrompt,
+      prompt: storedPrompt,
       form_data: sanitizedFormData,
-      ai_response: aiContent?.substring(0, aiResponseLimit) || "",
+      ai_response: cleanAiContent?.substring(0, aiResponseLimit) || "",
       html_content: JSON.stringify(worksheetData),
       user_id: userId || null,
       teacher_id: userId || null,

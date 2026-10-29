@@ -196,6 +196,7 @@ describe('engine_quality log line', () => {
     expect(Object.keys(q)).toEqual([
       'schema', 'engine_prompt_version', 'gate_mode', 'mode', 'model', 'fallback_used', 'repair_method',
       'repair_detail', 'generation_ms', 'worksheet_id', 'client_generation_id', 'has_media', 'checks', 'defects',
+      'finish_reason', 'truncated', 'primary_failure', 'fallback_skipped', 'em_dash_replaced',
     ]);
     expect(q).toMatchObject({
       schema: 1,
@@ -310,7 +311,7 @@ describe('repair telemetry', () => {
     expect((alerts[0] as any).body.errorType).toBe('parse_recovered');
   });
 
-  it('names the curly quote handling together with the repair it needed, output unchanged', async () => {
+  it('parses valid JSON with typographic quotes without a repair step and flattens them per value', async () => {
     const scenario: Scenario = (w) => {
       const sheet = worksheetFixture(DEFAULT_8);
       (sheet.exercises[0] as any).content = 'He said “please wait” and it’s fine.';
@@ -320,8 +321,21 @@ describe('repair telemetry', () => {
     const run = await runScenario(undefined, scenario);
     const q = qualityOf(run.logs)[0];
     expect(q.repair_method).toBe('none');
-    expect(q.repair_detail).toBe('curly-quotes+curly-apostrophes+escape-scan');
-    // the repaired content is what it always was: straight quotes, escaped
+    expect(q.repair_detail).toBe('none');
     expect(JSON.parse(run.insertRows[0].html_content).exercises[0].content).toBe('He said "please wait" and it\'s fine.');
+  });
+
+  it('still names the curly quote handling when the document needed a repair', async () => {
+    const scenario: Scenario = (w) => {
+      const text = JSON.stringify(worksheetFixture(DEFAULT_8)).replace('"Hello', '“Hello').replace(/,\s*"type":"reading"/, '');
+      // a stray straight quote inside a string forces the repair layers, curly quotes are still normalised first
+      const broken = text.replace(/"title":"([^"]*)"/, '"title":"He said "$1" it’s"');
+      w.geminiStream = () => ({ chunks: [broken] });
+      return { body: streamBody() };
+    };
+    const run = await runScenario(undefined, scenario);
+    const q = qualityOf(run.logs)[0];
+    expect(q.repair_detail).toContain('curly-apostrophes');
+    expect(q.repair_detail).toContain('escape-scan');
   });
 });

@@ -75,12 +75,8 @@ export const useHomeworkExerciseGeneration = () => {
         const data = await response.json();
         devLog('✅ Batch generation successful:', data);
 
-        if (data.fullPrompt) {
-          devLog('📝 Received full prompt from edge function (length:', data.fullPrompt.length, 'characters)');
-          setLastPrompt(data.fullPrompt);
-        } else {
-          devLog('⚠️ No fullPrompt in response, using simplified prompt');
-        }
+        // The edge function no longer returns its system message (core IP);
+        // `lastPrompt` stays the request text this hook built above.
 
         if (data.exercises && Array.isArray(data.exercises)) {
           const exercisesWithState = data.exercises.map((exercise: any, index: number) => ({

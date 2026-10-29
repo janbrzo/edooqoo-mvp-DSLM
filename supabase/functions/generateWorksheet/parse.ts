@@ -1,5 +1,11 @@
 import { parseAIResponseDetailed, extractJSONString, detectCurlyQuotes, joinRepairDetail } from "./helpers.ts";
 import { openai, OPENAI_FALLBACK_MODEL } from "./clients.ts";
+import { ENGINE_BUDGETS, callBudgetMs, withCallTimeout } from "./engineBudgets.ts";
+
+/** Optional request deadline (absolute ms): AI calls are clipped to the time left, or skipped. */
+export interface ParseBudget {
+  deadlineAt?: number;
+}
 
 // ============================================================
 // v6.9.64 — Parse-safe model fallback for picture worksheets.
@@ -12,9 +18,12 @@ import { openai, OPENAI_FALLBACK_MODEL } from "./clients.ts";
 export async function generateFallbackJsonWithOpenAI(
   systemMessage: string,
   userMessage: string,
+  budget: ParseBudget = {},
 ): Promise<{ content: string; model: string }> {
   console.log(`🟠 [JSON-FALLBACK] Regenerating worksheet JSON with ${OPENAI_FALLBACK_MODEL} after malformed Gemini JSON`);
-  const response = await (openai.chat.completions.create as any)({
+  const ms = callBudgetMs(Number.POSITIVE_INFINITY, budget.deadlineAt, Date.now());
+  if (ms < ENGINE_BUDGETS.aiRepairMinMs) throw new Error('JSON fallback skipped: request time budget used up (timeout)');
+  const response = await withCallTimeout(ms, (signal) => (openai.chat.completions.create as any)({
     model: OPENAI_FALLBACK_MODEL,
     temperature: 1,
     messages: [
@@ -23,7 +32,7 @@ export async function generateFallbackJsonWithOpenAI(
     ],
     max_completion_tokens: 30000,
     response_format: { type: 'json_object' },
-  });
+  }, { signal, maxRetries: 0 }));
   return {
     content: response.choices?.[0]?.message?.content || '',
     model: `${OPENAI_FALLBACK_MODEL}-json-fallback`,
@@ -36,9 +45,10 @@ export async function parseOrRegenerateWithFallback(params: {
   systemMessage: string;
   sanitizedPrompt: string;
   allowRegenerateFallback: boolean;
+  deadlineAt?: number;
 }): Promise<{ data: any; content: string; repairMethod: string; repairDetail: string; modelOverride?: string }> {
   try {
-    const parsed = await parseWithRecovery(params.rawContent, params.expectedExerciseCount);
+    const parsed = await parseWithRecovery(params.rawContent, params.expectedExerciseCount, { deadlineAt: params.deadlineAt });
     return {
       data: parsed.data,
       content: params.rawContent,
@@ -48,8 +58,8 @@ export async function parseOrRegenerateWithFallback(params: {
   } catch (firstError) {
     if (!params.allowRegenerateFallback) throw firstError;
     console.warn('⚠️ [JSON-FALLBACK] Parse/repair failed; trying full JSON regeneration fallback');
-    const fallback = await generateFallbackJsonWithOpenAI(params.systemMessage, params.sanitizedPrompt);
-    const parsed = await parseWithRecovery(fallback.content, params.expectedExerciseCount);
+    const fallback = await generateFallbackJsonWithOpenAI(params.systemMessage, params.sanitizedPrompt, { deadlineAt: params.deadlineAt });
+    const parsed = await parseWithRecovery(fallback.content, params.expectedExerciseCount, { deadlineAt: params.deadlineAt });
     return {
       data: parsed.data,
       content: fallback.content,
@@ -65,7 +75,7 @@ export async function parseOrRegenerateWithFallback(params: {
 // Secondary recovery: uses a deterministic model to fix malformed JSON
 // Does NOT re-generate content — only repairs structural JSON issues
 // ============================================================
-async function repairWorksheetJsonWithAI(brokenJson: string, expectedExerciseCount: number): Promise<string> {
+async function repairWorksheetJsonWithAI(brokenJson: string, expectedExerciseCount: number, budget: ParseBudget = {}): Promise<string> {
   console.log('🔧 [AI-REPAIR] Starting AI JSON repair pass...');
   console.log(`🔧 [AI-REPAIR] Input length: ${brokenJson.length}, expected exercises: ${expectedExerciseCount}`);
 
@@ -83,7 +93,9 @@ BROKEN JSON:
 ${brokenJson}`;
 
   try {
-    const repairResponse = await (openai.chat.completions.create as any)({
+    const ms = callBudgetMs(ENGINE_BUDGETS.aiRepairDocumentMs, budget.deadlineAt, Date.now());
+    if (ms < ENGINE_BUDGETS.aiRepairMinMs) throw new Error('AI repair skipped: request time budget used up (timeout)');
+    const repairResponse = await withCallTimeout(ms, (signal) => (openai.chat.completions.create as any)({
       model: "gpt-4o-mini",
       temperature: 0,
       messages: [
@@ -92,7 +104,7 @@ ${brokenJson}`;
       ],
       max_completion_tokens: 16000,
       response_format: { type: "json_object" },
-    });
+    }, { signal, maxRetries: 0 }));
 
     const repairedContent = repairResponse.choices[0]?.message?.content || "";
     console.log(`🔧 [AI-REPAIR] Repair response length: ${repairedContent.length}`);
@@ -117,6 +129,7 @@ async function repairJsonWindowWithAI(
   brokenJson: string,
   errorPosition: number,
   radius = 3000,
+  budget: ParseBudget = {},
 ): Promise<string | null> {
   if (!Number.isFinite(errorPosition) || errorPosition < 0) return null;
   const start = Math.max(0, errorPosition - radius);
@@ -125,7 +138,9 @@ async function repairJsonWindowWithAI(
   console.log(`🔧 [AI-REPAIR-WINDOW] pos=${errorPosition} window=[${start}, ${end}) len=${windowText.length}`);
 
   try {
-    const res = await (openai.chat.completions.create as any)({
+    const ms = callBudgetMs(ENGINE_BUDGETS.aiRepairWindowMs, budget.deadlineAt, Date.now());
+    if (ms < ENGINE_BUDGETS.aiRepairMinMs) return null;
+    const res = await withCallTimeout(ms, (signal) => (openai.chat.completions.create as any)({
       model: "gpt-4o-mini",
       temperature: 0,
       messages: [
@@ -140,7 +155,7 @@ async function repairJsonWindowWithAI(
         { role: "user", content: windowText },
       ],
       max_completion_tokens: 8000,
-    });
+    }, { signal, maxRetries: 0 }));
     const fixed = (res.choices[0]?.message?.content || "").replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/i, '');
     if (!fixed) return null;
     console.log(`🔧 [AI-REPAIR-WINDOW] fragment repaired (${windowText.length} → ${fixed.length})`);
@@ -159,13 +174,16 @@ async function repairJsonWindowWithAI(
 export async function parseWithRecovery(
   rawContent: string,
   expectedExerciseCount: number,
+  budget: ParseBudget = {},
 ): Promise<{ data: any; repairMethod: string; repairDetail: string }> {
-  const curly = detectCurlyQuotes(rawContent);
   // Attempt 1: Local parsing (extract + deterministic repair)
+  let curly: string[] = [];
   try {
-    const { data, step } = parseAIResponseDetailed(rawContent);
-    return { data, repairMethod: 'none', repairDetail: joinRepairDetail([...curly, step]) };
+    const { data, step, curly: applied } = parseAIResponseDetailed(rawContent);
+    return { data, repairMethod: 'none', repairDetail: joinRepairDetail([...applied, step]) };
   } catch (localError) {
+    // A failed local parse always went through the curly-quote rewrite.
+    curly = detectCurlyQuotes(rawContent);
     console.warn('⚠️ Local parse failed, attempting AI repair pass...');
 
     // Attempt 2: AI repair pass
@@ -173,7 +191,7 @@ export async function parseWithRecovery(
 
     // Attempt 2a: cheap, fast windowed repair around the reported position.
     const errorPosition = (localError as any).errorPosition ?? -1;
-    const windowed = await repairJsonWindowWithAI(rawForRepair, errorPosition);
+    const windowed = await repairJsonWindowWithAI(rawForRepair, errorPosition, 3000, budget);
     if (windowed) {
       try {
         const { data, step } = parseAIResponseDetailed(windowed);
@@ -185,7 +203,7 @@ export async function parseWithRecovery(
     }
 
     try {
-      const repairedJson = await repairWorksheetJsonWithAI(rawForRepair, expectedExerciseCount);
+      const repairedJson = await repairWorksheetJsonWithAI(rawForRepair, expectedExerciseCount, budget);
       const { data, step } = parseAIResponseDetailed(repairedJson);
       console.log('✅ json_repair_ai_succeeded');
       return { data, repairMethod: 'ai', repairDetail: joinRepairDetail([...curly, 'ai', step]) };

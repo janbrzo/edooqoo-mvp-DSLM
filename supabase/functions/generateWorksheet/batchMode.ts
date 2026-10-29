@@ -5,7 +5,10 @@ import { classifyErrorType, notifyGenerationFailure } from "./notify.ts";
 import { parseWithRecovery } from "./parse.ts";
 import { generateNonStreaming } from "./model.ts";
 import { checkBatchStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
+import { sanitizeEmDashes } from "./emDash.ts";
 import { runPipeline } from "./pipeline.ts";
+import { deadlineFrom } from "./engineBudgets.ts";
+import { newModelRunInfo } from "./providerErrors.ts";
 import { planBatch, type GenerationRequest } from "./composeRequest.ts";
 
 export async function runBatchMode(request: GenerationRequest): Promise<Response> {
@@ -17,6 +20,8 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
   // Telemetry only: what parse reported, read again by the gate observation.
   let observedRepairMethod = "none";
   let observedRepairDetail = "none";
+  const modelInfo = newModelRunInfo();
+  const deadlineAt = deadlineFrom(generationStartTime);
 
   return runPipeline<string, any, void, Response>({
     // Try Gemini first, fallback to OpenAI
@@ -26,7 +31,7 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
         geminiSucceeded: `✅ [BATCH-MODE] Gemini 2.5 Flash succeeded`,
         geminiFailed: "⚠️ [BATCH-MODE] Gemini failed, falling back to OpenAI fallback model:",
         openaiSucceeded: `✅ [BATCH-MODE] OpenAI fallback succeeded`,
-      });
+      }, { generationStartTime, info: modelInfo });
       const batchContent: string = modelResult.content || "";
       usedModel = modelResult.model;
 
@@ -41,7 +46,7 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
     },
 
     async parse(batchContent) {
-      const { data: batchData, repairMethod, repairDetail } = await parseWithRecovery(batchContent, plan.totalExerciseCount);
+      const { data: batchData, repairMethod, repairDetail } = await parseWithRecovery(batchContent, plan.totalExerciseCount, { deadlineAt });
       observedRepairMethod = repairMethod;
       observedRepairDetail = repairDetail;
       logAiRepairEarlyWarning("batch", repairMethod, repairDetail);
@@ -72,11 +77,14 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
         repairMethod: observedRepairMethod,
         repairDetail: observedRepairDetail,
         generationStartTime,
+        modelInfo,
       });
     },
 
-    // Batch exercises are returned exactly as the model produced them.
-    normalise() {},
+    // Only em dashes are cleaned; the exercises are otherwise returned as the model produced them.
+    normalise(batchData) {
+      sanitizeEmDashes(batchData);
+    },
 
     onProcessingError(error) {
       console.error(`❌ [BATCH-MODE] Failed to parse batch response:`, error);
@@ -93,11 +101,10 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
       console.log(`✅ [BATCH-MODE] Generated ${batchData.exercises.length} exercises in ONE request (${usedModel})`);
       console.log(`⏱️  [BATCH-MODE] Total batch generation time: ${batchGenerationTime} seconds`);
 
-      // Return batch exercises directly WITH FULL PROMPT for storage in homework_assignments.prompt
+      // The system message (core IP) is never sent to the browser.
       return new Response(
         JSON.stringify({
           exercises: batchData.exercises,
-          fullPrompt: plan.systemMessage, // ✅ Return complete system message for homework_assignments.prompt
           success: true,
         }),
         {

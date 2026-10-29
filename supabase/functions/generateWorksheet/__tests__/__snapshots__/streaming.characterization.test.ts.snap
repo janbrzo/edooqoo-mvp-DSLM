@@ -57,8 +57,8 @@ data: {"n":2,"text":"x\\ny"}
 ",
   ],
   "logs": [
-    "log: 📡 SSE sent: start {"a":1}",
-    "log: 📡 SSE sent: progress {"n":2,"text":"x\\ny"}",
+    "log: 📡 SSE sent: start (28 bytes)",
+    "log: 📡 SSE sent: progress (45 bytes)",
     "log: ✅ SSE stream closed",
   ],
   "results": [
@@ -71,7 +71,7 @@ data: {"n":2,"text":"x\\ny"}
 
 exports[`createSSEStream > send logs the event name and payload 1`] = `
 [
-  "log: 📡 SSE sent: progress {"exercisesGenerated":3,"expectedTotal":8}",
+  "log: 📡 SSE sent: progress (66 bytes)",
   "log: ✅ SSE stream closed",
 ]
 `;

@@ -8,6 +8,8 @@ import { checkExerciseCount, checkWorksheetStructure, logAiRepairEarlyWarning, o
 import { normaliseWorksheet } from "./normalise.ts";
 import { insertWorksheetRow } from "./persist.ts";
 import { runPipeline } from "./pipeline.ts";
+import { deadlineFrom } from "./engineBudgets.ts";
+import { newModelRunInfo } from "./providerErrors.ts";
 import type { GenerationRequest, WorksheetPlan } from "./composeRequest.ts";
 
 export async function runRegularMode(request: GenerationRequest, plan: WorksheetPlan): Promise<Response> {
@@ -26,6 +28,8 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
   // Telemetry only: what parse reported, read again by the gate observation.
   let observedRepairMethod = "none";
   let observedRepairDetail = "none";
+  const modelInfo = newModelRunInfo();
+  const deadlineAt = deadlineFrom(generationStartTime);
 
   return runPipeline<string | null, any, void, Response>({
     // Generate worksheet - Try Gemini first, fallback to OpenAI
@@ -35,7 +39,7 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
         geminiSucceeded: `✅ Gemini 2.5 Flash succeeded`,
         geminiFailed: "⚠️ Gemini failed, falling back to OpenAI fallback model:",
         openaiSucceeded: `✅ OpenAI fallback succeeded`,
-      });
+      }, { generationStartTime, info: modelInfo });
       jsonContent = regularModelResult.content;
       usedModel = regularModelResult.model;
 
@@ -73,6 +77,7 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
         systemMessage,
         sanitizedPrompt,
         allowRegenerateFallback: hasPictureMedia,
+        deadlineAt,
       });
       const worksheetData = recovery.data;
       jsonContent = recovery.content;
@@ -106,6 +111,7 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
         repairMethod: observedRepairMethod,
         repairDetail: observedRepairDetail,
         generationStartTime,
+        modelInfo,
       });
       checkExerciseCount(worksheetData, exerciseCount, isRegeneration);
     },
@@ -113,7 +119,7 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
     normalise: normaliseWorksheet,
 
     onProcessingError(parseError) {
-      console.error("Failed to parse AI response as JSON:", parseError, "Response content:", jsonContent?.substring(0, 500));
+      console.error("Failed to parse AI response as JSON:", parseError, { responseLength: jsonContent?.length || 0 });
       notifyGenerationFailure('parse', parseError instanceof Error ? parseError.message : String(parseError), {
         userId, teacherEmail, model: usedModel,
         promptPreview: sanitizedPrompt?.substring(0, 300),
@@ -187,7 +193,6 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
           hasUrl: !!selectedImage.url,
           source: selectedImage.source,
           urlType: selectedImage.url?.startsWith("data:") ? "base64" : "external",
-          urlPreview: selectedImage.url?.substring(0, 80) + "...",
         });
       }
 

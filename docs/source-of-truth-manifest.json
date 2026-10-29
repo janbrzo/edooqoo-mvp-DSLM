@@ -18,7 +18,7 @@
     "routes": 94,
     "pageModules": 88,
     "componentModules": 408,
-    "hookModules": 106,
+    "hookModules": 107,
     "contextModules": 1,
     "serviceModules": 19,
     "edgeFunctions": 80,
@@ -40144,6 +40144,31 @@
         }
       },
       {
+        "path": "src/hooks/__tests__/useHomeworkExerciseGeneration.test.tsx",
+        "domain": "__tests__",
+        "purpose": "Implements use Homework Exercise Generation behavior in the tests domain.",
+        "exports": [],
+        "props": [],
+        "state": [],
+        "hooks": [
+          "useHomeworkExerciseGeneration"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
         "path": "src/hooks/__tests__/useTokenSystem.consumeToken.test.tsx",
         "domain": "__tests__",
         "purpose": "Implements use Token System.consume Token behavior in the tests domain.",
@@ -47458,7 +47483,6 @@
           "errorMessage",
           "errorType",
           "exercises",
-          "fullPrompt",
           "success",
           "timestamp"
         ],

@@ -1,10 +1,12 @@
 // Streaming mode: the full worksheet is generated in the background while an
 // SSE stream reports progress; the worksheet is always saved, even when the
 // client disconnects.
-import { corsHeaders, openai, OPENAI_FALLBACK_MODEL } from "./clients.ts";
+import { corsHeaders, OPENAI_FALLBACK_MODEL } from "./clients.ts";
 import { classifyErrorType, notifyGenerationFailure, waitUntilIfAvailable, waitUntilOrAwait } from "./notify.ts";
 import { parseOrRegenerateWithFallback, parseWithRecovery } from "./parse.ts";
-import { generateWithGeminiStream } from "./model.ts";
+import { generateWithGeminiStream, generateWithOpenAIStream, shouldFallBack } from "./model.ts";
+import { deadlineFrom } from "./engineBudgets.ts";
+import { ModelTruncatedError, newModelRunInfo, toPublicError } from "./providerErrors.ts";
 import { checkWorksheetStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { normaliseWorksheet } from "./normalise.ts";
 import { insertWorksheetRow } from "./persist.ts";
@@ -76,6 +78,9 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
     // Telemetry only: what parse reported, read again by the gate observation.
     let observedRepairMethod = "none";
     let observedRepairDetail = "none";
+    const modelInfo = newModelRunInfo();
+    const modelOptions = { generationStartTime, info: modelInfo };
+    const deadlineAt = deadlineFrom(generationStartTime);
 
     try {
       safeSend("start", { message: "Starting generation..." });
@@ -83,6 +88,7 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
       await runPipeline<void, any, any, void>({
         async callModel() {
           let geminiFailed = false;
+          let geminiFailure: unknown = null;
 
           try {
             console.log("🔵 Trying Gemini 2.5 Flash streaming...");
@@ -102,20 +108,22 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
                   });
                 }
               },
-              30000
+              30000,
+              modelOptions,
             );
 
             fullContent = geminiResult.content;
             console.log(`✅ Gemini streaming completed`);
           } catch (geminiError) {
             geminiFailed = true;
+            geminiFailure = geminiError;
             // v6.9.96 — Gemini can throw "Failed to parse stream" AFTER every
             // exercise already arrived (callback buffered it in `fullContent`).
             // Try to salvage that content before paying for a slow OpenAI
             // regeneration.
             if (lastExerciseCount >= expectedTotal && fullContent.trim()) {
               try {
-                const rescued = await parseWithRecovery(fullContent, expectedTotal);
+                const rescued = await parseWithRecovery(fullContent, expectedTotal, { deadlineAt });
                 if (Array.isArray(rescued.data?.exercises) && rescued.data.exercises.length >= expectedTotal) {
                   console.warn(
                     "🛟 Gemini stream errored after full content — salvaged without fallback:",
@@ -133,7 +141,13 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
               }
             }
           }
-          if (geminiFailed && !salvaged) {
+          // Truncated output with no time left for a fallback: parse what arrived (same
+          // truncate-salvage layer as the non-streaming path) instead of failing the request.
+          const keepTruncated = geminiFailed && !salvaged && geminiFailure instanceof ModelTruncatedError
+            && fullContent.trim().length > 0;
+          if (geminiFailed && !salvaged && !shouldFallBack(geminiFailure, modelOptions)) {
+            if (!keepTruncated) throw geminiFailure;
+          } else if (geminiFailed && !salvaged) {
             console.warn("⚠️ Gemini streaming failed, falling back to OpenAI");
             streamUsedModel = OPENAI_FALLBACK_MODEL;
             // v6.9.60 — keep progress monotonic across the fallback so the
@@ -144,26 +158,14 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
             fullContent = "";
             const fallbackProgressFloor = lastExerciseCount;
 
-            const stream = await (openai.chat.completions.create as any)({
-              model: OPENAI_FALLBACK_MODEL,
-              temperature: 1,
-              messages: [
-                { role: "system", content: systemMessage },
-                { role: "user", content: sanitizedPrompt },
-              ],
-              max_completion_tokens: 30000,
-              stream: true,
-            });
-
-            for await (const chunk of stream) {
-              const delta = chunk.choices[0]?.delta?.content || "";
+            await generateWithOpenAIStream(systemMessage, sanitizedPrompt, (delta) => {
               fullContent += delta;
               const newCount = countExercisesInPartialJSON(fullContent);
               if (newCount > lastExerciseCount && newCount > fallbackProgressFloor) {
                 lastExerciseCount = newCount;
                 safeSend("progress", { exercisesGenerated: newCount, expectedTotal });
               }
-            }
+            }, modelOptions);
             console.log(`✅ OpenAI fallback streaming completed`);
           }
 
@@ -202,6 +204,7 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
               systemMessage,
               sanitizedPrompt,
               allowRegenerateFallback: hasPictureMedia,
+              deadlineAt,
             });
             worksheetData = result.data;
             fullContent = result.content;
@@ -245,6 +248,7 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
             repairMethod: observedRepairMethod,
             repairDetail: observedRepairDetail,
             generationStartTime,
+            modelInfo,
           });
         },
 
@@ -309,7 +313,10 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
       // EdgeRuntime.waitUntil keeps the notification fetch alive even after
       // the response stream is closed — otherwise Deno Deploy kills it.
       await waitUntilOrAwait(notifyPromise);
-      safeSend("error", { message: error instanceof Error ? error.message : "Unknown error" });
+      // Only a stable code and a generic sentence reach the client; the original
+      // message (it can carry provider or Postgres text) is in the log line above.
+      const publicError = toPublicError(error);
+      safeSend("error", { message: publicError.message, code: publicError.code });
     } finally {
       safeClose();
     }
