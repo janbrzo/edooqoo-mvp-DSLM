@@ -20,8 +20,8 @@ export const STUDENT_ID = '22222222-2222-4222-8222-222222222222';
 export const WORKSHEET_ID = '33333333-3333-4333-8333-333333333333';
 
 export const ENV: Record<string, string> = {
-  OPENAI_API_KEY: 'openai-key',
-  GEMINI_API_KEY: 'gemini-key',
+  OPENAI_API_KEY: 'test-oai-key',
+  GEMINI_API_KEY: 'test-google-key',
   SUPABASE_URL: 'https://example.supabase.co',
   SUPABASE_SERVICE_ROLE_KEY: 'service-key',
   SUPABASE_ANON_KEY: 'anon-key',
