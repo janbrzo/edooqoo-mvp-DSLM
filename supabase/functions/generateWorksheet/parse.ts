@@ -1,4 +1,4 @@
-import { parseAIResponse, extractJSONString } from "./helpers.ts";
+import { parseAIResponseDetailed, extractJSONString, detectCurlyQuotes, joinRepairDetail } from "./helpers.ts";
 import { openai, OPENAI_FALLBACK_MODEL } from "./clients.ts";
 
 // ============================================================
@@ -36,10 +36,15 @@ export async function parseOrRegenerateWithFallback(params: {
   systemMessage: string;
   sanitizedPrompt: string;
   allowRegenerateFallback: boolean;
-}): Promise<{ data: any; content: string; repairMethod: string; modelOverride?: string }> {
+}): Promise<{ data: any; content: string; repairMethod: string; repairDetail: string; modelOverride?: string }> {
   try {
     const parsed = await parseWithRecovery(params.rawContent, params.expectedExerciseCount);
-    return { data: parsed.data, content: params.rawContent, repairMethod: parsed.repairMethod };
+    return {
+      data: parsed.data,
+      content: params.rawContent,
+      repairMethod: parsed.repairMethod,
+      repairDetail: parsed.repairDetail,
+    };
   } catch (firstError) {
     if (!params.allowRegenerateFallback) throw firstError;
     console.warn('⚠️ [JSON-FALLBACK] Parse/repair failed; trying full JSON regeneration fallback');
@@ -49,6 +54,7 @@ export async function parseOrRegenerateWithFallback(params: {
       data: parsed.data,
       content: fallback.content,
       repairMethod: parsed.repairMethod === 'none' ? 'model-fallback' : `model-fallback+${parsed.repairMethod}`,
+      repairDetail: parsed.repairDetail === 'none' ? 'model-fallback' : `model-fallback+${parsed.repairDetail}`,
       modelOverride: fallback.model,
     };
   }
@@ -145,11 +151,20 @@ async function repairJsonWindowWithAI(
   }
 }
 
-export async function parseWithRecovery(rawContent: string, expectedExerciseCount: number): Promise<{ data: any; repairMethod: string }> {
+/**
+ * Parses with the full recovery pipeline. `repairMethod` keeps its historical
+ * values ('none' for every local repair, 'ai-window' or 'ai' for an AI repair);
+ * `repairDetail` names each step that was applied, local ones included.
+ */
+export async function parseWithRecovery(
+  rawContent: string,
+  expectedExerciseCount: number,
+): Promise<{ data: any; repairMethod: string; repairDetail: string }> {
+  const curly = detectCurlyQuotes(rawContent);
   // Attempt 1: Local parsing (extract + deterministic repair)
   try {
-    const data = parseAIResponse(rawContent);
-    return { data, repairMethod: 'none' };
+    const { data, step } = parseAIResponseDetailed(rawContent);
+    return { data, repairMethod: 'none', repairDetail: joinRepairDetail([...curly, step]) };
   } catch (localError) {
     console.warn('⚠️ Local parse failed, attempting AI repair pass...');
 
@@ -161,9 +176,9 @@ export async function parseWithRecovery(rawContent: string, expectedExerciseCoun
     const windowed = await repairJsonWindowWithAI(rawForRepair, errorPosition);
     if (windowed) {
       try {
-        const data = parseAIResponse(windowed);
+        const { data, step } = parseAIResponseDetailed(windowed);
         console.log('✅ json_repair_ai_window_succeeded');
-        return { data, repairMethod: 'ai-window' };
+        return { data, repairMethod: 'ai-window', repairDetail: joinRepairDetail([...curly, 'ai-window', step]) };
       } catch (windowErr) {
         console.warn('⚠️ json_repair_ai_window_failed:', (windowErr as Error).message);
       }
@@ -171,9 +186,9 @@ export async function parseWithRecovery(rawContent: string, expectedExerciseCoun
 
     try {
       const repairedJson = await repairWorksheetJsonWithAI(rawForRepair, expectedExerciseCount);
-      const data = parseAIResponse(repairedJson);
+      const { data, step } = parseAIResponseDetailed(repairedJson);
       console.log('✅ json_repair_ai_succeeded');
-      return { data, repairMethod: 'ai' };
+      return { data, repairMethod: 'ai', repairDetail: joinRepairDetail([...curly, 'ai', step]) };
     } catch (aiRepairError) {
       console.error('❌ json_repair_ai_failed:', (aiRepairError as Error).message);
       throw new Error(`Invalid JSON from AI: all repair attempts failed. Original: ${(localError as Error).message}`);
