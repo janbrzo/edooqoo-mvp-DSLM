@@ -3,14 +3,12 @@
 // that every mode feeds into the single pipeline.
 import { getExerciseTypesForCount } from "./helpers.ts";
 import { isValidUUID, sanitizeInput, validatePrompt } from "./security.ts";
-import { RateLimiter } from "./rateLimiter.ts";
+import { checkBalance, checkRateLimit, limitResponse } from "./limits.ts";
 import { getGeolocation } from "./geolocation.ts";
 import { composeSystemMessage } from "./prompts/prompt-composer.ts";
 import { resolveCaller } from "../_shared/auth.ts";
 import { corsHeaders, OPENAI_FALLBACK_MODEL, supabase } from "./clients.ts";
 import { buildWorksheetMediaContextImage } from "./media.ts";
-
-const rateLimiter = new RateLimiter();
 
 /** Everything the modes need to know about one accepted request. */
 export interface GenerationRequest {
@@ -122,16 +120,14 @@ export async function resolveRequest(req: Request, generationStartTime: number):
     console.log("📋 Anonymous mode - worksheet will be created without user association");
   }
 
-  // Enhanced rate limiting with multi-tier limits
-  const rateLimitKey = ip;
-  if (!rateLimiter.isAllowed(rateLimitKey)) {
-    return {
-      response: new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }),
-    };
-  }
+  // Rate limit (DB-backed, fail open to the in-memory limiter; see limits.ts), then the
+  // balance pre-check: both answer before geolocation and any model work.
+  const isAnonymous = caller.kind === "user" && caller.isAnonymous;
+  const limitInput = { client: supabase, userId, isAnonymous, isBatchGeneration, isRegeneration, enableStreaming: useStreaming, formData };
+  const rateDecision = await checkRateLimit({ ...limitInput, headers: req.headers, legacyKey: ip });
+  if (!rateDecision.ok) return { response: limitResponse(rateDecision, corsHeaders) };
+  const balanceDecision = await checkBalance(limitInput);
+  if (!balanceDecision.ok) return { response: limitResponse(balanceDecision, corsHeaders) };
 
   // ⏱️ TIMING: Get geolocation data
   const geoStartTime = Date.now();
