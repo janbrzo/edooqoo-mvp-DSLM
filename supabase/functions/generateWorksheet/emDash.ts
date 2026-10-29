@@ -21,6 +21,7 @@ export function countEmDashesInText(text: string): number {
 /** Cleans one plain string. */
 export function replaceEmDashes(text: string): string {
   if (!/—|&mdash;|&#8212;/i.test(text)) return text;
+  if (/^\s*(—|&mdash;|&#8212;)\s*$/i.test(text)) return "–";
   return text
     .replace(/&mdash;|&#8212;/gi, EM_DASH)
     .replace(/(\d)—(?=\d)/g, "$1–")

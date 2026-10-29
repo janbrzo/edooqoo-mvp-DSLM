@@ -53,12 +53,12 @@ describe('parseAIResponseDetailed', () => {
 });
 
 describe('typographic quotes are rewritten only when the parse fails', () => {
-  it('valid JSON with curly quotes and apostrophes is returned untouched with no repair step', () => {
+  it('valid JSON with curly quotes and apostrophes needs no repair step and its values are flattened', () => {
     const input = JSON.stringify({ title: 'He said “hi” and it’s fine', exercises: [] });
     const detailed = parseAIResponseDetailed(input);
     expect(detailed.step).toBe('none');
     expect(detailed.curly).toEqual([]);
-    expect(detailed.data.title).toBe('He said “hi” and it’s fine');
+    expect(detailed.data.title).toBe('He said "hi" and it\'s fine');
   });
 
   it('JSON broken by curly double quotes is normalised and repaired as before', () => {

@@ -311,7 +311,7 @@ describe('repair telemetry', () => {
     expect((alerts[0] as any).body.errorType).toBe('parse_recovered');
   });
 
-  it('keeps valid JSON with typographic quotes untouched (no repair step)', async () => {
+  it('parses valid JSON with typographic quotes without a repair step and flattens them per value', async () => {
     const scenario: Scenario = (w) => {
       const sheet = worksheetFixture(DEFAULT_8);
       (sheet.exercises[0] as any).content = 'He said “please wait” and it’s fine.';
@@ -322,7 +322,7 @@ describe('repair telemetry', () => {
     const q = qualityOf(run.logs)[0];
     expect(q.repair_method).toBe('none');
     expect(q.repair_detail).toBe('none');
-    expect(JSON.parse(run.insertRows[0].html_content).exercises[0].content).toBe('He said “please wait” and it’s fine.');
+    expect(JSON.parse(run.insertRows[0].html_content).exercises[0].content).toBe('He said "please wait" and it\'s fine.');
   });
 
   it('still names the curly quote handling when the document needed a repair', async () => {

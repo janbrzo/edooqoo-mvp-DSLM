@@ -68,8 +68,8 @@ describe('evaluateStream', () => {
   });
 
   it('past the hard budget a pause longer than the grace period ends the call', () => {
-    expect(evaluateStream(clock(101 * S, 90 * S), PRIMARY_STREAM_LIMITS)).toEqual({ ok: false, reason: 'hard_timeout' });
-    expect(evaluateStream(clock(101 * S, 90 * S), FALLBACK_STREAM_LIMITS)).toEqual({ ok: true });
+    expect(evaluateStream(clock(121 * S, 100 * S), PRIMARY_STREAM_LIMITS)).toEqual({ ok: false, reason: 'hard_timeout' });
+    expect(evaluateStream(clock(121 * S, 100 * S), FALLBACK_STREAM_LIMITS)).toEqual({ ok: true });
   });
 });
 

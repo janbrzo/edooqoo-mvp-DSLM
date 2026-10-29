@@ -201,6 +201,15 @@ export function normalizeCurlyQuotes(content: string): string {
     .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
 }
 
+function flattenCurlyQuotesInStrings(value: unknown): any {
+  if (typeof value === 'string') return normalizeCurlyQuotes(value);
+  if (Array.isArray(value)) return value.map(flattenCurlyQuotesInStrings);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, flattenCurlyQuotesInStrings(v)]));
+  }
+  return value;
+}
+
 /**
  * Same extraction as extractJSONString but leaves curly quotes alone, so valid
  * JSON that contains typographic quotes parses untouched.
@@ -312,9 +321,11 @@ export function parseAIResponseDetailed(jsonContent: string): { data: any; step:
   const extractedRaw = extractJSONStringRaw(jsonContent);
   let firstErrorPosition = -1;
 
-  // Attempt 0: valid JSON with typographic quotes is kept exactly as the model wrote it
+  // Attempt 0: valid JSON parses without the whole-text rewrite; typographic quotes inside
+  // its strings are then flattened per value, so exact option/answer comparisons in the UI
+  // keep seeing the straight quotes they always did.
   try {
-    const result = JSON.parse(extractedRaw);
+    const result = flattenCurlyQuotesInStrings(JSON.parse(extractedRaw));
     console.log('✅ JSON parsed successfully on first attempt');
     return { data: result, step: 'none', curly: [] };
   } catch (_) { /* normalise the quotes and go through the repair layers */ }

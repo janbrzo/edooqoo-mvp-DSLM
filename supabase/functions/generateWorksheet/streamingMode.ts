@@ -6,7 +6,7 @@ import { classifyErrorType, notifyGenerationFailure, waitUntilIfAvailable, waitU
 import { parseOrRegenerateWithFallback, parseWithRecovery } from "./parse.ts";
 import { generateWithGeminiStream, generateWithOpenAIStream, shouldFallBack } from "./model.ts";
 import { deadlineFrom } from "./engineBudgets.ts";
-import { newModelRunInfo, toPublicError } from "./providerErrors.ts";
+import { ModelTruncatedError, newModelRunInfo, toPublicError } from "./providerErrors.ts";
 import { checkWorksheetStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { normaliseWorksheet } from "./normalise.ts";
 import { insertWorksheetRow } from "./persist.ts";
@@ -141,10 +141,13 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
               }
             }
           }
+          // Truncated output with no time left for a fallback: parse what arrived (same
+          // truncate-salvage layer as the non-streaming path) instead of failing the request.
+          const keepTruncated = geminiFailed && !salvaged && geminiFailure instanceof ModelTruncatedError
+            && fullContent.trim().length > 0;
           if (geminiFailed && !salvaged && !shouldFallBack(geminiFailure, modelOptions)) {
-            throw geminiFailure;
-          }
-          if (geminiFailed && !salvaged) {
+            if (!keepTruncated) throw geminiFailure;
+          } else if (geminiFailed && !salvaged) {
             console.warn("⚠️ Gemini streaming failed, falling back to OpenAI");
             streamUsedModel = OPENAI_FALLBACK_MODEL;
             // v6.9.60 — keep progress monotonic across the fallback so the

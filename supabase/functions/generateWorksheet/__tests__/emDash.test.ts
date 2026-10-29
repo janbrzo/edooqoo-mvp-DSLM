@@ -57,3 +57,10 @@ describe('sanitizeEmDashes', () => {
     expect(sanitizeEmDashes(value)).toBe(0);
   });
 });
+
+describe('lone dash strings', () => {
+  it('keeps an en dash placeholder instead of emptying the string', () => {
+    expect(replaceEmDashes('—')).toBe('–');
+    expect(replaceEmDashes(' &mdash; ')).toBe('–');
+  });
+});

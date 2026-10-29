@@ -21,7 +21,7 @@ export const ENGINE_BUDGETS = {
   /** Primary streaming call: past this it is aborted unless it is still streaming. */
   primaryHardMs: 100_000,
   /** "Still streaming" = a chunk arrived within this long. */
-  activeGraceMs: 10_000,
+  activeGraceMs: 20_000,
   /** Non-streaming primary call (batch, regular): one hard timeout. */
   nonStreamingPrimaryMs: 120_000,
   /** The fallback model is only started when at least this much time remains. */
