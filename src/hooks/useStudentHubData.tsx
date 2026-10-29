@@ -61,7 +61,11 @@ export function clearHubSession() {
   }
 }
 
+import type { HubGoal } from '@/lib/studentHub/hubGoals';
+
 export interface StudentHubData {
+  /** Pillar 3.1: live, teacher-confirmed learning goals (absent on older responses). */
+  goals?: HubGoal[];
   teacherName: string;
   teacherEmail: string | null;
   studentName: string;
