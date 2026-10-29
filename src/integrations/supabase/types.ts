@@ -3988,6 +3988,7 @@ export type Database = {
       worksheets: {
         Row: {
           ai_response: string
+          ai_response_raw: string | null
           audio_duration: number | null
           audio_transcript: string | null
           audio_url: string | null
@@ -4031,6 +4032,7 @@ export type Database = {
         }
         Insert: {
           ai_response: string
+          ai_response_raw?: string | null
           audio_duration?: number | null
           audio_transcript?: string | null
           audio_url?: string | null
@@ -4074,6 +4076,7 @@ export type Database = {
         }
         Update: {
           ai_response?: string
+          ai_response_raw?: string | null
           audio_duration?: number | null
           audio_transcript?: string | null
           audio_url?: string | null

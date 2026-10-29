@@ -47502,6 +47502,7 @@
           ]
         },
         "environmentVariables": [
+          "CANONICAL_SAVE",
           "ENGINE_GATE_MODE",
           "GEMINI_API_KEY",
           "OPENAI_API_KEY",
@@ -57302,6 +57303,11 @@
             "optional": false
           },
           {
+            "name": "ai_response_raw",
+            "type": "string | null",
+            "optional": false
+          },
+          {
             "name": "audio_duration",
             "type": "number | null",
             "optional": false
@@ -61743,6 +61749,12 @@
         "name": "BUG_REPORT_FROM_EMAIL",
         "callsites": [
           "supabase/functions/submit-bug-report/index.ts"
+        ]
+      },
+      {
+        "name": "CANONICAL_SAVE",
+        "callsites": [
+          "supabase/functions/generateWorksheet/canonicalize.ts"
         ]
       },
       {

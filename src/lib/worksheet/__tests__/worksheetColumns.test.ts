@@ -87,6 +87,37 @@ describe('worksheets column grant (20261028121000)', () => {
   });
 });
 
+describe('ai_response_raw (20261029110000)', () => {
+  const migration = fs.readFileSync(
+    path.resolve(SRC_ROOT, '../supabase/migrations/20261029110000_engine_ai_response_raw.sql'),
+    'utf8',
+  );
+  // Executable statements only: strip the explanatory header comments.
+  const sql = migration.split('\n').filter((line) => !line.trim().startsWith('--')).join('\n');
+
+  it('is a forbidden column and never part of any client column list', () => {
+    expect(WORKSHEET_FORBIDDEN_COLUMNS as readonly string[]).toContain('ai_response_raw');
+    for (const columns of [OWNER_VIEW_COLUMNS, LIST_COLUMNS, DELETED_LIST_COLUMNS]) {
+      expect(columns as readonly string[]).not.toContain('ai_response_raw');
+    }
+    expect(OWNER_VIEW_SELECT).not.toMatch(/ai_response_raw/);
+  });
+
+  it('adds the column without any GRANT to anon or authenticated', () => {
+    expect(sql).toMatch(/ADD COLUMN IF NOT EXISTS ai_response_raw text/);
+    expect(sql).not.toMatch(/\bGRANT\b/i);
+    expect(sql).not.toMatch(/\bDROP\b/i);
+  });
+
+  it('the original column grant (which the test above compares with OWNER_VIEW_COLUMNS) does not include it', () => {
+    const original = fs.readFileSync(
+      path.resolve(SRC_ROOT, '../supabase/migrations/20261028121000_worksheets_hide_prompt_columns.sql'),
+      'utf8',
+    );
+    expect(original).not.toMatch(/ai_response_raw/);
+  });
+});
+
 describe('client reads of public.worksheets', () => {
   const files = walk(SRC_ROOT).filter((file) => !file.includes(`${path.sep}integrations${path.sep}supabase${path.sep}types`));
   const offenders: string[] = [];
@@ -99,8 +130,8 @@ describe('client reads of public.worksheets', () => {
       const rel = path.relative(SRC_ROOT, file);
       if (/\.select\(\s*(['"`])\s*\*\s*\1/.test(chain)) offenders.push(`${rel}: select('*')`);
       if (/\.select\(\s*\)/.test(chain)) offenders.push(`${rel}: select() without columns`);
-      if (/\b(prompt|ip_address)\b/.test(chain.slice(0, chain.search(/\.(insert|update|upsert)\(/) > 0 ? chain.search(/\.(insert|update|upsert)\(/) : chain.length)) ) {
-        offenders.push(`${rel}: selects prompt or ip_address`);
+      if (/\b(prompt|ip_address|ai_response_raw)\b/.test(chain.slice(0, chain.search(/\.(insert|update|upsert)\(/) > 0 ? chain.search(/\.(insert|update|upsert)\(/) : chain.length)) ) {
+        offenders.push(`${rel}: selects a forbidden column`);
       }
     }
     // A shared select variable must not hide a wildcard.

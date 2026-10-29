@@ -6,6 +6,7 @@ import { parseOrRegenerateWithFallback } from "./parse.ts";
 import { generateNonStreaming } from "./model.ts";
 import { checkExerciseCount, checkWorksheetStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { normaliseWorksheet } from "./normalise.ts";
+import { canonicalizeInPlace } from "./canonicalize.ts";
 import { insertWorksheetRow } from "./persist.ts";
 import { runPipeline } from "./pipeline.ts";
 import { deadlineFrom } from "./engineBudgets.ts";
@@ -116,7 +117,10 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
       checkExerciseCount(worksheetData, exerciseCount, isRegeneration);
     },
 
-    normalise: normaliseWorksheet,
+    normalise(worksheetData) {
+      normaliseWorksheet(worksheetData);
+      canonicalizeInPlace(worksheetData, formData, true);
+    },
 
     onProcessingError(parseError) {
       console.error("Failed to parse AI response as JSON:", parseError, { responseLength: jsonContent?.length || 0 });
