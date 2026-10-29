@@ -2,6 +2,8 @@
  * Final requirements section - DYNAMIC content based on selected exercises
  */
 
+import { getOrderedExercises } from "./exercise-order.ts";
+
 export const getFinalRequirements = (
   hasGrammarFocus: boolean,
   exerciseCount: number = 8,
@@ -13,11 +15,19 @@ export const getFinalRequirements = (
   // Check if Reading exercise is present in selected exercises
   const hasReading = selectedExercises?.some((ex) => ex === "reading" || ex === "reading-picture") ?? false;
 
+  // Same order as rule 2 of the core instructions (sorted only when media is attached)
+  const orderedExercises = selectedExercises
+    ? getOrderedExercises(selectedExercises, exerciseCount, hasSelectedImage, hasSelectedAudio)
+    : undefined;
+  // Number of the reading exercise; the legacy fixed "1" is kept when no media is attached
+  const readingIndex = orderedExercises?.findIndex((ex) => ex === "reading" || ex === "reading-picture") ?? -1;
+  const readingNumber = (hasSelectedImage || hasSelectedAudio) && readingIndex >= 0 ? readingIndex + 1 : 1;
+
   // Exercise-specific requirements mapping
   const exerciseRequirements = {
     reading: `Exercise with reading must have content more than 300 words. Analyze the lessonTopic, lessonGoal, grammarFocus and additionalInformation to determine the most appropriate text format. Ensure all content matches CEFR level ${englishLevel || "as specified"}.`,
     "true-false": hasReading
-      ? `EXACTLY 10 statements ALL directly based on the reading text from Exercise 1. NO general knowledge questions. Ensure all content matches CEFR level ${englishLevel || "as specified"}.`
+      ? `EXACTLY 10 statements ALL directly based on the reading text from Exercise ${readingNumber}. NO general knowledge questions. Ensure all content matches CEFR level ${englishLevel || "as specified"}.`
       : `EXACTLY 10 statements based on the lesson topic and general knowledge about it. Ensure all content matches CEFR level ${englishLevel || "as specified"}.`,
     matching: `EXACTLY 10 items to match with proper term-definition pairs. Ensure all content matches CEFR level ${englishLevel || "as specified"}.`,
     "fill-in-blanks": `EXACTLY 10 sentences and 10 words in word bank. Ensure all content matches CEFR level ${englishLevel || "as specified"}.`,
@@ -61,8 +71,8 @@ export const getFinalRequirements = (
   let requirements = "\nCRITICAL REQUIREMENTS VERIFICATION:\n";
 
   // ETAP 3: Generate requirements based on selected exercises (type already has -picture suffix if needed)
-  if (selectedExercises) {
-    selectedExercises.slice(0, exerciseCount).forEach((exerciseType, index) => {
+  if (orderedExercises) {
+    orderedExercises.forEach((exerciseType, index) => {
       // ✅ Use exercise type directly (already has -picture suffix from prompt-composer)
       const requirement = exerciseRequirements[exerciseType as keyof typeof exerciseRequirements];
       if (requirement) {
