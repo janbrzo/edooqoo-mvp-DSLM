@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-// @ts-expect-error plain ESM script without types
+// @ts-ignore plain ESM script without types (typed or untyped depending on tsconfig resolution)
 import { aggregateMetrics, computeWorksheetMetrics, isWordOrderBuildable, renderSummaryMarkdown } from '../../../scripts/engine/metrics.mjs';
-// @ts-expect-error plain ESM script without types
+// @ts-ignore plain ESM script without types (typed or untyped depending on tsconfig resolution)
 import { formDataForStorage, promptServiceFormData } from '../../../scripts/engine/run-golden-set.mjs';
 import { buildWorksheetRequest } from '@/lib/worksheet/buildWorksheetRequest';
 import { buildPromptServiceFormData } from '@/utils/promptFormatter';
