@@ -22,6 +22,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown } from "lucide-react";
 
 import { suggestHomeworkExercises } from "@/lib/homework/suggestExercises";
+import { suggestDeadlineFromLessons } from "@/lib/homework/lessonDeadline";
 
 interface CreateHomeworkModalProps {
   open: boolean;
@@ -99,6 +100,8 @@ export function CreateHomeworkModal({
   const [createdHomeworkId, setCreatedHomeworkId] = useState<string>('');
   const [existingHomework, setExistingHomework] = useState<any>(null);
   const [exercisesTouched, setExercisesTouched] = useState(false);
+  const [deadlineTouched, setDeadlineTouched] = useState(false);
+  const [lessonHint, setLessonHint] = useState<string | null>(null);
   const [suggestedCount, setSuggestedCount] = useState<number | null>(null);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [teacherEmail, setTeacherEmail] = useState<string | null>(null);
@@ -161,6 +164,36 @@ export function CreateHomeworkModal({
       checkForExistingHomework();
     }
   }, [open, worksheetId, selectedStudentId]);
+
+  // The default deadline follows the student's next booked lesson (2 h before it) so the homework
+  // can be discussed there; without a suitable lesson the usual default stays. Never overrides a
+  // deadline the teacher set.
+  useEffect(() => {
+    if (!open || !selectedStudentId || deadlineTouched) return;
+    let cancelled = false;
+    void (async () => {
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const [{ data: slots, error }, { data: settings }] = await Promise.all([
+        supabase
+          .from('calendar_slots')
+          .select('slot_date, start_time')
+          .eq('student_id', selectedStudentId)
+          .eq('status', 'booked')
+          .gte('slot_date', today)
+          .order('slot_date')
+          .order('start_time')
+          .limit(10),
+        supabase.from('calendar_settings').select('timezone').eq('teacher_id', teacherId).maybeSingle(),
+      ]);
+      if (cancelled || error || !slots) return;
+      const suggestion = suggestDeadlineFromLessons(slots, settings?.timezone || 'Europe/Warsaw');
+      if (!suggestion) { setLessonHint(null); return; }
+      setDeadline(suggestion.deadline);
+      setDeadlineTime(format(suggestion.deadline, 'HH:mm'));
+      setLessonHint(`2 h before your next lesson (${format(suggestion.lessonAt, 'EEE d MMM, HH:mm')})`);
+    })();
+    return () => { cancelled = true; };
+  }, [open, selectedStudentId, deadlineTouched, teacherId]);
 
   // Preselect what the student did not do in class or did badly; the teacher only confirms.
   // Never overrides a selection the teacher already made.
@@ -440,6 +473,8 @@ export function CreateHomeworkModal({
     setNotifyStudent(false);
     setEmailSentTo(null);
     setExercisesTouched(false);
+    setDeadlineTouched(false);
+    setLessonHint(null);
     setSuggestedCount(null);
     setReminderHours("24");
     setSendToTeacher(false);
@@ -638,6 +673,9 @@ export function CreateHomeworkModal({
                     {deadline ? `${format(deadline, 'PP')} · ${deadlineTime}` : 'None'}
                   </span>
                 </div>
+                {lessonHint && (
+                  <p className="text-xs text-muted-foreground">Set to {lessonHint}. Change it if you like.</p>
+                )}
                 <div className="flex gap-2">
                   <Popover>
                     <PopoverTrigger asChild>
@@ -657,7 +695,7 @@ export function CreateHomeworkModal({
                       <Calendar
                         mode="single"
                         selected={deadline}
-                        onSelect={setDeadline}
+                        onSelect={(date) => { setDeadlineTouched(true); setLessonHint(null); setDeadline(date); }}
                         disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                         initialFocus
                       />
@@ -668,7 +706,7 @@ export function CreateHomeworkModal({
                     <Input
                       type="time"
                       value={deadlineTime}
-                      onChange={(e) => setDeadlineTime(e.target.value)}
+                      onChange={(e) => { setDeadlineTouched(true); setLessonHint(null); setDeadlineTime(e.target.value); }}
                       className="w-28 h-9"
                     />
                   </div>
