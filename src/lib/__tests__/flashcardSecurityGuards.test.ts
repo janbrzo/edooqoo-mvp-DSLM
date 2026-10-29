@@ -4,10 +4,10 @@ import { join } from 'node:path';
 
 /**
  * Flashcard audit findings F-9, F-11, F-12 (decision D-4 option B): source-level checks of
- * 20261029090000_flashcard_security_guards.sql. Runtime behaviour is verified in production after applying.
+ * 20261029090100_flashcard_security_guards.sql. Runtime behaviour is verified in production after applying.
  */
 const MIGRATIONS = join(__dirname, '../../../supabase/migrations');
-const FILE = '20261029090000_flashcard_security_guards.sql';
+const FILE = '20261029090100_flashcard_security_guards.sql';
 const sql = existsSync(join(MIGRATIONS, FILE)) ? readFileSync(join(MIGRATIONS, FILE), 'utf8') : '';
 
 const fnBody = (name: string): string => {
