@@ -4620,6 +4620,10 @@ export type Database = {
           teacher_id: string
         }[]
       }
+      get_homework_review_by_share_token: {
+        Args: { p_share_token: string; p_student_email: string }
+        Returns: Json
+      }
       get_homework_state_by_share_token: {
         Args: { p_share_token: string }
         Returns: {
@@ -5220,6 +5224,7 @@ export type Database = {
         Returns: Json
       }
       reopen_homework: { Args: { p_homework_id: string }; Returns: Json }
+      request_homework_redo: { Args: { p_homework_id: string }; Returns: Json }
       revoke_mcp_token: { Args: { _id: string }; Returns: undefined }
       rollback_intake_extraction: {
         Args: { p_extraction_id: string }
@@ -5334,6 +5339,15 @@ export type Database = {
           p_worksheet_id: string
         }
         Returns: string
+      }
+      set_homework_item_score: {
+        Args: {
+          p_exercise_index: number
+          p_homework_id: string
+          p_mastery: number
+          p_question_index: number
+        }
+        Returns: Json
       }
       set_homework_item_verdict: {
         Args: {

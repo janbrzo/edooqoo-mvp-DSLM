@@ -10,10 +10,11 @@ import { ItemEvaluation, OPEN_ENDED_EXERCISE_TYPES } from '@/utils/masteryCalcul
 import { devLog, devWarn } from '@/utils/logger';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { questionIndicesOf, hasAnswerForQuestion } from '@/lib/answers/answerKeys';
-import { callStudentAnswerRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
+import { callStudentAnswerRpc, submitHomeworkAnswers, studentAnswerRpcName } from '@/lib/answers/studentAnswerRpc';
+import { buildKeepaliveSaveRequest } from '@/lib/homework/keepaliveSave';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 import { buildHomeworkDelta, parseAiEvaluations } from '@/lib/homework/deltaSave';
-import { isHomeworkClosedError } from '@/lib/homework/homeworkStateRpc';
+import { isHomeworkClosedError, isAccessRevokedError } from '@/lib/homework/homeworkStateRpc';
 
 
 interface UseInteractiveHomeworkProps {
@@ -61,6 +62,8 @@ export const useInteractiveHomework = ({
   const [isWaitingForAiEval, setIsWaitingForAiEval] = useState(false);
   // The server refused a write or a submit: the homework was submitted elsewhere or closed by the teacher.
   const [isLocked, setIsLocked] = useState(false);
+  /** The server refused this e-mail for this homework (address edited, homework deleted): retrying cannot help. */
+  const [accessRevoked, setAccessRevoked] = useState(false);
   const lockedToastShownRef = useRef(false);
   
   const pendingSavesQueueRef = useRef(createPendingSaves());
@@ -217,6 +220,14 @@ export const useInteractiveHomework = ({
       return true;
     } catch (error: any) {
       console.error('Error saving answer:', error);
+      if (isAccessRevokedError(error)) {
+        dirtyKeysRef.current[exerciseIndex]?.clear();
+        dirtyAudioRef.current[exerciseIndex]?.clear();
+        pendingSavesRef.current.delete(exerciseIndex);
+        setIsSaving(false);
+        setAccessRevoked(true);
+        return true; // terminal: the queue must not retry forever
+      }
       if (!saveErrorShownRef.current) {
         saveErrorShownRef.current = true;
         toast({
@@ -235,17 +246,20 @@ export const useInteractiveHomework = ({
    * runs (also on every retry), so a debounced, blurred or retried save always sends the
    * newest value of exactly the keys this tab changed.
    */
+  /** What exercise `exerciseIndex` still has to send: only the keys changed since the last confirmed save. */
+  const deltaFor = useCallback((exerciseIndex: number, exerciseType: string) => buildHomeworkDelta({
+    exerciseData: { ...exercises[exerciseIndex], worksheetId: sourceWorksheetId || homeworkId },
+    exerciseType,
+    answers: (answersRef.current[exerciseIndex] || {}) as Record<string, any>,
+    audio: audioAnswersRef.current[exerciseIndex] || {},
+    dirtyKeys: dirtyKeysRef.current[exerciseIndex] ?? [],
+    dirtyAudio: dirtyAudioRef.current[exerciseIndex] ?? [],
+  }), [exercises, sourceWorksheetId, homeworkId]);
+
   const runSave = useCallback(async (exerciseIndex: number, exerciseType: string): Promise<boolean> => {
     const dirty = dirtyKeysRef.current[exerciseIndex];
     const dirtyAudio = dirtyAudioRef.current[exerciseIndex];
-    const delta = buildHomeworkDelta({
-      exerciseData: { ...exercises[exerciseIndex], worksheetId: sourceWorksheetId || homeworkId },
-      exerciseType,
-      answers: (answersRef.current[exerciseIndex] || {}) as Record<string, any>,
-      audio: audioAnswersRef.current[exerciseIndex] || {},
-      dirtyKeys: dirty ?? [],
-      dirtyAudio: dirtyAudio ?? [],
-    });
+    const delta = deltaFor(exerciseIndex, exerciseType);
     if (!delta) {
       pendingSavesRef.current.delete(exerciseIndex);
       if (pendingSavesRef.current.size === 0) setIsSaving(false);
@@ -261,7 +275,7 @@ export const useInteractiveHomework = ({
       for (const q of delta.audioKeys) if (sentAudio?.[q] === delta.audio?.[q]) dirtyAudio?.delete(q);
     }
     return ok;
-  }, [exercises, sourceWorksheetId, homeworkId, saveAnswer]);
+  }, [deltaFor, saveAnswer]);
 
   const updateAnswer = useCallback((
     exerciseIndex: number, 
@@ -328,10 +342,22 @@ export const useInteractiveHomework = ({
     try {
       setIsSaving(true);
 
-      const pendingMap = (window as any).__pendingSpeakingRecordings as Map<string, { save: () => Promise<void> }> | undefined;
+      const pendingMap = (window as any).__pendingSpeakingRecordings as Map<string, { save: () => Promise<boolean | void> }> | undefined;
       if (pendingMap && pendingMap.size > 0) {
         devLog(`[submitHomework] Flushing ${pendingMap.size} pending recordings...`);
-        await Promise.all(Array.from(pendingMap.values()).map(e => e.save().catch(console.error)));
+        const saved = await Promise.all(Array.from(pendingMap.values()).map(async (e) => {
+          try { return (await e.save()) !== false; } catch (error) { console.error(error); return false; }
+        }));
+        if (saved.includes(false)) {
+          // A recording that failed to upload would be submitted as an empty answer.
+          toast({
+            title: "A recording was not saved",
+            description: "Check your connection and press Submit again in a moment.",
+            variant: "destructive"
+          });
+          setIsSaving(false);
+          return false;
+        }
         await new Promise(r => setTimeout(r, 500));
       }
 
@@ -398,6 +424,10 @@ export const useInteractiveHomework = ({
           description: "Your teacher marked it as done, so it can no longer be submitted.",
           variant: "destructive"
         });
+        return false;
+      }
+      if (isAccessRevokedError(error)) {
+        setAccessRevoked(true);
         return false;
       }
       console.error('Error submitting homework:', error);
@@ -497,6 +527,42 @@ export const useInteractiveHomework = ({
     };
   }, []);
 
+  // Closing the tab or reloading inside the 1.5 s debounce (or a retry window) must not lose the
+  // changed keys: send them with a keepalive request, which outlives the page. beforeunload and
+  // pagehide both fire on a close, so it is sent once.
+  const lastUnloadWriteRef = useRef(0);
+  useEffect(() => {
+    if (readOnly || !shareToken || !studentEmail) return;
+    const sendPending = () => {
+      if (isSubmitted || isLocked || Date.now() - lastUnloadWriteRef.current < 3000) return;
+      lastUnloadWriteRef.current = Date.now();
+      for (const exerciseIndex of pendingSavesQueueRef.current.pendingIndices()) {
+        const exerciseType = exercises[exerciseIndex]?.type || exercises[exerciseIndex]?.exercise_type || '';
+        const delta = deltaFor(exerciseIndex, exerciseType);
+        if (!delta) continue;
+        const request = buildKeepaliveSaveRequest(studentAnswerRpcName('save_homework_answer', shareToken), {
+          p_share_token: shareToken,
+          p_homework_id: homeworkId,
+          p_student_email: studentEmail,
+          p_exercise_index: exerciseIndex,
+          p_exercise_type: exerciseType,
+          p_answers: delta.answers,
+          p_time_spent_ms: getActiveTimeMs(exerciseIndex),
+          p_mastery: delta.mastery ?? null,
+          p_item_evaluations: delta.itemEvaluations,
+          p_audio_answers: delta.audio,
+        });
+        if (request) fetch(request.url, request.init).catch(() => {});
+      }
+    };
+    window.addEventListener('beforeunload', sendPending);
+    window.addEventListener('pagehide', sendPending);
+    return () => {
+      window.removeEventListener('beforeunload', sendPending);
+      window.removeEventListener('pagehide', sendPending);
+    };
+  }, [readOnly, shareToken, studentEmail, isSubmitted, isLocked, exercises, homeworkId, deltaFor, getActiveTimeMs]);
+
   const updateAudioAnswer = useCallback((exerciseIndex: number, questionIndex: number, audioUrl: string) => {
     if (readOnly || isSubmitted) return;
 
@@ -534,6 +600,7 @@ export const useInteractiveHomework = ({
     submittedAt,
     isWaitingForAiEval,
     isLocked,
+    accessRevoked,
     updateAnswer,
     updateAudioAnswer,
     saveOnBlur,

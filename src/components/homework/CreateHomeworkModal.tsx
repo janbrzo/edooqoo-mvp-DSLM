@@ -21,6 +21,9 @@ import { devLog } from '@/utils/logger';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
+import { suggestHomeworkExercises } from "@/lib/homework/suggestExercises";
+import { suggestDeadlineFromLessons } from "@/lib/homework/lessonDeadline";
+
 interface CreateHomeworkModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -96,6 +99,10 @@ export function CreateHomeworkModal({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [createdHomeworkId, setCreatedHomeworkId] = useState<string>('');
   const [existingHomework, setExistingHomework] = useState<any>(null);
+  const [exercisesTouched, setExercisesTouched] = useState(false);
+  const [deadlineTouched, setDeadlineTouched] = useState(false);
+  const [lessonHint, setLessonHint] = useState<string | null>(null);
+  const [suggestedCount, setSuggestedCount] = useState<number | null>(null);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [teacherEmail, setTeacherEmail] = useState<string | null>(null);
   const [selectedGeneratedTypes, setSelectedGeneratedTypes] = useState<string[]>([]);
@@ -109,8 +116,7 @@ export function CreateHomeworkModal({
     generateSimilarExercises,
     toggleExerciseSelection,
     clearGeneratedExercises,
-    getSelectedGeneratedExercises,
-    lastPrompt
+    getSelectedGeneratedExercises
   } = useHomeworkExerciseGeneration();
   
   // Set preselected student when modal opens
@@ -157,15 +163,76 @@ export function CreateHomeworkModal({
     if (open && worksheetId) {
       checkForExistingHomework();
     }
-  }, [open, worksheetId]);
+  }, [open, worksheetId, selectedStudentId]);
 
+  // The default deadline follows the student's next booked lesson (2 h before it) so the homework
+  // can be discussed there; without a suitable lesson the usual default stays. Never overrides a
+  // deadline the teacher set.
+  useEffect(() => {
+    if (!open || !selectedStudentId || deadlineTouched) return;
+    let cancelled = false;
+    void (async () => {
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const [{ data: slots, error }, { data: settings }] = await Promise.all([
+        supabase
+          .from('calendar_slots')
+          .select('slot_date, start_time')
+          .eq('student_id', selectedStudentId)
+          .eq('status', 'booked')
+          .gte('slot_date', today)
+          .order('slot_date')
+          .order('start_time')
+          .limit(10),
+        supabase.from('calendar_settings').select('timezone').eq('teacher_id', teacherId).maybeSingle(),
+      ]);
+      if (cancelled || error || !slots) return;
+      const suggestion = suggestDeadlineFromLessons(slots, settings?.timezone || 'Europe/Warsaw');
+      if (!suggestion) { setLessonHint(null); return; }
+      setDeadline(suggestion.deadline);
+      setDeadlineTime(format(suggestion.deadline, 'HH:mm'));
+      setLessonHint(`2 h before your next lesson (${format(suggestion.lessonAt, 'EEE d MMM, HH:mm')})`);
+    })();
+    return () => { cancelled = true; };
+  }, [open, selectedStudentId, deadlineTouched, teacherId]);
+
+  // Preselect what the student did not do in class or did badly; the teacher only confirms.
+  // Never overrides a selection the teacher already made.
+  useEffect(() => {
+    if (!open || !worksheetId || !selectedStudentId || exercisesTouched) return;
+    const email = students.find((s) => s.id === selectedStudentId)?.student_email?.trim().toLowerCase();
+    if (!email) return;
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase
+        .from('worksheet_student_answers')
+        .select('exercise_index, mastery, answers')
+        .eq('worksheet_id', worksheetId)
+        .eq('student_email', email);
+      if (cancelled || error || !data) return;
+      const originalIndices = (allExercises || [])
+        .map((exercise, original) => (exercise?.deleted ? -1 : original))
+        .filter((original) => original >= 0);
+      const picked = suggestHomeworkExercises(originalIndices, data as any);
+      if (picked.length === 0) { setSuggestedCount(null); return; }
+      setSelectedExercises(new Set(picked));
+      setSuggestedCount(picked.length);
+    })();
+    return () => { cancelled = true; };
+  }, [open, worksheetId, selectedStudentId, exercisesTouched, students, allExercises]);
+
+  // Only this student's earlier homework counts: another student having the worksheet is no duplicate.
   const checkForExistingHomework = async () => {
+    if (!selectedStudentId) {
+      setExistingHomework(null);
+      return;
+    }
     try {
       setCheckingDuplicate(true);
       const { data, error } = await supabase
         .from('homework_assignments')
         .select('id, title, share_token, created_at')
         .eq('source_worksheet_id', worksheetId)
+        .eq('student_id', selectedStudentId)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -180,6 +247,7 @@ export function CreateHomeworkModal({
   };
 
   const toggleExercise = (index: number) => {
+    setExercisesTouched(true);
     const newSelected = new Set(selectedExercises);
     if (newSelected.has(index)) {
       newSelected.delete(index);
@@ -191,9 +259,11 @@ export function CreateHomeworkModal({
 
   // v6.9.44: bulk helpers for the redesigned Exercises section.
   const selectAllExercises = () => {
+    setExercisesTouched(true);
     setSelectedExercises(new Set(exercises.map((_, i) => i)));
   };
   const clearExercisesSelection = () => {
+    setExercisesTouched(true);
     setSelectedExercises(new Set());
   };
 
@@ -329,10 +399,11 @@ export function CreateHomeworkModal({
           title: `${worksheetTitle} - Homework for ${student?.name}`,
           selected_exercises: exercisesData,
           deadline: finalDeadline,
-          reminder_hours: sendReminder ? parseInt(reminderHours) : null,
-          prompt: lastPrompt || null
+          reminder_hours: sendReminder && deadline ? parseInt(reminderHours) : null,
+          // Never persist the generation prompt (legacy rows held the engine system message).
+          prompt: null
         })
-        .select()
+        .select('id')
         .single();
 
       if (insertError) throw insertError;
@@ -401,6 +472,10 @@ export function CreateHomeworkModal({
     setSendReminder(true);
     setNotifyStudent(false);
     setEmailSentTo(null);
+    setExercisesTouched(false);
+    setDeadlineTouched(false);
+    setLessonHint(null);
+    setSuggestedCount(null);
     setReminderHours("24");
     setSendToTeacher(false);
     setIsGenerating(false);
@@ -598,6 +673,9 @@ export function CreateHomeworkModal({
                     {deadline ? `${format(deadline, 'PP')} · ${deadlineTime}` : 'None'}
                   </span>
                 </div>
+                {lessonHint && (
+                  <p className="text-xs text-muted-foreground">Set to {lessonHint}. Change it if you like.</p>
+                )}
                 <div className="flex gap-2">
                   <Popover>
                     <PopoverTrigger asChild>
@@ -617,7 +695,7 @@ export function CreateHomeworkModal({
                       <Calendar
                         mode="single"
                         selected={deadline}
-                        onSelect={setDeadline}
+                        onSelect={(date) => { setDeadlineTouched(true); setLessonHint(null); setDeadline(date); }}
                         disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                         initialFocus
                       />
@@ -628,7 +706,7 @@ export function CreateHomeworkModal({
                     <Input
                       type="time"
                       value={deadlineTime}
-                      onChange={(e) => setDeadlineTime(e.target.value)}
+                      onChange={(e) => { setDeadlineTouched(true); setLessonHint(null); setDeadlineTime(e.target.value); }}
                       className="w-28 h-9"
                     />
                   </div>
@@ -651,6 +729,11 @@ export function CreateHomeworkModal({
                   </Button>
                 </div>
               </div>
+              {suggestedCount !== null && !exercisesTouched && (
+                <p className="text-xs text-muted-foreground">
+                  Preselected {suggestedCount}: not done or weak in class. Change them if you like.
+                </p>
+              )}
               <div className="border rounded-md p-3 max-h-44 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5">
                 {exercises.map((exercise, index) => (
                   <div key={index} className="flex items-center space-x-2 min-w-0">
@@ -677,12 +760,16 @@ export function CreateHomeworkModal({
                 <div className="flex items-center gap-2">
                   <Switch
                     id="send-reminder"
-                    checked={sendReminder}
+                    checked={sendReminder && !!deadline}
                     onCheckedChange={setSendReminder}
+                    disabled={!deadline}
                   />
                   <Label htmlFor="send-reminder" className="cursor-pointer text-sm font-normal">
                     Send before deadline
                   </Label>
+                  {!deadline && (
+                    <span className="text-xs text-muted-foreground">Pick a deadline to send a reminder.</span>
+                  )}
                 </div>
                 {/* Opt-in: notify the student right after creation */}
                 <div className="flex items-center gap-2">
@@ -695,7 +782,7 @@ export function CreateHomeworkModal({
                     Notify student by email
                   </Label>
                 </div>
-                {sendReminder && (
+                {sendReminder && !!deadline && (
                   <Select value={reminderHours} onValueChange={setReminderHours}>
                     <SelectTrigger id="reminder-hours" className="h-8 w-44 text-sm">
                       <SelectValue />

@@ -1,0 +1,4236 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`validateExercise: every known type, valid and broken fixtures > answer-questions: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "answer-questions",
+  },
+  "threw": "Answer Questions exercise must have at least 3 questions",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > answer-questions: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the answer-questions task.",
+    "questions": [
+      {
+        "question": "Question 0?",
+      },
+      {
+        "question": "Question 1?",
+      },
+      {
+        "question": "Question 2?",
+      },
+      {
+        "question": "Question 3?",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: answer-questions",
+    "type": "answer-questions",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > answer-questions-audio: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "answer-questions-audio",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for answer-questions-audio: Answer Questions exercise must have at least 3 questions",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > answer-questions-audio: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the answer-questions-audio task.",
+    "questions": [
+      {
+        "question": "Question 0?",
+      },
+      {
+        "question": "Question 1?",
+      },
+      {
+        "question": "Question 2?",
+      },
+      {
+        "question": "Question 3?",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: answer-questions-audio",
+    "type": "answer-questions-audio",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > answer-questions-picture: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "answer-questions-picture",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for answer-questions-picture: Answer Questions exercise must have at least 3 questions",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > answer-questions-picture: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the answer-questions-picture task.",
+    "questions": [
+      {
+        "question": "Question 0?",
+      },
+      {
+        "question": "Question 1?",
+      },
+      {
+        "question": "Question 2?",
+      },
+      {
+        "question": "Question 3?",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: answer-questions-picture",
+    "type": "answer-questions-picture",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > antonyms: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "antonyms",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for antonyms: Synonyms/Antonyms exercise must have at least 5 pairs",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > antonyms: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the antonyms task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: antonyms",
+    "type": "antonyms",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for antonyms: Synonyms/Antonyms exercise must have at least 5 pairs",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > categorize: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "time": 10,
+    "type": "categorize",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > categorize: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "categories": [
+      "x",
+      "y",
+    ],
+    "icon": "fa-tasks",
+    "instructions": "Do the categorize task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: categorize",
+    "type": "categorize",
+    "words": [
+      {
+        "category": "y",
+        "word": "w0",
+      },
+      {
+        "category": "x",
+        "word": "w1",
+      },
+      {
+        "category": "y",
+        "word": "w2",
+      },
+      {
+        "category": "x",
+        "word": "w3",
+      },
+      {
+        "category": "y",
+        "word": "w4",
+      },
+      {
+        "category": "x",
+        "word": "w5",
+      },
+      {
+        "category": "y",
+        "word": "w6",
+      },
+      {
+        "category": "x",
+        "word": "w7",
+      },
+      {
+        "category": "y",
+        "word": "w8",
+      },
+      {
+        "category": "x",
+        "word": "w9",
+      },
+    ],
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > complete-word: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "time": 10,
+    "type": "complete-word",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > complete-word: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "instructions": "Do the complete-word task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: complete-word",
+    "type": "complete-word",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > describe-picture: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "describe-picture",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for describe-picture: Describe Picture exercise must have instructions or description",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > describe-picture: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "description": "Describe the picture.",
+    "instructions": "Do the describe-picture task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: describe-picture",
+    "type": "describe-picture",
+  },
+  "threw": null,
+  "warnings": [
+    "[INFO] Describe Picture exercise without image_url field (image will be provided via selectedImage in MediaSection)",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > dialogue: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "dialogue",
+  },
+  "threw": "Dialogue exercise must have at least 5 exchanges",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > dialogue: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "dialogue": [
+      {
+        "speaker": "Ben",
+        "text": "Line 0",
+      },
+      {
+        "speaker": "Anna",
+        "text": "Line 1",
+      },
+      {
+        "speaker": "Ben",
+        "text": "Line 2",
+      },
+      {
+        "speaker": "Anna",
+        "text": "Line 3",
+      },
+      {
+        "speaker": "Ben",
+        "text": "Line 4",
+      },
+      {
+        "speaker": "Anna",
+        "text": "Line 5",
+      },
+      {
+        "speaker": "Ben",
+        "text": "Line 6",
+      },
+      {
+        "speaker": "Anna",
+        "text": "Line 7",
+      },
+    ],
+    "expressions": [
+      "expression 0",
+      "expression 1",
+      "expression 2",
+      "expression 3",
+      "expression 4",
+      "expression 5",
+      "expression 6",
+      "expression 7",
+      "expression 8",
+      "expression 9",
+    ],
+    "instructions": "Do the dialogue task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: dialogue",
+    "type": "dialogue",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > discussion: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "discussion",
+  },
+  "threw": "Discussion exercise must have at least 5 questions",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > discussion: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the discussion task.",
+    "questions": [
+      {
+        "question": "Discussion question 0?",
+      },
+      {
+        "question": "Discussion question 1?",
+      },
+      {
+        "question": "Discussion question 2?",
+      },
+      {
+        "question": "Discussion question 3?",
+      },
+      {
+        "question": "Discussion question 4?",
+      },
+      {
+        "question": "Discussion question 5?",
+      },
+      {
+        "question": "Discussion question 6?",
+      },
+      {
+        "question": "Discussion question 7?",
+      },
+      {
+        "question": "Discussion question 8?",
+      },
+      {
+        "question": "Discussion question 9?",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: discussion",
+    "type": "discussion",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > error-correction: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "error-correction",
+  },
+  "threw": "Error correction exercise must have at least 5 sentences",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > error-correction: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the error-correction task.",
+    "sentences": [
+      {
+        "correction": "He goes to work 0.",
+        "text": "He go to work 0.",
+      },
+      {
+        "correction": "He goes to work 1.",
+        "text": "He go to work 1.",
+      },
+      {
+        "correction": "He goes to work 2.",
+        "text": "He go to work 2.",
+      },
+      {
+        "correction": "He goes to work 3.",
+        "text": "He go to work 3.",
+      },
+      {
+        "correction": "He goes to work 4.",
+        "text": "He go to work 4.",
+      },
+      {
+        "correction": "He goes to work 5.",
+        "text": "He go to work 5.",
+      },
+      {
+        "correction": "He goes to work 6.",
+        "text": "He go to work 6.",
+      },
+      {
+        "correction": "He goes to work 7.",
+        "text": "He go to work 7.",
+      },
+      {
+        "correction": "He goes to work 8.",
+        "text": "He go to work 8.",
+      },
+      {
+        "correction": "He goes to work 9.",
+        "text": "He go to work 9.",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: error-correction",
+    "type": "error-correction",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > fill-in-blanks: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "fill-in-blanks",
+  },
+  "threw": "Fill-in-blanks exercise must have at least 5 sentences",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > fill-in-blanks: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the fill-in-blanks task.",
+    "sentences": [
+      {
+        "answer": "word0",
+        "text": "Sentence 0 with _____.",
+      },
+      {
+        "answer": "word1",
+        "text": "Sentence 1 with _____.",
+      },
+      {
+        "answer": "word2",
+        "text": "Sentence 2 with _____.",
+      },
+      {
+        "answer": "word3",
+        "text": "Sentence 3 with _____.",
+      },
+      {
+        "answer": "word4",
+        "text": "Sentence 4 with _____.",
+      },
+      {
+        "answer": "word5",
+        "text": "Sentence 5 with _____.",
+      },
+      {
+        "answer": "word6",
+        "text": "Sentence 6 with _____.",
+      },
+      {
+        "answer": "word7",
+        "text": "Sentence 7 with _____.",
+      },
+      {
+        "answer": "word8",
+        "text": "Sentence 8 with _____.",
+      },
+      {
+        "answer": "word9",
+        "text": "Sentence 9 with _____.",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: fill-in-blanks",
+    "type": "fill-in-blanks",
+    "word_bank": [
+      "word0",
+      "word1",
+      "word2",
+      "word3",
+      "word4",
+      "word5",
+      "word6",
+      "word7",
+      "word8",
+      "word9",
+    ],
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > fill-in-blanks-audio: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "fill-in-blanks-audio",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for fill-in-blanks-audio: Fill in Blanks Audio must have transcript_with_blanks",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > fill-in-blanks-audio: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "answers": [
+      "a0",
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "a5",
+      "a6",
+      "a7",
+      "a8",
+      "a9",
+    ],
+    "full_transcript": "Hello you there.",
+    "instructions": "Do the fill-in-blanks-audio task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: fill-in-blanks-audio",
+    "transcript_with_blanks": "Hello _____ there.",
+    "type": "fill-in-blanks-audio",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > gap-text: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "gap-text",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for gap-text: Gap Text exercise must have at least 5 sentences",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > gap-text: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the gap-text task.",
+    "sentences": [
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 0.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 1.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 2.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 3.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 4.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 5.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 6.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 7.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 8.",
+      },
+      {
+        "answer": "went",
+        "text": "They _____ (go) home 9.",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: gap-text",
+    "type": "gap-text",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > listening-comprehension: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "listening-comprehension",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for listening-comprehension: Listening Comprehension exercise must have at least 8 questions",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > listening-comprehension: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the listening-comprehension task.",
+    "questions": [
+      {
+        "answer": "Answer 0",
+        "text": "Listening question 0",
+      },
+      {
+        "answer": "Answer 1",
+        "text": "Listening question 1",
+      },
+      {
+        "answer": "Answer 2",
+        "text": "Listening question 2",
+      },
+      {
+        "answer": "Answer 3",
+        "text": "Listening question 3",
+      },
+      {
+        "answer": "Answer 4",
+        "text": "Listening question 4",
+      },
+      {
+        "answer": "Answer 5",
+        "text": "Listening question 5",
+      },
+      {
+        "answer": "Answer 6",
+        "text": "Listening question 6",
+      },
+      {
+        "answer": "Answer 7",
+        "text": "Listening question 7",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: listening-comprehension",
+    "type": "listening-comprehension",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > matching: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "matching",
+  },
+  "threw": "Matching exercise must have at least 5 items",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > matching: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the matching task.",
+    "items": [
+      {
+        "definition": "definition0",
+        "term": "term0",
+      },
+      {
+        "definition": "definition1",
+        "term": "term1",
+      },
+      {
+        "definition": "definition2",
+        "term": "term2",
+      },
+      {
+        "definition": "definition3",
+        "term": "term3",
+      },
+      {
+        "definition": "definition4",
+        "term": "term4",
+      },
+      {
+        "definition": "definition5",
+        "term": "term5",
+      },
+      {
+        "definition": "definition6",
+        "term": "term6",
+      },
+      {
+        "definition": "definition7",
+        "term": "term7",
+      },
+      {
+        "definition": "definition8",
+        "term": "term8",
+      },
+      {
+        "definition": "definition9",
+        "term": "term9",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: matching",
+    "type": "matching",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > matching-halves: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "time": 10,
+    "type": "matching-halves",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > matching-halves: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "instructions": "Do the matching-halves task.",
+    "items": [
+      {
+        "definition": "definition0",
+        "term": "term0",
+      },
+      {
+        "definition": "definition1",
+        "term": "term1",
+      },
+      {
+        "definition": "definition2",
+        "term": "term2",
+      },
+      {
+        "definition": "definition3",
+        "term": "term3",
+      },
+      {
+        "definition": "definition4",
+        "term": "term4",
+      },
+      {
+        "definition": "definition5",
+        "term": "term5",
+      },
+      {
+        "definition": "definition6",
+        "term": "term6",
+      },
+      {
+        "definition": "definition7",
+        "term": "term7",
+      },
+      {
+        "definition": "definition8",
+        "term": "term8",
+      },
+      {
+        "definition": "definition9",
+        "term": "term9",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: matching-halves",
+    "type": "matching-halves",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > multiple-choice: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "multiple-choice",
+  },
+  "threw": "Multiple choice exercise must have at least 5 questions",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > multiple-choice: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the multiple-choice task.",
+    "questions": [
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A0",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B0",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C0",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D0",
+          },
+        ],
+        "text": "Question 0",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A1",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B1",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C1",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D1",
+          },
+        ],
+        "text": "Question 1",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A2",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B2",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C2",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D2",
+          },
+        ],
+        "text": "Question 2",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A3",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B3",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C3",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D3",
+          },
+        ],
+        "text": "Question 3",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A4",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B4",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C4",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D4",
+          },
+        ],
+        "text": "Question 4",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A5",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B5",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C5",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D5",
+          },
+        ],
+        "text": "Question 5",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A6",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B6",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C6",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D6",
+          },
+        ],
+        "text": "Question 6",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A7",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B7",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C7",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D7",
+          },
+        ],
+        "text": "Question 7",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A8",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B8",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C8",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D8",
+          },
+        ],
+        "text": "Question 8",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A9",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B9",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C9",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D9",
+          },
+        ],
+        "text": "Question 9",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: multiple-choice",
+    "type": "multiple-choice",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > multiple-choice-audio: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "multiple-choice-audio",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for multiple-choice-audio: Multiple choice exercise must have at least 5 questions",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > multiple-choice-audio: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the multiple-choice-audio task.",
+    "questions": [
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A0",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B0",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C0",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D0",
+          },
+        ],
+        "text": "Question 0",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A1",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B1",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C1",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D1",
+          },
+        ],
+        "text": "Question 1",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A2",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B2",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C2",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D2",
+          },
+        ],
+        "text": "Question 2",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A3",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B3",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C3",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D3",
+          },
+        ],
+        "text": "Question 3",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A4",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B4",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C4",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D4",
+          },
+        ],
+        "text": "Question 4",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A5",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B5",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C5",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D5",
+          },
+        ],
+        "text": "Question 5",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A6",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B6",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C6",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D6",
+          },
+        ],
+        "text": "Question 6",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A7",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B7",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C7",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D7",
+          },
+        ],
+        "text": "Question 7",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A8",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B8",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C8",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D8",
+          },
+        ],
+        "text": "Question 8",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A9",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B9",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C9",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D9",
+          },
+        ],
+        "text": "Question 9",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: multiple-choice-audio",
+    "type": "multiple-choice-audio",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > multiple-choice-picture: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "multiple-choice-picture",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for multiple-choice-picture: Multiple choice exercise must have at least 5 questions",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > multiple-choice-picture: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the multiple-choice-picture task.",
+    "questions": [
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A0",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B0",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C0",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D0",
+          },
+        ],
+        "text": "Question 0",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A1",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B1",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C1",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D1",
+          },
+        ],
+        "text": "Question 1",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A2",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B2",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C2",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D2",
+          },
+        ],
+        "text": "Question 2",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A3",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B3",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C3",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D3",
+          },
+        ],
+        "text": "Question 3",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A4",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B4",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C4",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D4",
+          },
+        ],
+        "text": "Question 4",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A5",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B5",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C5",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D5",
+          },
+        ],
+        "text": "Question 5",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A6",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B6",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C6",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D6",
+          },
+        ],
+        "text": "Question 6",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A7",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B7",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C7",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D7",
+          },
+        ],
+        "text": "Question 7",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A8",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B8",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C8",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D8",
+          },
+        ],
+        "text": "Question 8",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A9",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B9",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C9",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D9",
+          },
+        ],
+        "text": "Question 9",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: multiple-choice-picture",
+    "type": "multiple-choice-picture",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > negative-prefixes: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "negative-prefixes",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for negative-prefixes: Negative Prefixes exercise must have at least 5 words",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > negative-prefixes: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the negative-prefixes task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: negative-prefixes",
+    "type": "negative-prefixes",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for negative-prefixes: Negative Prefixes exercise must have at least 5 words",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > odd-one-out: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "odd-one-out",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for odd-one-out: Odd One Out exercise must have questions array",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > odd-one-out: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the odd-one-out task.",
+    "questions": [
+      {
+        "correct_answer": "c0",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c1",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c2",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c3",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c4",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c5",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c6",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c7",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c8",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c9",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: odd-one-out",
+    "type": "odd-one-out",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > paraphrasing: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "time": 10,
+    "type": "paraphrasing",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > paraphrasing: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "instructions": "Do the paraphrasing task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: paraphrasing",
+    "type": "paraphrasing",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > reading: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "reading",
+  },
+  "threw": "Reading exercise must have content",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > reading: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "content": "word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12 word13 word14 word15 word16 word17 word18 word19 word20 word21 word22 word23 word24 word25 word26 word27 word28 word29 word30 word31 word32 word33 word34 word35 word36 word37 word38 word39 word40 word41 word42 word43 word44 word45 word46 word47 word48 word49 word50 word51 word52 word53 word54 word55 word56 word57 word58 word59 word60 word61 word62 word63 word64 word65 word66 word67 word68 word69 word70 word71 word72 word73 word74 word75 word76 word77 word78 word79 word80 word81 word82 word83 word84 word85 word86 word87 word88 word89 word90 word91 word92 word93 word94 word95 word96 word97 word98 word99 word100 word101 word102 word103 word104 word105 word106 word107 word108 word109 word110 word111 word112 word113 word114 word115 word116 word117 word118 word119 word120 word121 word122 word123 word124 word125 word126 word127 word128 word129 word130 word131 word132 word133 word134 word135 word136 word137 word138 word139 word140 word141 word142 word143 word144 word145 word146 word147 word148 word149 word150 word151 word152 word153 word154 word155 word156 word157 word158 word159 word160 word161 word162 word163 word164 word165 word166 word167 word168 word169 word170 word171 word172 word173 word174 word175 word176 word177 word178 word179 word180 word181 word182 word183 word184 word185 word186 word187 word188 word189 word190 word191 word192 word193 word194 word195 word196 word197 word198 word199 word200 word201 word202 word203 word204 word205 word206 word207 word208 word209 word210 word211 word212 word213 word214 word215 word216 word217 word218 word219 word220",
+    "instructions": "Do the reading task.",
+    "questions": [
+      {
+        "answer": "A1",
+        "question": "Q1?",
+      },
+      {
+        "answer": "A2",
+        "question": "Q2?",
+      },
+      {
+        "answer": "A3",
+        "question": "Q3?",
+      },
+      {
+        "answer": "A4",
+        "question": "Q4?",
+      },
+      {
+        "answer": "A5",
+        "question": "Q5?",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: reading",
+    "type": "reading",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > sentence-transformation: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "sentence-transformation",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for sentence-transformation: Sentence Transformation exercise must have at least 5 transformations",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > sentence-transformation: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the sentence-transformation task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: sentence-transformation",
+    "transformations": [
+      {
+        "answer": "Changed 0",
+        "original": "Original 0",
+      },
+      {
+        "answer": "Changed 1",
+        "original": "Original 1",
+      },
+      {
+        "answer": "Changed 2",
+        "original": "Original 2",
+      },
+      {
+        "answer": "Changed 3",
+        "original": "Original 3",
+      },
+      {
+        "answer": "Changed 4",
+        "original": "Original 4",
+      },
+      {
+        "answer": "Changed 5",
+        "original": "Original 5",
+      },
+      {
+        "answer": "Changed 6",
+        "original": "Original 6",
+      },
+      {
+        "answer": "Changed 7",
+        "original": "Original 7",
+      },
+      {
+        "answer": "Changed 8",
+        "original": "Original 8",
+      },
+      {
+        "answer": "Changed 9",
+        "original": "Original 9",
+      },
+    ],
+    "type": "sentence-transformation",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > synonyms: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "synonyms",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for synonyms: Synonyms/Antonyms exercise must have at least 5 pairs",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > synonyms: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the synonyms task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: synonyms",
+    "type": "synonyms",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for synonyms: Synonyms/Antonyms exercise must have at least 5 pairs",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > synonyms-antonyms: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "synonyms-antonyms",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for synonyms-antonyms: Synonyms/Antonyms exercise must have at least 5 pairs",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > synonyms-antonyms: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the synonyms-antonyms task.",
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: synonyms-antonyms",
+    "type": "synonyms-antonyms",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for synonyms-antonyms: Synonyms/Antonyms exercise must have at least 5 pairs",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > true-false: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "true-false",
+  },
+  "threw": "True/False exercise must have at least 5 statements",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > true-false: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the true-false task.",
+    "statements": [
+      {
+        "isTrue": true,
+        "text": "Statement 1",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 2",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 3",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 4",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 5",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 6",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 7",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 8",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 9",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 10",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: true-false",
+    "type": "true-false",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > true-false-audio: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "true-false-audio",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for true-false-audio: True/False exercise must have at least 5 statements",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > true-false-audio: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the true-false-audio task.",
+    "statements": [
+      {
+        "isTrue": true,
+        "text": "Statement 1",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 2",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 3",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 4",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 5",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 6",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 7",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 8",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 9",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 10",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: true-false-audio",
+    "type": "true-false-audio",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > true-false-picture: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "true-false-picture",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for true-false-picture: True/False exercise must have at least 5 statements",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > true-false-picture: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the true-false-picture task.",
+    "statements": [
+      {
+        "isTrue": true,
+        "text": "Statement 1",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 2",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 3",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 4",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 5",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 6",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 7",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 8",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 9",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 10",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: true-false-picture",
+    "type": "true-false-picture",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > word-order: bare exercise with only a type 1`] = `
+{
+  "after": {
+    "type": "word-order",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for word-order: Word Order exercise must have at least 5 sentences",
+  ],
+}
+`;
+
+exports[`validateExercise: every known type, valid and broken fixtures > word-order: generator-shaped fixture 1`] = `
+{
+  "after": {
+    "instructions": "Do the word-order task.",
+    "sentences": [
+      {
+        "correct_order": "C b a 0.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 1.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 2.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 3.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 4.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 5.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 6.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 7.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 8.",
+        "scrambled_words": "a / b / c",
+      },
+      {
+        "correct_order": "C b a 9.",
+        "scrambled_words": "a / b / c",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: word-order",
+    "type": "word-order",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > answer-questions accepts question or text; fewer than 3 questions throws (lenient for picture and audio variants only) 1`] = `
+{
+  "after": {
+    "questions": [
+      {
+        "text": "a",
+      },
+      {
+        "question": "b",
+      },
+      {
+        "text": "c",
+      },
+    ],
+    "type": "answer-questions",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > answer-questions accepts question or text; fewer than 3 questions throws (lenient for picture and audio variants only) 2`] = `
+{
+  "after": {
+    "questions": [
+      {
+        "text": "a",
+      },
+    ],
+    "type": "answer-questions",
+  },
+  "threw": "Answer Questions exercise must have at least 3 questions",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > answer-questions accepts question or text; fewer than 3 questions throws (lenient for picture and audio variants only) 3`] = `
+{
+  "after": {
+    "questions": [
+      {
+        "text": "a",
+      },
+    ],
+    "type": "answer-questions-picture",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for answer-questions-picture: Answer Questions exercise must have at least 3 questions",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > basic structure types set default time and icon only when missing or wrong 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "time": 10,
+    "type": "paraphrasing",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > basic structure types set default time and icon only when missing or wrong 2`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "time": 10,
+    "type": "categorize",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > basic structure types set default time and icon only when missing or wrong 3`] = `
+{
+  "after": {
+    "icon": "fa-custom",
+    "time": 7,
+    "type": "complete-word",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > describe-picture accepts instructions or description and logs the missing image_url 1`] = `
+{
+  "after": {
+    "instructions": "Describe it.",
+    "type": "describe-picture",
+  },
+  "threw": null,
+  "warnings": [
+    "[INFO] Describe Picture exercise without image_url field (image will be provided via selectedImage in MediaSection)",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > describe-picture accepts instructions or description and logs the missing image_url 2`] = `
+{
+  "after": {
+    "description": "x",
+    "image_url": "https://x.test/i.jpg",
+    "type": "describe-picture",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > describe-picture accepts instructions or description and logs the missing image_url 3`] = `
+{
+  "after": {
+    "type": "describe-picture",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for describe-picture: Describe Picture exercise must have instructions or description",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > established types are strict (throw), new types lenient (warn): count by type 1`] = `
+{
+  "lenient": {
+    "fill-in-blanks-audio": null,
+    "gap-text": null,
+    "listening-comprehension": null,
+    "multiple-choice-picture": null,
+    "odd-one-out": null,
+    "true-false-audio": null,
+    "word-order": null,
+  },
+  "strict": {
+    "answer-questions": "Answer Questions exercise must have at least 3 questions",
+    "dialogue": "Dialogue exercise must have at least 5 exchanges",
+    "discussion": "Discussion exercise must have at least 5 questions",
+    "error-correction": "Error correction exercise must have at least 5 sentences",
+    "fill-in-blanks": "Fill-in-blanks exercise must have at least 5 sentences",
+    "matching": "Matching exercise must have at least 5 items",
+    "multiple-choice": "Multiple choice exercise must have at least 5 questions",
+    "reading": "Reading exercise must have content",
+    "true-false": "True/False exercise must have at least 5 statements",
+  },
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > fill-in-blanks needs a word bank of at least 5 (word bank absent throws) 1`] = `
+{
+  "after": {
+    "instructions": "Do the fill-in-blanks task.",
+    "sentences": [
+      {
+        "answer": "word0",
+        "text": "Sentence 0 with _____.",
+      },
+      {
+        "answer": "word1",
+        "text": "Sentence 1 with _____.",
+      },
+      {
+        "answer": "word2",
+        "text": "Sentence 2 with _____.",
+      },
+      {
+        "answer": "word3",
+        "text": "Sentence 3 with _____.",
+      },
+      {
+        "answer": "word4",
+        "text": "Sentence 4 with _____.",
+      },
+      {
+        "answer": "word5",
+        "text": "Sentence 5 with _____.",
+      },
+      {
+        "answer": "word6",
+        "text": "Sentence 6 with _____.",
+      },
+      {
+        "answer": "word7",
+        "text": "Sentence 7 with _____.",
+      },
+      {
+        "answer": "word8",
+        "text": "Sentence 8 with _____.",
+      },
+      {
+        "answer": "word9",
+        "text": "Sentence 9 with _____.",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: fill-in-blanks",
+    "type": "fill-in-blanks",
+  },
+  "threw": "Fill-in-blanks exercise must have a word bank with at least 5 words",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > fill-in-blanks needs a word bank of at least 5 (word bank absent throws) 2`] = `
+{
+  "after": {
+    "instructions": "Do the fill-in-blanks task.",
+    "sentences": [
+      {
+        "answer": "word0",
+        "text": "Sentence 0 with _____.",
+      },
+      {
+        "answer": "word1",
+        "text": "Sentence 1 with _____.",
+      },
+      {
+        "answer": "word2",
+        "text": "Sentence 2 with _____.",
+      },
+      {
+        "answer": "word3",
+        "text": "Sentence 3 with _____.",
+      },
+      {
+        "answer": "word4",
+        "text": "Sentence 4 with _____.",
+      },
+      {
+        "answer": "word5",
+        "text": "Sentence 5 with _____.",
+      },
+      {
+        "answer": "word6",
+        "text": "Sentence 6 with _____.",
+      },
+      {
+        "answer": "word7",
+        "text": "Sentence 7 with _____.",
+      },
+      {
+        "answer": "word8",
+        "text": "Sentence 8 with _____.",
+      },
+      {
+        "answer": "word9",
+        "text": "Sentence 9 with _____.",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: fill-in-blanks",
+    "type": "fill-in-blanks",
+    "word_bank": [
+      "a",
+      "b",
+    ],
+  },
+  "threw": "Fill-in-blanks exercise must have a word bank with at least 5 words",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > fill-in-blanks-audio accepts sentences with word_bank as well as the transcript form (N2) 1`] = `
+{
+  "after": {
+    "sentences": [
+      {
+        "answer": "a0",
+        "text": "s 0 _____",
+      },
+      {
+        "answer": "a1",
+        "text": "s 1 _____",
+      },
+      {
+        "answer": "a2",
+        "text": "s 2 _____",
+      },
+      {
+        "answer": "a3",
+        "text": "s 3 _____",
+      },
+      {
+        "answer": "a4",
+        "text": "s 4 _____",
+      },
+      {
+        "answer": "a5",
+        "text": "s 5 _____",
+      },
+      {
+        "answer": "a6",
+        "text": "s 6 _____",
+      },
+      {
+        "answer": "a7",
+        "text": "s 7 _____",
+      },
+      {
+        "answer": "a8",
+        "text": "s 8 _____",
+      },
+      {
+        "answer": "a9",
+        "text": "s 9 _____",
+      },
+    ],
+    "type": "fill-in-blanks-audio",
+    "word_bank": [
+      "a0",
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "a5",
+      "a6",
+      "a7",
+      "a8",
+      "a9",
+    ],
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > listening-comprehension needs 8 questions with text and answer strings 1`] = `
+{
+  "after": {
+    "questions": [
+      {
+        "answer": "a",
+        "text": "t",
+      },
+      {
+        "answer": "a",
+        "text": "t",
+      },
+      {
+        "answer": "a",
+        "text": "t",
+      },
+      {
+        "answer": "a",
+        "text": "t",
+      },
+      {
+        "answer": "a",
+        "text": "t",
+      },
+      {
+        "answer": "a",
+        "text": "t",
+      },
+      {
+        "answer": "a",
+        "text": "t",
+      },
+    ],
+    "type": "listening-comprehension",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for listening-comprehension: Listening Comprehension exercise must have at least 8 questions",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > listening-comprehension needs 8 questions with text and answer strings 2`] = `
+{
+  "after": {
+    "questions": [
+      {
+        "text": "t",
+      },
+      {
+        "text": "t",
+      },
+      {
+        "text": "t",
+      },
+      {
+        "text": "t",
+      },
+      {
+        "text": "t",
+      },
+      {
+        "text": "t",
+      },
+      {
+        "text": "t",
+      },
+      {
+        "text": "t",
+      },
+    ],
+    "type": "listening-comprehension",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for listening-comprehension: Each question must have an answer property",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > matching does not read the \`pairs\`/\`matches\` shapes that the normalizer accepts 1`] = `
+{
+  "after": {
+    "pairs": [
+      {
+        "definition": "definition0",
+        "term": "term0",
+      },
+      {
+        "definition": "definition1",
+        "term": "term1",
+      },
+      {
+        "definition": "definition2",
+        "term": "term2",
+      },
+      {
+        "definition": "definition3",
+        "term": "term3",
+      },
+      {
+        "definition": "definition4",
+        "term": "term4",
+      },
+      {
+        "definition": "definition5",
+        "term": "term5",
+      },
+      {
+        "definition": "definition6",
+        "term": "term6",
+      },
+      {
+        "definition": "definition7",
+        "term": "term7",
+      },
+      {
+        "definition": "definition8",
+        "term": "term8",
+      },
+      {
+        "definition": "definition9",
+        "term": "term9",
+      },
+    ],
+    "type": "matching",
+  },
+  "threw": "Matching exercise must have at least 5 items",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > matching: term and definition required for every item 1`] = `
+{
+  "after": {
+    "instructions": "Do the matching task.",
+    "items": [
+      {
+        "definition": "definition0",
+        "term": "term0",
+      },
+      {
+        "definition": "definition1",
+        "term": "term1",
+      },
+      {
+        "definition": "definition2",
+        "term": "term2",
+      },
+      {
+        "definition": "definition3",
+        "term": "term3",
+      },
+      {
+        "definition": "definition4",
+        "term": "term4",
+      },
+      {
+        "definition": "definition5",
+        "term": "term5",
+      },
+      {
+        "definition": "definition6",
+        "term": "term6",
+      },
+      {
+        "definition": "definition7",
+        "term": "term7",
+      },
+      {
+        "definition": "definition8",
+        "term": "term8",
+      },
+      {
+        "term": "x",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: matching",
+    "type": "matching",
+  },
+  "threw": "Each matching item must have both term and definition",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > multiple-choice: exactly four options and exactly one correct 1`] = `
+{
+  "after": {
+    "instructions": "Do the multiple-choice task.",
+    "questions": [
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A0",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B0",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C0",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D0",
+          },
+        ],
+        "text": "Question 0",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A1",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B1",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C1",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D1",
+          },
+        ],
+        "text": "Question 1",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A2",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B2",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C2",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D2",
+          },
+        ],
+        "text": "Question 2",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A3",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B3",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C3",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D3",
+          },
+        ],
+        "text": "Question 3",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A4",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B4",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C4",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D4",
+          },
+        ],
+        "text": "Question 4",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A5",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B5",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C5",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D5",
+          },
+        ],
+        "text": "Question 5",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A6",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B6",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C6",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D6",
+          },
+        ],
+        "text": "Question 6",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A7",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B7",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C7",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D7",
+          },
+        ],
+        "text": "Question 7",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A8",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B8",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C8",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D8",
+          },
+        ],
+        "text": "Question 8",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+          },
+          {
+            "correct": true,
+          },
+          {},
+          {},
+        ],
+        "text": "x",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: multiple-choice",
+    "type": "multiple-choice",
+  },
+  "threw": "Each multiple choice question must have exactly one correct answer",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > multiple-choice: exactly four options and exactly one correct 2`] = `
+{
+  "after": {
+    "instructions": "Do the multiple-choice task.",
+    "questions": [
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A0",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B0",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C0",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D0",
+          },
+        ],
+        "text": "Question 0",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A1",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B1",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C1",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D1",
+          },
+        ],
+        "text": "Question 1",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A2",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B2",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C2",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D2",
+          },
+        ],
+        "text": "Question 2",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A3",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B3",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C3",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D3",
+          },
+        ],
+        "text": "Question 3",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A4",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B4",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C4",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D4",
+          },
+        ],
+        "text": "Question 4",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A5",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B5",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C5",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D5",
+          },
+        ],
+        "text": "Question 5",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A6",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B6",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C6",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D6",
+          },
+        ],
+        "text": "Question 6",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A7",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B7",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C7",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D7",
+          },
+        ],
+        "text": "Question 7",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A8",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B8",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C8",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D8",
+          },
+        ],
+        "text": "Question 8",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+          },
+        ],
+        "text": "x",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: multiple-choice",
+    "type": "multiple-choice",
+  },
+  "threw": "Each multiple choice question must have exactly 4 options",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > multiple-choice: exactly four options and exactly one correct 3`] = `
+{
+  "after": {
+    "instructions": "Do the multiple-choice task.",
+    "questions": [
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A0",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B0",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C0",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D0",
+          },
+        ],
+        "text": "Question 0",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A1",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B1",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C1",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D1",
+          },
+        ],
+        "text": "Question 1",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A2",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B2",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C2",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D2",
+          },
+        ],
+        "text": "Question 2",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A3",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B3",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C3",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D3",
+          },
+        ],
+        "text": "Question 3",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A4",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B4",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C4",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D4",
+          },
+        ],
+        "text": "Question 4",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A5",
+          },
+          {
+            "correct": true,
+            "label": "B",
+            "text": "Option B5",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C5",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D5",
+          },
+        ],
+        "text": "Question 5",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A6",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B6",
+          },
+          {
+            "correct": true,
+            "label": "C",
+            "text": "Option C6",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D6",
+          },
+        ],
+        "text": "Question 6",
+      },
+      {
+        "options": [
+          {
+            "correct": false,
+            "label": "A",
+            "text": "Option A7",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B7",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C7",
+          },
+          {
+            "correct": true,
+            "label": "D",
+            "text": "Option D7",
+          },
+        ],
+        "text": "Question 7",
+      },
+      {
+        "options": [
+          {
+            "correct": true,
+            "label": "A",
+            "text": "Option A8",
+          },
+          {
+            "correct": false,
+            "label": "B",
+            "text": "Option B8",
+          },
+          {
+            "correct": false,
+            "label": "C",
+            "text": "Option C8",
+          },
+          {
+            "correct": false,
+            "label": "D",
+            "text": "Option D8",
+          },
+        ],
+        "text": "Question 8",
+      },
+      {
+        "options": [
+          {},
+          {},
+          {},
+          {},
+        ],
+        "text": "x",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: multiple-choice",
+    "type": "multiple-choice",
+  },
+  "threw": "Each multiple choice question must have exactly one correct answer",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > negative-prefixes accepts both word and base_word (N2: the prompt asks for word) 1`] = `
+{
+  "after": {
+    "type": "negative-prefixes",
+    "words": [
+      {
+        "answer": "unw0",
+        "word": "w0",
+      },
+      {
+        "answer": "unw1",
+        "word": "w1",
+      },
+      {
+        "answer": "unw2",
+        "word": "w2",
+      },
+      {
+        "answer": "unw3",
+        "word": "w3",
+      },
+      {
+        "answer": "unw4",
+        "word": "w4",
+      },
+      {
+        "answer": "unw5",
+        "word": "w5",
+      },
+      {
+        "answer": "unw6",
+        "word": "w6",
+      },
+      {
+        "answer": "unw7",
+        "word": "w7",
+      },
+      {
+        "answer": "unw8",
+        "word": "w8",
+      },
+      {
+        "answer": "unw9",
+        "word": "w9",
+      },
+    ],
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > negative-prefixes accepts both word and base_word (N2: the prompt asks for word) 2`] = `
+{
+  "after": {
+    "type": "negative-prefixes",
+    "words": [
+      {
+        "base_word": "w0",
+      },
+      {
+        "base_word": "w1",
+      },
+      {
+        "base_word": "w2",
+      },
+      {
+        "base_word": "w3",
+      },
+      {
+        "base_word": "w4",
+      },
+      {
+        "base_word": "w5",
+      },
+      {
+        "base_word": "w6",
+      },
+      {
+        "base_word": "w7",
+      },
+      {
+        "base_word": "w8",
+      },
+      {
+        "base_word": "w9",
+      },
+    ],
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > odd-one-out: a wrong question count only warns, a wrong option count throws (but lenient mode swallows it) 1`] = `
+{
+  "after": {
+    "instructions": "Do the odd-one-out task.",
+    "questions": [
+      {
+        "correct_answer": "c0",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c1",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+      {
+        "correct_answer": "c2",
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: odd-one-out",
+    "type": "odd-one-out",
+  },
+  "threw": null,
+  "warnings": [
+    "⚠️ [VALIDATOR] Odd One Out has 3 questions (expected: 10)",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > odd-one-out: a wrong question count only warns, a wrong option count throws (but lenient mode swallows it) 2`] = `
+{
+  "after": {
+    "instructions": "Do the odd-one-out task.",
+    "questions": [
+      {
+        "correct_answer": "a",
+        "options": [
+          "a",
+          "b",
+        ],
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: odd-one-out",
+    "type": "odd-one-out",
+  },
+  "threw": null,
+  "warnings": [
+    "⚠️ [VALIDATOR] Odd One Out has 1 questions (expected: 10)",
+    "Validation warning for odd-one-out: Each Odd One Out question must have exactly 5 options",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > odd-one-out: a wrong question count only warns, a wrong option count throws (but lenient mode swallows it) 3`] = `
+{
+  "after": {
+    "instructions": "Do the odd-one-out task.",
+    "questions": [
+      {
+        "options": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+        ],
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: odd-one-out",
+    "type": "odd-one-out",
+  },
+  "threw": null,
+  "warnings": [
+    "⚠️ [VALIDATOR] Odd One Out has 1 questions (expected: 10)",
+    "Validation warning for odd-one-out: Each Odd One Out question must have a correct_answer",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > reading: short content only warns, fewer than 5 questions throws 1`] = `
+{
+  "after": {
+    "content": "too short",
+    "instructions": "Do the reading task.",
+    "questions": [
+      {
+        "answer": "A1",
+        "question": "Q1?",
+      },
+      {
+        "answer": "A2",
+        "question": "Q2?",
+      },
+      {
+        "answer": "A3",
+        "question": "Q3?",
+      },
+      {
+        "answer": "A4",
+        "question": "Q4?",
+      },
+      {
+        "answer": "A5",
+        "question": "Q5?",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: reading",
+    "type": "reading",
+  },
+  "threw": null,
+  "warnings": [
+    "Reading exercise word count (2) outside recommended range of 200-400 words",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > reading: short content only warns, fewer than 5 questions throws 2`] = `
+{
+  "after": {
+    "content": "word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12 word13 word14 word15 word16 word17 word18 word19 word20 word21 word22 word23 word24 word25 word26 word27 word28 word29 word30 word31 word32 word33 word34 word35 word36 word37 word38 word39 word40 word41 word42 word43 word44 word45 word46 word47 word48 word49 word50 word51 word52 word53 word54 word55 word56 word57 word58 word59 word60 word61 word62 word63 word64 word65 word66 word67 word68 word69 word70 word71 word72 word73 word74 word75 word76 word77 word78 word79 word80 word81 word82 word83 word84 word85 word86 word87 word88 word89 word90 word91 word92 word93 word94 word95 word96 word97 word98 word99 word100 word101 word102 word103 word104 word105 word106 word107 word108 word109 word110 word111 word112 word113 word114 word115 word116 word117 word118 word119 word120 word121 word122 word123 word124 word125 word126 word127 word128 word129 word130 word131 word132 word133 word134 word135 word136 word137 word138 word139 word140 word141 word142 word143 word144 word145 word146 word147 word148 word149 word150 word151 word152 word153 word154 word155 word156 word157 word158 word159 word160 word161 word162 word163 word164 word165 word166 word167 word168 word169 word170 word171 word172 word173 word174 word175 word176 word177 word178 word179 word180 word181 word182 word183 word184 word185 word186 word187 word188 word189 word190 word191 word192 word193 word194 word195 word196 word197 word198 word199 word200 word201 word202 word203 word204 word205 word206 word207 word208 word209 word210 word211 word212 word213 word214 word215 word216 word217 word218 word219 word220",
+    "instructions": "Do the reading task.",
+    "questions": [
+      1,
+      2,
+      3,
+      4,
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: reading",
+    "type": "reading",
+  },
+  "threw": "Reading exercise must have at least 5 questions",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > reading: short content only warns, fewer than 5 questions throws 3`] = `
+{
+  "after": {
+    "content": 42,
+    "instructions": "Do the reading task.",
+    "questions": [
+      {
+        "answer": "A1",
+        "question": "Q1?",
+      },
+      {
+        "answer": "A2",
+        "question": "Q2?",
+      },
+      {
+        "answer": "A3",
+        "question": "Q3?",
+      },
+      {
+        "answer": "A4",
+        "question": "Q4?",
+      },
+      {
+        "answer": "A5",
+        "question": "Q5?",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: reading",
+    "type": "reading",
+  },
+  "threw": "Reading exercise must have content",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > sentence-transformation accepts transformations or sentences 1`] = `
+{
+  "after": {
+    "sentences": [
+      {
+        "original": "o0",
+      },
+      {
+        "original": "o1",
+      },
+      {
+        "original": "o2",
+      },
+      {
+        "original": "o3",
+      },
+      {
+        "original": "o4",
+      },
+    ],
+    "type": "sentence-transformation",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > sentence-transformation accepts transformations or sentences 2`] = `
+{
+  "after": {
+    "sentences": [
+      {},
+      {},
+      {},
+      {},
+      {},
+    ],
+    "type": "sentence-transformation",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for sentence-transformation: Each transformation must have an original sentence",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > synonyms/antonyms accepts items or pairs and both field-name styles 1`] = `
+{
+  "after": {
+    "pairs": [
+      {
+        "match": "m0",
+        "word": "w0",
+      },
+      {
+        "match": "m1",
+        "word": "w1",
+      },
+      {
+        "match": "m2",
+        "word": "w2",
+      },
+      {
+        "match": "m3",
+        "word": "w3",
+      },
+      {
+        "match": "m4",
+        "word": "w4",
+      },
+    ],
+    "type": "synonyms",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > synonyms/antonyms accepts items or pairs and both field-name styles 2`] = `
+{
+  "after": {
+    "items": [
+      {
+        "definition": "m0",
+        "term": "w0",
+      },
+      {
+        "definition": "m1",
+        "term": "w1",
+      },
+      {
+        "definition": "m2",
+        "term": "w2",
+      },
+      {
+        "definition": "m3",
+        "term": "w3",
+      },
+      {
+        "definition": "m4",
+        "term": "w4",
+      },
+    ],
+    "type": "antonyms",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > synonyms/antonyms accepts items or pairs and both field-name styles 3`] = `
+{
+  "after": {
+    "items": [
+      {
+        "word": "only word",
+      },
+      {
+        "word": "only word",
+      },
+      {
+        "word": "only word",
+      },
+      {
+        "word": "only word",
+      },
+      {
+        "word": "only word",
+      },
+    ],
+    "type": "synonyms-antonyms",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for synonyms-antonyms: Each synonym/antonym pair must have either (word, match) or (term, definition) properties",
+  ],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > true-false: isTrue must be a boolean; the prompt schema statement shape is checked as is 1`] = `
+{
+  "after": {
+    "instructions": "Do the true-false task.",
+    "statements": [
+      {
+        "isTrue": true,
+        "text": "Statement 1",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 2",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 3",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 4",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 5",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 6",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 7",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 8",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 9",
+      },
+      {
+        "isTrue": "true",
+        "text": "x",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: true-false",
+    "type": "true-false",
+  },
+  "threw": "Each true/false statement must have a boolean isTrue property",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > true-false: isTrue must be a boolean; the prompt schema statement shape is checked as is 2`] = `
+{
+  "after": {
+    "instructions": "Do the true-false task.",
+    "questions": [
+      {
+        "isTrue": true,
+        "text": "Statement 1",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 2",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 3",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 4",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 5",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 6",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 7",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 8",
+      },
+      {
+        "isTrue": true,
+        "text": "Statement 9",
+      },
+      {
+        "isTrue": false,
+        "text": "Statement 10",
+      },
+    ],
+    "teacher_tip": "Ask your student to explain.",
+    "time": 8,
+    "title": "Exercise 1: true-false",
+    "type": "true-false",
+  },
+  "threw": "True/False exercise must have at least 5 statements",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > word-order accepts scrambled_words or correct_order alone 1`] = `
+{
+  "after": {
+    "sentences": [
+      {
+        "correct_order": "A b c.",
+      },
+      {
+        "correct_order": "A b c.",
+      },
+      {
+        "correct_order": "A b c.",
+      },
+      {
+        "correct_order": "A b c.",
+      },
+      {
+        "correct_order": "A b c.",
+      },
+    ],
+    "type": "word-order",
+  },
+  "threw": null,
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: specific rules and quirks > word-order accepts scrambled_words or correct_order alone 2`] = `
+{
+  "after": {
+    "sentences": [
+      {},
+      {},
+      {},
+      {},
+      {},
+    ],
+    "type": "word-order",
+  },
+  "threw": null,
+  "warnings": [
+    "Validation warning for word-order: Each word order sentence must have scrambled_words or correct_order",
+  ],
+}
+`;
+
+exports[`validateExercise: structural checks > rejects no type 1`] = `
+{
+  "after": {},
+  "threw": "Exercise must have a valid type",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: structural checks > rejects null 1`] = `
+{
+  "after": null,
+  "threw": "Exercise must be an object",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: structural checks > rejects numeric type 1`] = `
+{
+  "after": {
+    "type": 4,
+  },
+  "threw": "Exercise must have a valid type",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: structural checks > rejects string 1`] = `
+{
+  "after": "x",
+  "threw": "Exercise must be an object",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: structural checks > rejects undefined 1`] = `
+{
+  "after": undefined,
+  "threw": "Exercise must be an object",
+  "warnings": [],
+}
+`;
+
+exports[`validateExercise: structural checks > unknown type is allowed and gets default time and icon 1`] = `
+{
+  "after": {
+    "icon": "fa-tasks",
+    "time": 10,
+    "type": "brand-new-type",
+  },
+  "threw": null,
+  "warnings": [
+    "🔧 [VALIDATOR] Unknown exercise type: brand-new-type - allowing with basic validation",
+  ],
+}
+`;
+
+exports[`validateExercise: structural checks > unknown type is allowed and gets default time and icon 2`] = `
+{
+  "after": {
+    "icon": "fa-x",
+    "time": 10,
+    "type": "brand-new-type",
+  },
+  "threw": null,
+  "warnings": [
+    "🔧 [VALIDATOR] Unknown exercise type: brand-new-type - allowing with basic validation",
+  ],
+}
+`;

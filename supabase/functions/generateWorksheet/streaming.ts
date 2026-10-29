@@ -69,7 +69,7 @@ export function createSSEStream(): SSEStream {
       try {
         const sseMessage = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
         controller.enqueue(encoder.encode(sseMessage));
-        console.log(`📡 SSE sent: ${event}`, data);
+        console.log(`📡 SSE sent: ${event} (${sseMessage.length} bytes)`);
         return true;
       } catch (error) {
         // Most common cause: client disconnected (refresh/navigate) and the

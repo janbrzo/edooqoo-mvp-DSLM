@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { useTeacherVerdicts, applyTeacherVerdict } from "@/lib/answers/teacherVerdicts";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 
 interface ExerciseWordOrderProps extends Partial<InteractiveExerciseProps> {
@@ -34,6 +35,7 @@ const ExerciseWordOrder: React.FC<ExerciseWordOrderProps> = ({
   onNanoSkillChange,
   isSharedWorksheet = false
 }) => {
+  const teacherVerdicts = useTeacherVerdicts();
   const handleScrambledWordsChange = (sIndex: number, value: string) => {
     onSentenceChange(sIndex, 'scrambled_words', value);
   };
@@ -45,7 +47,8 @@ const ExerciseWordOrder: React.FC<ExerciseWordOrderProps> = ({
           const studentAnswer = studentAnswers[sIndex] || '';
           const correctAnswer = sentence?.correct_order || '';
           // Use normalized comparison to ignore punctuation and case
-          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'sentence' });
+          const rawMatch = matchAnswer(studentAnswer, correctAnswer, { mode: 'sentence' });
+          const match = { ...rawMatch, verdict: applyTeacherVerdict(teacherVerdicts, sIndex, rawMatch.verdict) };
           const isCorrect = showCorrectAnswers && match.verdict === 'correct';
           const isReview = showCorrectAnswers && match.verdict === 'review';
           const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';

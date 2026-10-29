@@ -33,6 +33,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 import { hasStudentReturnedHomework, homeworkReviewPath, isHomeworkAwaitingReview } from '@/lib/homework/reviewState';
 import { markDoneOutcome, reopenHomework, type LifecycleResult } from '@/lib/homework/homeworkStateRpc';
+import { HOMEWORK_OWNER_VIEW_SELECT } from '@/lib/homework/homeworkColumns';
 
 interface StudentHomeworkTabProps {
   studentId: string;
@@ -88,7 +89,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
       const { data, error } = await supabase
         .from('homework_assignments')
         .select(`
-          *,
+          ${HOMEWORK_OWNER_VIEW_SELECT},
           students!inner(name, student_email)
         `)
         .eq('student_id', studentId)
@@ -286,8 +287,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
       toast.error("No worksheets available. Create a worksheet first.");
       return;
     }
-    // Set first worksheet as default
-    setSelectedWorksheetForHomework(worksheets[0].id);
+    // The latest worksheet is the default; the picker next to the button can change it.
     setIsCreateModalOpen(true);
   };
   
@@ -312,8 +312,8 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
     }
   };
   
-  // Get the first worksheet for the modal
-  const firstWorksheet = worksheets[0];
+  // The worksheet the homework is made from: the teacher's pick, else the latest one.
+  const chosenWorksheet = worksheets.find((w) => w.id === selectedWorksheetForHomework) ?? worksheets[0];
   
   return (
     <div className="space-y-4">
@@ -322,10 +322,24 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
         <h2 className="text-xl font-semibold">
           Homework Assignments ({allHomework.length})
         </h2>
-        <Button onClick={handleCreateNew}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create New Homework
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {worksheets.length > 1 && (
+            <Select value={chosenWorksheet?.id ?? ''} onValueChange={setSelectedWorksheetForHomework}>
+              <SelectTrigger className="h-9 w-56 text-sm" aria-label="Worksheet for the new homework">
+                <SelectValue placeholder="Worksheet" />
+              </SelectTrigger>
+              <SelectContent>
+                {worksheets.slice(0, 20).map((w) => (
+                  <SelectItem key={w.id} value={w.id}>{w.title || 'Worksheet'}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Button onClick={handleCreateNew}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Homework
+          </Button>
+        </div>
       </div>
       
       {/* Filters */}
@@ -664,17 +678,18 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
       </AlertDialog>
       
       {/* Create Homework Modal */}
-      {firstWorksheet && (
+      {chosenWorksheet && (
         <CreateHomeworkModal
+          key={chosenWorksheet.id}
           open={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
-          worksheetId={selectedWorksheetForHomework || firstWorksheet.id}
-          worksheetTitle={firstWorksheet.title || 'Worksheet'}
+          worksheetId={chosenWorksheet.id}
+          worksheetTitle={chosenWorksheet.title || 'Worksheet'}
           exercises={(() => {
             // Shared loader: never throws on corrupted ai_response
-            const loaded = loadWorksheetContent(firstWorksheet);
+            const loaded = loadWorksheetContent(chosenWorksheet);
             if (loaded.degraded) {
-              devWarn(`Worksheet ${firstWorksheet.id} loaded from html_content fallback`, loaded.reason);
+              devWarn(`Worksheet ${chosenWorksheet.id} loaded from html_content fallback`, loaded.reason);
             }
             return Array.isArray(loaded.data?.exercises) ? loaded.data.exercises : [];
           })()}

@@ -1,0 +1,18 @@
+lessonTopic: Chasing a late order by phone
+lessonGoal: Understand a voicemail and reply politely
+englishLevel: B1/B2
+languageStyle: 3/5 (neutral - balanced style)
+selectedExercises: reading, multiple-choice-audio, true-false-audio, fill-in-blanks-audio, matching, dialogue, discussion, error-correction
+
+LANGUAGE STYLE GUIDELINES (3/5):
+- Use neutral, balanced language that's neither too casual nor too formal
+- Mix contractions with full forms naturally and appropriately
+- Use standard expressions and commonly understood idioms
+- Examples: "How are you doing?", "That sounds excellent!", "I would like to", "Let's meet up", "It's interesting"
+
+CEFR LEVEL GUIDELINES (B1/B2):
+- Use intermediate vocabulary with more varied grammatical structures including conditionals and perfect tenses
+- Include topics related to work, travel, personal experiences, opinions, and abstract ideas
+- Use compound and some complex sentences with relative clauses and linking words
+- Introduce phrasal verbs, idiomatic expressions, and more nuanced vocabulary
+- Examples: "If I had known, I would have come earlier", "I've been learning English for five years", "Although it was raining, we decided to go out"

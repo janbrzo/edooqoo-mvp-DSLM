@@ -11,6 +11,8 @@ import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { useInteractiveHomework } from "@/hooks/useInteractiveHomework";
 import { fetchHomeworkState } from '@/lib/homework/homeworkStateRpc';
 import { fetchHomeworkExercises, hasHomeworkExercises } from '@/lib/homework/exercisesRpc';
+import { fetchStudentReview, type StudentReview } from '@/lib/homework/reviewForStudent';
+import { TeacherVerdictsContext, withoutDecidedEvaluations } from '@/lib/answers/teacherVerdicts';
 import { StudentEmailVerification } from "@/components/homework/StudentEmailVerification";
 import { HomeworkProgressBar } from "@/components/homework/HomeworkProgressBar";
 import { StudyModeButton } from "@/components/shared/StudyModeButton";
@@ -27,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { devLog } from '@/utils/logger';
+import { isClosedExerciseType } from '@/utils/masteryCalculator';
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 
 interface HomeworkData {
@@ -66,10 +69,10 @@ export default function HomeworkPage() {
   const [isTeacher, setIsTeacher] = useState(false);
   const [showIncompleteModal, setShowIncompleteModal] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
-  const [submitCountdown, setSubmitCountdown] = useState(15);
   const [studentEmailForTeacher, setStudentEmailForTeacher] = useState<string | null>(null);
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [studentIdForTeacher, setStudentIdForTeacher] = useState<string | null>(null);
+  const [studentReview, setStudentReview] = useState<StudentReview | null>(null);
   
   // PROBLEM 2 FIX: Check localStorage for remembered email on mount
   useEffect(() => {
@@ -111,7 +114,6 @@ export default function HomeworkPage() {
   const [isImageFullScreen, setIsImageFullScreen] = useState(false);
   
   const exerciseRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Interactive homework hook - only active after email verification
   const totalExercises = Array.isArray(homework?.selected_exercises) 
@@ -146,6 +148,7 @@ export default function HomeworkPage() {
     submittedAt,
     isWaitingForAiEval,
     isLocked,
+    accessRevoked,
     updateAnswer,
     updateAudioAnswer,
     saveOnBlur,
@@ -179,6 +182,18 @@ export default function HomeworkPage() {
     }
   }, [homework]);
 
+  // After the teacher sent the review the student sees the comments and the decisions on items
+  // the answer key could not judge (the server answers null before that or for another email).
+  const reviewedAt = homework?.reviewed_at;
+  useEffect(() => {
+    if (!token || !verifiedEmail || verifiedEmail === 'teacher' || isTeacher || !reviewedAt || !exercisesLoaded) return;
+    let cancelled = false;
+    fetchStudentReview(token, verifiedEmail)
+      .then((review) => { if (!cancelled) setStudentReview(review); })
+      .catch((error) => console.error('Error loading homework review:', error));
+    return () => { cancelled = true; };
+  }, [token, verifiedEmail, isTeacher, reviewedAt, exercisesLoaded]);
+
   // The link alone does not carry the exercises (and their answer keys): a student gets them once
   // the assigned email is verified. A remembered email that no longer matches is dropped.
   const awaitingExercises = !!homework && !!verifiedEmail && verifiedEmail !== 'teacher' && !isTeacher && !exercisesLoaded;
@@ -208,6 +223,17 @@ export default function HomeworkPage() {
       });
     return () => { cancelled = true; };
   }, [awaitingExercises, token, verifiedEmail]);
+
+  // The server no longer accepts the remembered e-mail (the teacher changed the address, or the
+  // homework was removed): forget it and ask for the e-mail again instead of retrying forever.
+  useEffect(() => {
+    if (!accessRevoked || !token || isTeacher) return;
+    try { localStorage.removeItem(`homework_email_${token}`); } catch { /* storage unavailable */ }
+    setVerifiedEmail(null);
+    toast.error("Please confirm your e-mail again", {
+      description: "This link no longer accepts the address you used. Ask your teacher for a new link if it keeps happening.",
+    });
+  }, [accessRevoked, token, isTeacher]);
 
   // The server refused a write or a submit: re-read why (submitted elsewhere or closed by the teacher).
   useEffect(() => {
@@ -404,45 +430,22 @@ export default function HomeworkPage() {
     }
   };
 
-  // Check if homework is incomplete before submitting
+  // Submitting is irreversible and always an explicit click: a countdown that submitted by itself
+  // sent work the student had only stopped looking at. Nothing answered yet cannot be submitted.
   const handleSubmitClick = () => {
     const progress = getProgress();
+    if (progress.answeredTasks === 0) {
+      toast.error("Answer at least one question before you submit.");
+      return;
+    }
     if (progress.percentageComplete < 100) {
       setShowIncompleteModal(true);
     } else {
-      // Show complete modal with countdown for 100% complete homework
       setShowCompleteModal(true);
-      setSubmitCountdown(15);
     }
   };
 
-  // Countdown effect for complete modal
-  useEffect(() => {
-    if (showCompleteModal && submitCountdown > 0) {
-      countdownIntervalRef.current = setInterval(() => {
-        setSubmitCountdown(prev => prev - 1);
-      }, 1000);
-      
-      return () => {
-        if (countdownIntervalRef.current) {
-          clearInterval(countdownIntervalRef.current);
-        }
-      };
-    } else if (showCompleteModal && submitCountdown === 0) {
-      // Auto-submit when countdown reaches 0
-      handleMarkCompleted();
-      setShowCompleteModal(false);
-    }
-  }, [showCompleteModal, submitCountdown]);
-
-  // Reset countdown when modal closes
-  const handleCloseCompleteModal = () => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-    }
-    setShowCompleteModal(false);
-    setSubmitCountdown(15);
-  };
+  const handleCloseCompleteModal = () => setShowCompleteModal(false);
 
   const handleMarkCompleted = async () => {
     if (!homework) return;
@@ -814,6 +817,7 @@ export default function HomeworkPage() {
               onBlur={handleExerciseBlur(index, exercise.type)}
               data-exercise-index={index}
             >
+              <TeacherVerdictsContext.Provider value={studentReview?.verdicts[index] ?? {}}>
               <HomeworkExerciseRenderer
                 exercise={exercise}
                 index={index}
@@ -836,7 +840,7 @@ export default function HomeworkPage() {
                 showCorrectAnswers={isTeacher || showCorrectAnswersToStudent}
                 disabled={finalIsSubmitted && !isTeacher}
                 viewMode={isTeacher ? "teacher" : "student"}
-                aiEvaluation={aiEvaluations[index]}
+                aiEvaluation={isClosedExerciseType(exercise.type) ? withoutDecidedEvaluations(aiEvaluations[index], studentReview?.verdicts[index]) : aiEvaluations[index]}
                 isWaitingForAiEval={isWaitingForAiEval}
                 audioAnswers={audioAnswers[index]}
                 onAudioAnswerChange={
@@ -845,6 +849,13 @@ export default function HomeworkPage() {
                     : (qIndex: number, audioUrl: string) => updateAudioAnswer(index, qIndex, audioUrl)
                 }
               />
+              </TeacherVerdictsContext.Provider>
+              {!isTeacher && studentReview?.comments[index] && (
+                <Card className="mt-3 p-4 border-primary/30 bg-primary/5">
+                  <p className="text-sm font-medium text-primary mb-1">Comment from {teacherName}</p>
+                  <p className="text-sm whitespace-pre-wrap">{studentReview.comments[index]}</p>
+                </Card>
+              )}
             </div>
           ))}
         </div>
@@ -1110,14 +1121,6 @@ export default function HomeworkPage() {
                 ⚠️ After submission you will NOT be able to edit your answers.
                 You will see the correct answers immediately.
               </p>
-              <div className="text-center py-4">
-                <div className="text-4xl font-bold text-primary tabular-nums">
-                  {submitCountdown}
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Auto-submitting in {submitCountdown} seconds...
-                </p>
-              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

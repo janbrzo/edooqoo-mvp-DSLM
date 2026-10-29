@@ -191,6 +191,30 @@ export function getOfficialExerciseName(type: string): string {
  * Strips markdown, BOM, control characters, smart quotes
  */
 export function extractJSONString(raw: string): string {
+  return normalizeCurlyQuotes(extractJSONStringRaw(raw));
+}
+
+/** Smart double quotes become `"`, smart apostrophes become `'` (can change the JSON structure). */
+export function normalizeCurlyQuotes(content: string): string {
+  return content
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
+}
+
+function flattenCurlyQuotesInStrings(value: unknown): any {
+  if (typeof value === 'string') return normalizeCurlyQuotes(value);
+  if (Array.isArray(value)) return value.map(flattenCurlyQuotesInStrings);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, flattenCurlyQuotesInStrings(v)]));
+  }
+  return value;
+}
+
+/**
+ * Same extraction as extractJSONString but leaves curly quotes alone, so valid
+ * JSON that contains typographic quotes parses untouched.
+ */
+export function extractJSONStringRaw(raw: string): string {
   let content = raw;
   
   // Remove BOM
@@ -199,10 +223,6 @@ export function extractJSONString(raw: string): string {
   // Remove markdown code fences
   content = content.replace(/^```json?\s*/im, '');
   content = content.replace(/```\s*$/im, '');
-  
-  // Normalize smart quotes to standard quotes
-  content = content.replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"');
-  content = content.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
   
   // Remove control characters (except newline, tab, carriage return)
   content = content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
@@ -283,15 +303,42 @@ export function repairJSONStringDeterministic(content: string): string {
  * Returns parsed object or throws with detailed context
  */
 export function parseAIResponse(jsonContent: string): any {
-  // Layer 1: Extract clean JSON
-  const extracted = extractJSONString(jsonContent);
+  return parseAIResponseDetailed(jsonContent).data;
+}
+
+/**
+ * Local repair step that produced the parsed value, for telemetry only:
+ * 'none' (parsed as extracted), 'deterministic', 'escape-scan' or 'truncate'.
+ */
+export type LocalRepairStep = 'none' | 'deterministic' | 'escape-scan' | 'truncate';
+
+/**
+ * Same pipeline and same result as parseAIResponse, plus the local repair step
+ * that succeeded. The repaired output is identical; only the report is added.
+ */
+export function parseAIResponseDetailed(jsonContent: string): { data: any; step: LocalRepairStep; curly: string[] } {
+  // Layer 1: Extract clean JSON, curly quotes untouched
+  const extractedRaw = extractJSONStringRaw(jsonContent);
   let firstErrorPosition = -1;
-  
-  // Attempt 1: Parse extracted content directly
+
+  // Attempt 0: valid JSON parses without the whole-text rewrite; typographic quotes inside
+  // its strings are then flattened per value, so exact option/answer comparisons in the UI
+  // keep seeing the straight quotes they always did.
+  try {
+    const result = flattenCurlyQuotesInStrings(JSON.parse(extractedRaw));
+    console.log('✅ JSON parsed successfully on first attempt');
+    return { data: result, step: 'none', curly: [] };
+  } catch (_) { /* normalise the quotes and go through the repair layers */ }
+
+  // Only a failed parse pays for the curly-quote rewrite (as it always did).
+  const curly = detectCurlyQuotes(extractedRaw);
+  const extracted = normalizeCurlyQuotes(extractedRaw);
+
+  // Attempt 1: Parse the normalised content
   try {
     const result = JSON.parse(extracted);
     console.log('✅ JSON parsed successfully on first attempt');
-    return result;
+    return { data: result, step: 'none', curly };
   } catch (firstError) {
     console.warn('⚠️ json_parse_initial_failed:', (firstError as Error).message);
     const m = /position (\d+)/.exec((firstError as Error).message || '');
@@ -303,7 +350,7 @@ export function parseAIResponse(jsonContent: string): any {
   try {
     const result = JSON.parse(repaired);
     console.log('✅ json_repair_deterministic_succeeded');
-    return result;
+    return { data: result, step: 'deterministic', curly };
   } catch (secondError) {
     console.warn('⚠️ json_repair_deterministic_failed:', (secondError as Error).message);
   }
@@ -316,7 +363,7 @@ export function parseAIResponse(jsonContent: string): any {
     try {
       const result = JSON.parse(escaped);
       console.log('✅ json_repair_layer: escape-scan');
-      return result;
+      return { data: result, step: 'escape-scan', curly };
     } catch (thirdError) {
       console.warn('⚠️ json_repair_escape_scan_failed:', (thirdError as Error).message);
     }
@@ -331,7 +378,7 @@ export function parseAIResponse(jsonContent: string): any {
       const result = JSON.parse(salvaged);
       const count = Array.isArray(result?.exercises) ? result.exercises.length : 0;
       console.log(`✅ json_repair_layer: truncate (${count} exercises salvaged)`);
-      return result;
+      return { data: result, step: 'truncate', curly };
     } catch { /* try next candidate */ }
   }
 
@@ -346,6 +393,28 @@ export function parseAIResponse(jsonContent: string): any {
   (error as any).rawLength = extracted.length;
   (error as any).errorPosition = firstErrorPosition;
   throw error;
+}
+
+/**
+ * Which curly-quote normalisation extractJSONString will apply to `raw`
+ * (telemetry only): double quotes can change the JSON structure, apostrophes
+ * only the text.
+ */
+export function detectCurlyQuotes(raw: string): string[] {
+  const found: string[] = [];
+  if (/[\u201C\u201D\u201E\u201F\u2033\u2036]/.test(raw)) found.push('curly-quotes');
+  if (/[\u2018\u2019\u201A\u201B\u2032\u2035]/.test(raw)) found.push('curly-apostrophes');
+  return found;
+}
+
+/**
+ * Joins the repair steps that were applied into the detailed telemetry value
+ * (for example `curly-quotes+truncate` or `ai-window`); 'none' when no step was
+ * applied. Telemetry only: `repairMethod` keeps its original values.
+ */
+export function joinRepairDetail(steps: string[]): string {
+  const applied = steps.filter((step) => step && step !== 'none');
+  return applied.length ? applied.join('+') : 'none';
 }
 
 /**

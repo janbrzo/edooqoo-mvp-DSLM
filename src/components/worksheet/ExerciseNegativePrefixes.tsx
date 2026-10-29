@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { useTeacherVerdicts, applyTeacherVerdict } from "@/lib/answers/teacherVerdicts";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 
 interface ExerciseNegativePrefixesProps extends Partial<InteractiveExerciseProps> {
@@ -36,13 +37,15 @@ const ExerciseNegativePrefixes: React.FC<ExerciseNegativePrefixesProps> = ({
   onNanoSkillChange,
   isSharedWorksheet = false
 }) => {
+  const teacherVerdicts = useTeacherVerdicts();
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {words.map((wordItem, wIndex) => {
           const studentAnswer = studentAnswers[wIndex] || '';
           const correctAnswer = wordItem?.answer || '';
-          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+          const rawMatch = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+          const match = { ...rawMatch, verdict: applyTeacherVerdict(teacherVerdicts, wIndex, rawMatch.verdict) };
           const isCorrect = showCorrectAnswers && match.verdict === 'correct';
           const isReview = showCorrectAnswers && match.verdict === 'review';
           const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';

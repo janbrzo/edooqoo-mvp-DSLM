@@ -20,12 +20,20 @@ import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEv
 import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
 import { isClosedExerciseType } from "@/utils/masteryCalculator";
 import { ItemsToCheckPanel } from "@/components/homework/ItemsToCheckPanel";
-import { findItemsToCheck, type StoredItemRating } from "@/lib/homework/reviewItems";
+import { ItemsToScorePanel } from "@/components/homework/ItemsToScorePanel";
+import { requestHomeworkRedo } from "@/lib/homework/homeworkStateRpc";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { findItemsToCheck, findItemsToScore, teacherVerdictsOf, type StoredItemRating } from "@/lib/homework/reviewItems";
+import { TeacherVerdictsContext, withoutDecidedEvaluations } from "@/lib/answers/teacherVerdicts";
 import { parseAiEvaluation } from "@/utils/aiEvaluationMapper";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useTeacherAuthRedirect } from "@/hooks/useTeacherAuthRedirect";
 import { useDemoContext } from "@/contexts/DemoContext";
+import { HOMEWORK_OWNER_VIEW_SELECT, type HomeworkOwnerRow } from '@/lib/homework/homeworkColumns';
 
 interface HomeworkData {
   id: string;
@@ -37,6 +45,7 @@ interface HomeworkData {
   reviewed_at: string | null;
   reviewed_by: string | null;
   view_count: number;
+  attempt?: number;
   viewed_at: string | null;
   teacher_id: string;
   student_id: string;
@@ -56,6 +65,8 @@ interface StudentAnswer {
   submitted_at: string | null;
   ai_evaluation?: AiEvaluation | null;
   item_evaluations?: StoredItemRating[] | null;
+  ai_eval_attempts?: number | null;
+  ai_eval_note?: string | null;
 }
 
 interface TeacherComment {
@@ -74,6 +85,8 @@ export default function HomeworkReviewPage() {
   const { isDemoMode, demoData } = useDemoContext();
   const [homework, setHomework] = useState<HomeworkData | null>(null);
   const [studentAnswers, setStudentAnswers] = useState<StudentAnswer[]>([]);
+  const [redoOpen, setRedoOpen] = useState(false);
+  const [redoing, setRedoing] = useState(false);
   const [teacherComments, setTeacherComments] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
@@ -112,12 +125,12 @@ export default function HomeworkReviewPage() {
       const { data: homeworkData, error: homeworkError } = await supabase
         .from('homework_assignments')
         .select(`
-          *,
+          ${HOMEWORK_OWNER_VIEW_SELECT},
           students(name, student_email, english_level)
         `)
         .eq('id', id)
         .eq('teacher_id', user.id)
-        .single();
+        .single<HomeworkOwnerRow & { students: { name: string; student_email: string | null; english_level: string | null } | null }>();
 
       if (homeworkError) throw homeworkError;
 
@@ -153,9 +166,9 @@ export default function HomeworkReviewPage() {
         // Use direct query to get ai_evaluation which RPC might not return
         const { data: answersData, error: answersError } = await supabase
           .from('homework_student_answers')
-          .select('exercise_index, exercise_type, answers, is_submitted, submitted_at, ai_evaluation, item_evaluations')
+          .select('exercise_index, exercise_type, answers, is_submitted, submitted_at, ai_evaluation, item_evaluations, ai_eval_attempts, ai_eval_note')
           .eq('homework_id', id)
-          .eq('student_email', studentEmail);
+          .eq('student_email', studentEmail.trim().toLowerCase());
 
         if (!answersError && answersData) {
           // Cast answers from JSON to Record<number, any>
@@ -237,7 +250,7 @@ export default function HomeworkReviewPage() {
       if (error) throw error;
 
       // Create notification for student (optional - could be email)
-      toast.success("Review sent to student! They can now see correct answers and your comments.");
+      toast.success("Review sent. When your student opens the homework they see your comments and your decisions.");
 
       // The dashboard and timeline caches do not refetch on mount; drop the
       // stale "waiting for your review" entries now.
@@ -251,6 +264,29 @@ export default function HomeworkReviewPage() {
       toast.error("Failed to send review");
     } finally {
       setIsSending(false);
+    }
+  };
+
+  // The returned attempt is archived and the homework opens again, empty, under the same link.
+  const redoHomework = async () => {
+    if (!homework) return;
+    setRedoing(true);
+    try {
+      const result = await requestHomeworkRedo(homework.id);
+      if (!result.success) {
+        toast.error(result.error || "Could not open the homework again");
+        return;
+      }
+      toast.success("The student can do this homework again. Send them the link if they need a reminder.");
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-attention'], refetchType: 'all' });
+      void queryClient.invalidateQueries({ queryKey: ['student-timeline-sources'], refetchType: 'all' });
+      setRedoOpen(false);
+      await loadHomework();
+    } catch (error) {
+      console.error('Error opening homework again:', error);
+      toast.error("Could not open the homework again");
+    } finally {
+      setRedoing(false);
     }
   };
 
@@ -425,6 +461,9 @@ export default function HomeworkReviewPage() {
                 <div className="flex items-center gap-2 text-green-600">
                   <CheckCircle2 className="h-4 w-4" />
                   <span>Submitted: {format(new Date(submittedAt), "PPP HH:mm")}</span>
+                  {homework.deadline && new Date(submittedAt) > new Date(homework.deadline) && (
+                    <Badge variant="outline" className="text-amber-600 border-amber-600">Submitted late</Badge>
+                  )}
                 </div>
               )}
             </div>
@@ -445,6 +484,9 @@ export default function HomeworkReviewPage() {
                 <Badge variant="outline" className="text-green-600 border-green-600">
                   Student has submitted
                 </Badge>
+              )}
+              {(homework.attempt ?? 1) > 1 && (
+                <Badge variant="outline">Attempt {homework.attempt}</Badge>
               )}
             </div>
             
@@ -478,8 +520,18 @@ export default function HomeworkReviewPage() {
           {Array.isArray(homework.selected_exercises) && homework.selected_exercises.map((exercise, index) => {
             const studentAnswer = getStudentAnswerForExercise(index);
             const hasAnswer = Object.keys(studentAnswer).length > 0;
-            const aiEvaluation = getAiEvaluationForExercise(index);
+            // A teacher decision hides the AI explanation of a closed question (it would contradict it);
+            // for an open answer the model's feedback stays useful next to the teacher's rating.
+            const aiEvaluation = isClosedExerciseType(exercise.type)
+              ? withoutDecidedEvaluations(getAiEvaluationForExercise(index), teacherVerdictsOf(studentAnswers.find((a) => a.exercise_index === index)?.item_evaluations))
+              : getAiEvaluationForExercise(index);
             const storedRow = studentAnswers.find((a) => a.exercise_index === index);
+            // The server gave up grading this exercise (3 attempts): say so instead of showing a blank.
+            const aiGaveUp = !!storedRow?.is_submitted && !storedRow.ai_evaluation && (storedRow.ai_eval_attempts ?? 0) >= 3
+              && !!storedRow.ai_eval_note && storedRow.ai_eval_note !== 'no evaluable answers';
+            const itemsToScore = storedRow?.is_submitted
+              ? findItemsToScore(storedRow.exercise_type || exercise.type, exercise, storedRow.answers, storedRow.item_evaluations)
+              : [];
             const itemsToCheck = storedRow?.is_submitted
               ? findItemsToCheck(storedRow.exercise_type || exercise.type, exercise, storedRow.answers, storedRow.item_evaluations)
               : [];
@@ -487,6 +539,7 @@ export default function HomeworkReviewPage() {
             return (
               <div key={index} className="space-y-4">
                 {/* Exercise */}
+                <TeacherVerdictsContext.Provider value={teacherVerdictsOf(storedRow?.item_evaluations)}>
                 <ExerciseSection
                   exercise={exercise}
                   index={index + 1}
@@ -503,6 +556,7 @@ export default function HomeworkReviewPage() {
                   studentAnswers={studentAnswer as any}
                   showCorrectAnswers={true}
                 />
+                </TeacherVerdictsContext.Provider>
                 
                 {/* AI feedback per question (ai_evaluation.question_evaluations) */}
                 {aiEvaluation && isClosedExerciseType(exercise.type) && (
@@ -521,6 +575,18 @@ export default function HomeworkReviewPage() {
                   </div>
                 )}
                 
+                {aiGaveUp && (
+                  <p className="ml-4 text-sm text-amber-600">
+                    The automatic evaluation of this exercise did not finish, so it has no score yet. Please read the answers yourself.
+                  </p>
+                )}
+                <ItemsToScorePanel
+                  homeworkId={homework.id}
+                  exerciseIndex={index}
+                  items={itemsToScore}
+                  onRated={(rated) => setStudentAnswers((prev) => prev.map((a) =>
+                    a.exercise_index === index ? { ...a, item_evaluations: rated } : a))}
+                />
                 <ItemsToCheckPanel
                   homeworkId={homework.id}
                   exerciseIndex={index}
@@ -572,6 +638,13 @@ export default function HomeworkReviewPage() {
 
         {/* Footer */}
         <div className="mt-12">
+          {hasStudentSubmitted && (
+            <div className="mb-4 flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setRedoOpen(true)}>
+                Let student redo
+              </Button>
+            </div>
+          )}
           {!isReviewed && hasStudentSubmitted ? (
             <Button 
               onClick={sendReviewToStudent}
@@ -606,6 +679,23 @@ export default function HomeworkReviewPage() {
           )}
         </div>
       </div>
+      <AlertDialog open={redoOpen} onOpenChange={setRedoOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Let the student do this homework again?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The returned answers and your comments are archived. The homework opens again with empty answers
+              under the same link. The student's progress keeps the first attempt until the second one is submitted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={redoing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction disabled={redoing} onClick={(e) => { e.preventDefault(); void redoHomework(); }}>
+              {redoing ? "Opening..." : "Open again"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

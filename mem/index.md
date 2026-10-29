@@ -64,3 +64,4 @@
 - [DSLM forgetting curve](mem://features/dslm/forgetting-curve) — D9/D10 read-time effective mastery (14d grace, 60d half-life, 50% floor), single module _shared/forgetting.ts, 7.1/7.2 deferred
 - [Micro-skill Taxonomy v2](mem://dslm/micro-skill-taxonomy-v2) — extract_micro_skill changes additive only; never move a skill name between two real topics
 - [AI Defensibility Pillars](mem://strategy/ai-defensibility-roadmap) — approved five-pillar product direction, durable learning state rather than raw generation
+- [Homework audit 2026-10](mem://features/homework/audit-2026-10) — server-owned grading and evidence, lifecycle and Mark done, review reaches the student, teacher verdicts and ratings, redo with attempts archive, keys behind the e-mail gate, creation flow; spec docs/ux/homework-spec.md

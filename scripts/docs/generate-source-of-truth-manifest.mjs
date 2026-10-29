@@ -563,20 +563,50 @@ function parseDatabase(usageByTable) {
   };
 }
 
-function parseEdgeFunction(file) {
-  const { text, sourceFile } = readSource(file);
-  const requestFields = [];
-  for (const match of text.matchAll(
-    /(?:const|let)\s*\{([\s\S]*?)\}\s*=\s*await\s+(?:req|request)\.json\(\)/g,
-  )) {
-    requestFields.push(
-      ...match[1]
-        .split(",")
-        .map((item) => item.trim().split(/[:=]/)[0]?.trim())
-        .filter((item) => /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(item)),
-    );
+/**
+ * The files an Edge Function's index.ts reaches through relative imports inside
+ * its own directory (tests excluded). A function split into modules still has
+ * one contract, so its request fields, tables and env vars are read from all of
+ * them.
+ */
+function localModules(entry) {
+  const directory = path.dirname(entry);
+  const seen = new Set([entry]);
+  const queue = [entry];
+  while (queue.length) {
+    const file = queue.shift();
+    const source = fs.readFileSync(file, "utf8");
+    for (const match of source.matchAll(/(?:import|export)\s[^"']*?from\s*["'](\.[^"']+)["']/g)) {
+      const target = path.resolve(path.dirname(file), match[1]);
+      if (!target.startsWith(directory + path.sep)) continue;
+      if (target.includes(`${path.sep}__tests__${path.sep}`)) continue;
+      if (seen.has(target) || !fs.existsSync(target)) continue;
+      seen.add(target);
+      queue.push(target);
+    }
   }
-  for (const match of text.matchAll(
+  return [...seen].sort();
+}
+
+function parseEdgeFunction(file) {
+  const sources = localModules(file).map((module) => ({ module, ...readSource(module) }));
+  const entry = sources.find((source) => source.module === file);
+  const text = sources.map((source) => source.text).join("\n");
+  const requestFields = [];
+  for (const source of sources) {
+    for (const match of source.text.matchAll(
+      /(?:const|let)\s*\{([\s\S]*?)\}\s*=\s*await\s+(?:req|request)\.json\(\)/g,
+    )) {
+      requestFields.push(
+        ...match[1]
+          .split(",")
+          .map((item) => item.trim().split(/[:=]/)[0]?.trim())
+          .filter((item) => /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(item)),
+      );
+    }
+  }
+  // Loose heuristics: only the entry file, helper modules use these names for anything.
+  for (const match of entry.text.matchAll(
     /(?:const|let)\s*\{([\s\S]*?)\}\s*=\s*(?:body|payload|data)\s*(?:\|\|\s*\{\})?\s*;/g,
   )) {
     requestFields.push(
@@ -586,7 +616,8 @@ function parseEdgeFunction(file) {
         .filter((item) => /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(item)),
     );
   }
-  for (const match of text.matchAll(/\b(?:body|payload|data)\.([a-zA-Z_$][a-zA-Z0-9_$]*)/g)) {
+  // Loose heuristic: only the entry file, helper modules use `data.` for anything.
+  for (const match of entry.text.matchAll(/\b(?:body|payload|data)\.([a-zA-Z_$][a-zA-Z0-9_$]*)/g)) {
     requestFields.push(match[1]);
   }
   const methods = unique(
@@ -598,7 +629,7 @@ function parseEdgeFunction(file) {
     [...text.matchAll(/Deno\.env\.get\(\s*["']([^"']+)["']\s*\)/g)].map((match) => match[1]),
   );
   const responseFields = [];
-  function visit(node) {
+  function visit(node, sourceFile) {
     if (
       ts.isCallExpression(node) &&
       ts.isPropertyAccessExpression(node.expression) &&
@@ -606,16 +637,24 @@ function parseEdgeFunction(file) {
       ts.isIdentifier(node.expression.expression) &&
       node.expression.expression.text === "JSON" &&
       node.arguments[0] &&
-      ts.isObjectLiteralExpression(node.arguments[0])
+      ts.isObjectLiteralExpression(node.arguments[0]) &&
+      // console.log(JSON.stringify({...})) is a log line, not a response body
+      !(
+        node.parent &&
+        ts.isCallExpression(node.parent) &&
+        ts.isPropertyAccessExpression(node.parent.expression) &&
+        ts.isIdentifier(node.parent.expression.expression) &&
+        node.parent.expression.expression.text === "console"
+      )
     ) {
       for (const property of node.arguments[0].properties) {
         const name = propertyName(property, sourceFile);
         if (name) responseFields.push(name);
       }
     }
-    ts.forEachChild(node, visit);
+    ts.forEachChild(node, (child) => visit(child, sourceFile));
   }
-  visit(sourceFile);
+  for (const source of sources) visit(source.sourceFile, source.sourceFile);
   return {
     name: path.basename(path.dirname(file)),
     path: relativePath(file),
@@ -836,7 +875,8 @@ function main() {
   const edgeFiles = walkFiles(path.join(ROOT, "supabase", "functions"), [".ts"]).filter(
     (file) => path.basename(file) === "index.ts",
   );
-  const allAuditedFiles = [...srcFiles, ...edgeFiles];
+  const edgeAuditedFiles = [...new Set(edgeFiles.flatMap(localModules))].sort();
+  const allAuditedFiles = [...srcFiles, ...edgeAuditedFiles];
   const usageByTable = buildUsageIndex(allAuditedFiles);
   const routes = parseRoutes();
   const components = walkFiles(path.join(ROOT, "src", "components"), [".tsx"]).map(analyzeTsFile);

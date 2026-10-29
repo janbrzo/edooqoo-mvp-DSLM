@@ -2,6 +2,25 @@
 // Geolocation utility with improved IP parsing, reliable services, and database cache
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import { ENGINE_BUDGETS, withCallTimeout } from './engineBudgets.ts';
+
+/**
+ * Starts the lookup without blocking the caller. `target` is filled when the
+ * lookup finishes (or is given up after ENGINE_BUDGETS.geolocationTotalMs); the
+ * returned promise never rejects and is awaited where the row is saved.
+ */
+export function startGeolocation(ip: string, target: { country?: string; city?: string }): Promise<void> {
+  const started = Date.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const gaveUp = new Promise<{ country?: string; city?: string }>((resolve) => {
+    timer = setTimeout(() => resolve({}), ENGINE_BUDGETS.geolocationTotalMs);
+  });
+  return Promise.race([getGeolocation(ip).catch(() => ({})), gaveUp]).then((result) => {
+    clearTimeout(timer);
+    Object.assign(target, result);
+    console.log(`⏱️ [TIMING] Geolocation lookup (off the critical path): ${Date.now() - started}ms`);
+  });
+}
 
 export async function getGeolocation(ip: string): Promise<{ country?: string; city?: string }> {
   try {
@@ -142,11 +161,12 @@ function parseIP(ipString: string): string | null {
 }
 
 async function tryIPAPIService(ip: string): Promise<{ country?: string; city?: string }> {
-  const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+  const response = await withCallTimeout(ENGINE_BUDGETS.geolocationFetchMs, (signal) => fetch(`https://ipapi.co/${ip}/json/`, {
     headers: {
       'User-Agent': 'Supabase-Edge-Function/1.0'
-    }
-  });
+    },
+    signal
+  }));
   
   if (!response.ok) {
     throw new Error(`ipapi.co returned status: ${response.status}`);
@@ -162,11 +182,12 @@ async function tryIPAPIService(ip: string): Promise<{ country?: string; city?: s
 }
 
 async function tryFreeGeoIPService(ip: string): Promise<{ country?: string; city?: string }> {
-  const response = await fetch(`https://freegeoip.app/json/${ip}`, {
+  const response = await withCallTimeout(ENGINE_BUDGETS.geolocationFetchMs, (signal) => fetch(`https://freegeoip.app/json/${ip}`, {
     headers: {
       'User-Agent': 'Supabase-Edge-Function/1.0'
-    }
-  });
+    },
+    signal
+  }));
   
   if (!response.ok) {
     throw new Error(`freegeoip.app returned status: ${response.status}`);

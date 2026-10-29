@@ -1,0 +1,18 @@
+lessonTopic: Booking a medical appointment
+lessonGoal: Phone the clinic, give personal details and agree a time
+englishLevel: A1/A2
+languageStyle: 2/5 (casual - relaxed, friendly)
+selectedExercises: reading, true-false, matching, fill-in-blanks, multiple-choice, dialogue
+
+LANGUAGE STYLE GUIDELINES (2/5):
+- Use casual, relaxed language with regular contractions and friendly tone
+- Include common informal expressions and everyday language
+- Keep sentences moderately simple but well-structured
+- Examples: "How's it going?", "That sounds really great!", "I'd love to", "Let's hang out", "It's pretty cool"
+
+CEFR LEVEL GUIDELINES (A1/A2):
+- Use simple, basic vocabulary and elementary grammatical structures appropriate for beginners
+- Focus on everyday topics, common situations, and concrete subjects (family, food, weather, hobbies)
+- Keep sentences short and straightforward with present simple, present continuous, and basic past tense
+- Avoid complex clauses, abstract concepts, and advanced vocabulary
+- Examples: "I like pizza", "She is working now", "We went to the park yesterday"
