@@ -5,7 +5,7 @@
 //  * a read-only balance pre-check (RPC engine_pre_check) so a teacher without
 //    credit gets a calm 402 before any model cost.
 // Both fail OPEN: a database problem must never block generation, the legacy
-// in-memory limiter takes over and a warning is logged. Both are switchable
+// per-isolate limiter (same thresholds per bucket) takes over and a warning is logged. Both are switchable
 // without a redeploy (ENGINE_DB_RATE_LIMIT, ENGINE_BALANCE_PRECHECK = on | off).
 // No prompt, model parameter or generation output is touched here.
 import { RateLimiter } from "./rateLimiter.ts";
@@ -26,7 +26,9 @@ export interface Tier {
  * limiter (3 per 5 min, 5 per 15 min, 10 per 60 min); `batch` and `regenerate`
  * are separate, higher buckets because one homework or edit session sends
  * several requests. `daily` is the per-user cap for signed-in teachers and
- * counts every kind. Env override format: "limit:seconds,limit:seconds"
+ * counts every kind. The daily default of 150 is unmeasured: production data
+ * shows at most 19 stored worksheets per teacher per day, but regenerations and
+ * Add Exercise calls are not stored, so their volume is unknown. Env override format: "limit:seconds,limit:seconds"
  * (ENGINE_RATE_LIMIT_GENERATE, _BATCH, _REGENERATE, _DAILY); "off" disables
  * a bucket, an unparsable value keeps the default.
  */
@@ -38,7 +40,7 @@ export const DEFAULT_TIERS: Record<BucketKind | "daily", Tier[]> = {
   ],
   batch: [{ limit: 30, windowSeconds: 600 }],
   regenerate: [{ limit: 20, windowSeconds: 600 }],
-  daily: [{ limit: 60, windowSeconds: 86400 }],
+  daily: [{ limit: 150, windowSeconds: 86400 }],
 };
 
 /** Total time budget of all limiter RPCs of one request, and of the pre-check. */
@@ -121,9 +123,23 @@ export function deriveCallerKey(headers: Headers, userId: string | null, isAnony
 }
 
 /** Bucket of a request; mirrors how index.ts routes batch, regeneration and normal generation. */
-export function bucketKind(input: { isBatchGeneration?: boolean; isRegeneration?: boolean; formData?: any }): BucketKind {
+export interface RequestShape {
+  isBatchGeneration?: boolean;
+  isRegeneration?: boolean;
+  /** True when the client asked for the SSE stream (index.ts: `enableStreaming === true`). */
+  enableStreaming?: boolean;
+  formData?: any;
+}
+
+/**
+ * Bucket of a request, mirroring what the handler does. Batch wins (index.ts routes it first).
+ * `isRegeneration` only skips the worksheet insert in regular mode (regularMode.persist);
+ * streamingMode.persist inserts a charged row regardless, so a streaming request with
+ * isRegeneration is a normal, pre-checked generation.
+ */
+export function bucketKind(input: RequestShape): BucketKind {
   if (input.isBatchGeneration && Array.isArray(input.formData?.targetExerciseTypes)) return "batch";
-  if (input.isRegeneration) return "regenerate";
+  if (input.isRegeneration && input.enableStreaming !== true) return "regenerate";
   return "generate";
 }
 
@@ -181,6 +197,7 @@ export interface RateLimitInput {
   isAnonymous: boolean;
   isBatchGeneration?: boolean;
   isRegeneration?: boolean;
+  enableStreaming?: boolean;
   formData?: any;
   /** The legacy key (the whole forwarded-for string), used only when the DB limiter is off. */
   legacyKey: string;
@@ -188,11 +205,36 @@ export interface RateLimitInput {
 
 export interface LimitDeps {
   env?: EnvReader;
+  /** Legacy limiter used when ENGINE_DB_RATE_LIMIT is off. */
   memory?: { isAllowed(key: string): boolean };
+  /** Per-isolate fallback used when the database limiter fails. */
+  fallback?: { isAllowed(key: string, tiers: Tier[]): boolean };
 }
 
-/** Legacy limiter, shared by the flag-off path and the fail-open fallback. */
+/** Legacy limiter (hard-coded generate thresholds); only used when the DB limiter flag is off. */
 export const memoryLimiter = new RateLimiter();
+
+/** In-memory fixed thresholds per bucket kind, for the fail-open fallback. */
+export class TierMemoryLimiter {
+  private requests = new Map<string, number[]>();
+
+  isAllowed(key: string, tiers: Tier[]): boolean {
+    const now = Date.now();
+    const longest = tiers.reduce((m, t) => Math.max(m, t.windowSeconds), 0) * 1000;
+    const recent = (this.requests.get(key) ?? []).filter((t) => now - t < longest);
+    for (const tier of tiers) {
+      if (recent.filter((t) => now - t < tier.windowSeconds * 1000).length >= tier.limit) {
+        this.requests.set(key, recent);
+        return false;
+      }
+    }
+    recent.push(now);
+    this.requests.set(key, recent);
+    return true;
+  }
+}
+
+export const fallbackLimiter = new TierMemoryLimiter();
 
 const tooMany = (retryAfterSeconds?: number): LimitDenied => ({
   ok: false,
@@ -205,6 +247,7 @@ const tooMany = (retryAfterSeconds?: number): LimitDenied => ({
 export async function checkRateLimit(input: RateLimitInput, deps: LimitDeps = {}): Promise<LimitDecision> {
   const env = deps.env ?? defaultEnv;
   const memory = deps.memory ?? memoryLimiter;
+  const fallback = deps.fallback ?? fallbackLimiter;
 
   if (!flagOn(env, "ENGINE_DB_RATE_LIMIT")) {
     return memory.isAllowed(input.legacyKey) ? { ok: true } : tooMany();
@@ -247,7 +290,7 @@ export async function checkRateLimit(input: RateLimitInput, deps: LimitDeps = {}
     console.warn(
       `[limits] DB rate limiter unavailable, using in-memory limiter: ${error instanceof Error ? error.message : String(error)}`,
     );
-    return memory.isAllowed(key) ? { ok: true } : tooMany();
+    return fallback.isAllowed(`${kind}:${key}`, tiersFor(kind, env)) ? { ok: true } : tooMany();
   } finally {
     deadline.done();
   }
@@ -262,6 +305,7 @@ export interface PreCheckInput {
   isAnonymous: boolean;
   isBatchGeneration?: boolean;
   isRegeneration?: boolean;
+  enableStreaming?: boolean;
   formData?: any;
 }
 
@@ -272,10 +316,10 @@ export const TOKENS_FROZEN_MESSAGE =
 
 /**
  * Only a request that will insert a charged worksheet row is pre-checked:
- * batch (homework exercises) and regeneration write no worksheet and are not
- * charged by the server trigger today, so they are never refused here.
+ * batch (homework exercises) and regular-mode regeneration write no worksheet
+ * and are not charged by the server trigger today, so they are never refused here.
  */
-export function chargesWorksheet(input: { isBatchGeneration?: boolean; isRegeneration?: boolean; formData?: any }): boolean {
+export function chargesWorksheet(input: RequestShape): boolean {
   return bucketKind(input) === "generate";
 }
 

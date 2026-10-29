@@ -123,7 +123,7 @@ export async function resolveRequest(req: Request, generationStartTime: number):
   // Rate limit (DB-backed, fail open to the in-memory limiter; see limits.ts), then the
   // balance pre-check: both answer before geolocation and any model work.
   const isAnonymous = caller.kind === "user" && caller.isAnonymous;
-  const limitInput = { client: supabase, userId, isAnonymous, isBatchGeneration, isRegeneration, formData };
+  const limitInput = { client: supabase, userId, isAnonymous, isBatchGeneration, isRegeneration, enableStreaming: useStreaming, formData };
   const rateDecision = await checkRateLimit({ ...limitInput, headers: req.headers, legacyKey: ip });
   if (!rateDecision.ok) return { response: limitResponse(rateDecision, corsHeaders) };
   const balanceDecision = await checkBalance(limitInput);

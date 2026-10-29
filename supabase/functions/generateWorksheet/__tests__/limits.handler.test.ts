@@ -183,6 +183,22 @@ describe('generateWorksheet limits at handler level', () => {
     expect(r.calls.some((c: any) => c.name === 'engine_pre_check')).toBe(false);
   });
 
+  it('streaming + isRegeneration inserts a charged row, so it is a generate request: generate buckets, pre-check, 402', async () => {
+    const ok = await run(ON, ALLOW_ALL, body({ isRegeneration: true }));
+    expect(rpcCalls(ok.calls).map((c: any) => c.args?.p_bucket ?? c.name)).toEqual([
+      'generate_300',
+      'generate_900',
+      'generate_3600',
+      'daily_86400',
+      'engine_pre_check',
+    ]);
+    expect(ok.insertRows.length).toBe(1);
+    const refused = await run(ON, PRECHECK_REFUSES('insufficient_tokens', false), body({ isRegeneration: true }));
+    expect((refused.response as any).status).toBe(402);
+    expect(modelCalls(refused.calls)).toEqual([]);
+    expect(refused.insertRows).toEqual([]);
+  });
+
   it('regeneration is bucketed separately and never pre-checked', async () => {
     const reg = await run(ON, ALLOW_ALL, body({ enableStreaming: false, isRegeneration: true }));
     expect(rpcCalls(reg.calls).map((c: any) => c.args.p_bucket)).toEqual(['regenerate_600', 'daily_86400']);

@@ -10,6 +10,7 @@ import {
   limitResponse,
   parseTiers,
   sanitiseIp,
+  TierMemoryLimiter,
   tiersFor,
   trustedIp,
   type EnvReader,
@@ -34,6 +35,13 @@ const memory = (answer = true) => ({
   calls: [] as string[],
   isAllowed(k: string) {
     this.calls.push(k);
+    return answer;
+  },
+});
+const fallbackSpy = (answer = true) => ({
+  calls: [] as Array<[string, unknown]>,
+  isAllowed(k: string, tiers: unknown) {
+    this.calls.push([k, tiers as never]);
     return answer;
   },
 });
@@ -90,13 +98,16 @@ describe('configuration and buckets', () => {
     ]);
     expect(DEFAULT_TIERS.batch).toEqual([{ limit: 30, windowSeconds: 600 }]);
     expect(DEFAULT_TIERS.regenerate).toEqual([{ limit: 20, windowSeconds: 600 }]);
-    expect(DEFAULT_TIERS.daily).toEqual([{ limit: 60, windowSeconds: 86400 }]);
+    expect(DEFAULT_TIERS.daily).toEqual([{ limit: 150, windowSeconds: 86400 }]);
   });
   it('routes requests to buckets like index.ts', () => {
     expect(bucketKind({})).toBe('generate');
     expect(bucketKind({ isRegeneration: true })).toBe('regenerate');
     expect(bucketKind({ isBatchGeneration: true, formData: { targetExerciseTypes: ['a'] } })).toBe('batch');
     expect(bucketKind({ isBatchGeneration: true, formData: {} })).toBe('generate');
+    // streamingMode inserts a charged row even with isRegeneration: it is a normal generation
+    expect(bucketKind({ isRegeneration: true, enableStreaming: true })).toBe('generate');
+    expect(bucketKind({ isRegeneration: true, enableStreaming: false })).toBe('regenerate');
   });
   it('parses env overrides, sorts windows and ignores bad values', () => {
     expect(parseTiers('10:3600, 2:60', [])).toEqual([
@@ -168,11 +179,11 @@ describe('checkRateLimit', () => {
       },
     ],
   ])('fails open to the in-memory limiter on %s', async (_n, handler) => {
-    const m = memory(true);
-    expect(await checkRateLimit(base(client(handler as any)), { env: env(), memory: m })).toEqual({ ok: true });
-    expect(m.calls).toEqual(['ip:203.0.113.7']);
+    const m = fallbackSpy(true);
+    expect(await checkRateLimit(base(client(handler as any)), { env: env(), fallback: m })).toEqual({ ok: true });
+    expect(m.calls).toEqual([['generate:ip:203.0.113.7', DEFAULT_TIERS.generate]]);
     expect(warn.mock.calls.some((c) => String(c[0]).includes('DB rate limiter unavailable'))).toBe(true);
-    expect(await checkRateLimit(base(client(handler as any)), { env: env(), memory: memory(false) })).toMatchObject({
+    expect(await checkRateLimit(base(client(handler as any)), { env: env(), fallback: fallbackSpy(false) })).toMatchObject({
       ok: false,
       status: 429,
     });
@@ -181,8 +192,8 @@ describe('checkRateLimit', () => {
     vi.useFakeTimers();
     try {
       const never = { rpc: () => new Promise(() => {}) };
-      const m = memory(true);
-      const p = checkRateLimit(base(never), { env: env(), memory: m });
+      const m = fallbackSpy(true);
+      const p = checkRateLimit(base(never), { env: env(), fallback: m });
       await vi.advanceTimersByTimeAsync(2001);
       expect(await p).toEqual({ ok: true });
       expect(m.calls).toHaveLength(1);
@@ -190,6 +201,24 @@ describe('checkRateLimit', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+  it('the fallback uses the thresholds of the request own bucket kind', async () => {
+    const down = () => {
+      throw new Error('db down');
+    };
+    const fb = fallbackSpy(true);
+    await checkRateLimit(base(client(down), { isBatchGeneration: true, formData: { targetExerciseTypes: ['x'] } }), { env: env(), fallback: fb });
+    await checkRateLimit(base(client(down), { isRegeneration: true }), { env: env(), fallback: fb });
+    expect(fb.calls.map((c) => c[1])).toEqual([DEFAULT_TIERS.batch, DEFAULT_TIERS.regenerate]);
+  });
+  it('TierMemoryLimiter enforces every tier of its kind and keeps kinds apart', () => {
+    const l = new TierMemoryLimiter();
+    const t = [{ limit: 2, windowSeconds: 60 }, { limit: 3, windowSeconds: 600 }];
+    expect([l.isAllowed('a', t), l.isAllowed('a', t), l.isAllowed('a', t)]).toEqual([true, true, false]);
+    expect(l.isAllowed('b', t)).toBe(true);
+    const batch = DEFAULT_TIERS.batch;
+    for (let i = 0; i < 30; i++) expect(l.isAllowed('c', batch)).toBe(true);
+    expect(l.isAllowed('c', batch)).toBe(false);
   });
   it('passes an abort signal to the query builder when it supports one', async () => {
     let signal: AbortSignal | undefined;

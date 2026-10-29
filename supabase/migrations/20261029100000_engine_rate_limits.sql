@@ -28,6 +28,10 @@
 --       - available_tokens > 0                                        -> allowed
 --       - otherwise                                                   -> refused (insufficient_tokens)
 --
+-- Thresholds live in the Edge Function (generateWorksheet/limits.ts), not here. The per-user daily
+-- default (150) is unmeasured: production shows at most 19 stored worksheets per teacher per day,
+-- but regenerations and Add Exercise calls are not stored.
+--
 -- The Edge Function fails OPEN on any error of these RPCs (and works with this migration
 -- missing), so apply order does not matter for availability; the limits take effect once both
 -- the migration and the function are live.
