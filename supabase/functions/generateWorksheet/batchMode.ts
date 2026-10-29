@@ -6,6 +6,7 @@ import { parseWithRecovery } from "./parse.ts";
 import { generateNonStreaming } from "./model.ts";
 import { checkBatchStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { sanitizeEmDashes } from "./emDash.ts";
+import { canonicalizeInPlace } from "./canonicalize.ts";
 import { runPipeline } from "./pipeline.ts";
 import { deadlineFrom } from "./engineBudgets.ts";
 import { newModelRunInfo } from "./providerErrors.ts";
@@ -81,9 +82,11 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
       });
     },
 
-    // Only em dashes are cleaned; the exercises are otherwise returned as the model produced them.
+    // Em dashes are cleaned, then the exercises get the canonical shape (id, time, version). Titles stay
+    // as the model wrote them: the caller numbers them inside the worksheet they are added to.
     normalise(batchData) {
       sanitizeEmDashes(batchData);
+      canonicalizeInPlace(batchData, formData, false);
     },
 
     onProcessingError(error) {

@@ -4,6 +4,21 @@ import { getOfficialExerciseName } from "./helpers.ts";
 import { validateExercise } from "./validators.ts";
 import { sanitizeEmDashes } from "./emDash.ts";
 
+/** Official, numbered titles that keep the model's own description (PROBLEM 6 FIX). */
+export function applyExerciseTitles(exercises: any[]): void {
+  exercises.forEach((exercise: any, index: number) => {
+    const exerciseNumber = index + 1;
+    const officialName = getOfficialExerciseName(exercise.type);
+    const aiTitle = exercise.title || '';
+    const cleanAiTitle = aiTitle.replace(/^Exercise\s+\d+:\s*/i, '').trim();
+    const escapedName = officialName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const aiDesc = cleanAiTitle.replace(new RegExp(`^${escapedName}\\s*[-:]?\\s*`, 'i'), '').trim();
+    exercise.title = aiDesc
+      ? `Exercise ${exerciseNumber}: ${officialName}: ${aiDesc}`
+      : `Exercise ${exerciseNumber}: ${officialName}`;
+  });
+}
+
 export function normaliseWorksheet(worksheetData: any): void {
   // Model output must not carry em dashes into the saved or displayed worksheet.
   sanitizeEmDashes(worksheetData);
@@ -19,17 +34,7 @@ export function normaliseWorksheet(worksheetData: any): void {
   }
 
   // PROBLEM 6 FIX: Preserve AI description in exercise titles
-  worksheetData.exercises.forEach((exercise: any, index: number) => {
-    const exerciseNumber = index + 1;
-    const officialName = getOfficialExerciseName(exercise.type);
-    const aiTitle = exercise.title || '';
-    const cleanAiTitle = aiTitle.replace(/^Exercise\s+\d+:\s*/i, '').trim();
-    const escapedName = officialName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const aiDesc = cleanAiTitle.replace(new RegExp(`^${escapedName}\\s*[-:]?\\s*`, 'i'), '').trim();
-    exercise.title = aiDesc
-      ? `Exercise ${exerciseNumber}: ${officialName}: ${aiDesc}`
-      : `Exercise ${exerciseNumber}: ${officialName}`;
-  });
+  applyExerciseTitles(worksheetData.exercises);
 
   // Kept for clients that still read the field; no sources are claimed (it used to be a random 65-89).
   worksheetData.sourceCount = 0;

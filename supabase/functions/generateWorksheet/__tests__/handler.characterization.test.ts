@@ -410,7 +410,7 @@ describe('streaming pipeline', () => {
     w.geminiStream = () => ({ chunks: [JSON.stringify(sheet)] });
     const rec = await run(streamBody());
     const row = w.raw.insertRows[0];
-    expect({ aiResponseLength: row.ai_response.length, htmlLength: row.html_content.length, logs: rec.logs.filter((l) => l.includes('MONITORING')) }).toMatchSnapshot();
+    expect({ aiResponseLength: row.ai_response.length, aiResponseRawLength: row.ai_response_raw.length, htmlLength: row.html_content.length, logs: rec.logs.filter((l) => l.includes('MONITORING')) }).toMatchSnapshot();
   });
 
   it('an injection-style topic is treated as grammar focus by the regex (quirk)', async () => {

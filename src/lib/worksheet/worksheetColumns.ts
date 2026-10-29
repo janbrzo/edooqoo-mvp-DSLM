@@ -1,8 +1,8 @@
 /**
  * Explicit column lists for client reads of `public.worksheets`.
  *
- * `prompt` (the full model prompt) and `ip_address` are never selected by the
- * client: a column-level REVOKE of SELECT on them must not break any query, so
+ * `prompt` (the full model prompt), `ip_address` and `ai_response_raw` (the untouched
+ * model text) are never selected by the client:a column-level REVOKE of SELECT on them must not break any query, so
  * `select('*')` and a bare `.select()` (RETURNING *) are forbidden on this table
  * (enforced by `src/lib/worksheet/__tests__/worksheetColumns.test.ts`).
  */
@@ -10,7 +10,7 @@
 import type { Tables } from '@/integrations/supabase/types';
 
 /** Columns the client must never read. */
-export const WORKSHEET_FORBIDDEN_COLUMNS = ['prompt', 'ip_address'] as const;
+export const WORKSHEET_FORBIDDEN_COLUMNS = ['prompt', 'ip_address', 'ai_response_raw'] as const;
 
 /** Every readable column of `public.worksheets` (live schema minus the forbidden ones). */
 export const OWNER_VIEW_COLUMNS = [

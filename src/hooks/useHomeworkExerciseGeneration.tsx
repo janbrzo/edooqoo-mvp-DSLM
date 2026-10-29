@@ -81,13 +81,13 @@ export const useHomeworkExerciseGeneration = () => {
         if (data.exercises && Array.isArray(data.exercises)) {
           const exercisesWithState = data.exercises.map((exercise: any, index: number) => ({
             ...exercise,
-            id: `generated-${Date.now()}-${index}`,
+            id: exercise.id || `generated-${Date.now()}-${index}`,
             selected: true,
             title: normalizeExerciseField(exercise.title),
             instructions: normalizeExerciseField(exercise.instructions),
             content: normalizeExerciseField(exercise.content),
           }));
-          
+
           setGeneratedExercises((prev) => [...prev, ...exercisesWithState]);
           toast.success(`Generated ${exercisesWithState.length} exercise(s) successfully!`);
         } else {
@@ -124,13 +124,13 @@ export const useHomeworkExerciseGeneration = () => {
         if (data.exercises && Array.isArray(data.exercises)) {
           const exercisesWithState = data.exercises.map((exercise: any, index: number) => ({
             ...exercise,
-            id: `generated-${Date.now()}-${index}`,
+            id: exercise.id || `generated-${Date.now()}-${index}`,
             selected: true,
             title: normalizeExerciseField(exercise.title),
             instructions: normalizeExerciseField(exercise.instructions),
             content: normalizeExerciseField(exercise.content),
           }));
-          
+
           setGeneratedExercises((prev) => [...prev, ...exercisesWithState]);
           toast.success(`Generated ${exercisesWithState.length} exercise(s)!`);
         }

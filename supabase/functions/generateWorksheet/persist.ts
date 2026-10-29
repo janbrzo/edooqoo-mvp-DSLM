@@ -4,6 +4,7 @@
 import { supabase } from "./clients.ts";
 import { ENGINE_PROMPT_VERSION } from "./engineVersion.ts";
 import { replaceEmDashesInJsonText } from "./emDash.ts";
+import { CANONICAL_VERSION, isCanonicalSaveEnabled } from "./canonicalize.ts";
 import type { GenerationRequest, WorksheetPlan } from "./composeRequest.ts";
 
 export interface InsertedWorksheet {
@@ -79,32 +80,49 @@ export async function insertWorksheetRow(
   // Auto-generate share token at creation time (permanent, no expiration)
   const shareToken = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
 
-  const { data, error } = await supabase
-    .from("worksheets")
-    .insert({
-      prompt: storedPrompt,
-      form_data: sanitizedFormData,
-      ai_response: cleanAiContent?.substring(0, aiResponseLimit) || "",
-      html_content: JSON.stringify(worksheetData),
-      user_id: userId || null,
-      teacher_id: userId || null,
-      teacher_email: teacherEmail,
-      student_id: studentId || null,
-      selected_image: sanitizedImage,
-      selected_audio: sanitizedAudio,
-      audio_url: selectedAudio?.ai_generated_audio_url || selectedAudio?.url || null,
-      audio_transcript: selectedAudio?.transcript || null,
-      audio_duration: selectedAudio?.duration || null,
-      audio_voice: selectedAudio?.voice || null,
-      ip_address: ip,
-      status: "created",
-      title: worksheetData.title?.substring(0, 255) || "Generated Worksheet",
-      generation_time_seconds: generationTimeSeconds,
-      country: geoData.country || null,
-      city: geoData.city || null,
-      share_token: shareToken,
-    })
-    .select("id, created_at, title, share_token");
+  // P2.3: a canonical worksheet is stored as ai_response AND html_content (one version for every
+  // reader, never truncated so it stays valid JSON); the model's own text moves to ai_response_raw,
+  // which no client role can select. With the CANONICAL_SAVE flag off the row is written as before.
+  const canonical = isCanonicalSaveEnabled() && worksheetData?.canonical_version === CANONICAL_VERSION;
+  const worksheetJson = JSON.stringify(worksheetData);
+  const rawText = cleanAiContent?.substring(0, aiResponseLimit) || "";
+
+  const row: Record<string, unknown> = {
+    prompt: storedPrompt,
+    form_data: sanitizedFormData,
+    ai_response: canonical ? worksheetJson : rawText,
+    html_content: worksheetJson,
+    user_id: userId || null,
+    teacher_id: userId || null,
+    teacher_email: teacherEmail,
+    student_id: studentId || null,
+    selected_image: sanitizedImage,
+    selected_audio: sanitizedAudio,
+    audio_url: selectedAudio?.ai_generated_audio_url || selectedAudio?.url || null,
+    audio_transcript: selectedAudio?.transcript || null,
+    audio_duration: selectedAudio?.duration || null,
+    audio_voice: selectedAudio?.voice || null,
+    ip_address: ip,
+    status: "created",
+    title: worksheetData.title?.substring(0, 255) || "Generated Worksheet",
+    generation_time_seconds: generationTimeSeconds,
+    country: geoData.country || null,
+    city: geoData.city || null,
+    share_token: shareToken,
+  };
+  if (canonical) row.ai_response_raw = rawText;
+
+  const insertRow = (values: Record<string, unknown>) =>
+    supabase.from("worksheets").insert(values).select("id, created_at, title, share_token");
+
+  let { data, error } = await insertRow(row);
+  // The code can be deployed a moment before the additive migration: save without the raw copy
+  // instead of losing the worksheet.
+  if (error && canonical && /ai_response_raw/i.test(String(error.message ?? ""))) {
+    console.warn("⚠️ ai_response_raw column is not available yet, saving without the raw copy");
+    const { ai_response_raw: _raw, ...withoutRaw } = row;
+    ({ data, error } = await insertRow(withoutRaw));
+  }
 
   return { data, error };
 }

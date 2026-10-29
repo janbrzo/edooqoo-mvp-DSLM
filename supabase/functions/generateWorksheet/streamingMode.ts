@@ -9,6 +9,7 @@ import { deadlineFrom } from "./engineBudgets.ts";
 import { ModelTruncatedError, newModelRunInfo, toPublicError } from "./providerErrors.ts";
 import { checkWorksheetStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { normaliseWorksheet } from "./normalise.ts";
+import { canonicalizeInPlace } from "./canonicalize.ts";
 import { insertWorksheetRow } from "./persist.ts";
 import { runPipeline } from "./pipeline.ts";
 import {
@@ -252,7 +253,10 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
           });
         },
 
-        normalise: normaliseWorksheet,
+        normalise(worksheetData) {
+          normaliseWorksheet(worksheetData);
+          canonicalizeInPlace(worksheetData, formData, true);
+        },
 
         // The outer handler below reports every failure of the stream.
         onProcessingError(error) {
