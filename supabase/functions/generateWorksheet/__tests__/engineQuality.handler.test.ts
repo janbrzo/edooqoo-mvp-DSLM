@@ -196,7 +196,7 @@ describe('engine_quality log line', () => {
     expect(Object.keys(q)).toEqual([
       'schema', 'engine_prompt_version', 'gate_mode', 'mode', 'model', 'fallback_used', 'repair_method',
       'repair_detail', 'generation_ms', 'worksheet_id', 'client_generation_id', 'has_media', 'checks', 'defects',
-      'finish_reason', 'truncated', 'primary_failure', 'fallback_skipped',
+      'finish_reason', 'truncated', 'primary_failure', 'fallback_skipped', 'em_dash_replaced',
     ]);
     expect(q).toMatchObject({
       schema: 1,

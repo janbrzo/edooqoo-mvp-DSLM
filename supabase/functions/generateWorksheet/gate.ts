@@ -5,6 +5,7 @@
 import { ENGINE_PROMPT_VERSION } from "./engineVersion.ts";
 import { evaluateWorksheetQuality } from "./quality.ts";
 import { OPENAI_FALLBACK_MODEL } from "./clients.ts";
+import { countEmDashes } from "./emDash.ts";
 import type { ModelRunInfo } from "./providerErrors.ts";
 
 /** Full worksheet (streaming and regular modes). */
@@ -111,6 +112,8 @@ export function observeWorksheetQuality(obs: QualityObservation): void {
         truncated: obs.modelInfo?.truncated ?? false,
         primary_failure: obs.modelInfo?.primaryFailure ?? null,
         fallback_skipped: obs.modelInfo?.fallbackSkipped ?? false,
+        // em dashes in the model output that the normalise stage replaces
+        em_dash_replaced: countEmDashes(obs.worksheet),
       },
     }));
   } catch (error) {

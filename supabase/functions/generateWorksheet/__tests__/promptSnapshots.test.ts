@@ -10,9 +10,14 @@
  * and asserts the Gemini prompt is their exact concatenation. Batch (add
  * exercise) and regeneration modes get their own snapshots.
  *
+
+ * The saved worksheets.prompt holds a version header with the system message hash
+ * instead of the system message, so the system text is read from the Gemini prompt.
+ *
  * These files change only with an explicit "update the Worksheet Generation
  * Engine" instruction; any refactor must leave them byte-for-byte identical.
  */
+import { createHash } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   TEACHER_ID,
@@ -25,6 +30,7 @@ import {
   world,
 } from './world';
 import { AUDIO, GOLDEN_FORMS, IMAGE, chunked, worksheetJson } from './fixtures';
+import { ENGINE_PROMPT_VERSION } from '../engineVersion';
 
 vi.mock('https://deno.land/std@0.208.0/http/server.ts', async () => (await import('./world')).modules.denoServe());
 vi.mock('https://esm.sh/@supabase/supabase-js@2', async () => (await import('./world')).modules.supabase());
@@ -34,7 +40,6 @@ vi.mock('https://esm.sh/openai@4.28.0', async () => (await import('./world')).mo
 vi.mock('https://esm.sh/@google/generative-ai@0.21.0', async () => (await import('./world')).modules.gemini());
 
 const GEMINI_SEP = '\n\n---\n\nUser Request:\n';
-const DB_SYSTEM = 'SYSTEM MESSAGE:\n';
 const DB_USER = '\n\nUSER MESSAGE:\n';
 
 type Handler = (req: Request) => Promise<Response>;
@@ -62,10 +67,15 @@ async function formatPrompt(formData: Record<string, unknown>): Promise<string> 
   return body.prompt as string;
 }
 
-function splitDbPrompt(prompt: string) {
-  expect(prompt.startsWith(DB_SYSTEM)).toBe(true);
+/** The saved prompt is a version header plus the user message; the system message is only identified by its hash. */
+function splitDbPrompt(prompt: string, geminiPrompt: string) {
   const i = prompt.lastIndexOf(DB_USER);
-  return { system: prompt.slice(DB_SYSTEM.length, i), user: prompt.slice(i + DB_USER.length) };
+  const header = prompt.slice(0, i);
+  const sep = geminiPrompt.lastIndexOf(GEMINI_SEP);
+  const system = geminiPrompt.slice(0, sep);
+  expect(header).toBe(`engine_prompt_version=${ENGINE_PROMPT_VERSION}; system_sha256=${createHash('sha256').update(system).digest('hex')}`);
+  expect(prompt).not.toContain(system);
+  return { system, user: prompt.slice(i + DB_USER.length) };
 }
 
 describe('golden prompt snapshots (streaming pipeline)', () => {
@@ -85,7 +95,7 @@ describe('golden prompt snapshots (streaming pipeline)', () => {
     expect(events[events.length - 1]).toBe('done');
 
     expect(w.raw.insertRows).toHaveLength(1);
-    const { system, user } = splitDbPrompt(w.raw.insertRows[0].prompt);
+    const { system, user } = splitDbPrompt(w.raw.insertRows[0].prompt, w.raw.gemini[0]);
 
     // The Gemini prompt is exactly system + separator + user.
     expect(w.raw.gemini).toHaveLength(1);
@@ -116,7 +126,7 @@ describe('golden prompt snapshots (streaming pipeline)', () => {
     await summariseResponse(
       await generateHandler(jsonRequest({ prompt, formData, userId: TEACHER_ID, enableStreaming: true }, USER_HEADERS)),
     );
-    const saved = splitDbPrompt(w.raw.insertRows[0].prompt);
+    const saved = splitDbPrompt(w.raw.insertRows[0].prompt, w.raw.gemini[0]);
 
     // Run 2 (fresh module state): Gemini fails at once, OpenAI streams.
     w.raw.gemini.length = 0;
@@ -185,7 +195,7 @@ describe('golden prompt snapshots (batch and regeneration pipelines)', () => {
     },
   ];
 
-  it.each(batchCases)('$id: system message returned as fullPrompt', async ({ id, prompt, formData }) => {
+  it.each(batchCases)('$id: system message is built but not returned to the browser', async ({ id, prompt, formData }) => {
     const w = world();
     w.geminiGenerate = async () => worksheetJson(formData.targetExerciseTypes);
     const response = await generateHandler(
@@ -197,7 +207,8 @@ describe('golden prompt snapshots (batch and regeneration pipelines)', () => {
     const sep = w.raw.gemini[0].lastIndexOf(GEMINI_SEP);
     const system = w.raw.gemini[0].slice(0, sep);
     const user = w.raw.gemini[0].slice(sep + GEMINI_SEP.length);
-    expect(body.fullPrompt).toBe(system);
+    expect(body).toEqual({ exercises: expect.any(Array), success: true });
+    expect(JSON.stringify(body)).not.toContain(system.slice(0, 200));
     await expect(system).toMatchFileSnapshot(`./promptSnapshots/${id}.system-message.txt`);
     await expect(user).toMatchFileSnapshot(`./promptSnapshots/${id}.user-message.txt`);
   });

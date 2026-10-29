@@ -6,7 +6,7 @@ import { classifyErrorType, notifyGenerationFailure, waitUntilIfAvailable, waitU
 import { parseOrRegenerateWithFallback, parseWithRecovery } from "./parse.ts";
 import { generateWithGeminiStream, generateWithOpenAIStream, shouldFallBack } from "./model.ts";
 import { deadlineFrom } from "./engineBudgets.ts";
-import { newModelRunInfo } from "./providerErrors.ts";
+import { newModelRunInfo, toPublicError } from "./providerErrors.ts";
 import { checkWorksheetStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { normaliseWorksheet } from "./normalise.ts";
 import { insertWorksheetRow } from "./persist.ts";
@@ -310,7 +310,10 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
       // EdgeRuntime.waitUntil keeps the notification fetch alive even after
       // the response stream is closed — otherwise Deno Deploy kills it.
       await waitUntilOrAwait(notifyPromise);
-      safeSend("error", { message: error instanceof Error ? error.message : "Unknown error" });
+      // Only a stable code and a generic sentence reach the client; the original
+      // message (it can carry provider or Postgres text) is in the log line above.
+      const publicError = toPublicError(error);
+      safeSend("error", { message: publicError.message, code: publicError.code });
     } finally {
       safeClose();
     }

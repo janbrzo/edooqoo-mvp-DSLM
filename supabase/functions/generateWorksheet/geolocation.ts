@@ -4,6 +4,24 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
 import { ENGINE_BUDGETS, withCallTimeout } from './engineBudgets.ts';
 
+/**
+ * Starts the lookup without blocking the caller. `target` is filled when the
+ * lookup finishes (or is given up after ENGINE_BUDGETS.geolocationTotalMs); the
+ * returned promise never rejects and is awaited where the row is saved.
+ */
+export function startGeolocation(ip: string, target: { country?: string; city?: string }): Promise<void> {
+  const started = Date.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const gaveUp = new Promise<{ country?: string; city?: string }>((resolve) => {
+    timer = setTimeout(() => resolve({}), ENGINE_BUDGETS.geolocationTotalMs);
+  });
+  return Promise.race([getGeolocation(ip).catch(() => ({})), gaveUp]).then((result) => {
+    clearTimeout(timer);
+    Object.assign(target, result);
+    console.log(`⏱️ [TIMING] Geolocation lookup (off the critical path): ${Date.now() - started}ms`);
+  });
+}
+
 export async function getGeolocation(ip: string): Promise<{ country?: string; city?: string }> {
   try {
     // Parse IP from complex string like "46.227.241.106,46.227.241.106, 13.248.113.208"

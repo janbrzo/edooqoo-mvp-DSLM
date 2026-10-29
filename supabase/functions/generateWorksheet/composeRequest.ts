@@ -4,11 +4,11 @@
 import { getExerciseTypesForCount } from "./helpers.ts";
 import { isValidUUID, sanitizeInput, validatePrompt } from "./security.ts";
 import { RateLimiter } from "./rateLimiter.ts";
-import { getGeolocation } from "./geolocation.ts";
+import { startGeolocation } from "./geolocation.ts";
 import { composeSystemMessage } from "./prompts/prompt-composer.ts";
 import { resolveCaller } from "../_shared/auth.ts";
 import { corsHeaders, OPENAI_FALLBACK_MODEL, supabase } from "./clients.ts";
-import { buildWorksheetMediaContextImage } from "./media.ts";
+import { buildWorksheetMediaContextImage, cleanAudioForPrompt, cleanImageForPrompt } from "./media.ts";
 
 const rateLimiter = new RateLimiter();
 
@@ -22,7 +22,10 @@ export interface GenerationRequest {
   studentId: string | null;
   ip: string;
   geoData: { country?: string; city?: string };
+  /** Milliseconds the request waited for the lookup (it runs beside the model call, so 0). */
   geoDuration: number;
+  /** Settles when `geoData` is filled; awaited where the row is saved. */
+  geoReady: Promise<void>;
   sanitizedPrompt: string;
   teacherEmail: string | null;
   hasGrammarFocus: boolean;
@@ -89,7 +92,6 @@ export async function resolveRequest(req: Request, generationStartTime: number):
       error: promptValidation.error,
       promptType: typeof prompt,
       promptLength: prompt?.length || 0,
-      promptPreview: typeof prompt === 'string' ? prompt.substring(0, 200) : String(prompt),
       userId: userId || 'anonymous',
       hasFormData: !!formData,
       formDataKeys: formData ? Object.keys(formData) : [],
@@ -133,16 +135,15 @@ export async function resolveRequest(req: Request, generationStartTime: number):
     };
   }
 
-  // ⏱️ TIMING: Get geolocation data
-  const geoStartTime = Date.now();
-  const geoData = await getGeolocation(ip);
-  const geoDuration = Date.now() - geoStartTime;
-  console.log(`⏱️ [TIMING] Geolocation lookup: ${geoDuration}ms`);
+  // Geolocation runs beside the model call; the row waits for it at save time.
+  const geoData: { country?: string; city?: string } = {};
+  const geoReady = startGeolocation(ip, geoData);
+  const geoDuration = 0;
 
   // Sanitize inputs
   const sanitizedPrompt = sanitizeInput(prompt, 5000);
 
-  console.log("Received validated prompt:", sanitizedPrompt.substring(0, 100) + "...");
+  console.log("Received validated prompt:", { length: sanitizedPrompt.length });
 
   // Get teacher email if userId is provided
   let teacherEmail = null;
@@ -172,6 +173,7 @@ export async function resolveRequest(req: Request, generationStartTime: number):
       ip,
       geoData,
       geoDuration,
+      geoReady,
       sanitizedPrompt,
       teacherEmail,
       hasGrammarFocus,
@@ -207,8 +209,8 @@ export function planBatch(request: GenerationRequest): BatchPlan {
   const batchNeedsAudio = formData.targetExerciseTypes.some((t: string) =>
     String(t).includes("-audio") || String(t) === "listening-comprehension"
   );
-  const batchImage = batchNeedsImage ? (formData.selectedImage || null) : null;
-  const batchAudio = batchNeedsAudio ? (formData.selectedAudio || null) : null;
+  const batchImage = batchNeedsImage ? cleanImageForPrompt(formData.selectedImage || null) : null;
+  const batchAudio = batchNeedsAudio ? cleanAudioForPrompt(formData.selectedAudio || null) : null;
 
   // Build ONE system message for ALL exercise types
   const systemMessage = composeSystemMessage(
@@ -324,7 +326,6 @@ export function planWorksheet(request: GenerationRequest): WorksheetPlan {
     imageId: selectedImage?.id,
     imageSource: selectedImage?.source,
     hasDetailedDescription: !!selectedImage?.detailedDescription,
-    descriptionPreview: selectedImage?.detailedDescription?.substring(0, 150),
   });
 
   // DEBUG: Log audio data before passing to prompt composer
@@ -332,7 +333,6 @@ export function planWorksheet(request: GenerationRequest): WorksheetPlan {
     hasAudio: !!selectedAudio,
     hasTranscript: !!selectedAudio?.transcript,
     transcriptLength: selectedAudio?.transcript?.length || 0,
-    transcriptPreview: selectedAudio?.transcript?.substring(0, 100) || "[EMPTY]",
     audioDuration: selectedAudio?.duration,
     audioVoice: selectedAudio?.voice,
   });
@@ -346,7 +346,7 @@ export function planWorksheet(request: GenerationRequest): WorksheetPlan {
     exerciseCount,
     effectiveExercises,
     worksheetPromptImage,
-    selectedAudio,
+    cleanAudioForPrompt(selectedAudio),
     exerciseFocusMap,
   );
 

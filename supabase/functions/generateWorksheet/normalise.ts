@@ -1,9 +1,13 @@
 // Normalise stage of the pipeline: lenient validation, official exercise
-// titles and the display-only source count. Mutates the parsed worksheet.
+// titles, em dash cleanup and the neutral source count. Mutates the parsed worksheet.
 import { getOfficialExerciseName } from "./helpers.ts";
 import { validateExercise } from "./validators.ts";
+import { sanitizeEmDashes } from "./emDash.ts";
 
 export function normaliseWorksheet(worksheetData: any): void {
+  // Model output must not carry em dashes into the saved or displayed worksheet.
+  sanitizeEmDashes(worksheetData);
+
   // Validate exercises (lenient mode: every validator error is ignored)
   for (let i = 0; i < worksheetData.exercises.length; i++) {
     const exercise = worksheetData.exercises[i];
@@ -27,6 +31,6 @@ export function normaliseWorksheet(worksheetData: any): void {
       : `Exercise ${exerciseNumber}: ${officialName}`;
   });
 
-  const sourceCount = Math.floor(Math.random() * (90 - 65) + 65);
-  worksheetData.sourceCount = sourceCount;
+  // Kept for clients that still read the field; no sources are claimed (it used to be a random 65-89).
+  worksheetData.sourceCount = 0;
 }

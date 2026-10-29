@@ -34,6 +34,8 @@ export const ENGINE_BUDGETS = {
   aiRepairMinMs: 5_000,
   /** One geolocation lookup request. */
   geolocationFetchMs: 2_000,
+  /** The whole geolocation lookup (cache and both services) is given up after this. */
+  geolocationTotalMs: 5_000,
   /** How often the stream watchdog evaluates its limits. */
   watchdogPollMs: 1_000,
 } as const;

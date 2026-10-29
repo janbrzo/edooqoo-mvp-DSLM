@@ -119,7 +119,7 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
     normalise: normaliseWorksheet,
 
     onProcessingError(parseError) {
-      console.error("Failed to parse AI response as JSON:", parseError, "Response content:", jsonContent?.substring(0, 500));
+      console.error("Failed to parse AI response as JSON:", parseError, { responseLength: jsonContent?.length || 0 });
       notifyGenerationFailure('parse', parseError instanceof Error ? parseError.message : String(parseError), {
         userId, teacherEmail, model: usedModel,
         promptPreview: sanitizedPrompt?.substring(0, 300),
@@ -193,7 +193,6 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
           hasUrl: !!selectedImage.url,
           source: selectedImage.source,
           urlType: selectedImage.url?.startsWith("data:") ? "base64" : "external",
-          urlPreview: selectedImage.url?.substring(0, 80) + "...",
         });
       }
 

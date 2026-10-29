@@ -88,3 +88,37 @@ export function noteFinish(info: ModelRunInfo | undefined, finishReason: string 
   info.finishReason = finishReason ?? null;
   info.truncated = isTruncationReason(finishReason);
 }
+
+export type PublicErrorCode =
+  | "model_timeout"
+  | "provider_busy"
+  | "provider_request"
+  | "invalid_output"
+  | "save_failed"
+  | "internal";
+
+const PUBLIC_MESSAGES: Record<PublicErrorCode, string> = {
+  model_timeout: "The AI model took too long to answer. Please try again.",
+  provider_busy: "The AI service is busy right now. Please try again in a moment.",
+  provider_request: "The AI service could not process this request. Please try again.",
+  invalid_output: "The AI returned a worksheet that could not be used. Please try again.",
+  save_failed: "The worksheet could not be saved. Please try again.",
+  internal: "Worksheet generation failed. Please try again.",
+};
+
+/**
+ * What the client may be told about a failed generation: a stable code and a
+ * generic sentence. The original message (which can carry provider or Postgres
+ * text) stays in the server logs.
+ */
+export function toPublicError(error: unknown): { code: PublicErrorCode; message: string } {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  const cls = classifyProviderError(error);
+  let code: PublicErrorCode = "internal";
+  if (/^Database save failed|^No worksheet ID returned/.test(message)) code = "save_failed";
+  else if (cls.kind === "timeout") code = "model_timeout";
+  else if (cls.kind === "rate_limit" || cls.kind === "server") code = "provider_busy";
+  else if (cls.kind === "request") code = "provider_request";
+  else if (/^Invalid (worksheet structure|JSON from AI)|^Generated \d+ exercises/.test(message)) code = "invalid_output";
+  return { code, message: PUBLIC_MESSAGES[code] };
+}

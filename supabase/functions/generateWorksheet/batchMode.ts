@@ -5,6 +5,7 @@ import { classifyErrorType, notifyGenerationFailure } from "./notify.ts";
 import { parseWithRecovery } from "./parse.ts";
 import { generateNonStreaming } from "./model.ts";
 import { checkBatchStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
+import { sanitizeEmDashes } from "./emDash.ts";
 import { runPipeline } from "./pipeline.ts";
 import { deadlineFrom } from "./engineBudgets.ts";
 import { newModelRunInfo } from "./providerErrors.ts";
@@ -80,8 +81,10 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
       });
     },
 
-    // Batch exercises are returned exactly as the model produced them.
-    normalise() {},
+    // Only em dashes are cleaned; the exercises are otherwise returned as the model produced them.
+    normalise(batchData) {
+      sanitizeEmDashes(batchData);
+    },
 
     onProcessingError(error) {
       console.error(`❌ [BATCH-MODE] Failed to parse batch response:`, error);
@@ -98,11 +101,10 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
       console.log(`✅ [BATCH-MODE] Generated ${batchData.exercises.length} exercises in ONE request (${usedModel})`);
       console.log(`⏱️  [BATCH-MODE] Total batch generation time: ${batchGenerationTime} seconds`);
 
-      // Return batch exercises directly WITH FULL PROMPT for storage in homework_assignments.prompt
+      // The system message (core IP) is never sent to the browser.
       return new Response(
         JSON.stringify({
           exercises: batchData.exercises,
-          fullPrompt: plan.systemMessage, // ✅ Return complete system message for homework_assignments.prompt
           success: true,
         }),
         {
