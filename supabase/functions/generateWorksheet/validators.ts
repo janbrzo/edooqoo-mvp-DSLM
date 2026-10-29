@@ -316,8 +316,9 @@ function validateNegativePrefixesExercise(exercise: any): void {
   }
   
   for (const word of exercise.words) {
-    if (!word.base_word) {
-      throw new Error('Each negative prefix word must have base_word');
+    // The prompt schema field is "word"; "base_word" is accepted as well.
+    if (!word.word && !word.base_word) {
+      throw new Error('Each negative prefix word must have word or base_word');
     }
   }
 }
@@ -381,6 +382,21 @@ function validateListeningComprehensionExercise(exercise: any): void {
  * Validates Fill in Blanks Audio exercise (dictation)
  */
 function validateFillInBlanksAudioExercise(exercise: any): void {
+  // The prompt schema is the basic fill-in-blanks structure ("sentences" with
+  // "text" and "answer", plus "word_bank"); the transcript form is the older
+  // shape. Either one is valid.
+  if (Array.isArray(exercise.sentences) && exercise.sentences.length > 0) {
+    if (exercise.sentences.length < 5) {
+      throw new Error('Fill in Blanks Audio must have at least 5 sentences');
+    }
+    for (const sentence of exercise.sentences) {
+      if (!sentence || !sentence.text || !sentence.answer) {
+        throw new Error('Each Fill in Blanks Audio sentence must have text and answer');
+      }
+    }
+    return;
+  }
+
   if (!exercise.transcript_with_blanks || typeof exercise.transcript_with_blanks !== 'string') {
     throw new Error('Fill in Blanks Audio must have transcript_with_blanks');
   }
