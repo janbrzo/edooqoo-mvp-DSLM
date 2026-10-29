@@ -10,6 +10,7 @@ import { useFlashcardSets } from '@/hooks/useFlashcardSets';
 import { useFlashcardCards } from '@/hooks/useFlashcardCards';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { canTranslate, readTranslationResult, TRANSLATION_UNAVAILABLE_MESSAGE } from '@/lib/flashcards/translationResult';
 
 interface QuickAddWordToFlashcardsModalProps {
   open: boolean;
@@ -74,21 +75,28 @@ export const QuickAddWordToFlashcardsModal = ({
   
   // Auto-translate when word changes (debounced effect)
   const fetchTranslationForWord = async (wordToTranslate: string, backType: 'translation' | 'definition') => {
-    if (!wordToTranslate.trim()) return;
+    if (!canTranslate(wordToTranslate)) return;
     
     setIsTranslating(true);
     try {
       const { data, error } = await supabase.functions.invoke('translate-flashcard', {
         body: {
           text: wordToTranslate.trim(),
-          target_language: backType === 'translation' ? nativeLanguage : 'English definition',
+          target_language: backType === 'translation' ? nativeLanguage : 'English',
           mode: backType === 'definition' ? 'definition' : 'translation',
         }
       });
       
       if (error) throw error;
-      setTranslation(data?.translation || '');
-      setCefrLevel(data?.cefr_level || null);
+      const result = readTranslationResult(data);
+      if (!result) {
+        setTranslation('');
+        setCefrLevel(null);
+        toast.error(TRANSLATION_UNAVAILABLE_MESSAGE);
+        return;
+      }
+      setTranslation(result.translation);
+      setCefrLevel(result.cefrLevel);
     } catch (error) {
       console.error('Translation error:', error);
     } finally {

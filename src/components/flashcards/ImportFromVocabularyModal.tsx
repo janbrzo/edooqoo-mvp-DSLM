@@ -9,6 +9,7 @@ import { normalizeVocabularySheet } from '@/types/flashcards';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { devLog } from '@/utils/logger';
+import { readTranslationResult } from '@/lib/flashcards/translationResult';
 import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 
 interface ImportFromVocabularyModalProps {
@@ -135,10 +136,12 @@ export function ImportFromVocabularyModal({
             
             if (error) throw error;
             
+            const result = readTranslationResult(data);
+            if (!result) return item;
             return {
               ...item,
-              definition: data?.translation || item.definition,
-              cefr_level: data?.cefr_level || undefined,
+              definition: result.translation,
+              cefr_level: result.cefrLevel || undefined,
             };
           } catch (error) {
             console.error('[ImportFromVocabularyModal] Translation error:', error);
