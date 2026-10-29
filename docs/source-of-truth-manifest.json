@@ -24,7 +24,7 @@
     "edgeFunctions": 80,
     "typedTables": 79,
     "typedRpcs": 139,
-    "migrationIndexes": 29
+    "migrationIndexes": 30
   },
   "routes": [
     {
@@ -60547,6 +60547,12 @@
         "table": "token_transactions",
         "unique": false,
         "migration": "supabase/migrations/20261028101000_billing_server_charge_trigger.sql"
+      },
+      {
+        "name": "idx_engine_rate_limits_window_started_at",
+        "table": "engine_rate_limits",
+        "unique": false,
+        "migration": "supabase/migrations/20261029100000_engine_rate_limits.sql"
       }
     ],
     "migrationFunctions": [
@@ -60619,6 +60625,10 @@
         "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
       },
       {
+        "name": "cleanup_engine_rate_limits",
+        "migration": "supabase/migrations/20261029100000_engine_rate_limits.sql"
+      },
+      {
         "name": "compute_skill_metric",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
@@ -60641,6 +60651,10 @@
       {
         "name": "compute_skill_metric",
         "migration": "supabase/migrations/20261027100100_compute_skill_metric_source_weight.sql"
+      },
+      {
+        "name": "consume_engine_rate_limit",
+        "migration": "supabase/migrations/20261029100000_engine_rate_limits.sql"
       },
       {
         "name": "consume_exercise_credit",
@@ -60689,6 +60703,10 @@
       {
         "name": "dslm_validation_report",
         "migration": "supabase/migrations/20261027090100_dslm_validation_report.sql"
+      },
+      {
+        "name": "engine_pre_check",
+        "migration": "supabase/migrations/20261029100000_engine_rate_limits.sql"
       },
       {
         "name": "extract_micro_skill",

@@ -25,6 +25,10 @@ export const ENV: Record<string, string> = {
   SUPABASE_URL: 'https://example.supabase.co',
   SUPABASE_SERVICE_ROLE_KEY: 'service-key',
   SUPABASE_ANON_KEY: 'anon-key',
+  // The characterization snapshots predate the DB limiter and the balance
+  // pre-check; they run with both off. limits.handler.test.ts turns them on.
+  ENGINE_DB_RATE_LIMIT: 'off',
+  ENGINE_BALANCE_PRECHECK: 'off',
 };
 
 export const FIXED_NOW = new Date('2026-10-28T10:00:00.000Z');
@@ -64,6 +68,8 @@ export interface World {
   /** The ipapi.co answer waits for this promise (geolocation off the critical path). */
   ipapiGate?: Promise<void>;
   user: { id: string; is_anonymous: boolean } | null;
+  /** Scripted RPC results (limits.handler.test.ts); unscripted calls fail like an unreachable database. */
+  rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
   /** Unredacted copies for the golden prompt snapshots. */
   raw: { gemini: string[]; openai: any[]; insertRows: any[] };
 }
@@ -101,6 +107,9 @@ export function newWorld(): World {
     geoCache: { data: null, error: { message: 'no rows' } },
     ipapi: { ok: true, body: { country_name: 'Poland', city: 'Warsaw' } },
     user: { id: TEACHER_ID, is_anonymous: false },
+    rpc: async () => {
+      throw new Error('rpc not scripted');
+    },
     raw: { gemini: [], openai: [], insertRows: [] },
   };
 }
@@ -228,6 +237,11 @@ function redactRow(table: string, row: any) {
 
 const supabaseClient = () => ({
   from: (table: string) => makeQuery(table),
+  rpc: (name: string, args: Record<string, unknown>) => {
+    const w = world();
+    w.calls.push({ kind: 'rpc', name, args });
+    return w.rpc(name, args);
+  },
   auth: {
     getUser: async (token: string) => {
       const w = world();
