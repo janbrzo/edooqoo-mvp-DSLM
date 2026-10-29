@@ -7,6 +7,8 @@
  * Helper function to generate dynamic exercise list instruction
  * @param hasSelectedImage - If true, transforms picture-compatible exercises to -picture versions
  */
+import { getOrderedExercises } from "./exercise-order.ts";
+
 const generateExerciseListInstruction = (
   selectedExercises?: string[],
   exerciseCount: number = 8,
@@ -15,19 +17,8 @@ const generateExerciseListInstruction = (
   exerciseFocusMap?: Record<string, string>,
 ) => {
   if (selectedExercises && selectedExercises.length > 0) {
-    let orderedExercises = [...selectedExercises].slice(0, exerciseCount);
-
-    // SORT: Picture exercises ALWAYS first, then audio exercises, then others
-    if (hasSelectedImage || hasSelectedAudio) {
-      const pictureExercises = orderedExercises.filter((ex) => ex.endsWith("-picture"));
-      const audioExercises = orderedExercises.filter((ex) => ex.endsWith("-audio") || ex === "listening-comprehension");
-      const otherExercises = orderedExercises.filter(
-        (ex) => !ex.endsWith("-picture") && !ex.endsWith("-audio") && ex !== "listening-comprehension",
-      );
-
-      // Priority: picture > audio > others
-      orderedExercises = [...pictureExercises, ...audioExercises, ...otherExercises];
-    }
+    // Picture > audio > others when media is attached (shared with templates and requirements)
+    const orderedExercises = getOrderedExercises(selectedExercises, exerciseCount, hasSelectedImage, hasSelectedAudio);
 
     // Append focus tags if exerciseFocusMap has entries
     const exerciseListWithTags = orderedExercises.map(ex => {

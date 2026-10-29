@@ -390,7 +390,7 @@ CRITICAL REQUIREMENTS VERIFICATION:
 1. Exercise 1 (multiple-choice-picture): EXACTLY 10 multiple-choice questions based on the provided image. Each question has 4 options with one correct answer referencing visible details. Time: 8 min. Ensure all content matches CEFR level A1/A2.
 2. Exercise 2 (describe-picture): Generate complete exercise based on the provided image. Include "image_description" describing the actual image, EXACTLY 10 detailed "prompts" specific to what's visible, "useful_vocabulary" relevant to content. Time: 10 min. Ensure all content matches CEFR level A1/A2.
 3. Exercise 3 (reading): Exercise with reading must have content more than 300 words. Analyze the lessonTopic, lessonGoal, grammarFocus and additionalInformation to determine the most appropriate text format. Ensure all content matches CEFR level A1/A2.
-4. Exercise 4 (true-false): EXACTLY 10 statements ALL directly based on the reading text from Exercise 1. NO general knowledge questions. Ensure all content matches CEFR level A1/A2.
+4. Exercise 4 (true-false): EXACTLY 10 statements ALL directly based on the reading text from Exercise 3. NO general knowledge questions. Ensure all content matches CEFR level A1/A2.
 5. Exercise 5 (fill-in-blanks): EXACTLY 10 sentences and 10 words in word bank. Ensure all content matches CEFR level A1/A2.
 6. Exercise 6 (dialogue): AT LEAST 10 dialogue exchanges and EXACTLY 10 expressions. Ensure all content matches CEFR level A1/A2.
 7. Exercise 7 (word-order): EXACTLY 10 sentences with "scrambled_words" (separated by " / ") and "correct_order" fields. Ensure all content matches CEFR level A1/A2.

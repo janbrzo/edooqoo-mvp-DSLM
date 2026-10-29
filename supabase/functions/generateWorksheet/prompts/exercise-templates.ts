@@ -5,6 +5,7 @@
 
 import { exerciseFunctions, exerciseOrder, getVocabularySheet } from "./individual-exercises.ts";
 import { normalizeExerciseId } from "../helpers.ts";
+import { getOrderedExercises } from "./exercise-order.ts";
 
 export const getExerciseTemplates = (
   hasGrammarFocus: boolean,
@@ -19,7 +20,7 @@ export const getExerciseTemplates = (
   // Use custom selected exercises if provided, otherwise use default order
   if (selectedExercises && selectedExercises.length > 0) {
     // ✅ Keep ORIGINAL exercise types (with -picture suffix if present)
-    finalExercises = selectedExercises.slice(0, exerciseCount);
+    finalExercises = getOrderedExercises(selectedExercises, exerciseCount, hasSelectedImage, hasSelectedAudio);
   } else {
     // Select the first N exercises from the default order
     finalExercises = exerciseOrder.slice(0, exerciseCount);

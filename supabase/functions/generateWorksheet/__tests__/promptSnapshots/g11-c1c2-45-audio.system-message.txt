@@ -245,7 +245,7 @@ END OF EXAMPLE
 CRITICAL REQUIREMENTS VERIFICATION:
 1. Exercise 1 (listening-comprehension): EXACTLY 10 questions about the audio content. Questions must test understanding of main ideas, specific details, speaker attitudes, emotions, and contextual information. Each question must have a detailed answer (2-3 sentences). Ensure all content matches CEFR level C1/C2.
 2. Exercise 2 (reading): Exercise with reading must have content more than 300 words. Analyze the lessonTopic, lessonGoal, grammarFocus and additionalInformation to determine the most appropriate text format. Ensure all content matches CEFR level C1/C2.
-3. Exercise 3 (true-false): EXACTLY 10 statements ALL directly based on the reading text from Exercise 1. NO general knowledge questions. Ensure all content matches CEFR level C1/C2.
+3. Exercise 3 (true-false): EXACTLY 10 statements ALL directly based on the reading text from Exercise 2. NO general knowledge questions. Ensure all content matches CEFR level C1/C2.
 4. Exercise 4 (matching): EXACTLY 10 items to match with proper term-definition pairs. Ensure all content matches CEFR level C1/C2.
 5. Exercise 5 (fill-in-blanks): EXACTLY 10 sentences and 10 words in word bank. Ensure all content matches CEFR level C1/C2.
 6. Exercise 6 (discussion): EXACTLY 10 discussion questions. Ensure all content matches CEFR level C1/C2.
