@@ -637,7 +637,15 @@ function parseEdgeFunction(file) {
       ts.isIdentifier(node.expression.expression) &&
       node.expression.expression.text === "JSON" &&
       node.arguments[0] &&
-      ts.isObjectLiteralExpression(node.arguments[0])
+      ts.isObjectLiteralExpression(node.arguments[0]) &&
+      // console.log(JSON.stringify({...})) is a log line, not a response body
+      !(
+        node.parent &&
+        ts.isCallExpression(node.parent) &&
+        ts.isPropertyAccessExpression(node.parent.expression) &&
+        ts.isIdentifier(node.parent.expression.expression) &&
+        node.parent.expression.expression.text === "console"
+      )
     ) {
       for (const property of node.arguments[0].properties) {
         const name = propertyName(property, sourceFile);

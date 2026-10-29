@@ -47454,15 +47454,11 @@
           "userId"
         ],
         "visibleResponseFields": [
-          "behaving_as",
-          "engine_gate_warning",
-          "engine_quality",
           "error",
           "errorMessage",
           "errorType",
           "exercises",
           "fullPrompt",
-          "parse_recovered_early_warning",
           "success",
           "timestamp"
         ],

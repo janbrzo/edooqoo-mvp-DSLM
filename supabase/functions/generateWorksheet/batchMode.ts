@@ -65,6 +65,8 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
         formData,
         hasMedia: false,
         checkCountAndOrder: true,
+        // the model may interleave the requested types, so only set and count are reliable
+        checkOrder: false,
         requestedTypes,
         model: usedModel,
         repairMethod: observedRepairMethod,

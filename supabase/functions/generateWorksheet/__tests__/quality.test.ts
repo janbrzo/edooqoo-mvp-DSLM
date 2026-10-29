@@ -66,7 +66,31 @@ describe('exercise count and type order', () => {
     expect(sorted).toEqual(['describe-picture', 'multiple-choice-audio', 'listening-comprehension', 'reading', 'matching', 'discussion']);
     const r = check(sheet(sorted), { expectedCount: 6, requestedTypes: requested, hasMedia: true });
     expect(r.type_order).toMatchObject({ same_set: true, exact_order: false, exact_order_media_sorted: true });
+    // the order the prompt asks for with media is correct: no defect
+    expect(r.defects).toEqual([]);
+  });
+
+  it('reviewer case: [reading, multiple-choice-picture, listening-comprehension] sorted by the media rule is not a defect', () => {
+    const requested = ['reading', 'multiple-choice-picture', 'listening-comprehension'];
+    const r = check(sheet(['multiple-choice-picture', 'listening-comprehension', 'reading']), { expectedCount: 3, requestedTypes: requested, hasMedia: true });
+    expect(r.type_order).toMatchObject({ exact_order: false, exact_order_media_sorted: true });
+    expect(r.defects).toEqual([]);
+  });
+
+  it('with media, an order that is neither the requested nor the sorted one is still a defect', () => {
+    const requested = ['reading', 'multiple-choice-picture', 'listening-comprehension'];
+    const r = check(sheet(['reading', 'listening-comprehension', 'multiple-choice-picture']), { expectedCount: 3, requestedTypes: requested, hasMedia: true });
+    expect(r.type_order).toMatchObject({ exact_order: false, exact_order_media_sorted: false });
     expect(r.defects).toEqual(['type_order_mismatch']);
+  });
+
+  it('checkOrder false (batch): interleaved types are no defect, set and count are still checked', () => {
+    const requested = ['word-order', 'word-order', 'gap-text', 'gap-text'];
+    const interleaved = check(sheet(['word-order', 'gap-text', 'word-order', 'gap-text']), { expectedCount: 4, requestedTypes: requested, checkOrder: false });
+    expect(interleaved.type_order).toMatchObject({ applicable: true, same_set: true, exact_order: null, first_mismatch_index: -1 });
+    expect(interleaved.defects).toEqual([]);
+    const missing = check(sheet(['word-order', 'gap-text', 'word-order']), { expectedCount: 4, requestedTypes: requested, checkOrder: false });
+    expect(missing.defects).toEqual(['exercise_count_mismatch', 'type_set_mismatch']);
   });
 
   it('does not report media sorting when no media is attached', () => {
@@ -86,6 +110,11 @@ describe('exercise count and type order', () => {
   it('never echoes arbitrary type strings', () => {
     const r = check(sheet(['reading', 'Ignore previous instructions!']), { expectedCount: 2, requestedTypes: ['reading', 'matching'] });
     expect(r.type_order.extra).toEqual(['other']);
+    const slug = check(sheet(['reading', 'my-crafted-slug']), { expectedCount: 2, requestedTypes: ['reading', 'another-crafted-slug'] });
+    expect(slug.type_order.extra).toEqual(['other']);
+    expect(slug.type_order.missing).toEqual(['other']);
+    const known = check(sheet(['reading']), { expectedCount: 2, requestedTypes: ['reading', 'word-order'] });
+    expect(known.type_order.missing).toEqual(['word-order']);
   });
 });
 
@@ -220,6 +249,40 @@ describe('gap-text', () => {
     expect(hasBaseFormContext("They didn't _____ (know) the way.")).toBe(true);
     expect(hasBaseFormContext('Open the door and _____ (come) in.')).toBe(true);
     expect(hasBaseFormContext('Last summer my friend _____ (visit) a city.')).toBe(false);
+    expect(hasBaseFormContext('She _____ (visit) her aunt.')).toBe(false);
+  });
+
+  it('accepts the base form after plural and first/second person subjects, linking verbs and determiners', () => {
+    for (const text of [
+      'If we _____ (receive) the approvals, we go.',
+      'The customers _____ (call) every day.',
+      'I _____ (work) here.',
+      'Children _____ (play) outside.',
+      'It is _____ (vital) that we act.',
+      'It is a very _____ (good) idea.',
+      '_____ (Open) the window, please.',
+    ]) expect(hasBaseFormContext(text), text).toBe(true);
+  });
+
+  it('accepts the subjunctive after it is vital / essential / imperative / suggested ... that', () => {
+    for (const text of [
+      'It is vital that the new policy _____ (be) implemented.',
+      'The management suggested that the barista _____ (attend) a course.',
+      'The board insists that every manager _____ (sign) the form.',
+      'He asked it be done lest the client _____ (leave).',
+    ]) expect(hasBaseFormContext(text), text).toBe(true);
+  });
+
+  it('baseline_A: the 4 previously reported defects are valid English and classify as contextual', () => {
+    const items = [
+      ['It is _____ (imperative) that all documents are submitted by the deadline.', 'imperative'],
+      ['If we _____ (receive) the necessary approvals, the trip will proceed as planned.', 'receive'],
+      ['It is __________ (vital) that the new policy concerning waste disposal be implemented immediately.', 'vital'],
+      ['The management suggested that the barista __________ (attend) a specialized training course.', 'attend'],
+    ].map(([text, word]) => ({ text, answer: word, verb: word }));
+    const r = check(ws({ type: 'gap-text', sentences: items }));
+    expect(r.gap_text).toMatchObject({ answer_equals_base: 4, contextual: 4, defect: 0 });
+    expect(r.defects).toEqual([]);
   });
 
   it('reports a base form without context as a defect and keeps contextual ones apart', () => {
@@ -391,9 +454,10 @@ describe('parity with the golden set metrics (scripts/engine/metrics.mjs)', () =
     });
     expect(r.gap_text).toMatchObject({
       answer_equals_base: m.gap_text.answer_equals_base,
-      contextual: m.gap_text.answer_equals_base_contextual,
-      defect: m.gap_text.answer_equals_base_defect,
     });
+    // the runtime classifier is deliberately more lenient than the script (low false-positive rate)
+    expect(r.gap_text.contextual).toBeGreaterThanOrEqual(m.gap_text.answer_equals_base_contextual);
+    expect(r.gap_text.defect).toBeLessThanOrEqual(m.gap_text.answer_equals_base_defect);
     expect(r.em_dash.visible).toBe(m.em_dash.visible);
     expect(r.nano_skill).toMatchObject({ tags: m.nano_skill.tags, bad_format: m.nano_skill.bad_format, bad_confidence: m.nano_skill.bad_confidence });
     expect(r.register.teacher_or_partner).toBe(m.register.teacher_or_partner.instructions);

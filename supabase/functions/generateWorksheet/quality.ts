@@ -20,6 +20,8 @@
 // The report holds counts and enumerations only, never worksheet text, so it
 // is safe to log.
 
+import { ALL_EXERCISE_IDS } from "../_shared/exerciseTaxonomy.ts";
+
 /** Em dash U+2014, built from its code point (noEmDash.test.ts scans sources). */
 const EM_DASH = String.fromCharCode(0x2014);
 const EM_DASH_RE = new RegExp(EM_DASH, "g");
@@ -35,8 +37,8 @@ const BASE_CONTEXT_WORDS = new Set([
 /** Owner decision: at most 2 of 10 gap-text items may be base form in context. */
 export const GAP_TEXT_CONTEXTUAL_LIMIT_PER_TEN = 2;
 
-/** Types the report may name; anything else is reported as "other". */
-const TYPE_NAME = /^[a-z][a-z0-9-]{0,39}$/;
+/** Types the report may name (taxonomy plus the two the validators know); anything else is "other". */
+const KNOWN_TYPES: ReadonlySet<string> = new Set([...ALL_EXERCISE_IDS, "synonyms-antonyms", "sentence-transformation"]);
 
 export type DefectCode =
   | "exercise_count_mismatch"
@@ -66,6 +68,8 @@ export interface QualityContext {
   hasMedia?: boolean;
   /** False for single-exercise regeneration: count and order are not checked. */
   checkCountAndOrder?: boolean;
+  /** False when the requested order is not a reliable reference (batch): set and count are still checked. */
+  checkOrder?: boolean;
 }
 
 export interface QualityReport {
@@ -229,10 +233,53 @@ function checkFillInBlanks(exercises: Record<string, any>[]) {
 // gap-text
 // ---------------------------------------------------------------------------
 
-/** True when one of the three words before the first gap makes the base form correct. */
-export function hasBaseFormContext(text: unknown): boolean {
+const SUBJUNCTIVE_TRIGGER = new RegExp(
+  "\\b(?:vital|essential|imperative|important|necessary|crucial|critical|desirable|advisable|recommended|suggested|" +
+    "required|demanded|insisted|requested|proposed|suggest|suggests|recommend|recommends|demand|demands|insist|insists|" +
+    "require|requires|request|requests|propose|proposes|advise|advises|advised|urge|urges|urged|lest)\\b",
+);
+/** Words after which the gap is not a finite verb, or the base form is the correct present form. */
+const BASE_OK_PREVIOUS_WORDS = new Set([
+  "i", "we", "you", "they", "people", "children", "men", "women", "police", "who", "what", "which",
+  "is", "are", "am", "was", "were", "be", "been", "being", "seem", "seems", "look", "looks", "feel", "feels", "become", "becomes",
+  "the", "a", "an", "my", "your", "his", "her", "its", "our", "their", "this", "that", "these", "those", "some", "any", "no",
+  "very", "more", "most", "so", "too", "quite", "really", "extremely", "less", "least",
+  "where", "when", "why", "how", "whom", "whose", "if", "unless", "than", "as",
+  "never", "always", "often", "usually", "also", "just", "still", "already",
+]);
+
+/**
+ * True when the base form is acceptable English at the gap, or when we cannot
+ * tell: modal / to / do-support / conjunction context, a subjunctive trigger
+ * ("It is vital that", "suggested that"), plural or first/second person
+ * subjects, a predicate adjective or noun after a linking verb or determiner,
+ * and a gap at the start of the sentence (imperative). Only a gap right after a
+ * clearly singular subject (he, she, it, a name, a singular noun) with none of
+ * those contexts is a defect, so the log signal has a low false-positive rate.
+ */
+/**
+ * The narrow owner definition: one of the 3 words before the gap is a modal,
+ * `to`, a do-support form, `and`, `or`, `not` or `let`. Only these count toward
+ * the "at most 2 of 10" limit of the tested skill (base form after a modal).
+ */
+export function hasModalBaseContext(text: unknown): boolean {
   const before = norm(str(text).split(/_{2,}/)[0]).split(/\s+/).filter(Boolean).slice(-3);
   return before.some((w) => BASE_CONTEXT_WORDS.has(w.replace(/[^a-z']/g, "")));
+}
+
+export function hasBaseFormContext(text: unknown): boolean {
+  const beforeText = norm(str(text).split(/_{2,}/)[0]);
+  const before = beforeText.split(/\s+/).filter(Boolean);
+  if (before.length === 0) return true;
+  const clean = (w: string) => w.replace(/[^a-z']/g, "");
+  if (hasModalBaseContext(text)) return true;
+  if (SUBJUNCTIVE_TRIGGER.test(beforeText) && /\b(?:that|lest)\b/.test(beforeText)) return true;
+  const last = clean(before[before.length - 1]);
+  if (!last) return true;
+  if (BASE_OK_PREVIOUS_WORDS.has(last)) return true;
+  // plural noun subject (customers, managers): ends in s but not ss, us, is
+  if (/[a-z]s$/.test(last) && !/(?:ss|us|is)$/.test(last)) return true;
+  return false;
 }
 
 function checkGapText(exercises: Record<string, any>[]) {
@@ -255,7 +302,7 @@ function checkGapText(exercises: Record<string, any>[]) {
       equalsBase += 1;
       if (hasBaseFormContext(s?.text)) {
         contextual += 1;
-        exerciseContextual += 1;
+        if (hasModalBaseContext(s?.text)) exerciseContextual += 1;
       }
     }
     const limit = Math.max(
@@ -373,7 +420,7 @@ export function sortRequestedTypesForMedia(requested: string[]): string[] {
   ];
 }
 
-const safeTypeName = (t: string) => (TYPE_NAME.test(t) ? t : "other");
+const safeTypeName = (t: string) => (KNOWN_TYPES.has(t) ? t : "other");
 
 function checkTypeOrder(actual: string[], ctx: QualityContext, applicable: boolean): QualityReport["type_order"] {
   const requestedAll = Array.isArray(ctx.requestedTypes)
@@ -387,6 +434,7 @@ function checkTypeOrder(actual: string[], ctx: QualityContext, applicable: boole
   }
   const expected = typeof ctx.expectedCount === "number" ? ctx.expectedCount : requestedAll.length;
   const requested = requestedAll.slice(0, expected);
+  const checkOrder = ctx.checkOrder !== false;
   const sameSet = actual.length === requested.length && [...actual].sort().join("|") === [...requested].sort().join("|");
   const exact = sameSet && actual.every((t, i) => t === requested[i]);
   const sorted = sortRequestedTypesForMedia(requested);
@@ -394,9 +442,9 @@ function checkTypeOrder(actual: string[], ctx: QualityContext, applicable: boole
   return {
     applicable: true,
     same_set: sameSet,
-    exact_order: exact,
-    exact_order_media_sorted: ctx.hasMedia ? exactSorted : null,
-    first_mismatch_index: exact ? -1 : actual.findIndex((t, i) => t !== requested[i]),
+    exact_order: checkOrder ? exact : null,
+    exact_order_media_sorted: checkOrder && ctx.hasMedia ? exactSorted : null,
+    first_mismatch_index: exact || !checkOrder ? -1 : actual.findIndex((t, i) => t !== requested[i]),
     missing: requested.filter((t) => !actual.includes(t)).map(safeTypeName),
     extra: actual.filter((t) => !requested.includes(t)).map(safeTypeName),
   };
@@ -446,7 +494,10 @@ function listDefects(r: QualityReport): DefectCode[] {
   if (r.exercise_count.match === false) d.push("exercise_count_mismatch");
   if (r.type_order.applicable) {
     if (r.type_order.same_set === false) d.push("type_set_mismatch");
-    else if (r.type_order.exact_order === false) d.push("type_order_mismatch");
+    else if (r.type_order.exact_order === false && r.type_order.exact_order_media_sorted !== true) {
+      // an order that follows the picture > audio > others rule of the prompt is correct
+      d.push("type_order_mismatch");
+    }
   }
   if (r.word_order.unbuildable > 0) d.push("word_order_unbuildable");
   if (r.multiple_choice.zero_correct > 0) d.push("mc_zero_correct");

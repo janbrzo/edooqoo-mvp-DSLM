@@ -4,6 +4,7 @@
 // mode only, see observeWorksheetQuality).
 import { ENGINE_PROMPT_VERSION } from "./engineVersion.ts";
 import { evaluateWorksheetQuality } from "./quality.ts";
+import { OPENAI_FALLBACK_MODEL } from "./clients.ts";
 
 /** Full worksheet (streaming and regular modes). */
 export function checkWorksheetStructure(worksheetData: any): void {
@@ -37,7 +38,6 @@ export function checkBatchStructure(batchData: any): void {
 
 export type GateMode = "off" | "log" | "enforce";
 
-const PRIMARY_MODEL = "gemini-2.5-flash";
 const AI_REPAIR_STEP = /(^|\+)(ai|ai-window|ai-fallback)(\+|$)/;
 
 export function readGateMode(): GateMode {
@@ -57,6 +57,8 @@ export interface QualityObservation {
   hasMedia: boolean;
   /** False for single-exercise regeneration: count and order are not checked. */
   checkCountAndOrder: boolean;
+  /** False when the requested order is not a reliable reference (batch). */
+  checkOrder?: boolean;
   /** Requested types in order (batch: the target types); undefined = formData.selectedExercises. */
   requestedTypes?: string[] | null;
   model: string;
@@ -83,6 +85,7 @@ export function observeWorksheetQuality(obs: QualityObservation): void {
       requestedTypes: requested,
       hasMedia: obs.hasMedia,
       checkCountAndOrder: obs.checkCountAndOrder,
+      checkOrder: obs.checkOrder,
     });
     const clientId = obs.formData?.clientGenerationId;
     console.log(JSON.stringify({
@@ -92,7 +95,7 @@ export function observeWorksheetQuality(obs: QualityObservation): void {
         gate_mode: "log",
         mode: obs.mode,
         model: obs.model || "unknown",
-        fallback_used: !!obs.model && !obs.model.startsWith(PRIMARY_MODEL),
+        fallback_used: obs.model.startsWith(OPENAI_FALLBACK_MODEL),
         repair_method: obs.repairMethod,
         repair_detail: obs.repairDetail,
         generation_ms: Date.now() - obs.generationStartTime,
