@@ -4,16 +4,19 @@ import { corsHeaders } from "./clients.ts";
 import { classifyErrorType, notifyGenerationFailure } from "./notify.ts";
 import { parseWithRecovery } from "./parse.ts";
 import { generateNonStreaming } from "./model.ts";
-import { checkBatchStructure } from "./gate.ts";
+import { checkBatchStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { runPipeline } from "./pipeline.ts";
 import { planBatch, type GenerationRequest } from "./composeRequest.ts";
 
 export async function runBatchMode(request: GenerationRequest): Promise<Response> {
-  const { sanitizedPrompt, userId, teacherEmail } = request;
+  const { sanitizedPrompt, userId, teacherEmail, formData, generationStartTime } = request;
   const plan = planBatch(request);
 
   let usedModel = "";
   let batchGenerationTime = "";
+  // Telemetry only: what parse reported, read again by the gate observation.
+  let observedRepairMethod = "none";
+  let observedRepairDetail = "none";
 
   return runPipeline<string, any, void, Response>({
     // Try Gemini first, fallback to OpenAI
@@ -38,12 +41,39 @@ export async function runBatchMode(request: GenerationRequest): Promise<Response
     },
 
     async parse(batchContent) {
-      const { data: batchData, repairMethod } = await parseWithRecovery(batchContent, plan.totalExerciseCount);
+      const { data: batchData, repairMethod, repairDetail } = await parseWithRecovery(batchContent, plan.totalExerciseCount);
+      observedRepairMethod = repairMethod;
+      observedRepairDetail = repairDetail;
+      logAiRepairEarlyWarning("batch", repairMethod, repairDetail);
       if (repairMethod !== 'none') console.log(`🔧 [BATCH] JSON repaired using: ${repairMethod}`);
       return batchData;
     },
 
-    gate: checkBatchStructure,
+    gate(batchData) {
+      checkBatchStructure(batchData);
+      // The batch asks for `exerciseCountPerType` exercises of each target type.
+      // Observation must never affect the batch, so odd input just skips the type check.
+      let requestedTypes: string[] | null = null;
+      try {
+        const perType = Number(formData.exerciseCountPerType) || 1;
+        requestedTypes = (formData.targetExerciseTypes as string[]).flatMap((t) => Array(perType).fill(String(t)));
+      } catch (_) { /* leave the type check out */ }
+      observeWorksheetQuality({
+        mode: "batch",
+        worksheet: batchData,
+        expectedCount: plan.totalExerciseCount,
+        formData,
+        hasMedia: false,
+        checkCountAndOrder: true,
+        // the model may interleave the requested types, so only set and count are reliable
+        checkOrder: false,
+        requestedTypes,
+        model: usedModel,
+        repairMethod: observedRepairMethod,
+        repairDetail: observedRepairDetail,
+        generationStartTime,
+      });
+    },
 
     // Batch exercises are returned exactly as the model produced them.
     normalise() {},

@@ -2571,7 +2571,7 @@ exports[`validateExercise: specific rules and quirks > fill-in-blanks needs a wo
 }
 `;
 
-exports[`validateExercise: specific rules and quirks > fill-in-blanks-audio requires transcript_with_blanks and full_transcript although the prompt forbids them (known mismatch, lenient) 1`] = `
+exports[`validateExercise: specific rules and quirks > fill-in-blanks-audio accepts sentences with word_bank as well as the transcript form (N2) 1`] = `
 {
   "after": {
     "sentences": [
@@ -2631,9 +2631,7 @@ exports[`validateExercise: specific rules and quirks > fill-in-blanks-audio requ
     ],
   },
   "threw": null,
-  "warnings": [
-    "Validation warning for fill-in-blanks-audio: Fill in Blanks Audio must have transcript_with_blanks",
-  ],
+  "warnings": [],
 }
 `;
 
@@ -3577,7 +3575,7 @@ exports[`validateExercise: specific rules and quirks > multiple-choice: exactly 
 }
 `;
 
-exports[`validateExercise: specific rules and quirks > negative-prefixes reads base_word although the prompt asks for word (known mismatch, lenient so only a warning) 1`] = `
+exports[`validateExercise: specific rules and quirks > negative-prefixes accepts both word and base_word (N2: the prompt asks for word) 1`] = `
 {
   "after": {
     "type": "negative-prefixes",
@@ -3625,13 +3623,11 @@ exports[`validateExercise: specific rules and quirks > negative-prefixes reads b
     ],
   },
   "threw": null,
-  "warnings": [
-    "Validation warning for negative-prefixes: Each negative prefix word must have base_word",
-  ],
+  "warnings": [],
 }
 `;
 
-exports[`validateExercise: specific rules and quirks > negative-prefixes reads base_word although the prompt asks for word (known mismatch, lenient so only a warning) 2`] = `
+exports[`validateExercise: specific rules and quirks > negative-prefixes accepts both word and base_word (N2: the prompt asks for word) 2`] = `
 {
   "after": {
     "type": "negative-prefixes",

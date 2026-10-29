@@ -126,12 +126,12 @@ describe('validateExercise: specific rules and quirks', () => {
     expect(check(mk('fill-in-blanks', { word_bank: ['a', 'b'] }))).toMatchSnapshot();
   });
 
-  it('negative-prefixes reads base_word although the prompt asks for word (known mismatch, lenient so only a warning)', () => {
+  it('negative-prefixes accepts both word and base_word (N2: the prompt asks for word)', () => {
     expect(check({ type: 'negative-prefixes', words: Array.from({ length: 10 }, (_, i) => ({ word: `w${i}`, answer: `unw${i}` })) })).toMatchSnapshot();
     expect(check({ type: 'negative-prefixes', words: Array.from({ length: 10 }, (_, i) => ({ base_word: `w${i}` })) })).toMatchSnapshot();
   });
 
-  it('fill-in-blanks-audio requires transcript_with_blanks and full_transcript although the prompt forbids them (known mismatch, lenient)', () => {
+  it('fill-in-blanks-audio accepts sentences with word_bank as well as the transcript form (N2)', () => {
     expect(
       check({
         type: 'fill-in-blanks-audio',

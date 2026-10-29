@@ -5,7 +5,7 @@ import { corsHeaders, openai, OPENAI_FALLBACK_MODEL } from "./clients.ts";
 import { classifyErrorType, notifyGenerationFailure, waitUntilIfAvailable, waitUntilOrAwait } from "./notify.ts";
 import { parseOrRegenerateWithFallback, parseWithRecovery } from "./parse.ts";
 import { generateWithGeminiStream } from "./model.ts";
-import { checkWorksheetStructure } from "./gate.ts";
+import { checkWorksheetStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { normaliseWorksheet } from "./normalise.ts";
 import { insertWorksheetRow } from "./persist.ts";
 import { runPipeline } from "./pipeline.ts";
@@ -16,10 +16,10 @@ import {
 } from "./streaming.ts";
 import type { GenerationRequest, WorksheetPlan } from "./composeRequest.ts";
 
-type Salvaged = { data: any; content: string; repairMethod: string; modelOverride?: string };
+type Salvaged = { data: any; content: string; repairMethod: string; repairDetail: string; modelOverride?: string };
 
 export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan): Response {
-  const { formData, userId, teacherEmail, sanitizedPrompt, generationStartTime } = request;
+  const { formData, isRegeneration, userId, teacherEmail, sanitizedPrompt, generationStartTime } = request;
   const { hasPictureMedia, systemMessage } = plan;
 
   console.log("🌊 Starting STREAMING mode...");
@@ -73,6 +73,9 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
     let streamUsedModel = "";
     const expectedTotal = getExpectedCount(formData?.lessonTime);
     let salvaged: Salvaged | null = null;
+    // Telemetry only: what parse reported, read again by the gate observation.
+    let observedRepairMethod = "none";
+    let observedRepairDetail = "none";
 
     try {
       safeSend("start", { message: "Starting generation..." });
@@ -122,6 +125,7 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
                     data: rescued.data,
                     content: fullContent,
                     repairMethod: rescued.repairMethod === 'none' ? 'stream-salvage' : `stream-salvage+${rescued.repairMethod}`,
+                    repairDetail: rescued.repairDetail === 'none' ? 'stream-salvage' : `stream-salvage+${rescued.repairDetail}`,
                   };
                 }
               } catch (salvageError) {
@@ -187,6 +191,7 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
 
           let worksheetData: any;
           let repairMethod: string;
+          let repairDetail: string;
           try {
             // v6.9.64 — allow a parse-safe model fallback for picture worksheets
             // (the long visual description is the dominant cause of malformed
@@ -201,10 +206,14 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
             worksheetData = result.data;
             fullContent = result.content;
             repairMethod = result.repairMethod;
+            repairDetail = result.repairDetail;
             if (result.modelOverride) streamUsedModel = result.modelOverride;
           } finally {
             clearInterval(repairKeepalive);
           }
+          observedRepairMethod = repairMethod;
+          observedRepairDetail = repairDetail;
+          logAiRepairEarlyWarning("streaming", repairMethod, repairDetail);
           if (repairMethod !== 'none') {
             console.log(`🔧 [STREAMING] JSON was repaired using: ${repairMethod}`);
             // Best-effort early warning — worksheet uratowany, but prompt may be drifting.
@@ -223,7 +232,21 @@ export function runStreamingMode(request: GenerationRequest, plan: WorksheetPlan
           return worksheetData;
         },
 
-        gate: checkWorksheetStructure,
+        gate(worksheetData) {
+          checkWorksheetStructure(worksheetData);
+          observeWorksheetQuality({
+            mode: "streaming",
+            worksheet: worksheetData,
+            expectedCount: expectedTotal,
+            formData,
+            hasMedia: !!plan.selectedImage || !!plan.selectedAudio,
+            checkCountAndOrder: !isRegeneration,
+            model: streamUsedModel,
+            repairMethod: observedRepairMethod,
+            repairDetail: observedRepairDetail,
+            generationStartTime,
+          });
+        },
 
         normalise: normaliseWorksheet,
 

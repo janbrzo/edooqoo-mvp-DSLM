@@ -4,7 +4,7 @@ import { corsHeaders, OPENAI_FALLBACK_MODEL } from "./clients.ts";
 import { notifyGenerationFailure } from "./notify.ts";
 import { parseOrRegenerateWithFallback } from "./parse.ts";
 import { generateNonStreaming } from "./model.ts";
-import { checkExerciseCount, checkWorksheetStructure } from "./gate.ts";
+import { checkExerciseCount, checkWorksheetStructure, logAiRepairEarlyWarning, observeWorksheetQuality } from "./gate.ts";
 import { normaliseWorksheet } from "./normalise.ts";
 import { insertWorksheetRow } from "./persist.ts";
 import { runPipeline } from "./pipeline.ts";
@@ -23,6 +23,9 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
   let jsonContent: string | null = null;
   let openaiDuration = 0;
   let generationTimeSeconds = 0;
+  // Telemetry only: what parse reported, read again by the gate observation.
+  let observedRepairMethod = "none";
+  let observedRepairDetail = "none";
 
   return runPipeline<string | null, any, void, Response>({
     // Generate worksheet - Try Gemini first, fallback to OpenAI
@@ -74,7 +77,10 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
       const worksheetData = recovery.data;
       jsonContent = recovery.content;
       const repairMethod = recovery.repairMethod;
+      observedRepairMethod = repairMethod;
+      observedRepairDetail = recovery.repairDetail;
       if (recovery.modelOverride) usedModel = recovery.modelOverride;
+      logAiRepairEarlyWarning("regular", repairMethod, recovery.repairDetail);
       if (repairMethod !== 'none') {
         console.log(`🔧 [REGULAR] JSON was repaired using: ${repairMethod}`);
       }
@@ -89,6 +95,18 @@ export async function runRegularMode(request: GenerationRequest, plan: Worksheet
 
     gate(worksheetData) {
       checkWorksheetStructure(worksheetData);
+      observeWorksheetQuality({
+        mode: "regular",
+        worksheet: worksheetData,
+        expectedCount: exerciseCount,
+        formData,
+        hasMedia: !!selectedImage || !!selectedAudio,
+        checkCountAndOrder: !isRegeneration,
+        model: usedModel,
+        repairMethod: observedRepairMethod,
+        repairDetail: observedRepairDetail,
+        generationStartTime,
+      });
       checkExerciseCount(worksheetData, exerciseCount, isRegeneration);
     },
 
