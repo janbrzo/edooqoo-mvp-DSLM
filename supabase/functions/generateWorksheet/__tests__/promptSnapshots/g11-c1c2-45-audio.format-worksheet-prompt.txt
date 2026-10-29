@@ -1,0 +1,18 @@
+lessonTopic: Resolving a supply chain dispute
+lessonGoal: Follow a technical call and summarise the position
+englishLevel: C1/C2
+languageStyle: 3/5 (neutral - balanced style)
+selectedExercises: listening-comprehension, reading, true-false, matching, fill-in-blanks, discussion
+
+LANGUAGE STYLE GUIDELINES (3/5):
+- Use neutral, balanced language that's neither too casual nor too formal
+- Mix contractions with full forms naturally and appropriately
+- Use standard expressions and commonly understood idioms
+- Examples: "How are you doing?", "That sounds excellent!", "I would like to", "Let's meet up", "It's interesting"
+
+CEFR LEVEL GUIDELINES (C1/C2):
+- Use advanced, sophisticated vocabulary with complex grammatical structures and subtle nuances
+- Include abstract topics, professional contexts, academic discussions, and complex social issues
+- Employ complex sentence structures with multiple clauses, inversion, and advanced discourse markers
+- Use idiomatic language, collocations, and precise terminology appropriate to the context
+- Examples: "Had I known the implications, I would have reconsidered my decision", "Not only did she excel academically, but she also demonstrated exceptional leadership qualities"

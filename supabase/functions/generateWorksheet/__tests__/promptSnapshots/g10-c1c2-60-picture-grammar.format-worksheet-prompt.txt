@@ -1,0 +1,20 @@
+lessonTopic: Reflecting on a missed business opportunity
+lessonGoal: Speculate about the past and express regret
+englishLevel: C1/C2
+languageStyle: 4/5 (formal - professional tone)
+grammarFocus: Third conditional for regrets
+additionalInformation: Use the office photo as a prompt for speculation.
+selectedExercises: multiple-choice-picture, describe-picture, reading, true-false, fill-in-blanks, dialogue, word-order, error-correction
+
+LANGUAGE STYLE GUIDELINES (4/5):
+- Use formal, professional language with proper grammar and structure
+- Prefer full forms over contractions (I am, you are, cannot, will not)
+- Use sophisticated vocabulary and well-constructed sentences
+- Examples: "How are you today?", "That is excellent!", "I would be delighted to", "Shall we arrange a meeting?", "It is quite remarkable"
+
+CEFR LEVEL GUIDELINES (C1/C2):
+- Use advanced, sophisticated vocabulary with complex grammatical structures and subtle nuances
+- Include abstract topics, professional contexts, academic discussions, and complex social issues
+- Employ complex sentence structures with multiple clauses, inversion, and advanced discourse markers
+- Use idiomatic language, collocations, and precise terminology appropriate to the context
+- Examples: "Had I known the implications, I would have reconsidered my decision", "Not only did she excel academically, but she also demonstrated exceptional leadership qualities"

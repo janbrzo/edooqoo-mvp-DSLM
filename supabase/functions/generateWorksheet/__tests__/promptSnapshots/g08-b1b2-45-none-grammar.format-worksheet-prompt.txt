@@ -1,0 +1,19 @@
+lessonTopic: Talking about recent work experience at an interview
+lessonGoal: Describe achievements and recent changes
+englishLevel: B1/B2
+languageStyle: 2/5 (casual - relaxed, friendly)
+grammarFocus: Present perfect vs past simple for recent experience
+selectedExercises: reading, true-false, matching, fill-in-blanks, multiple-choice, dialogue
+
+LANGUAGE STYLE GUIDELINES (2/5):
+- Use casual, relaxed language with regular contractions and friendly tone
+- Include common informal expressions and everyday language
+- Keep sentences moderately simple but well-structured
+- Examples: "How's it going?", "That sounds really great!", "I'd love to", "Let's hang out", "It's pretty cool"
+
+CEFR LEVEL GUIDELINES (B1/B2):
+- Use intermediate vocabulary with more varied grammatical structures including conditionals and perfect tenses
+- Include topics related to work, travel, personal experiences, opinions, and abstract ideas
+- Use compound and some complex sentences with relative clauses and linking words
+- Introduce phrasal verbs, idiomatic expressions, and more nuanced vocabulary
+- Examples: "If I had known, I would have come earlier", "I've been learning English for five years", "Although it was raining, we decided to go out"

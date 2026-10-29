@@ -1,0 +1,19 @@
+lessonTopic: Briefing a client on a delayed delivery
+lessonGoal: Understand and paraphrase a supplier message
+englishLevel: C1/C2
+languageStyle: 5/5 (very formal - academic style)
+selectedExercises: reading, multiple-choice-audio, true-false-audio, fill-in-blanks-audio, matching, dialogue, discussion, error-correction
+
+LANGUAGE STYLE GUIDELINES (5/5):
+- Use very formal, academic language with sophisticated vocabulary and complex structures
+- Strictly avoid contractions and maintain formal grammatical constructions throughout
+- Employ elevated vocabulary, complex sentence structures, and academic tone
+- Use precise, scholarly language and formal expressions
+- Examples: "How do you do?", "That is most exceptional!", "I would be most honored to", "Shall we schedule a formal appointment?", "It is extraordinarily fascinating"
+
+CEFR LEVEL GUIDELINES (C1/C2):
+- Use advanced, sophisticated vocabulary with complex grammatical structures and subtle nuances
+- Include abstract topics, professional contexts, academic discussions, and complex social issues
+- Employ complex sentence structures with multiple clauses, inversion, and advanced discourse markers
+- Use idiomatic language, collocations, and precise terminology appropriate to the context
+- Examples: "Had I known the implications, I would have reconsidered my decision", "Not only did she excel academically, but she also demonstrated exceptional leadership qualities"

@@ -46754,7 +46754,8 @@
         },
         "environmentVariables": [
           "SUPABASE_SERVICE_ROLE_KEY",
-          "SUPABASE_URL"
+          "SUPABASE_URL",
+          "Stripe_Secret_Key"
         ]
       },
       {
@@ -47445,7 +47446,6 @@
         ],
         "requestFields": [
           "enableStreaming",
-          "exercises",
           "formData",
           "isBatchGeneration",
           "isRegeneration",
@@ -47464,6 +47464,7 @@
         ],
         "dataDependencies": {
           "tables": [
+            "geolocation_cache",
             "profiles",
             "students",
             "worksheets"
@@ -47471,7 +47472,9 @@
           "rpcs": [],
           "edgeFunctions": [],
           "fetchTargets": [
-            "${supabaseUrl}/functions/v1/notify-generation-failure"
+            "${supabaseUrl}/functions/v1/notify-generation-failure",
+            "https://freegeoip.app/json/${ip}",
+            "https://ipapi.co/${ip}/json/"
           ]
         },
         "environmentVariables": [
@@ -47972,14 +47975,19 @@
         ],
         "dataDependencies": {
           "tables": [
+            "homework_assignments",
+            "homework_student_answers",
             "pending_worksheet_ai_evaluations",
             "students",
             "worksheet_student_answers",
             "worksheets"
           ],
           "rpcs": [
+            "claim_homework_answer_ai_attempt",
             "claim_pending_ai_evaluations",
+            "list_homework_answers_needing_ai_evaluation",
             "list_worksheet_answers_needing_ai_evaluation",
+            "mark_homework_answer_ai_not_evaluable",
             "mark_worksheet_answer_not_evaluable",
             "needs_ai_evaluation"
           ],
@@ -48867,12 +48875,17 @@
           "success"
         ],
         "dataDependencies": {
-          "tables": [],
+          "tables": [
+            "feedbacks"
+          ],
           "rpcs": [],
           "edgeFunctions": [],
           "fetchTargets": []
         },
-        "environmentVariables": []
+        "environmentVariables": [
+          "SUPABASE_SERVICE_ROLE_KEY",
+          "SUPABASE_URL"
+        ]
       },
       {
         "name": "suggest-exercises",
@@ -52825,7 +52838,8 @@
             "src/services/worksheetService/feedbackService.ts"
           ],
           "edgeFunctions": [
-            "loop-worksheet-quality"
+            "loop-worksheet-quality",
+            "submitFeedback"
           ]
         }
       },
@@ -53375,6 +53389,7 @@
         "featureOwnership": {
           "clientFiles": [],
           "edgeFunctions": [
+            "generateWorksheet",
             "get-demo-locale"
           ]
         }
@@ -53537,6 +53552,7 @@
           ],
           "edgeFunctions": [
             "get-student-hub-data",
+            "process-pending-ai-evaluations",
             "send-homework-email",
             "send-homework-reminders",
             "test-send-reminder"
@@ -53744,7 +53760,8 @@
             "src/pages/HomeworkReviewPage.tsx"
           ],
           "edgeFunctions": [
-            "get-student-hub-data"
+            "get-student-hub-data",
+            "process-pending-ai-evaluations"
           ]
         }
       },
@@ -61416,6 +61433,7 @@
           "supabase/functions/claim-anonymous-worksheets/index.ts",
           "supabase/functions/cleanup-anonymous-users/index.ts",
           "supabase/functions/create-export-payment/index.ts",
+          "supabase/functions/create-export-payment/stripe-service.ts",
           "supabase/functions/create-subscription/index.ts",
           "supabase/functions/customer-portal/index.ts",
           "supabase/functions/delete-account/index.ts",
@@ -61430,7 +61448,8 @@
           "supabase/functions/generate-image/index.ts",
           "supabase/functions/generate-media-exercises/index.ts",
           "supabase/functions/generate-timeline/index.ts",
-          "supabase/functions/generateWorksheet/index.ts",
+          "supabase/functions/generateWorksheet/clients.ts",
+          "supabase/functions/generateWorksheet/geolocation.ts",
           "supabase/functions/get-demo-locale/index.ts",
           "supabase/functions/get-student-bookings/index.ts",
           "supabase/functions/get-student-hub-data/index.ts",
@@ -61460,6 +61479,7 @@
           "supabase/functions/student-gcal-auth-callback/index.ts",
           "supabase/functions/student-gcal-sync/index.ts",
           "supabase/functions/submit-bug-report/index.ts",
+          "supabase/functions/submitFeedback/database.ts",
           "supabase/functions/test-send-reminder/index.ts",
           "supabase/functions/track-student-event/index.ts",
           "supabase/functions/track-user-event/index.ts",
@@ -61485,6 +61505,12 @@
         ]
       },
       {
+        "host": "freegeoip.app",
+        "callsites": [
+          "supabase/functions/generateWorksheet/geolocation.ts"
+        ]
+      },
+      {
         "host": "generativelanguage.googleapis.com",
         "callsites": [
           "supabase/functions/audit-llm-models/index.ts",
@@ -61494,6 +61520,7 @@
       {
         "host": "ipapi.co",
         "callsites": [
+          "supabase/functions/generateWorksheet/geolocation.ts",
           "supabase/functions/get-demo-locale/index.ts"
         ]
       },
@@ -61624,7 +61651,8 @@
       {
         "host": "www.sitemaps.org",
         "callsites": [
-          "supabase/functions/regenerate-gallery-sitemap/index.ts"
+          "supabase/functions/regenerate-gallery-sitemap/index.ts",
+          "supabase/functions/sitemap-xml/sitemap.generated.ts"
         ]
       },
       {
@@ -61700,7 +61728,7 @@
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/classify-knowledge-entry/index.ts",
           "supabase/functions/generate-image/index.ts",
-          "supabase/functions/generateWorksheet/index.ts",
+          "supabase/functions/generateWorksheet/clients.ts",
           "supabase/functions/process-welcome-test/index.ts",
           "supabase/functions/suggest-exercises/index.ts",
           "supabase/functions/verify-open-answers/index.ts"
@@ -61772,7 +61800,7 @@
           "supabase/functions/generate-audio/index.ts",
           "supabase/functions/generate-media-exercises/index.ts",
           "supabase/functions/generate-welcome-test-audio/index.ts",
-          "supabase/functions/generateWorksheet/index.ts",
+          "supabase/functions/generateWorksheet/clients.ts",
           "supabase/functions/process-welcome-test/index.ts",
           "supabase/functions/suggest-exercises/index.ts",
           "supabase/functions/transcribe-audio/index.ts",
@@ -61847,6 +61875,7 @@
         "name": "Stripe_Secret_Key",
         "callsites": [
           "supabase/functions/check-subscription-status/index.ts",
+          "supabase/functions/create-export-payment/stripe-service.ts",
           "supabase/functions/create-subscription/index.ts",
           "supabase/functions/customer-portal/index.ts",
           "supabase/functions/downgrade-subscription/index.ts",
@@ -61913,7 +61942,9 @@
           "supabase/functions/generate-media-exercises/index.ts",
           "supabase/functions/generate-timeline/index.ts",
           "supabase/functions/generate-welcome-test-audio/index.ts",
-          "supabase/functions/generateWorksheet/index.ts",
+          "supabase/functions/generateWorksheet/clients.ts",
+          "supabase/functions/generateWorksheet/geolocation.ts",
+          "supabase/functions/generateWorksheet/notify.ts",
           "supabase/functions/get-demo-locale/index.ts",
           "supabase/functions/get-student-bookings/index.ts",
           "supabase/functions/get-student-hub-data/index.ts",
@@ -61943,6 +61974,7 @@
           "supabase/functions/student-gcal-auth-callback/index.ts",
           "supabase/functions/student-gcal-sync/index.ts",
           "supabase/functions/submit-bug-report/index.ts",
+          "supabase/functions/submitFeedback/database.ts",
           "supabase/functions/test-send-reminder/index.ts",
           "supabase/functions/track-student-event/index.ts",
           "supabase/functions/track-user-event/index.ts",
@@ -61985,7 +62017,9 @@
           "supabase/functions/generate-media-exercises/index.ts",
           "supabase/functions/generate-timeline/index.ts",
           "supabase/functions/generate-welcome-test-audio/index.ts",
-          "supabase/functions/generateWorksheet/index.ts",
+          "supabase/functions/generateWorksheet/clients.ts",
+          "supabase/functions/generateWorksheet/geolocation.ts",
+          "supabase/functions/generateWorksheet/notify.ts",
           "supabase/functions/get-demo-locale/index.ts",
           "supabase/functions/get-student-bookings/index.ts",
           "supabase/functions/get-student-hub-data/index.ts",
@@ -62015,6 +62049,7 @@
           "supabase/functions/student-gcal-auth-callback/index.ts",
           "supabase/functions/student-gcal-sync/index.ts",
           "supabase/functions/submit-bug-report/index.ts",
+          "supabase/functions/submitFeedback/database.ts",
           "supabase/functions/test-send-reminder/index.ts",
           "supabase/functions/test-webhook/index.ts",
           "supabase/functions/track-student-event/index.ts",
