@@ -12,6 +12,44 @@ import { LearningProgress } from '@/components/flashcards/LearningProgress';
 import { SessionSummary } from '@/components/flashcards/SessionSummary';
 import { useFlashcardLearning } from '@/hooks/useFlashcardLearning';
 import { safeReturnTo } from '@/lib/flashcards/safeReturnTo';
+import { normalizeLearnerEmail } from '@/lib/flashcards/reviewState';
+import { devError } from '@/utils/logger';
+
+function formatNextDue(iso: string): string {
+  const due = new Date(iso);
+  if (Number.isNaN(due.getTime())) return 'soon';
+  const days = Math.ceil((due.getTime() - Date.now()) / 86400000);
+  if (days <= 1) return 'tomorrow';
+  return `in ${days} days (${due.toLocaleDateString(undefined, { day: 'numeric', month: 'long' })})`;
+}
+
+interface StudyMessageProps {
+  title: string;
+  body: string;
+  note?: string;
+  actions: Array<{ label: string; onClick: () => void; variant?: 'default' | 'outline' }>;
+}
+
+function StudyMessage({ title, body, note, actions }: StudyMessageProps) {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardContent className="p-8 text-center space-y-4">
+          <h1 className="text-2xl font-bold">{title}</h1>
+          <p className="text-muted-foreground">{body}</p>
+          <div className="space-y-2">
+            {actions.map((a) => (
+              <Button key={a.label} className="w-full" variant={a.variant ?? 'default'} onClick={a.onClick}>
+                {a.label}
+              </Button>
+            ))}
+          </div>
+          {note && <p className="text-xs text-muted-foreground">{note}</p>}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function FlashcardsLearning() {
   const { token } = useParams<{ token: string }>();
@@ -26,14 +64,11 @@ export default function FlashcardsLearning() {
   const [loading, setLoading] = useState(true);
   const [allCards, setAllCards] = useState<any[]>([]);
 
-  const learning = useFlashcardLearning(
-    setData?.id || '',
-    learnerEmail
-  );
+  const learning = useFlashcardLearning(token || '', learnerEmail);
 
   useEffect(() => {
     if (emailFromUrl) {
-      setLearnerEmail(emailFromUrl);
+      setLearnerEmail(normalizeLearnerEmail(emailFromUrl));
       setEmailSubmitted(true);
       if (mode === 'study' && setData?.id) {
         learning.loadSession();
@@ -56,7 +91,7 @@ export default function FlashcardsLearning() {
         if (mode === 'browse') await fetchAllCards(data[0].id);
       }
     } catch (error) {
-      console.error('Error fetching flashcard set:', error);
+      devError('Error fetching flashcard set:', error);
     } finally {
       setLoading(false);
     }
@@ -71,13 +106,14 @@ export default function FlashcardsLearning() {
       if (error) throw error;
       setAllCards((data as any) || []);
     } catch (error) {
-      console.error('Error fetching cards:', error);
+      devError('Error fetching cards:', error);
     }
   };
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (learnerEmail.trim()) {
+      setLearnerEmail(normalizeLearnerEmail(learnerEmail));
       setEmailSubmitted(true);
       if (mode === 'study') learning.loadSession();
     }
@@ -123,7 +159,7 @@ export default function FlashcardsLearning() {
             </div>
           </div>
         </div>
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10 p-4">
+        <div className="absolute inset-0 bg-foreground/50 flex items-center justify-center z-10 p-4">
           <div className="bg-background rounded-lg shadow-xl p-6 w-full max-w-md space-y-6">
             <div className="text-center">
               <h1 className="text-3xl font-bold mb-2">{setData.title}</h1>
@@ -190,14 +226,77 @@ export default function FlashcardsLearning() {
     );
   }
 
-  // Study mode - session complete
+  const dashboardEmail = setData?.student_email || learnerEmail;
+  const goBackToDashboard = () => {
+    const target = safeReturnTo(returnTo ?? undefined, '');
+    navigate(target || `/my-flashcards/${encodeURIComponent(dashboardEmail)}`);
+  };
+
+  // Study mode: loading, error, empty and nothing-due states come before the summary
+  if (learning.loadError) {
+    return (
+      <StudyMessage
+        title="We could not load your cards"
+        body="Check that the link and your email are correct, then try again."
+        actions={[
+          { label: 'Try again', onClick: () => void learning.loadSession('due') },
+          { label: 'Back', onClick: goBackToDashboard, variant: 'outline' },
+        ]}
+      />
+    );
+  }
+
+  if (!learning.loaded) {
+    return <PageLoadingState label="Loading your cards" cards={2} />;
+  }
+
+  if (learning.isEmptySet) {
+    return (
+      <StudyMessage
+        title="This set has no cards yet"
+        body="Ask your teacher to add cards, then come back."
+        actions={[{ label: 'Back', onClick: goBackToDashboard, variant: 'outline' }]}
+      />
+    );
+  }
+
+  if (learning.isSessionComplete && learning.sessionStats.totalCards === 0) {
+    if (learning.sessionMode !== 'due') {
+      return (
+        <StudyMessage
+          title="No cards to practice"
+          body="You have no mistakes to practice right now."
+          actions={[
+            { label: 'Practice all cards', onClick: () => learning.restartSession('all') },
+            { label: 'Back', onClick: goBackToDashboard, variant: 'outline' },
+          ]}
+        />
+      );
+    }
+    return (
+      <StudyMessage
+        title="All done for today"
+        body={
+          learning.nextDueAt
+            ? `Nothing is due right now. Your next review is ${formatNextDue(learning.nextDueAt)}.`
+            : 'Nothing is due right now.'
+        }
+        note="Practice any time you like: practice does not change your review schedule."
+        actions={[
+          { label: 'Practice all cards', onClick: () => learning.restartSession('all') },
+          { label: 'Back', onClick: goBackToDashboard, variant: 'outline' },
+        ]}
+      />
+    );
+  }
+
   if (learning.isSessionComplete) {
     return (
       <SessionSummary
         stats={learning.sessionStats}
         onRestart={learning.restartSession}
         setTitle={setData.title}
-        studentEmail={setData?.student_email || learnerEmail}
+        studentEmail={dashboardEmail}
         returnTo={returnTo || undefined}
       />
     );
@@ -219,7 +318,9 @@ export default function FlashcardsLearning() {
         <div className="flex-1 flex items-center justify-center py-8">
           {learning.currentCard && (
             <FlashcardDisplay
+              key={learning.currentCard.entryKey}
               card={learning.currentCard}
+              disabled={learning.isSaving}
               onReview={learning.submitReview}
               nativeLanguage={setData.student_native_language}
             />

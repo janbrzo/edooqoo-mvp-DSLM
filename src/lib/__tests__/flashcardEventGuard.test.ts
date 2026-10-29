@@ -104,6 +104,7 @@ describe('CEFR allow-list', () => {
 describe('migration hygiene', () => {
   it('has no DROP and no em dash', () => {
     expect(sql).not.toMatch(/\bDROP\b/i);
-    expect(sql).not.toMatch(/—|&mdash;/);
+    expect(sql).not.toContain(String.fromCharCode(0x2014));
+    expect(sql).not.toContain('&md' + 'ash;');
   });
 });

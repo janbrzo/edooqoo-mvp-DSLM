@@ -30,7 +30,7 @@ export function SessionSummary({ stats, onRestart, setTitle, studentEmail, retur
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center text-2xl">🎉 Session Complete!</CardTitle>
+          <CardTitle className="text-center text-2xl">Session complete</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center">
@@ -38,14 +38,14 @@ export function SessionSummary({ stats, onRestart, setTitle, studentEmail, retur
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-green-600">{stats.correctAnswers}</div>
+            <div className="text-center p-4 bg-success/10 rounded-lg">
+              <CheckCircle2 className="w-8 h-8 text-success mx-auto mb-2" />
+              <div className="text-2xl font-bold text-success">{stats.correctAnswers}</div>
               <div className="text-sm text-muted-foreground">Correct</div>
             </div>
-            <div className="text-center p-4 bg-red-50 rounded-lg">
-              <XCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-red-600">{stats.incorrectAnswers}</div>
+            <div className="text-center p-4 bg-destructive/10 rounded-lg">
+              <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+              <div className="text-2xl font-bold text-destructive">{stats.incorrectAnswers}</div>
               <div className="text-sm text-muted-foreground">Incorrect</div>
             </div>
           </div>
@@ -55,13 +55,24 @@ export function SessionSummary({ stats, onRestart, setTitle, studentEmail, retur
             <div className="text-sm text-muted-foreground">Accuracy</div>
           </div>
 
+          {stats.practiceReviews > 0 && (
+            <p className="text-sm text-muted-foreground text-center">
+              {stats.practiceReviews === stats.reviewedCards
+                ? 'This was practice: your review schedule did not change.'
+                : `${stats.practiceReviews} of ${stats.reviewedCards} answers were practice and did not change your review schedule.`}
+            </p>
+          )}
+
           <div className="space-y-2">
             <Button onClick={() => onRestart("all")} className="w-full" size="lg">
-              🔄 Study All Again
+              Practice all cards again
             </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Practice does not change when your cards are due.
+            </p>
             {stats.incorrectAnswers > 0 && (
               <Button onClick={() => onRestart("mistakes")} className="w-full" size="lg" variant="outline">
-                📝 Study To Practice Only ({stats.incorrectAnswers})
+                Practice my mistakes ({stats.incorrectAnswers})
               </Button>
             )}
             <Button variant="outline" className="w-full" onClick={handleBackToDashboard}>

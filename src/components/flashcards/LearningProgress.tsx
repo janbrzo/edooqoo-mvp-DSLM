@@ -9,7 +9,7 @@ interface LearningProgressProps {
 }
 
 export function LearningProgress({ current, total, stats }: LearningProgressProps) {
-  const progress = (current / total) * 100;
+  const progress = total > 0 ? (Math.min(current, total) / total) * 100 : 0;
 
   return (
     <div className="space-y-3">

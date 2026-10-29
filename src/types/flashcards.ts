@@ -62,32 +62,65 @@ export type ReviewQuality = 0 | 1 | 2 | 3;
 // 2 = Good (correct with some hesitation)
 // 3 = Easy (perfect response)
 
-// Card for learning session (combined data)
+// Row returned by get_flashcard_learning_cards_by_token (one row per card,
+// progress for both directions side by side; d2_* only meaningful when the set is bidirectional)
+export interface LearningRpcRow {
+  card_id: string;
+  card_position: number;
+  front_text: string;
+  back_text: string;
+  front_example: string | null;
+  cefr_level: string | null;
+  back_type: 'translation' | 'definition' | null;
+  is_bidirectional: boolean;
+  d1_easiness_factor: number;
+  d1_repetition: number;
+  d1_interval_days: number;
+  d1_next_review_date: string | null;
+  d1_total_reviews: number;
+  d1_correct_count: number;
+  d1_incorrect_count: number;
+  d2_easiness_factor: number;
+  d2_repetition: number;
+  d2_interval_days: number;
+  d2_next_review_date: string | null;
+  d2_total_reviews: number;
+  d2_correct_count: number;
+  d2_incorrect_count: number;
+}
+
+export type LearningQueueMode = 'due' | 'all' | 'mistakes';
+
+// One entry of a study session: exactly one per (card, direction)
 export interface LearningCard {
+  entryKey: string; // `${card_id}:${direction}`
   card_id: string;
   front_text: string;
   front_example: string | null;
   back_text: string;
+  back_type: 'translation' | 'definition';
   card_position: number;
   direction: 1 | 2;
   easiness_factor: number;
   repetition: number;
   interval_days: number;
-  next_review_date: string;
+  next_review_date: string | null;
   total_reviews: number;
   correct_count: number;
   incorrect_count: number;
   cefr_level?: string | null;
   // Runtime state
-  isNew?: boolean;
-  isDueForReview?: boolean;
+  isNew: boolean;
+  isDue: boolean;
 }
 
 // Session statistics
 export interface LearningSessionStats {
   totalCards: number;
   newCards: number;
-  reviewedCards: number;
+  reviewedCards: number; // every answer given this session
+  scheduledReviews: number; // answers the server counted toward the schedule
+  practiceReviews: number; // answers given before the due date (schedule unchanged)
   correctAnswers: number;
   incorrectAnswers: number;
   averageEasiness: number;

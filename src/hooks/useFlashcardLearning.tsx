@@ -1,233 +1,185 @@
-import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { LearningCard, ReviewQuality, LearningSessionStats } from '@/types/flashcards';
-import { devLog } from '@/utils/logger';
+import type { LearningCard, LearningQueueMode, LearningSessionStats } from '@/types/flashcards';
+import { devError, devLog } from '@/utils/logger';
+import { buildSessionQueue, earliestNextReview, expandEntries } from '@/lib/flashcards/queue';
+import { fetchLearningCards, saveFlashcardReview } from '@/lib/flashcards/learningRpc';
+import {
+  clampResponseTimeMs,
+  normalizeLearnerEmail,
+  stateFromSaveResult,
+  type SaveQuality,
+} from '@/lib/flashcards/reviewState';
 
-// SM-2 Algorithm Implementation
-function calculateSM2(
-  quality: ReviewQuality,
-  repetition: number,
-  easinessFactor: number,
-  intervalDays: number
-): { newRepetition: number; newEF: number; newInterval: number } {
-  let newEF = easinessFactor;
-  let newRepetition = repetition;
-  let newInterval = intervalDays;
+const emptyStats: LearningSessionStats = {
+  totalCards: 0,
+  newCards: 0,
+  reviewedCards: 0,
+  scheduledReviews: 0,
+  practiceReviews: 0,
+  correctAnswers: 0,
+  incorrectAnswers: 0,
+  averageEasiness: 2.5,
+};
 
-  if (quality < 2) {
-    // Failed - reset
-    newRepetition = 0;
-    newInterval = 1;
-  } else {
-    // Success
-    if (repetition === 0) {
-      newInterval = 1;
-    } else if (repetition === 1) {
-      newInterval = 6;
-    } else {
-      newInterval = Math.round(intervalDays * easinessFactor);
-    }
-    newRepetition = repetition + 1;
-  }
-
-  // Update easiness factor
-  newEF = easinessFactor + (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02));
-  newEF = Math.max(1.3, newEF); // Minimum EF is 1.3
-
-  return { newRepetition, newEF, newInterval };
-}
-
-export const useFlashcardLearning = (setId: string, learnerEmail: string) => {
+/**
+ * Token-scoped flashcard study session. All persistence goes through
+ * get_flashcard_learning_cards_by_token / save_flashcard_review_by_token; the server owns the
+ * schedule and decides whether an answer is scheduled or practice.
+ */
+export const useFlashcardLearning = (shareToken: string, learnerEmail: string) => {
+  const email = normalizeLearnerEmail(learnerEmail);
   const [cards, setCards] = useState<LearningCard[]>([]);
+  const [allEntries, setAllEntries] = useState<LearningCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
-  // PROBLEM 4 FIX: Track response time for flashcards
-  const [cardShownAt, setCardShownAt] = useState<number>(Date.now());
-  const [pausedTimeMs, setPausedTimeMs] = useState(0);
-  const [isTabActive, setIsTabActive] = useState(true);
-  const [sessionStats, setSessionStats] = useState<LearningSessionStats>({
-    totalCards: 0,
-    newCards: 0,
-    reviewedCards: 0,
-    correctAnswers: 0,
-    incorrectAnswers: 0,
-    averageEasiness: 2.5,
-  });
+  const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [sessionMode, setSessionMode] = useState<LearningQueueMode>('due');
+  const [sessionStats, setSessionStats] = useState<LearningSessionStats>(emptyStats);
   const { toast } = useToast();
 
-  // PROBLEM 4 FIX: Pause timer when tab is inactive
+  // Response-time tracking (refs so the visibility handler never sees stale values)
+  const cardShownAtRef = useRef<number>(Date.now());
+  const pausedMsRef = useRef(0);
+  const tabActiveRef = useRef(true);
+  const inFlightRef = useRef(false);
+
+  const resetTimer = useCallback(() => {
+    cardShownAtRef.current = Date.now();
+    pausedMsRef.current = 0;
+    tabActiveRef.current = typeof document === 'undefined' ? true : !document.hidden;
+  }, []);
+
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setPausedTimeMs(prev => prev + (Date.now() - cardShownAt));
-        setIsTabActive(false);
+        if (tabActiveRef.current) pausedMsRef.current += Date.now() - cardShownAtRef.current;
+        tabActiveRef.current = false;
       } else {
-        setCardShownAt(Date.now());
-        setIsTabActive(true);
+        cardShownAtRef.current = Date.now();
+        tabActiveRef.current = true;
       }
     };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [cardShownAt]);
+  }, []);
 
-  const loadSession = useCallback(async (includeAll = false, mistakesOnly = false) => {
-    if (!setId || !learnerEmail) return;
-
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.rpc('get_flashcard_cards_for_learning', {
-        p_set_id: setId,
-        p_learner_identifier: learnerEmail,
-      });
-
-      if (error) throw error;
-
-      let learningCards: LearningCard[] = (data || []).map((card: any) => ({
-        ...card,
-        isNew: card.total_reviews === 0,
-        isDueForReview: new Date(card.next_review_date) <= new Date(),
-      }));
-
-      // Filter logic
-      if (mistakesOnly) {
-        // Only cards with more incorrect than correct answers
-        learningCards = learningCards.filter(card => 
-          card.incorrect_count > card.correct_count || card.easiness_factor < 2.0
-        );
-      } else if (!includeAll) {
-        // Default: new or due for review
-        learningCards = learningCards.filter(card => card.isNew || card.isDueForReview);
+  const loadSession = useCallback(
+    async (mode: LearningQueueMode = 'due') => {
+      if (!shareToken || !email) return;
+      setLoading(true);
+      setLoadError(false);
+      try {
+        const rows = await fetchLearningCards(shareToken, email);
+        const now = new Date();
+        const queue = buildSessionQueue(rows, { mode, now });
+        setAllEntries(expandEntries(rows, now));
+        setCards(queue);
+        setCurrentIndex(0);
+        setSessionMode(mode);
+        setSessionStats({
+          ...emptyStats,
+          totalCards: queue.length,
+          newCards: queue.filter((c) => c.isNew).length,
+        });
+        // The timer starts when the first card is shown, not when the e-mail was typed.
+        resetTimer();
+        setLoaded(true);
+      } catch (error) {
+        devError('[Flashcard] Error loading learning session:', error);
+        setLoadError(true);
+        toast({
+          title: 'Error',
+          description: 'Failed to load learning session',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
-      // else: includeAll = true means load all cards
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [shareToken, email, resetTimer],
+  );
 
-      // Fetch set direction flag via SECURITY DEFINER RPC (works for anon share links too)
-      const { data: isBidirectional } = await supabase.rpc('get_flashcard_set_is_bidirectional', {
-        p_set_id: setId,
-      });
+  const submitReview = useCallback(
+    async (entryKey: string, quality: SaveQuality): Promise<boolean> => {
+      if (inFlightRef.current) return false;
+      const index = cards.findIndex((c) => c.entryKey === entryKey);
+      if (index < 0 || !shareToken || !email) return false;
+      const entry = cards[index];
 
-      // Duplicate cards for bidirectional (direction 1 and 2)
-      if (isBidirectional) {
-        const reversedCards = learningCards.map(card => ({
-          ...card,
-          direction: 2 as const, // Mark as reversed
+      inFlightRef.current = true;
+      setIsSaving(true);
+      const activeTime = tabActiveRef.current ? Date.now() - cardShownAtRef.current : 0;
+      const responseTimeMs = clampResponseTimeMs(pausedMsRef.current + activeTime);
+      devLog('[Flashcard] Response time:', responseTimeMs, 'ms');
+
+      try {
+        const result = await saveFlashcardReview({
+          shareToken,
+          email,
+          cardId: entry.card_id,
+          direction: entry.direction,
+          quality,
+          responseTimeMs,
+        });
+        const state = stateFromSaveResult(result);
+        const patch = (list: LearningCard[]) =>
+          list.map((c) => (c.entryKey === entryKey ? { ...c, ...state, isDue: false } : c));
+        setCards(patch);
+        setAllEntries(patch);
+
+        setSessionStats((prev) => ({
+          ...prev,
+          reviewedCards: prev.reviewedCards + 1,
+          scheduledReviews: prev.scheduledReviews + (result.counted ? 1 : 0),
+          practiceReviews: prev.practiceReviews + (result.counted ? 0 : 1),
+          correctAnswers: quality >= 2 ? prev.correctAnswers + 1 : prev.correctAnswers,
+          incorrectAnswers: quality < 2 ? prev.incorrectAnswers + 1 : prev.incorrectAnswers,
+          averageEasiness:
+            (prev.averageEasiness * prev.reviewedCards + result.easiness_factor) / (prev.reviewedCards + 1),
         }));
-        learningCards = [...learningCards, ...reversedCards];
+
+        setCurrentIndex((prev) => Math.max(prev, index + 1));
+        resetTimer();
+        return true;
+      } catch (error) {
+        // Do not advance: the learner can retry the same card.
+        devError('[Flashcard] Error submitting review:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to save your progress. Please try again.',
+          variant: 'destructive',
+        });
+        return false;
+      } finally {
+        inFlightRef.current = false;
+        setIsSaving(false);
       }
-
-      // Shuffle cards randomly (Problem 8)
-      const shuffledCards = learningCards.sort(() => Math.random() - 0.5);
-
-      setCards(shuffledCards);
-      setCurrentIndex(0);
-      setSessionStats({
-        totalCards: shuffledCards.length,
-        newCards: shuffledCards.filter(c => c.isNew).length,
-        reviewedCards: 0,
-        correctAnswers: 0,
-        incorrectAnswers: 0,
-        averageEasiness: 2.5,
-      });
-    } catch (error: any) {
-      console.error('Error loading learning session:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load learning session',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [setId, learnerEmail]);
-
-  const submitReview = async (cardId: string, quality: ReviewQuality) => {
-    const card = cards.find(c => c.card_id === cardId);
-    if (!card) return;
-
-    // PROBLEM 4 FIX: Calculate response time (excludes paused time)
-    const activeTime = isTabActive ? (Date.now() - cardShownAt) : 0;
-    const responseTimeMs = pausedTimeMs + activeTime;
-    devLog('[Flashcard] Response time:', responseTimeMs, 'ms');
-
-    try {
-      const { newRepetition, newEF, newInterval } = calculateSM2(
-        quality,
-        card.repetition,
-        card.easiness_factor,
-        card.interval_days
-      );
-
-      const nextReviewDate = new Date();
-      nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
-
-      // v6.9.87: learners no longer write to flashcard_progress directly.
-      // The SECURITY DEFINER RPC scopes the row to the learner's own identifier.
-      const { error } = await supabase.rpc('save_flashcard_progress', {
-        p_card_id: cardId,
-        p_set_id: setId,
-        p_learner_identifier: learnerEmail,
-        p_direction: card.direction,
-        p_easiness_factor: newEF,
-        p_repetition: newRepetition,
-        p_interval_days: newInterval,
-        p_next_review_date: nextReviewDate.toISOString(),
-        p_total_reviews: card.total_reviews + 1,
-        p_correct_count: quality >= 2 ? card.correct_count + 1 : card.correct_count,
-        p_incorrect_count: quality < 2 ? card.incorrect_count + 1 : card.incorrect_count,
-        p_last_response_time_ms: responseTimeMs,
-        p_last_quality_rating: quality, // 0=Again, 2=I Know This
-      } as any);
-
-      if (error) throw error;
-
-      // Update session stats
-      setSessionStats(prev => ({
-        ...prev,
-        reviewedCards: prev.reviewedCards + 1,
-        correctAnswers: quality >= 2 ? prev.correctAnswers + 1 : prev.correctAnswers,
-        incorrectAnswers: quality < 2 ? prev.incorrectAnswers + 1 : prev.incorrectAnswers,
-        averageEasiness: ((prev.averageEasiness * prev.reviewedCards) + newEF) / (prev.reviewedCards + 1),
-      }));
-
-      // Move to next card and reset timer
-      setCurrentIndex(prev => prev + 1);
-      // PROBLEM 4 FIX: Reset timer for next card
-      setCardShownAt(Date.now());
-      setPausedTimeMs(0);
-      setIsTabActive(true);
-    } catch (error: any) {
-      console.error('Error submitting review:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save your progress',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const getCurrentCard = () => {
-    if (currentIndex >= cards.length) return null;
-    return cards[currentIndex];
-  };
-
-  const isSessionComplete = () => currentIndex >= cards.length;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cards, shareToken, email, resetTimer],
+  );
 
   const restartSession = (mode: 'all' | 'mistakes' = 'all') => {
-    if (mode === 'all') {
-      loadSession(true, false); // includeAll=true, mistakesOnly=false
-    } else {
-      loadSession(false, true); // includeAll=false, mistakesOnly=true
-    }
+    void loadSession(mode);
   };
 
   return {
     cards,
-    currentCard: getCurrentCard(),
+    currentCard: currentIndex < cards.length ? cards[currentIndex] : null,
     currentIndex,
     loading,
+    loaded,
+    loadError,
+    isSaving,
+    sessionMode,
     sessionStats,
-    isSessionComplete: isSessionComplete(),
+    isEmptySet: loaded && allEntries.length === 0,
+    nextDueAt: loaded ? earliestNextReview(allEntries, new Date()) : null,
+    isSessionComplete: loaded && !loading && currentIndex >= cards.length,
     loadSession,
     submitReview,
     restartSession,
