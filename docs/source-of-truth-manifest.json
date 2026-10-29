@@ -47454,11 +47454,15 @@
           "userId"
         ],
         "visibleResponseFields": [
+          "behaving_as",
+          "engine_gate_warning",
+          "engine_quality",
           "error",
           "errorMessage",
           "errorType",
           "exercises",
           "fullPrompt",
+          "parse_recovered_early_warning",
           "success",
           "timestamp"
         ],
@@ -47478,6 +47482,7 @@
           ]
         },
         "environmentVariables": [
+          "ENGINE_GATE_MODE",
           "GEMINI_API_KEY",
           "OPENAI_API_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
@@ -61720,6 +61725,12 @@
         "name": "DEV",
         "callsites": [
           "src/utils/logger.ts"
+        ]
+      },
+      {
+        "name": "ENGINE_GATE_MODE",
+        "callsites": [
+          "supabase/functions/generateWorksheet/gate.ts"
         ]
       },
       {
