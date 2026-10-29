@@ -3,6 +3,7 @@ import { hubLandingPath } from '@/lib/studentHub/hubLandingPath';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
 import { StudentHubStats } from '@/components/student-hub/StudentHubStats';
+import { StudentHubGoalsCard } from '@/components/student-hub/StudentHubGoalsCard';
 import { useStudentHubData, getSavedHubEmail } from '@/hooks/useStudentHubData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -59,6 +60,9 @@ const StudentHubDashboard = () => {
 
         {/* Stats */}
         <StudentHubStats stats={data.stats} nextLesson={nextLesson} teacherToken={teacherToken!} worksheetsCount={data.sharedWorksheets?.length || 0} />
+
+        {/* Goals (Pillar 3.1) */}
+        <StudentHubGoalsCard goals={data.goals ?? []} />
 
         {/* Next Lesson */}
         {nextLesson ? (

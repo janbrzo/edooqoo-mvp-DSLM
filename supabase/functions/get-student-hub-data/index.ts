@@ -554,6 +554,32 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const studentMeetingLink = studentSettingsData?.default_meeting_link || null;
 
+    // Pillar 3.1: learner-visible goals. Only goals the teacher owns that are
+    // live (not deleted/archived); auto-suggested Welcome Test goals stay
+    // hidden until the teacher accepts them.
+    const { data: goalRows } = await supabase
+      .from('student_progress_goals')
+      .select('id, title, description, goal_type, target_date, is_achieved, achieved_at, manual_progress_pct, source, accepted_at, display_order')
+      .eq('student_id', studentId)
+      .eq('teacher_id', teacherId)
+      .is('deleted_at', null)
+      .is('archived_at', null)
+      .order('display_order', { ascending: true })
+      .limit(20);
+    const hubGoals = (goalRows || [])
+      .filter((g: any) => (g.title || '').trim() !== '' && !(g.source === 'welcome_test_auto' && !g.accepted_at))
+      .map((g: any) => ({
+        id: g.id,
+        title: g.title,
+        description: g.description ?? null,
+        goal_type: g.goal_type,
+        target_date: g.target_date ?? null,
+        is_achieved: !!g.is_achieved,
+        achieved_at: g.achieved_at ?? null,
+        manual_progress_pct: g.manual_progress_pct ?? null,
+        display_order: g.display_order ?? 0,
+      }));
+
     return new Response(JSON.stringify({
       teacherName,
       teacherEmail: teacherProfile?.email || null,
@@ -568,6 +594,7 @@ Deno.serve(async (req) => {
       upcomingLessons: enrichedLessons,
       stats,
       defaultMeetingLink: studentMeetingLink || null,
+      goals: hubGoals,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
