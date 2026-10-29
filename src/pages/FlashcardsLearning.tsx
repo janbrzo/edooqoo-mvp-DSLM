@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PageLoadingState } from '@/components/ui/PageLoadingState';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -11,13 +11,15 @@ import { FlashcardDisplay } from '@/components/flashcards/FlashcardDisplay';
 import { LearningProgress } from '@/components/flashcards/LearningProgress';
 import { SessionSummary } from '@/components/flashcards/SessionSummary';
 import { useFlashcardLearning } from '@/hooks/useFlashcardLearning';
+import { safeReturnTo } from '@/lib/flashcards/safeReturnTo';
 
 export default function FlashcardsLearning() {
   const { token } = useParams<{ token: string }>();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') || 'study';
   const emailFromUrl = searchParams.get('email');
-  const returnTo = searchParams.get('returnTo');
+  const navigate = useNavigate();
+  const returnTo = safeReturnTo(searchParams.get('returnTo'), '') || null;
   const [setData, setSetData] = useState<any>(null);
   const [learnerEmail, setLearnerEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
@@ -82,17 +84,12 @@ export default function FlashcardsLearning() {
   };
 
   const handleQuit = () => {
-    if (returnTo) {
-      window.location.href = returnTo;
-      return;
-    }
-    // Fallback
-    window.location.href = '/';
+    navigate(returnTo ?? '/');
   };
 
   const getDashboardUrl = () => {
     if (returnTo && returnTo.includes('/flashcards')) {
-      return returnTo.replace(/\/flashcards$/, '');
+      return safeReturnTo(returnTo.replace(/\/flashcards$/, ''), '') || null;
     }
     return null;
   };
@@ -160,7 +157,7 @@ export default function FlashcardsLearning() {
             <h1 className="text-3xl font-bold">{setData.title}</h1>
             <div className="flex items-center gap-2">
               {getDashboardUrl() && (
-                <Button variant="outline" onClick={() => window.location.href = getDashboardUrl()!}>
+                <Button variant="outline" onClick={() => navigate(getDashboardUrl()!)}>
                   <X className="w-4 h-4 mr-2" /> Back to Dashboard
                 </Button>
               )}

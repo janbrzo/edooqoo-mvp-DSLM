@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { safeReturnTo } from "@/lib/flashcards/safeReturnTo";
 import { LearningSessionStats } from "@/types/flashcards";
 import { CheckCircle2, XCircle } from "lucide-react";
 
@@ -17,8 +18,9 @@ export function SessionSummary({ stats, onRestart, setTitle, studentEmail, retur
   const accuracy = stats.reviewedCards > 0 ? Math.round((stats.correctAnswers / stats.reviewedCards) * 100) : 0;
 
   const handleBackToDashboard = () => {
-    if (returnTo) {
-      navigate(returnTo);
+    const target = safeReturnTo(returnTo, '');
+    if (target) {
+      navigate(target);
     } else {
       navigate(`/my-flashcards/${encodeURIComponent(studentEmail)}`);
     }
