@@ -26,7 +26,7 @@ describe('flashcard security guards migration', () => {
 
   it('has no destructive statements, no em dash and no apostrophes in comments', () => {
     expect(sql).not.toMatch(/\b(DROP|DELETE|TRUNCATE)\b/i);
-    expect(sql).not.toContain('—');
+    expect(sql).not.toContain(String.fromCharCode(0x2014));
     for (const line of sql.split('\n')) if (/^\s*--/.test(line)) expect(line).not.toContain("'");
   });
 
