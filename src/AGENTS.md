@@ -28,3 +28,4 @@ One rule per entry with a one-line why. Moved from the root AGENTS.md.
 - The profile billing guard trigger tests `current_user = 'authenticated'`, never `auth.role()` — because the JWT role is still `authenticated` inside SECURITY DEFINER billing functions like `consume_token`, which then could not charge tokens.
 - Every AI model id used in `supabase/functions/**` is registered in `supabase/functions/_shared/modelRegistry.ts` (enforced by `src/lib/__tests__/modelAudit.test.ts`) — because `audit-llm-models` monitors and advises only on registered models.
 
+- Student Hub goals are exposed only by `get-student-hub-data` (live, same-teacher goals; unaccepted `welcome_test_auto` hidden) and shaped only by the pure `src/lib/studentHub/hubGoals.ts`, which never infers progress beyond the teacher's saved value — because learners must see only confirmed goals and no invented mastery.
