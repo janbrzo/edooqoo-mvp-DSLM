@@ -191,6 +191,21 @@ export function getOfficialExerciseName(type: string): string {
  * Strips markdown, BOM, control characters, smart quotes
  */
 export function extractJSONString(raw: string): string {
+  return normalizeCurlyQuotes(extractJSONStringRaw(raw));
+}
+
+/** Smart double quotes become `"`, smart apostrophes become `'` (can change the JSON structure). */
+export function normalizeCurlyQuotes(content: string): string {
+  return content
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
+}
+
+/**
+ * Same extraction as extractJSONString but leaves curly quotes alone, so valid
+ * JSON that contains typographic quotes parses untouched.
+ */
+export function extractJSONStringRaw(raw: string): string {
   let content = raw;
   
   // Remove BOM
@@ -199,10 +214,6 @@ export function extractJSONString(raw: string): string {
   // Remove markdown code fences
   content = content.replace(/^```json?\s*/im, '');
   content = content.replace(/```\s*$/im, '');
-  
-  // Normalize smart quotes to standard quotes
-  content = content.replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"');
-  content = content.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
   
   // Remove control characters (except newline, tab, carriage return)
   content = content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
@@ -296,16 +307,27 @@ export type LocalRepairStep = 'none' | 'deterministic' | 'escape-scan' | 'trunca
  * Same pipeline and same result as parseAIResponse, plus the local repair step
  * that succeeded. The repaired output is identical; only the report is added.
  */
-export function parseAIResponseDetailed(jsonContent: string): { data: any; step: LocalRepairStep } {
-  // Layer 1: Extract clean JSON
-  const extracted = extractJSONString(jsonContent);
+export function parseAIResponseDetailed(jsonContent: string): { data: any; step: LocalRepairStep; curly: string[] } {
+  // Layer 1: Extract clean JSON, curly quotes untouched
+  const extractedRaw = extractJSONStringRaw(jsonContent);
   let firstErrorPosition = -1;
-  
-  // Attempt 1: Parse extracted content directly
+
+  // Attempt 0: valid JSON with typographic quotes is kept exactly as the model wrote it
+  try {
+    const result = JSON.parse(extractedRaw);
+    console.log('✅ JSON parsed successfully on first attempt');
+    return { data: result, step: 'none', curly: [] };
+  } catch (_) { /* normalise the quotes and go through the repair layers */ }
+
+  // Only a failed parse pays for the curly-quote rewrite (as it always did).
+  const curly = detectCurlyQuotes(extractedRaw);
+  const extracted = normalizeCurlyQuotes(extractedRaw);
+
+  // Attempt 1: Parse the normalised content
   try {
     const result = JSON.parse(extracted);
     console.log('✅ JSON parsed successfully on first attempt');
-    return { data: result, step: 'none' };
+    return { data: result, step: 'none', curly };
   } catch (firstError) {
     console.warn('⚠️ json_parse_initial_failed:', (firstError as Error).message);
     const m = /position (\d+)/.exec((firstError as Error).message || '');
@@ -317,7 +339,7 @@ export function parseAIResponseDetailed(jsonContent: string): { data: any; step:
   try {
     const result = JSON.parse(repaired);
     console.log('✅ json_repair_deterministic_succeeded');
-    return { data: result, step: 'deterministic' };
+    return { data: result, step: 'deterministic', curly };
   } catch (secondError) {
     console.warn('⚠️ json_repair_deterministic_failed:', (secondError as Error).message);
   }
@@ -330,7 +352,7 @@ export function parseAIResponseDetailed(jsonContent: string): { data: any; step:
     try {
       const result = JSON.parse(escaped);
       console.log('✅ json_repair_layer: escape-scan');
-      return { data: result, step: 'escape-scan' };
+      return { data: result, step: 'escape-scan', curly };
     } catch (thirdError) {
       console.warn('⚠️ json_repair_escape_scan_failed:', (thirdError as Error).message);
     }
@@ -345,7 +367,7 @@ export function parseAIResponseDetailed(jsonContent: string): { data: any; step:
       const result = JSON.parse(salvaged);
       const count = Array.isArray(result?.exercises) ? result.exercises.length : 0;
       console.log(`✅ json_repair_layer: truncate (${count} exercises salvaged)`);
-      return { data: result, step: 'truncate' };
+      return { data: result, step: 'truncate', curly };
     } catch { /* try next candidate */ }
   }
 

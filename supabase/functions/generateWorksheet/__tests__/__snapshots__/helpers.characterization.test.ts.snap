@@ -347,7 +347,7 @@ exports[`parseAIResponse > smart quotes inside a value corrupt valid JSON and ar
   "ok": {
     "exercises": [
       {
-        "title": "He said "hi"",
+        "title": "He said “hi”",
         "type": "reading",
       },
     ],

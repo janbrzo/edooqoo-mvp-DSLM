@@ -2,6 +2,7 @@
 // Geolocation utility with improved IP parsing, reliable services, and database cache
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import { ENGINE_BUDGETS, withCallTimeout } from './engineBudgets.ts';
 
 export async function getGeolocation(ip: string): Promise<{ country?: string; city?: string }> {
   try {
@@ -142,11 +143,12 @@ function parseIP(ipString: string): string | null {
 }
 
 async function tryIPAPIService(ip: string): Promise<{ country?: string; city?: string }> {
-  const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+  const response = await withCallTimeout(ENGINE_BUDGETS.geolocationFetchMs, (signal) => fetch(`https://ipapi.co/${ip}/json/`, {
     headers: {
       'User-Agent': 'Supabase-Edge-Function/1.0'
-    }
-  });
+    },
+    signal
+  }));
   
   if (!response.ok) {
     throw new Error(`ipapi.co returned status: ${response.status}`);
@@ -162,11 +164,12 @@ async function tryIPAPIService(ip: string): Promise<{ country?: string; city?: s
 }
 
 async function tryFreeGeoIPService(ip: string): Promise<{ country?: string; city?: string }> {
-  const response = await fetch(`https://freegeoip.app/json/${ip}`, {
+  const response = await withCallTimeout(ENGINE_BUDGETS.geolocationFetchMs, (signal) => fetch(`https://freegeoip.app/json/${ip}`, {
     headers: {
       'User-Agent': 'Supabase-Edge-Function/1.0'
-    }
-  });
+    },
+    signal
+  }));
   
   if (!response.ok) {
     throw new Error(`freegeoip.app returned status: ${response.status}`);

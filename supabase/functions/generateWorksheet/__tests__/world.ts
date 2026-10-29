@@ -35,6 +35,8 @@ export interface GeminiStreamScript {
   chunks: string[];
   /** Thrown from the stream after all chunks were delivered. */
   throwAfter?: Error;
+  /** Reported by the last chunk (candidates[0].finishReason). */
+  finishReason?: string;
   /** The stream yields nothing until this promise settles. */
   gate?: Promise<void>;
 }
@@ -286,7 +288,13 @@ export const modules = {
               response: Promise.resolve({}),
               stream: (async function* () {
                 if (script.gate) await script.gate;
-                for (const c of script.chunks) yield { text: () => c };
+                for (let i = 0; i < script.chunks.length; i++) {
+                  const c = script.chunks[i];
+                  const last = i === script.chunks.length - 1;
+                  yield last && script.finishReason
+                    ? { text: () => c, candidates: [{ finishReason: script.finishReason }] }
+                    : { text: () => c };
+                }
                 if (script.throwAfter) throw script.throwAfter;
               })(),
             };
