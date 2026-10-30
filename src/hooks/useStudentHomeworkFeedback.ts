@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { fetchStudentReview, type StudentReview } from '@/lib/homework/reviewForStudent';
 import { homeworkState } from '@/lib/homework/reviewState';
 import type { HubHomework } from '@/lib/studentHub/homeworkLifecycle';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 export interface HomeworkFeedbackScope {
   teacherToken: string;
@@ -15,6 +16,7 @@ type FeedbackResult =
 
 /** Lazy authorized read. A changed scope hides the old result before the next effect runs. */
 export function useStudentHomeworkFeedback(scope: HomeworkFeedbackScope | null) {
+  const { isDemoMode } = useDemoContext();
   const [result, setResult] = useState<FeedbackResult | null>(null);
   const [attempt, setAttempt] = useState(0);
   const token = scope?.homework.share_token ?? '';
@@ -22,7 +24,7 @@ export function useStudentHomeworkFeedback(scope: HomeworkFeedbackScope | null) 
   const teacherToken = scope?.teacherToken ?? '';
   const homeworkId = scope?.homework.id ?? '';
   const reviewedAt = scope?.homework.reviewed_at ?? '';
-  const eligible = !!scope && localStorage.getItem('edooqoo_demo_mode') !== 'true' && homeworkState(scope.homework) === 'reviewed';
+  const eligible = !!scope && !isDemoMode && localStorage.getItem('edooqoo_demo_mode') !== 'true' && homeworkState(scope.homework) === 'reviewed';
   const key = eligible && token && email && teacherToken && homeworkId && reviewedAt
     ? JSON.stringify([teacherToken, email, homeworkId, token, reviewedAt]) : '';
 
@@ -35,12 +37,12 @@ export function useStudentHomeworkFeedback(scope: HomeworkFeedbackScope | null) 
     setResult({ key, status: 'loading', review: null });
     fetchStudentReview(token, email)
       .then(review => {
-        if (!cancelled) setResult(review
+        if (!cancelled && localStorage.getItem('edooqoo_demo_mode') !== 'true') setResult(review
           ? { key, status: 'ready', review }
           : { key, status: 'unavailable', review: null });
       })
       .catch(() => {
-        if (!cancelled) setResult({ key, status: 'error', review: null });
+        if (!cancelled && localStorage.getItem('edooqoo_demo_mode') !== 'true') setResult({ key, status: 'error', review: null });
       });
     return () => { cancelled = true; };
   }, [key, token, email, attempt]);
@@ -49,6 +51,6 @@ export function useStudentHomeworkFeedback(scope: HomeworkFeedbackScope | null) 
     setResult(null);
     setAttempt(value => value + 1);
   }, []);
-  const current = key && result?.key === key ? result : null;
+  const current = key && localStorage.getItem('edooqoo_demo_mode') !== 'true' && result?.key === key ? result : null;
   return { status: current?.status ?? (key ? 'loading' : 'unavailable'), review: current?.review ?? null, retry };
 }

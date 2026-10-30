@@ -6,7 +6,8 @@ import { useStudentHubData } from '@/hooks/useStudentHubData';
 import { HomeworkFeedbackModal } from '@/components/student-hub/HomeworkFeedbackModal';
 import { StudentHubHomeworkRow } from '@/components/student-hub/StudentHubHomeworkRow';
 
-const boundary = vi.hoisted(() => ({ rpc: vi.fn(), invoke: vi.fn() }));
+const boundary = vi.hoisted(() => ({ rpc: vi.fn(), invoke: vi.fn(), demo: false }));
+vi.mock('@/contexts/DemoContext', () => ({ useDemoContext: () => ({ isDemoMode: boundary.demo }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: boundary.rpc, functions: { invoke: boundary.invoke } } }));
 vi.mock('@/components/ui/dialog', () => ({
   Dialog: ({ open, children }: { open: boolean; children: React.ReactNode }) => open ? <div>{children}</div> : null,
@@ -42,6 +43,10 @@ const scope: HomeworkFeedbackScope = {
 const raw: { comments: Array<{ exercise_index: number; comment_text: string }>; verdicts: Record<string, Record<string, string>> } = {
   comments: [{ exercise_index: 0, comment_text: 'Use a clearer opening.' }], verdicts: { '0': { '1': 'wrong' } },
 };
+const hubPayload = {
+  studentName: 'Learner A', studentId: 'test-student', studentEmail: scope.email, teacherName: 'Test Teacher',
+  homeworks: [scope.homework], upcomingLessons: [], flashcardSets: [], sharedWorksheets: [], stats: {},
+};
 let renderer: ReactTestRenderer | undefined;
 let feedback: ReturnType<typeof useStudentHomeworkFeedback> | undefined;
 let hub: ReturnType<typeof useStudentHubData> | undefined;
@@ -52,10 +57,11 @@ async function update(child: React.ReactElement) { await act(async () => { rende
 
 beforeEach(() => {
   vi.clearAllMocks();
+  boundary.demo = false;
   vi.stubGlobal('localStorage', storage()); vi.stubGlobal('sessionStorage', storage());
   feedback = undefined; hub = undefined;
   boundary.rpc.mockResolvedValue({ data: raw, error: null });
-  boundary.invoke.mockResolvedValue({ data: { studentName: 'Learner A', studentEmail: scope.email, homeworks: [scope.homework] }, error: null });
+  boundary.invoke.mockResolvedValue({ data: hubPayload, error: null });
 });
 afterEach(async () => { await act(async () => renderer?.unmount()); renderer = undefined; vi.unstubAllGlobals(); });
 
@@ -148,6 +154,13 @@ describe('Pillar 3 feedback controls and read-only handoff', () => {
 });
 
 describe('Pillar 3 Hub identity safety', () => {
+  it.each([null, {}, { ...hubPayload, homeworks: {} }, { ...hubPayload, studentEmail: 42 }, { ...hubPayload, homeworks: [{}] }])('rejects malformed Hub responses without exposing data: %j', async data => {
+    boundary.invoke.mockResolvedValueOnce({ data, error: null });
+    await mount(<HubProbe />);
+    expect(hub?.data).toBeNull(); expect(hub?.error).toBe('Invalid Hub response. Please try again.');
+    await act(async () => { await hub?.refetch(); });
+    expect(hub?.data?.studentName).toBe('Learner A');
+  });
   it('clears old learner data and rejects out-of-order Hub responses', async () => {
     await mount(<HubProbe />);
     expect(hub?.data?.studentName).toBe('Learner A');
@@ -157,8 +170,8 @@ describe('Pillar 3 Hub identity safety', () => {
     await update(<HubProbe token="teacher-b" />);
     expect(hub?.data).toBeNull();
     await update(<HubProbe token="teacher-c" />);
-    await act(async () => current.resolve({ data: { studentName: 'Learner C' }, error: null }));
-    await act(async () => old.resolve({ data: { studentName: 'Learner B' }, error: null }));
+    await act(async () => current.resolve({ data: { ...hubPayload, studentName: 'Learner C' }, error: null }));
+    await act(async () => old.resolve({ data: { ...hubPayload, studentName: 'Learner B' }, error: null }));
     expect(hub?.data?.studentName).toBe('Learner C');
   });
   it('failed password proof clears both data and stored session on refetch', async () => {
@@ -180,5 +193,23 @@ describe('Pillar 3 Hub identity safety', () => {
     await mount(<HubProbe token="demo-teacher" />);
     await act(async () => { await hub?.refetch(); });
     expect(boundary.invoke).not.toHaveBeenCalled(); expect(hub?.data).toBeNull();
+  });
+  it('entering demo while a Hub read is pending cancels its visible result', async () => {
+    const pending = deferred<{ data: typeof hubPayload; error: null }>();
+    boundary.invoke.mockReturnValueOnce(pending.promise);
+    await mount(<HubProbe />);
+    boundary.demo = true;
+    await update(<HubProbe />);
+    await act(async () => pending.resolve({ data: hubPayload, error: null }));
+    expect(hub?.data).toBeNull(); expect(boundary.invoke).toHaveBeenCalledTimes(1);
+  });
+  it('entering demo while feedback is pending cancels the review', async () => {
+    const pending = deferred<{ data: typeof raw; error: null }>();
+    boundary.rpc.mockReturnValueOnce(pending.promise);
+    await mount(<FeedbackProbe value={scope} />);
+    boundary.demo = true;
+    await update(<FeedbackProbe value={scope} />);
+    await act(async () => pending.resolve({ data: raw, error: null }));
+    expect(feedback?.review).toBeNull(); expect(feedback?.status).toBe('unavailable');
   });
 });

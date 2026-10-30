@@ -19,12 +19,10 @@ const StudentHubHomework = () => {
   const requestedFeedback = searchParams.get('feedback');
   const email = getSavedHubEmail();
   const [filter, setFilter] = useState<HomeworkFilter>('all');
-  const [feedbackId, setFeedbackId] = useState<string | null>(null);
 
   useEffect(() => {
-    setFeedbackId(requestedFeedback);
     if (!email) navigate(hubLandingPath(teacherToken));
-  }, [teacherToken, email, navigate, requestedFeedback]);
+  }, [teacherToken, email, navigate]);
 
   const { data, loading, error, refetch } = useStudentHubData(teacherToken, email || undefined);
 
@@ -32,7 +30,7 @@ const StudentHubHomework = () => {
 
   const homeworks = data?.homeworks || [];
   const now = Date.now();
-  const feedbackHomework = !loading && !error ? homeworks.find(hw => hw.id === feedbackId && homeworkLifecycle(hw, now).canReadFeedback) : undefined;
+  const feedbackHomework = !loading && !error ? homeworks.find(hw => hw.id === requestedFeedback && homeworkLifecycle(hw, now).canReadFeedback) : undefined;
   const feedbackScope = data && teacherToken && feedbackHomework
     ? { teacherToken, email: data.studentEmail, homework: feedbackHomework } : null;
 
@@ -66,7 +64,11 @@ const StudentHubHomework = () => {
               ) : (
                 <div className="space-y-2">
                   {filterHubHomework(homeworks, item.value).map(hw => (
-                    <StudentHubHomeworkRow key={hw.id} homework={hw} now={now} onFeedback={setFeedbackId} />
+                    <StudentHubHomeworkRow key={hw.id} homework={hw} now={now} onFeedback={id => setSearchParams(previous => {
+                      const next = new URLSearchParams(previous);
+                      next.set('feedback', id);
+                      return next;
+                    })} />
                   ))}
                 </div>
               )}
@@ -74,7 +76,6 @@ const StudentHubHomework = () => {
           ))}
         </Tabs>
         <HomeworkFeedbackModal scope={feedbackScope} teacherName={data?.teacherName} onClose={() => {
-          setFeedbackId(null);
           if (requestedFeedback) setSearchParams(previous => {
             const next = new URLSearchParams(previous);
             next.delete('feedback');

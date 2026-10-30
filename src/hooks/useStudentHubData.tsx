@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { devError } from '@/utils/logger';
 import type { HubHomework } from '@/lib/studentHub/homeworkLifecycle';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 const STORAGE_KEY = 'student_hub_email';
 const TTL_DAYS = 30;
@@ -123,18 +124,20 @@ export interface StudentHubData {
 }
 
 export function useStudentHubData(token: string | undefined, email: string | undefined) {
+  const { isDemoMode } = useDemoContext();
+  const blocked = isDemoMode || localStorage.getItem('edooqoo_demo_mode') === 'true';
   const [snapshot, setSnapshot] = useState<{ key: string; data: StudentHubData } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestId = useRef(0);
-  const key = JSON.stringify([token ?? '', email?.trim() ?? '']);
+  const key = JSON.stringify([token ?? '', email?.trim() ?? '', blocked]);
   const activeKey = useRef(key);
   activeKey.current = key;
 
   const fetchData = useCallback(async () => {
     const id = ++requestId.current;
-    const isCurrent = () => requestId.current === id && activeKey.current === key;
-    if (!token || !email || localStorage.getItem('edooqoo_demo_mode') === 'true') {
+    const isCurrent = () => requestId.current === id && activeKey.current === key && localStorage.getItem('edooqoo_demo_mode') !== 'true';
+    if (!token || !email || blocked) {
       setSnapshot(null);
       setLoading(false);
       setError(null);
@@ -157,6 +160,17 @@ export function useStudentHubData(token: string | undefined, email: string | und
         throw new Error('This Hub is password-protected. Please sign in again.');
       }
       if (result?.error) throw new Error(result.error);
+      if (!result || typeof result.studentId !== 'string' || typeof result.studentEmail !== 'string' ||
+        !result.studentId.trim() || !result.studentEmail.trim() || typeof result.studentName !== 'string' ||
+        typeof result.teacherName !== 'string' || !Array.isArray(result.homeworks) ||
+        !Array.isArray(result.upcomingLessons) || !Array.isArray(result.flashcardSets) ||
+        !Array.isArray(result.sharedWorksheets) || !result.stats ||
+        !result.homeworks.every((hw: HubHomework) => hw && typeof hw.id === 'string' &&
+          typeof hw.title === 'string' && typeof hw.share_token === 'string' &&
+          typeof hw.created_at === 'string' && typeof hw.exercises_count === 'number' &&
+          typeof hw.completed_exercises_count === 'number')) {
+        throw new Error('Invalid Hub response. Please try again.');
+      }
       setSnapshot({ key, data: result });
     } catch (err: any) {
       if (!isCurrent()) return;
@@ -166,13 +180,13 @@ export function useStudentHubData(token: string | undefined, email: string | und
     } finally {
       if (isCurrent()) setLoading(false);
     }
-  }, [token, email, key]);
+  }, [token, email, key, blocked]);
 
   useEffect(() => {
     fetchData();
     return () => { requestId.current++; };
   }, [fetchData]);
 
-  const data = snapshot?.key === key ? snapshot.data : null;
+  const data = !blocked && snapshot?.key === key ? snapshot.data : null;
   return { data, loading, error, refetch: fetchData };
 }
