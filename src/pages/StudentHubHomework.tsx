@@ -1,96 +1,87 @@
 import React, { useEffect, useState } from 'react';
 import { hubLandingPath } from '@/lib/studentHub/hubLandingPath';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
 import { useStudentHubData, getSavedHubEmail } from '@/hooks/useStudentHubData';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ClipboardList, ArrowRight, Loader2 } from 'lucide-react';
-import { format, parseISO, isPast } from 'date-fns';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ClipboardList, Loader2, RotateCw } from 'lucide-react';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
-
-type Filter = 'all' | 'pending' | 'completed' | 'overdue';
+import { StudentHubHomeworkRow } from '@/components/student-hub/StudentHubHomeworkRow';
+import { HomeworkFeedbackModal } from '@/components/student-hub/HomeworkFeedbackModal';
+import { filterHubHomework, HOMEWORK_FILTERS, homeworkLifecycle, type HomeworkFilter } from '@/lib/studentHub/homeworkLifecycle';
 
 const StudentHubHomework = () => {
   useForceLightTheme();
   const { teacherToken } = useParams<{ teacherToken: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedFeedback = searchParams.get('feedback');
   const email = getSavedHubEmail();
-  const [filter, setFilter] = useState<Filter>('all');
+  const [filter, setFilter] = useState<HomeworkFilter>('all');
 
-  useEffect(() => { if (!email) navigate(hubLandingPath(teacherToken)); }, [email, navigate]);
+  useEffect(() => {
+    if (!email) navigate(hubLandingPath(teacherToken));
+  }, [teacherToken, email, navigate]);
 
-  const { data, loading } = useStudentHubData(teacherToken, email || undefined);
+  const { data, loading, error, refetch } = useStudentHubData(teacherToken, email || undefined);
 
   if (!email) return null;
 
   const homeworks = data?.homeworks || [];
-  const filtered = homeworks.filter(hw => {
-    if (filter === 'pending') return !hw.completed_at;
-    if (filter === 'completed') return !!hw.completed_at;
-    if (filter === 'overdue') return !hw.completed_at && hw.deadline && isPast(parseISO(hw.deadline));
-    return true;
-  });
+  const now = Date.now();
+  const feedbackHomework = !loading && !error ? homeworks.find(hw => hw.id === requestedFeedback && homeworkLifecycle(hw, now).canReadFeedback) : undefined;
+  const feedbackScope = data && teacherToken && feedbackHomework
+    ? { teacherToken, email: data.studentEmail, homework: feedbackHomework } : null;
 
   return (
     <StudentHubLayout studentName={data?.studentName} teacherName={data?.teacherName}>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2"><ClipboardList className="h-5 w-5" /> Homework</h1>
-          <p className="text-sm text-muted-foreground mt-1">All your homework assignments</p>
         </div>
 
-        {/* Filters */}
-        <div className="flex gap-1.5 flex-wrap">
-          {(['all', 'pending', 'completed', 'overdue'] as Filter[]).map(f => (
-            <Button key={f} variant={filter === f ? 'default' : 'outline'} size="sm" className="text-xs h-7 capitalize"
-              onClick={() => setFilter(f)}>
-              {f}
-            </Button>
+        <Tabs value={filter} onValueChange={value => {
+          if (HOMEWORK_FILTERS.some(item => item.value === value)) setFilter(value as HomeworkFilter);
+        }}>
+          <TabsList aria-label="Homework status" className="grid grid-cols-4 w-full sm:w-auto sm:inline-flex">
+            {HOMEWORK_FILTERS.map(item => (
+              <TabsTrigger key={item.value} value={item.value} className="text-xs px-2 sm:px-3">{item.label}</TabsTrigger>
+            ))}
+          </TabsList>
+          {HOMEWORK_FILTERS.map(item => (
+            <TabsContent key={item.value} value={item.value} className="mt-4">
+              {loading ? (
+                <div role="status" aria-label="Loading homework" className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+              ) : error || !data ? (
+                <div role="alert" className="py-12 text-center space-y-3">
+                  <p className="text-sm text-destructive">{error || 'Could not load homework.'}</p>
+                  <Button variant="outline" onClick={refetch}><RotateCw /> Try again</Button>
+                  <Button variant="ghost" onClick={() => navigate(hubLandingPath(teacherToken))}>Sign in again</Button>
+                </div>
+              ) : filterHubHomework(homeworks, item.value).length === 0 ? (
+                <p className="py-12 text-center text-muted-foreground">No homework found.</p>
+              ) : (
+                <div className="space-y-2">
+                  {filterHubHomework(homeworks, item.value).map(hw => (
+                    <StudentHubHomeworkRow key={hw.id} homework={hw} now={now} onFeedback={id => setSearchParams(previous => {
+                      const next = new URLSearchParams(previous);
+                      next.set('feedback', id);
+                      return next;
+                    })} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
           ))}
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
-        ) : filtered.length === 0 ? (
-          <Card><CardContent className="py-12 text-center text-muted-foreground">No homework found.</CardContent></Card>
-        ) : (
-          <div className="space-y-2">
-            {filtered.map(hw => {
-              const isOverdue = !hw.completed_at && hw.deadline && isPast(parseISO(hw.deadline));
-              return (
-                <Card key={hw.id} className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => window.open(`/homework/${hw.share_token}`, '_blank')}>
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex-1 space-y-1">
-                      <p className="font-medium text-sm">{hw.title}</p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {hw.source_worksheet_title && (
-                          <span className="text-xs text-muted-foreground">From: {hw.source_worksheet_title}</span>
-                        )}
-                        {hw.deadline && (
-                          <span className={`text-xs ${isOverdue ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
-                            Due: {format(parseISO(hw.deadline), 'MMM d, yyyy')}
-                          </span>
-                        )}
-                        <Badge variant={hw.completed_at ? 'default' : 'secondary'} className="text-xs">
-                          {hw.completed_at ? '✓ Completed' : `${hw.completed_exercises_count}/${hw.exercises_count} done`}
-                        </Badge>
-                        {hw.reviewed_at && <Badge variant="outline" className="text-xs">📝 Reviewed</Badge>}
-                        {isOverdue && <Badge variant="destructive" className="text-xs">Overdue</Badge>}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Assigned: {format(parseISO(hw.created_at), 'MMM d, yyyy')}
-                      </p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+        </Tabs>
+        <HomeworkFeedbackModal scope={feedbackScope} teacherName={data?.teacherName} onClose={() => {
+          if (requestedFeedback) setSearchParams(previous => {
+            const next = new URLSearchParams(previous);
+            next.delete('feedback');
+            return next;
+          }, { replace: true });
+        }} />
       </div>
     </StudentHubLayout>
   );

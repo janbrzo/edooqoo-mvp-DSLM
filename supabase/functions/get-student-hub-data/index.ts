@@ -376,7 +376,7 @@ Deno.serve(async (req) => {
     // 5. Homework assignments
     const { data: homeworks } = await supabase
       .from('homework_assignments')
-      .select('id, title, share_token, deadline, created_at, completed_at, reviewed_at, source_worksheet_id, selected_exercises')
+      .select('id, title, share_token, deadline, created_at, completed_at, reviewed_at, completed_by_teacher, source_worksheet_id, selected_exercises')
       .eq('student_id', studentId)
       .eq('teacher_id', teacherId)
       .not('share_token', 'is', null)
@@ -424,6 +424,7 @@ Deno.serve(async (req) => {
         created_at: h.created_at,
         completed_at: h.completed_at,
         reviewed_at: h.reviewed_at,
+        completed_by_teacher: h.completed_by_teacher,
         source_worksheet_title: h.source_worksheet_id ? worksheetTitleMap[h.source_worksheet_id] : null,
         exercises_count: exercises.length,
         completed_exercises_count: progress?.completed || 0,
