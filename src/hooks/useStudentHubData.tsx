@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import { devError } from '@/utils/logger';
 import type { HubHomework } from '@/lib/studentHub/homeworkLifecycle';
 
 const STORAGE_KEY = 'student_hub_email';
@@ -160,7 +160,7 @@ export function useStudentHubData(token: string | undefined, email: string | und
       setSnapshot({ key, data: result });
     } catch (err: any) {
       if (!isCurrent()) return;
-      logger.error('Error fetching hub data');
+      devError('Error fetching hub data');
       setError(err.message || 'Failed to load data');
       setSnapshot(null);
     } finally {
