@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { hubLandingPath } from '@/lib/studentHub/hubLandingPath';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
 import { useStudentHubData, getSavedHubEmail } from '@/hooks/useStudentHubData';
 import { Button } from '@/components/ui/button';
@@ -15,14 +15,16 @@ const StudentHubHomework = () => {
   useForceLightTheme();
   const { teacherToken } = useParams<{ teacherToken: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedFeedback = searchParams.get('feedback');
   const email = getSavedHubEmail();
   const [filter, setFilter] = useState<HomeworkFilter>('all');
   const [feedbackId, setFeedbackId] = useState<string | null>(null);
 
   useEffect(() => {
-    setFeedbackId(null);
+    setFeedbackId(requestedFeedback);
     if (!email) navigate(hubLandingPath(teacherToken));
-  }, [teacherToken, email, navigate]);
+  }, [teacherToken, email, navigate, requestedFeedback]);
 
   const { data, loading, error, refetch } = useStudentHubData(teacherToken, email || undefined);
 
@@ -71,7 +73,14 @@ const StudentHubHomework = () => {
             </TabsContent>
           ))}
         </Tabs>
-        <HomeworkFeedbackModal scope={feedbackScope} teacherName={data?.teacherName} onClose={() => setFeedbackId(null)} />
+        <HomeworkFeedbackModal scope={feedbackScope} teacherName={data?.teacherName} onClose={() => {
+          setFeedbackId(null);
+          if (requestedFeedback) setSearchParams(previous => {
+            const next = new URLSearchParams(previous);
+            next.delete('feedback');
+            return next;
+          }, { replace: true });
+        }} />
       </div>
     </StudentHubLayout>
   );
