@@ -119,6 +119,12 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Stage 2.4 closeout: 19 selected source-boundary cases plus 12 executable hook/demo/manual-handoff cases; removed styling-only tests, tightened the exact evidence union and verified actual bootstrap readers do not recognize the manual prefill as generation intent. Full suite: 1745 tests across 120 files passed; protected engine and root/public llms.txt (15 hashed files) unchanged, automatic build OK. Local radar fixture to anonymous form readback passed without page errors; no authenticated production certification. Independent review completed; spec: docs/ux/explainable-dslm-spec.md.
 - [ ] Pillar 2 production verification: authenticated end-to-end pass on a real account remains unavailable on external unmanaged Supabase.
 
+## AI Defensibility, Pillar 3
+
+- [x] Stage 3.1: read-only confirmed teacher goals in Student Hub; approved plan: `docs/ux/pillar3-student-teacher-workflow-plan.md`.
+- [ ] Stage 3.2: shared homework lifecycle tabs and in-hub read-only teacher feedback using the existing authorized review read.
+- [ ] Stage 3.4 for 3.2: lifecycle and runtime regression tests, boundary guards, architectural documentation, and browser verification with explicit production-access limitations.
+
 ## SEO/GEO Consolidation, Step 2
 
 - [x] Merged 63 near-duplicate pages (containment 0.65-0.93) into 5 canonical targets: /edooqoo-vs-chatgpt.html, /chatgpt-alternative-for-english-tutors.html, /ai-tools-for-private-english-tutors.html, /edooqoo-vs-twee.html, /edooqoo-vs-busyteacher.html; retired URLs 301 via CONTENT_OVERRIDES + meta-refresh stubs, dropped from sitemap, internal links pruned (Resources, GlobalFooter, citation mesh)
