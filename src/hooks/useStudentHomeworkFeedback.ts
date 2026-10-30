@@ -22,7 +22,7 @@ export function useStudentHomeworkFeedback(scope: HomeworkFeedbackScope | null) 
   const teacherToken = scope?.teacherToken ?? '';
   const homeworkId = scope?.homework.id ?? '';
   const reviewedAt = scope?.homework.reviewed_at ?? '';
-  const eligible = !!scope && homeworkState(scope.homework) === 'reviewed';
+  const eligible = !!scope && localStorage.getItem('edooqoo_demo_mode') !== 'true' && homeworkState(scope.homework) === 'reviewed';
   const key = eligible && token && email && teacherToken && homeworkId && reviewedAt
     ? JSON.stringify([teacherToken, email, homeworkId, token, reviewedAt]) : '';
 

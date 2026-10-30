@@ -39,7 +39,9 @@ const scope: HomeworkFeedbackScope = {
     exercises_count: 2, completed_exercises_count: 2,
   },
 };
-const raw = { comments: [{ exercise_index: 0, comment_text: 'Use a clearer opening.' }], verdicts: { '0': { '1': 'wrong' } } };
+const raw: { comments: Array<{ exercise_index: number; comment_text: string }>; verdicts: Record<string, Record<string, string>> } = {
+  comments: [{ exercise_index: 0, comment_text: 'Use a clearer opening.' }], verdicts: { '0': { '1': 'wrong' } },
+};
 let renderer: ReactTestRenderer | undefined;
 let feedback: ReturnType<typeof useStudentHomeworkFeedback> | undefined;
 let hub: ReturnType<typeof useStudentHubData> | undefined;
