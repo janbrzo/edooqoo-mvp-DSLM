@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
+import type { HubHomework } from '@/lib/studentHub/homeworkLifecycle';
 
 const STORAGE_KEY = 'student_hub_email';
 const TTL_DAYS = 30;
@@ -87,18 +89,7 @@ export interface StudentHubData {
     /** v6.9.72: propagated from students.native_language for the Add Card dialog. */
     student_native_language?: string | null;
   }>;
-  homeworks: Array<{
-    id: string;
-    title: string;
-    share_token: string;
-    deadline: string | null;
-    created_at: string;
-    completed_at: string | null;
-    reviewed_at: string | null;
-    source_worksheet_title: string | null;
-    exercises_count: number;
-    completed_exercises_count: number;
-  }>;
+  homeworks: HubHomework[];
   sharedWorksheets: Array<{
     id: string;
     title: string;
@@ -132,18 +123,31 @@ export interface StudentHubData {
 }
 
 export function useStudentHubData(token: string | undefined, email: string | undefined) {
-  const [data, setData] = useState<StudentHubData | null>(null);
+  const [snapshot, setSnapshot] = useState<{ key: string; data: StudentHubData } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const requestId = useRef(0);
+  const key = JSON.stringify([token ?? '', email?.trim() ?? '']);
+  const activeKey = useRef(key);
+  activeKey.current = key;
 
   const fetchData = useCallback(async () => {
-    if (!token || !email) return;
+    const id = ++requestId.current;
+    const isCurrent = () => requestId.current === id && activeKey.current === key;
+    if (!token || !email || localStorage.getItem('edooqoo_demo_mode') === 'true') {
+      setSnapshot(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
     setLoading(true);
     setError(null);
+    setSnapshot(null);
     try {
       const { data: result, error: err } = await supabase.functions.invoke('get-student-hub-data', {
         body: { token, email: email.trim(), hubSessionToken: getSavedHubSession() || undefined },
       });
+      if (!isCurrent()) return;
       if (err) throw err;
       if (result?.requiresPassword) {
         // The stored session (if any) is no longer valid for this student, 
@@ -153,19 +157,22 @@ export function useStudentHubData(token: string | undefined, email: string | und
         throw new Error('This Hub is password-protected. Please sign in again.');
       }
       if (result?.error) throw new Error(result.error);
-      setData(result);
+      setSnapshot({ key, data: result });
     } catch (err: any) {
-      console.error('Error fetching hub data:', err);
+      if (!isCurrent()) return;
+      logger.error('Error fetching hub data');
       setError(err.message || 'Failed to load data');
-      setData(null);
+      setSnapshot(null);
     } finally {
-      setLoading(false);
+      if (isCurrent()) setLoading(false);
     }
-  }, [token, email]);
+  }, [token, email, key]);
 
   useEffect(() => {
     fetchData();
+    return () => { requestId.current++; };
   }, [fetchData]);
 
+  const data = snapshot?.key === key ? snapshot.data : null;
   return { data, loading, error, refetch: fetchData };
 }

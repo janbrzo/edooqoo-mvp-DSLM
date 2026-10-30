@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
 import { StudentHubStats } from '@/components/student-hub/StudentHubStats';
 import { StudentHubGoalsCard } from '@/components/student-hub/StudentHubGoalsCard';
+import { StudentHubHomeworkRow } from '@/components/student-hub/StudentHubHomeworkRow';
 import { useStudentHubData, getSavedHubEmail } from '@/hooks/useStudentHubData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -190,25 +191,8 @@ const StudentHubDashboard = () => {
           ) : (
             <div className="space-y-2">
               {data.homeworks.slice(0, 3).map(hw => (
-                <Card key={hw.id} className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => window.open(`/homework/${hw.share_token}`, '_blank')}>
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{hw.title}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        {hw.deadline && (
-                          <span className="text-xs text-muted-foreground">
-                            Due: {format(parseISO(hw.deadline), 'MMM d, yyyy')}
-                          </span>
-                        )}
-                        <Badge variant={hw.completed_at ? 'default' : 'secondary'} className="text-xs">
-                          {hw.completed_at ? '✓ Completed' : `${hw.completed_exercises_count}/${hw.exercises_count} done`}
-                        </Badge>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  </CardContent>
-                </Card>
+                <StudentHubHomeworkRow key={hw.id} homework={hw} now={Date.now()}
+                  onFeedback={id => navigate(`/my/${teacherToken}/homework?feedback=${encodeURIComponent(id)}`)} />
               ))}
             </div>
           )}
