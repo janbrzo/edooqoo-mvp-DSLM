@@ -60,4 +60,14 @@ Overdue is true only for open work with a valid deadline strictly before caller-
 
 ## Verification limitations
 
+### Verification result (2026-10-30)
+
+- 53 new cases: 21 lifecycle, 26 runtime and 6 selected boundary guards. Focused Student Hub/homework/no-em-dash run: 131 tests across 20 files passed.
+- All available remaining suites: 2703 tests across 186 files passed. The unfiltered full run exits with five environment errors: existing jsdom suites cannot import the optional native `canvas.node` binary. Those five files were explicitly excluded from the successful second run, not claimed as passing or removed from the project.
+- Automatic preview build reports OK. `get-student-hub-data` deployment succeeded with the additive teacher-closure field; real authorized response readback remains unverified.
+- Real signed-out homework navigation returned to `/my?teacher=test-teacher`, showing the Hub sign-in screen.
+- Synthetic browser verification passed All/To Do/In Review/Reviewed membership, overdue/teacher-closed states, lazy read, comments as text, review failure/retry, exact token/email request, dashboard-to-feedback navigation, invalid-id denial, list selection/reload/close, unrelated query preservation, empty data and Hub failure/retry. There were zero browser page errors.
+- Desktop and 390px list/modal were checked visually; neither introduced horizontal overflow. Browser fixtures were local synthetic data, not a real learner session.
+- Worksheet Generation Engine and both `llms.txt` files are byte-identical to their initial hash baseline. No database migrations, grading/redo writes, or new student permissions were introduced.
+
 This project uses external unmanaged Supabase. No authorized real teacher/student session is injected, so synthetic Hub browser fixtures and mocked runtime reads do not certify authenticated production behavior. Hosted student submit -> teacher review -> student readback, password enforcement and transactional redo require an authorized dedicated test session. Do not label the whole Pillar 3 complete while Stage 3.3 remains unimplemented.

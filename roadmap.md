@@ -122,8 +122,10 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 ## AI Defensibility, Pillar 3
 
 - [x] Stage 3.1: read-only confirmed teacher goals in Student Hub; approved plan: `docs/ux/pillar3-student-teacher-workflow-plan.md`.
-- [ ] Stage 3.2: shared homework lifecycle tabs and in-hub read-only teacher feedback using the existing authorized review read.
-- [ ] Stage 3.4 for 3.2: lifecycle and runtime regression tests, boundary guards, architectural documentation, and browser verification with explicit production-access limitations.
+- [x] Stage 3.2: shared canonical lifecycle tabs/rows and lazy in-hub published teacher feedback; additive teacher-closure field deployed in `get-student-hub-data`, identity/race protection and URL-owned review selection. No new permissions or worksheet-engine changes. Spec: `docs/ux/pillar3-homework-feedback-spec.md`.
+- [x] Stage 3.4 for 3.2: 53 new lifecycle/runtime/boundary cases, 131 focused tests passed; 2703 tests in 186 available suites passed. Browser signed-out redirect and synthetic portal tabs, reviews, error/retry/empty, wrong-id denial, query preservation, dashboard/list deep links, reload/close and 390px layouts passed without page errors. Automatic build OK; protected engine and llms hashes unchanged.
+- [ ] Stage 3.2 hosted end-to-end: blocked by no authorized real student/teacher session for external unmanaged Supabase; synthetic fixtures do not certify password/RPC/submit-review-readback behavior.
+- [ ] Stage 3.4 full-suite completion: five existing jsdom suites cannot start because the sandbox's optional native canvas binary is missing; all other suites passed. No test or production dependency was changed to hide this environment issue.
 
 ## SEO/GEO Consolidation, Step 2
 
