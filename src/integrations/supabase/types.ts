@@ -5541,6 +5541,10 @@ export type Database = {
           worksheet_id: string
         }[]
       }
+      load_homework_mistake_source: {
+        Args: { p_homework_id: string }
+        Returns: Json
+      }
       log_dslm_decision: {
         Args: {
           p_decision_type: string
