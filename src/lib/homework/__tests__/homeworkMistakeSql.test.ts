@@ -19,7 +19,7 @@ const homework = '00000000-0000-4000-8000-000000000003';
 const cards = JSON.stringify([{ exercise_index: 0, question_index: 0, front_text: 'Choose a polite request', back_text: 'Could you send it?' }]);
 function save(owner: string | null = teacher, snapshotOverride = '', cardPayload = cards) {
   return `SET request.jwt.claim.role='service_role'; WITH s AS (SELECT public.load_homework_mistake_source('${homework}') AS v), p AS (
-    SELECT (v->'homework' - 'id' - 'title' - 'share_token') || jsonb_build_object('answers',v->'answers') AS snapshot FROM s)
+    SELECT ((v->'homework') - 'id' - 'title' - 'share_token') || jsonb_build_object('answers',v->'answers') AS snapshot FROM s)
     SELECT public.save_homework_mistake_flashcards('${homework}',${owner ? `'${owner}'` : 'NULL'},'proof','learner@example.test',${snapshotOverride || 'snapshot'},'${cardPayload}'::jsonb) FROM p;`;
 }
 describe('Homework mistake transaction, actual migrations in isolated PostgreSQL', () => {
