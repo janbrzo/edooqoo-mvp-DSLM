@@ -1829,6 +1829,123 @@ export type Database = {
           },
         ]
       }
+      homework_mistake_cards: {
+        Row: {
+          card_id: string
+          created_at: string
+          exercise_index: number
+          id: string
+          mistake_set_id: string
+          question_index: number
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          exercise_index: number
+          id?: string
+          mistake_set_id: string
+          question_index: number
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          exercise_index?: number
+          id?: string
+          mistake_set_id?: string
+          question_index?: number
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_mistake_cards_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "flashcard_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_mistake_cards_mistake_set_id_fkey"
+            columns: ["mistake_set_id"]
+            isOneToOne: false
+            referencedRelation: "homework_mistake_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_mistake_cards_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_mistake_sets: {
+        Row: {
+          attempt: number
+          created_at: string
+          homework_id: string
+          id: string
+          set_id: string
+          student_id: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          attempt: number
+          created_at?: string
+          homework_id: string
+          id?: string
+          set_id: string
+          student_id: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          homework_id?: string
+          id?: string
+          set_id?: string
+          student_id?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_mistake_sets_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "homework_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_mistake_sets_set_id_fkey"
+            columns: ["set_id"]
+            isOneToOne: false
+            referencedRelation: "flashcard_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_mistake_sets_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_mistake_sets_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_notifications: {
         Row: {
           created_at: string | null
@@ -5424,6 +5541,10 @@ export type Database = {
           worksheet_id: string
         }[]
       }
+      load_homework_mistake_source: {
+        Args: { p_homework_id: string }
+        Returns: Json
+      }
       log_dslm_decision: {
         Args: {
           p_decision_type: string
@@ -5676,6 +5797,17 @@ export type Database = {
           p_time_spent_ms?: number
         }
         Returns: string
+      }
+      save_homework_mistake_flashcards: {
+        Args: {
+          p_cards: Json
+          p_homework_id: string
+          p_share_token: string
+          p_snapshot: Json
+          p_student_email: string
+          p_teacher_id: string
+        }
+        Returns: Json
       }
       save_mark_done_evaluation: {
         Args: {

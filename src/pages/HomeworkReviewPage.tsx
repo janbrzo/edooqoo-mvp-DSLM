@@ -34,6 +34,7 @@ import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useTeacherAuthRedirect } from "@/hooks/useTeacherAuthRedirect";
 import { useDemoContext } from "@/contexts/DemoContext";
 import { HOMEWORK_OWNER_VIEW_SELECT, type HomeworkOwnerRow } from '@/lib/homework/homeworkColumns';
+import { CreateMistakeFlashcardsButton } from '@/components/homework/CreateMistakeFlashcardsButton';
 
 interface HomeworkData {
   id: string;
@@ -503,6 +504,16 @@ export default function HomeworkReviewPage() {
           </div>
         </Card>
       </div>
+
+      {hasStudentSubmitted && homework.completed_at && (
+        <div className="max-w-5xl mx-auto px-4 py-2">
+          <CreateMistakeFlashcardsButton
+            key={`${homework.id}:${homework.attempt ?? 1}`}
+            scope={{ homeworkId: homework.id, audience: 'teacher', revision: JSON.stringify([homework.attempt, studentAnswers.map(answer => answer.item_evaluations)]) }}
+            returnTo={`/homework/${homework.id}/review`}
+          />
+        </div>
+      )}
 
       {lessonMedia && (
         <div className="max-w-5xl mx-auto px-4">

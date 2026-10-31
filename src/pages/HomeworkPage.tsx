@@ -31,6 +31,7 @@ import {
 import { devLog } from '@/utils/logger';
 import { isClosedExerciseType } from '@/utils/masteryCalculator';
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
+import { CreateMistakeFlashcardsButton } from '@/components/homework/CreateMistakeFlashcardsButton';
 
 interface HomeworkData {
   id: string;
@@ -768,6 +769,15 @@ export default function HomeworkPage() {
       </div>
 
       {/* Exercise Navigation Sidebar */}
+      {!isTeacher && verifiedEmail && verifiedEmail !== 'teacher' && token && exercisesLoaded && homework.reviewed_at && finalIsSubmitted && !closedByTeacher && (
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <CreateMistakeFlashcardsButton
+            key={JSON.stringify([token, verifiedEmail, homework.reviewed_at])}
+            scope={{ homeworkId: homework.id, revision: homework.reviewed_at, audience: 'student', shareToken: token, email: verifiedEmail }}
+            returnTo={`/homework/${token}`}
+          />
+        </div>
+      )}
       {exercisesForNav.length > 0 && (
         <ExerciseNavSidebar
           exercises={exercisesForNav}
