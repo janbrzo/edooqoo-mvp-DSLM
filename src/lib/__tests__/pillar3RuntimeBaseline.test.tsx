@@ -9,6 +9,8 @@ import { StudentHubHomeworkRow } from '@/components/student-hub/StudentHubHomewo
 const boundary = vi.hoisted(() => ({ rpc: vi.fn(), invoke: vi.fn(), demo: false }));
 vi.mock('@/contexts/DemoContext', () => ({ useDemoContext: () => ({ isDemoMode: boundary.demo }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: boundary.rpc, functions: { invoke: boundary.invoke } } }));
+// Conversion has its own executable suite; these cases retain the feedback-read contract.
+vi.mock('@/components/homework/CreateMistakeFlashcardsButton', () => ({ CreateMistakeFlashcardsButton: () => null }));
 vi.mock('@/components/ui/dialog', () => ({
   Dialog: ({ open, children }: { open: boolean; children: React.ReactNode }) => open ? <div>{children}</div> : null,
   DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
