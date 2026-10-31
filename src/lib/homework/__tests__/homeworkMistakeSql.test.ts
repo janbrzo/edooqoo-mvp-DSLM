@@ -89,6 +89,22 @@ describe('Homework mistake transaction, actual migrations in isolated PostgreSQL
     sql(save()); sql('UPDATE flashcard_sets SET allow_student_contributions=false;'); expect(() => sql(save(null))).toThrow(/contributions_disabled/);
     sql('UPDATE flashcard_sets SET deleted_at=now();'); expect(() => sql(save())).toThrow(/set_unavailable/);
   });
+  it('expired sets are not silently recreated', () => {
+    sql(save()); sql("UPDATE flashcard_sets SET share_expires_at=now()-interval '1 day';");
+    expect(() => sql(save(null))).toThrow(/set_unavailable/);
+    expect(sql('SELECT count(*) FROM flashcard_sets;')).toBe('1');
+  });
+  it('retry preserves teacher-edited card text', () => {
+    sql(save()); sql("UPDATE flashcard_cards SET front_text='Teacher curated request';"); sql(save(null));
+    expect(sql('SELECT front_text FROM flashcard_cards;')).toBe('Teacher curated request');
+  });
+  it('a new attempt keeps separate source provenance and the previous practice card', () => {
+    sql(save()); sql('UPDATE homework_assignments SET attempt=2;');
+    const result = JSON.parse(sql(save(null)).split('\n').at(-1) ?? '{}');
+    expect(result.created_count).toBe(1);
+    expect(sql('SELECT count(*) FROM homework_mistake_sets;')).toBe('2');
+    expect(sql('SELECT count(*) FROM flashcard_cards;')).toBe('2');
+  });
   it('creating cards does not write events, mastery or repetition progress', () => {
     sql(save()); expect(sql('SELECT (SELECT count(*) FROM student_events),(SELECT count(*) FROM student_skill_metrics),(SELECT count(*) FROM flashcard_progress);')).toBe('0|0|0');
   });
