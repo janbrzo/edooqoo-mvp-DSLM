@@ -42,11 +42,9 @@ Deno.serve(async req => {
         const learner = !!parsed.data.share_token && hw.share_token === parsed.data.share_token && !!student.student_email
           && student.student_email.trim().toLowerCase() === parsed.data.student_email?.trim().toLowerCase();
         if (!owner && !learner) return null;
-        const { data: answers, error: answerError } = await admin.from('homework_student_answers')
-          .select('exercise_index,exercise_type,answers,is_submitted,eval_trigger,item_evaluations')
-          .eq('homework_id', id).eq('student_email', student.student_email?.trim().toLowerCase() ?? '').order('exercise_index').limit(1000);
-        if (answerError) throw new MistakeFailure('service_unavailable', 503);
-        return { homework: hw, student, answers: answers ?? [] } as MistakeSource;
+        const { data: source, error: sourceError } = await admin.rpc('load_homework_mistake_source', { p_homework_id: id });
+        if (sourceError) throw new MistakeFailure('service_unavailable', 503);
+        return source as MistakeSource | null;
       },
       save: async (source, cards, ownerId, request) => {
         const hw = source.homework;
