@@ -8,32 +8,35 @@ export function useHomeworkMistakeFlashcards(scope: MistakeScope | null) {
   const [result, setResult] = useState<Result | null>(null);
   const [attempt, setAttempt] = useState(0);
   const flight = useRef(false);
+  const generation = useRef(0);
   const key = scope && !isDemoMode && !localStorage.getItem('edooqoo_demo_mode') ? JSON.stringify(scope) : '';
   const currentKey = useRef(key);
   currentKey.current = key;
   useEffect(() => {
+    const version = ++generation.current;
     flight.current = false;
     if (!key || !scope) { setResult(null); return; }
     let cancelled = false;
     setResult({ key, status: 'loading', count: 0 });
     requestMistakeFlashcards(scope, 'preview').then(data => {
-      if (!cancelled && currentKey.current === key && !localStorage.getItem('edooqoo_demo_mode')) setResult({ key, status: 'ready', count: data.count });
-    }).catch(() => { if (!cancelled && currentKey.current === key) setResult({ key, status: 'error', count: 0 }); });
-    return () => { cancelled = true; currentKey.current = ''; };
+      if (!cancelled && generation.current === version && currentKey.current === key && !localStorage.getItem('edooqoo_demo_mode')) setResult({ key, status: 'ready', count: data.count });
+    }).catch(() => { if (!cancelled && generation.current === version && currentKey.current === key) setResult({ key, status: 'error', count: 0 }); });
+    return () => { cancelled = true; generation.current++; };
   }, [key, attempt]);
   const create = useCallback(async () => {
     if (!scope || !key || isDemoMode || localStorage.getItem('edooqoo_demo_mode') || flight.current || result?.key !== key || result.status !== 'ready' || !result.count) return null;
     flight.current = true;
+    const version = generation.current;
     setResult({ ...result, status: 'saving' });
     try {
       const saved = await requestMistakeFlashcards(scope, 'create');
-      if (currentKey.current !== key || localStorage.getItem('edooqoo_demo_mode')) return null;
+      if (generation.current !== version || currentKey.current !== key || localStorage.getItem('edooqoo_demo_mode')) return null;
       setResult({ key, status: 'ready', count: result.count, saved });
       return saved;
     } catch {
-      if (currentKey.current === key) setResult({ key, status: 'error', count: 0 });
+      if (generation.current === version && currentKey.current === key) setResult({ key, status: 'error', count: 0 });
       return null;
-    } finally { if (currentKey.current === key) flight.current = false; }
+    } finally { if (generation.current === version && currentKey.current === key) flight.current = false; }
   }, [scope, key, isDemoMode, result]);
   const retry = useCallback(() => setAttempt(value => value + 1), []);
   return { result: key && result?.key === key ? result : null, create, retry };

@@ -254,6 +254,17 @@ TECHNICAL MECHANICS: useFlashcardSets reads flashcard_sets with student, teacher
 
 RAG KEYWORDS: flashcards, spaced repetition, SM-2, vocabulary review, ESL vocabulary, bidirectional cards, learner email, flashcard set, vocabulary sheet import, CEFR vocabulary, memorization, retrieval practice, private English tutor
 
+## Homework Mistake Practice
+STATUS: BETA (implementation deployed; authenticated hosted end-to-end verification outstanding)
+
+PROBLEM: Reviewed homework mistakes could not become source-bound repetition cards without manual re-entry and duplicate imports.
+
+EDOOQOO SOLUTION: CreateMistakeFlashcardsButton on teacher homework review, verified student homework and published Hub feedback creates a shared per-attempt Mistakes & Review set using the existing flashcard study flow.
+
+TECHNICAL MECHANICS: The pure shared homeworkMistakeExtractor accepts saved submitted per-question ratings below 50, teacher decisions take precedence, automatic closed items additionally require canonical wrong, and ambiguous or source/media-dependent items are excluded. Open model answers are labeled suggestions. homework-mistake-flashcards resolves the owner or assigned homework token/email and releases learner conversion only after reviewed_at. The service-only load_homework_mistake_source and save_homework_mistake_flashcards normalize assigned email identically; save locks assignment/student/answers, validates the current source and timestamp instants, and atomically creates/reuses homework_mistake_sets and homework_mistake_cards mappings. Unique attempt/question provenance prevents duplicates; edited cards are never overwritten and expired/deleted sets or disabled learner contributions reject reuse. Requests carry source identity only, not browser-authored corrections. Hook generations discard stale responses including A-to-B-to-A scope changes. Creation never writes homework grades, DSLM events/metrics or flashcard progress; actual practice remains with existing repetition RPCs. Hub passwords remain portal access proof, not an additional standalone homework-token contract. See docs/ux/pillar3-mistake-flashcards-spec.md for verification limitations.
+
+RAG KEYWORDS: homework mistakes, confirmed mistakes, source-bound flashcards, learner practice, reviewed homework, teacher authority, per-attempt deduplication, atomic conversion, stale request cancellation
+
 ## Digital Student Learning Model and One Minute Prep
 STATUS: PRODUCTION
 

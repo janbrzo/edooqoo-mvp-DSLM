@@ -47,4 +47,10 @@ describe('Source-bound homework mistake cards', () => {
     expect(extract({ exercise_type: 'reading' }, { type: 'reading', content: 'Private passage', questions: [{ question: 'What happened?', suggested_answer: 'A meeting.' }] })).toEqual([]);
     expect(extract({ exercise_type: 'multiple-choice-audio' }, { ...exercise, type: 'multiple-choice-audio' })).toEqual([]);
   });
+  it.each(['content', 'passage', 'transcript', 'image_description'])('closed choice questions cannot discard their required %s', field => {
+    expect(extract({}, { ...exercise, [field]: 'The client cancelled the meeting.' })).toEqual([]);
+  });
+  it('true/false questions about a passage are not standalone cards', () => {
+    expect(extract({ exercise_type: 'true-false', answers: { 0: true } }, { type: 'true-false', content: 'Maya cancelled the meeting.', statements: [{ statement: 'Maya attended the meeting.', isTrue: false }] })).toEqual([]);
+  });
 });

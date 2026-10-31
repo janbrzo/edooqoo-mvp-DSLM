@@ -74,6 +74,16 @@ describe('Pillar 3 mistake action runtime, not hosted authorization certificatio
     await act(async () => { pending.resolve({ data: saved, error: null }); await first; });
     expect(hook?.result?.saved).toBeUndefined();
   });
+  it('A to B to A cannot resurrect a save from the first A request', async () => {
+    await mount(<Probe value={scope} />); const pending = deferred(); boundary.invoke.mockReturnValueOnce(pending.promise);
+    let first: Promise<unknown> | undefined;
+    await act(async () => { first = hook?.create(); });
+    await act(async () => { renderer?.update(<Probe value={{ ...scope, email: 'other@example.test' }} />); });
+    await act(async () => { renderer?.update(<Probe value={scope} />); });
+    await act(async () => { pending.resolve({ data: saved, error: null }); await first; });
+    expect(hook?.result?.status).toBe('ready');
+    expect(hook?.result?.saved).toBeUndefined();
+  });
   it('failed save offers a fresh preview retry without assuming success', async () => {
     await mount(<Probe value={scope} />); boundary.invoke.mockResolvedValueOnce({ data: null, error: new Error('offline') });
     await act(async () => { await hook?.create(); }); expect(hook?.result?.status).toBe('error');
