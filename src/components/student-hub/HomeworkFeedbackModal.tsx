@@ -2,6 +2,7 @@ import { MessageSquare, Loader2, ExternalLink, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useStudentHomeworkFeedback, type HomeworkFeedbackScope } from '@/hooks/useStudentHomeworkFeedback';
+import { CreateMistakeFlashcardsButton } from '@/components/homework/CreateMistakeFlashcardsButton';
 
 interface Props {
   scope: HomeworkFeedbackScope | null;
@@ -65,6 +66,15 @@ export function HomeworkFeedbackModal({ scope, teacherName, onClose }: Props) {
                 <ExternalLink /> Open Homework
               </a>
             </Button>
+            {status === 'ready' && review && (
+              <div className="mt-3">
+                <CreateMistakeFlashcardsButton
+                  key={JSON.stringify([scope.teacherToken, scope.email, scope.homework.id, scope.homework.reviewed_at])}
+                  scope={{ homeworkId: scope.homework.id, revision: scope.homework.reviewed_at ?? '', audience: 'student', shareToken: scope.homework.share_token ?? undefined, email: scope.email }}
+                  returnTo={`/my/${scope.teacherToken}/homework?feedback=${scope.homework.id}`}
+                />
+              </div>
+            )}
           </div>
         )}
       </DialogContent>
