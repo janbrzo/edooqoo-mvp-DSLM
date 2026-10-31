@@ -1,0 +1,2 @@
+export { extractHomeworkMistakes } from '../../../supabase/functions/_shared/homeworkMistakeExtractor';
+export type { MistakeCard, MistakeAnswerRow } from '../../../supabase/functions/_shared/homeworkMistakeExtractor';
