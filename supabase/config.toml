@@ -42,3 +42,6 @@ verify_jwt = false
 # JWT verification is handled by the MCP SDK itself, not Supabase.
 [functions.mcp]
 verify_jwt = false
+
+[functions.homework-mistake-flashcards]
+verify_jwt = false
