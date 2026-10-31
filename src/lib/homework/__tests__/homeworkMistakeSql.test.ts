@@ -1,13 +1,16 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { execFile, execFileSync } from 'node:child_process';
-import { chownSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { chownSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync } from 'node:fs';
 import { promisify } from 'node:util';
 
 // Isolated PostgreSQL only. This suite never connects to the hosted project.
 const run = promisify(execFile);
 const dir = mkdtempSync('/tmp/homework-mistake-sql-');
 const uid = process.getuid?.();
-const asUser = (cmd: string, args: string[]) => uid === 0 ? ['runuser', ['-u', 'nobody', '--', cmd, ...args]] as const : [cmd, args] as const;
+let started = false;
+// Resolve wrappers/symlinks so PostgreSQL can locate its packaged extension libraries.
+const executable = (cmd: string) => realpathSync(execFileSync('which', [cmd], { encoding: 'utf8' }).trim());
+const asUser = (cmd: string, args: string[]) => uid === 0 ? ['runuser', ['-u', 'nobody', '--', executable(cmd), ...args]] as const : [executable(cmd), args] as const;
 const sqlArgs = ['-h', dir, '-p', '55437', '-U', 'nobody', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-At'];
 function sql(value: string) { return execFileSync('psql', [...sqlArgs, '-c', value], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim(); }
 const teacher = '00000000-0000-4000-8000-000000000001';
@@ -26,6 +29,7 @@ describe('Homework mistake transaction, actual migrations in isolated PostgreSQL
     execFileSync(init, [...args], { stdio: 'pipe' });
     const [ctl, ctlArgs] = asUser('pg_ctl', ['-D', `${dir}/data`, '-l', `${dir}/server.log`, '-o', `-k ${dir} -p 55437 -h ''`, '-w', 'start']);
     execFileSync(ctl, [...ctlArgs], { stdio: 'pipe' });
+    started = true;
     sql(`CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;
       CREATE SCHEMA auth; CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto WITH SCHEMA extensions;
       CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql AS $$ SELECT current_setting('request.jwt.claim.role',true) $$;
@@ -45,7 +49,7 @@ describe('Homework mistake transaction, actual migrations in isolated PostgreSQL
     INSERT INTO homework_assignments VALUES('${homework}','${teacher}','${student}','Requests','proof','[]',1,'2026-10-31T10:00:00Z','2026-10-30T10:00:00Z',false);
     INSERT INTO homework_student_answers VALUES('${homework}',' LEARNER@example.test ',0,'multiple-choice','{"0":"Send it!"}',true,'submit_homework','[{"question_index":0,"hasValue":true,"mastery":0}]');`));
   afterAll(() => {
-    try { const [ctl,args] = asUser('pg_ctl', ['-D',`${dir}/data`,'-m','immediate','-w','stop']); execFileSync(ctl,[...args],{stdio:'pipe'}); } finally { rmSync(dir,{recursive:true,force:true}); }
+    try { if (started) { const [ctl,args] = asUser('pg_ctl', ['-D',`${dir}/data`,'-m','immediate','-w','stop']); execFileSync(ctl,[...args],{stdio:'pipe'}); } } finally { rmSync(dir,{recursive:true,force:true}); }
   });
   it('canonical normalized loading sees the assigned answer, and timestamps allow equivalent Z representation', () => {
     expect(sql(`SET request.jwt.claim.role='service_role'; SELECT jsonb_array_length(load_homework_mistake_source('${homework}')->'answers');`).split('\n').at(-1)).toBe('1');

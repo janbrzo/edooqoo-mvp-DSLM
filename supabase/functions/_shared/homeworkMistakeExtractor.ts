@@ -1,6 +1,6 @@
 /** Read-only projection of saved homework evidence. Never grades or writes learning state. */
 import { buildClosedItemContext } from './closedItemContext.ts';
-import { buildOpenAnswerContext, openExerciseItems } from './openAnswerContext.ts';
+import { buildOpenAnswerContext, exerciseSourceText, openExerciseItems } from './openAnswerContext.ts';
 import { isClosedExerciseType, isOpenExerciseType } from './itemMastery.ts';
 
 export interface MistakeCard {
@@ -47,7 +47,7 @@ export function extractHomeworkMistakes(exercises: unknown, rows: readonly Mista
       let back = '';
       if (isClosedExerciseType(row.exercise_type)) {
         // Audio/image-dependent questions cannot become self-contained text cards.
-        if (row.exercise_type.includes('-audio') || row.exercise_type.includes('-picture')) continue;
+        if (row.exercise_type.includes('-audio') || row.exercise_type.includes('-picture') || exerciseSourceText(exercise)) continue;
         const context = buildClosedItemContext(row.exercise_type, exercise, question, answers);
         if (!context || (!teacher.length && context.key_verdict !== 'wrong')) continue;
         // Multi-blank ambiguity is left for the teacher, not converted from a zero aggregate.
