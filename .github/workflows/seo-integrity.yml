@@ -66,10 +66,10 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit -p tsconfig.app.json
 
+      - name: Install isolated PostgreSQL test dependencies
+        run: sudo apt-get update && sudo apt-get install -y postgresql postgresql-contrib
+
       - name: Unit tests
-        env:
-          # The isolated homework transaction suite needs server binaries, never a hosted DB URL.
-          LC_ALL: C
         run: npm test
 
       - name: Full SEO production build
