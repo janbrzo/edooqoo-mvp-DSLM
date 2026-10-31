@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { execFile, execFileSync } from 'node:child_process';
-import { chownSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync } from 'node:fs';
+import { chownSync, existsSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync } from 'node:fs';
 import { promisify } from 'node:util';
 
 // Isolated PostgreSQL only. This suite never connects to the hosted project.
@@ -9,7 +9,18 @@ const dir = mkdtempSync('/tmp/homework-mistake-sql-');
 const uid = process.getuid?.();
 let started = false;
 // Resolve wrappers/symlinks so PostgreSQL can locate its packaged extension libraries.
-const executable = (cmd: string) => realpathSync(execFileSync('which', [cmd], { encoding: 'utf8' }).trim());
+const executable = (cmd: string) => {
+  try { return realpathSync(execFileSync('which', [cmd], { encoding: 'utf8', stdio: ['ignore','pipe','pipe'] }).trim()); }
+  catch {
+    // Ubuntu CI keeps server binaries outside PATH; never fall back to a hosted connection.
+    const root = '/usr/lib/postgresql';
+    if (existsSync(root)) for (const version of readdirSync(root).sort().reverse()) {
+      const path = `${root}/${version}/bin/${cmd}`;
+      if (existsSync(path)) return realpathSync(path);
+    }
+    throw new Error(`Local PostgreSQL binary ${cmd} is required for isolated transaction tests.`);
+  }
+};
 const asUser = (cmd: string, args: string[]) => uid === 0 ? ['runuser', ['-u', 'nobody', '--', executable(cmd), ...args]] as const : [executable(cmd), args] as const;
 const sqlArgs = ['-h', dir, '-p', '55437', '-U', 'nobody', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-At'];
 function sql(value: string) { return execFileSync('psql', [...sqlArgs, '-c', value], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim(); }

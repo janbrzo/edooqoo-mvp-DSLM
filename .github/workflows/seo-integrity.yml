@@ -67,6 +67,9 @@ jobs:
         run: npx tsc --noEmit -p tsconfig.app.json
 
       - name: Unit tests
+        env:
+          # The isolated homework transaction suite needs server binaries, never a hosted DB URL.
+          LC_ALL: C
         run: npm test
 
       - name: Full SEO production build
