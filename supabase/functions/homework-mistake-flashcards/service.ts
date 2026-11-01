@@ -30,6 +30,8 @@ export async function handleMistakes(request: MistakeRequest, teacherId: string 
   if ((!owner && !learner) || student.deleted_at || student.id !== hw.student_id || student.teacher_id !== hw.teacher_id) throw new MistakeFailure('not_allowed', 403);
   if (!hw.completed_at || hw.completed_by_teacher || (!owner && !hw.reviewed_at)) throw new MistakeFailure('not_reviewed', 409);
   const cards = extractHomeworkMistakes(hw.selected_exercises, source.answers);
+  // Match the existing transactional batch limit, without silently dropping evidence.
+  if (cards.length > 500) throw new MistakeFailure('too_many_mistakes', 409);
   if (request.mode === 'preview') return { count: cards.length };
   if (!cards.length) throw new MistakeFailure('no_mistakes', 409);
   return deps.save(source, cards, owner ? teacherId : null, request);

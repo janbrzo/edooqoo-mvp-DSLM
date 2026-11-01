@@ -50,6 +50,8 @@ export function extractHomeworkMistakes(exercises: unknown, rows: readonly Mista
         if (row.exercise_type.includes('-audio') || row.exercise_type.includes('-picture') || exerciseSourceText(exercise)) continue;
         const context = buildClosedItemContext(row.exercise_type, exercise, question, answers);
         if (!context || (!teacher.length && context.key_verdict !== 'wrong')) continue;
+        // Options alone are not a practice prompt. Do not change the shared grader.
+        if (row.exercise_type.startsWith('multiple-choice') && !context.question_text.split('\nOptions:')[0]?.trim()) continue;
         // Multi-blank ambiguity is left for the teacher, not converted from a zero aggregate.
         if (!teacher.length && (row.exercise_type === 'gap-text' || row.exercise_type === 'fill-in-blanks')
           && Object.keys(answers).some(key => key.startsWith(`${question}_`))) continue;
@@ -65,6 +67,8 @@ export function extractHomeworkMistakes(exercises: unknown, rows: readonly Mista
         front = context.question_text;
         back = context.suggested_answer ? `Suggested answer: ${context.suggested_answer}` : '';
       } else continue;
+      front = front.trim();
+      back = back.trim();
       if (!validText(front) || !validText(back)) continue;
       out.set(`${row.exercise_index}:${question}`, {
         exercise_index: row.exercise_index, question_index: question,

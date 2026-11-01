@@ -27,4 +27,16 @@ describe('Pillar 3 selected read-only boundaries (not production authorization c
     const adapter = read('src/lib/homework/reviewForStudent.ts');
     expect([...adapter.matchAll(/supabase\.rpc\('([^']+)'/g)].map(match => match[1])).toEqual(['get_homework_review_by_share_token']);
   });
+  it('CI gates the complete suite and actual HTTP adapter before the production build', () => {
+    const workflow = read('.github/workflows/seo-integrity.yml');
+    const commands = [...workflow.matchAll(/^\s+run: (.+)$/gm)].map(match => match[1]);
+    const unit = commands.indexOf('npm test');
+    const http = commands.indexOf('deno test --config supabase/functions/homework-mistake-flashcards/deno.json --allow-net --allow-env supabase/functions/homework-mistake-flashcards/*_test.ts');
+    const build = commands.indexOf('npm run build:seo');
+    expect(unit).toBeGreaterThan(-1);
+    expect(http).toBeGreaterThan(unit);
+    expect(build).toBeGreaterThan(http);
+    expect(commands.some(command => command.includes('postgresql-contrib'))).toBe(true);
+    expect(workflow).not.toMatch(/continue-on-error: true|--no-check|--exclude/);
+  });
 });

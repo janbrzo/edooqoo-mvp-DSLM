@@ -30,7 +30,7 @@ describe('Source-bound homework mistake cards', () => {
     expect(extract({ ...changed, item_evaluations: [{ question_index: 0, mastery: 0, hasValue: true, source: 'teacher' }] }, wordOrder)[0]?.back_text).toBe('He went home');
   });
   it('never turns a key-correct answer into an automatic mistake', () => expect(extract({ answers: { 0: 'Could you send it?' } })).toEqual([]));
-  it('skips an unresolved answer key even after teacher rejection', () => expect(extract({}, { type: 'multiple-choice', questions: [{ question: 'Request?', options: [] }] })).toEqual([]));
+  it('skips an unresolved answer key even after teacher rejection', () => expect(extract({ item_evaluations: [{ question_index: 0, mastery: 0, hasValue: true, source: 'teacher' }] }, { type: 'multiple-choice', questions: [{ question: 'Request?', options: [] }] })).toEqual([]));
   it('grammar gap uses the canonical matcher', () => {
     const gap = { type: 'gap-text', sentences: [{ text: 'She ___ the client.', answer: 'calls' }] };
     expect(extract({ exercise_type: 'gap-text', answers: { 0: 'call' } }, gap)[0]?.back_text).toBe('calls');
@@ -52,5 +52,33 @@ describe('Source-bound homework mistake cards', () => {
   });
   it('true/false questions about a passage are not standalone cards', () => {
     expect(extract({ exercise_type: 'true-false', answers: { 0: true } }, { type: 'true-false', content: 'Maya cancelled the meeting.', statements: [{ statement: 'Maya attended the meeting.', isTrue: false }] })).toEqual([]);
+  });
+  it('saved teacher rejection supersedes automatic acceptance', () => {
+    expect(extract({ item_evaluations: [{ question_index: 0, mastery: 100, hasValue: true }, { question_index: 0, mastery: 0, hasValue: true, source: 'teacher' }] })).toHaveLength(1);
+  });
+  it('conflicting teacher decisions never create a mistake', () => {
+    expect(extract({ item_evaluations: [{ question_index: 0, mastery: 0, hasValue: true, source: 'teacher' }, { question_index: 0, mastery: 100, hasValue: true, source: 'teacher' }] })).toEqual([]);
+  });
+  it.each([-5, Infinity, -Infinity, 101, '0', null])('rejects malformed mastery %s', mastery => {
+    expect(extract({ item_evaluations: [{ question_index: 0, mastery, hasValue: true }] })).toEqual([]);
+  });
+  it.each([
+    { exercise_index: 0.5 }, { exercise_index: 9 }, { exercise_type: 'unsupported' },
+    { item_evaluations: [{ question_index: 0.5, mastery: 0, hasValue: true }] },
+    { item_evaluations: [{ question_index: 9, mastery: 0, hasValue: true }] },
+    { item_evaluations: [{ question_index: 0, mastery: 0 }] },
+  ])('rejects malformed or mismatched source identity %j', change => expect(extract(change)).toEqual([]));
+  it.each(['', '   ', 'x'.repeat(4001), 'Bad\u0000text'])('cannot create a card with unusable question text', question => {
+    expect(extract({}, { ...exercise, questions: [{ ...exercise.questions[0], question }] })).toEqual([]);
+  });
+  it('an open answer needs learner text as well as a saved suggested answer', () => {
+    expect(extract({ exercise_type: 'sentence-transformation', answers: {} }, { type: 'sentence-transformation', sentences: [{ original: 'Make a request', transformed: 'Could you send it?' }] })).toEqual([]);
+  });
+  it('sorts source identities and deduplicates rows without modifying evidence', () => {
+    const rows = [{ ...row, exercise_index: 1 }, row, row];
+    const before = structuredClone(rows);
+    const result = extractHomeworkMistakes([exercise, exercise], rows);
+    expect(result.map(card => [card.exercise_index, card.question_index])).toEqual([[0, 0], [1, 0]]);
+    expect(rows).toEqual(before);
   });
 });

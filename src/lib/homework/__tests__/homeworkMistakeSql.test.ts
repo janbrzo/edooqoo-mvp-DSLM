@@ -119,9 +119,64 @@ describe('Homework mistake transaction, actual migrations in isolated PostgreSQL
   it('creating cards does not write events, mastery or repetition progress', () => {
     sql(save()); expect(sql('SELECT (SELECT count(*) FROM student_events),(SELECT count(*) FROM student_skill_metrics),(SELECT count(*) FROM flashcard_progress);')).toBe('0|0|0');
   });
+  it('creation, mixed retries and failed batch preserve existing lifecycle, answers and learning rows', () => {
+    sql(`INSERT INTO student_events VALUES('${teacher}'); INSERT INTO student_skill_metrics VALUES('${student}'); INSERT INTO flashcard_progress VALUES('${homework}');`);
+    const state = () => sql(`SELECT jsonb_build_object(
+      'homework',(SELECT jsonb_agg(to_jsonb(h)) FROM homework_assignments h),
+      'answers',(SELECT jsonb_agg(to_jsonb(a)) FROM homework_student_answers a),
+      'events',(SELECT jsonb_agg(to_jsonb(e)) FROM student_events e),
+      'metrics',(SELECT jsonb_agg(to_jsonb(m)) FROM student_skill_metrics m),
+      'progress',(SELECT jsonb_agg(to_jsonb(p)) FROM flashcard_progress p));`);
+    const before = state();
+    sql(save()); expect(state()).toBe(before);
+    sql(save(null)); expect(state()).toBe(before);
+    expect(() => sql(save(teacher,'',cards.replace('"question_index":0','"question_index":9')))).toThrow(/invalid_source/);
+    expect(state()).toBe(before);
+  });
+  it('a valid first card followed by an invalid card rolls back the entire transaction', () => {
+    const batch = JSON.stringify([...JSON.parse(cards), { exercise_index: 0, question_index: 9, front_text: 'Invalid later item', back_text: 'Never saved' }]);
+    expect(() => sql(save(teacher, '', batch))).toThrow(/invalid_source/);
+    expect(sql('SELECT (SELECT count(*) FROM flashcard_sets),(SELECT count(*) FROM flashcard_cards),(SELECT count(*) FROM homework_mistake_sets),(SELECT count(*) FROM homework_mistake_cards);')).toBe('0|0|0|0');
+  });
+  it.each([
+    { field: 'answers', change: 'UPDATE homework_student_answers SET answers=\'{"0":"Could you send it?"}\';' },
+    { field: 'ratings', change: 'UPDATE homework_student_answers SET item_evaluations=\'[{"question_index":0,"hasValue":true,"mastery":100}]\';' },
+    { field: 'exercises', change: 'UPDATE homework_assignments SET selected_exercises=\'[{"type":"discussion"}]\';' },
+    { field: 'review', change: "UPDATE homework_assignments SET reviewed_at='2026-11-01T12:00:00Z';" },
+    { field: 'completion', change: "UPDATE homework_assignments SET completed_at='2026-11-01T11:00:00Z';" },
+  ])('a changed $field source after extraction rejects a stale snapshot', ({ change }) => {
+    const snapshot = sql(`SET request.jwt.claim.role='service_role'; SELECT ((v->'homework') - 'id' - 'title' - 'share_token') || jsonb_build_object('answers',v->'answers') FROM (SELECT load_homework_mistake_source('${homework}') v) s;`).split('\n').at(-1) ?? '{}';
+    sql(change);
+    expect(() => sql(save(teacher, `'${snapshot.replace(/'/g, "''")}'::jsonb`))).toThrow(/source_changed/);
+    expect(sql('SELECT count(*) FROM flashcard_cards;')).toBe('0');
+  });
+  it.each([
+    "UPDATE homework_assignments SET share_token='rotated';",
+    "UPDATE students SET student_email='reassigned@example.test';",
+    'UPDATE students SET deleted_at=now();',
+    "UPDATE students SET teacher_id='00000000-0000-4000-8000-000000000009';",
+  ])('changed learner proof is revalidated at save: %s', change => {
+    sql(change);
+    expect(() => sql(save(null))).toThrow(/not_allowed/);
+    expect(sql('SELECT count(*) FROM flashcard_cards;')).toBe('0');
+  });
+  it('soft-deleted source cards cannot be silently recreated on retry', () => {
+    sql(save()); sql('UPDATE flashcard_cards SET deleted_at=now();');
+    expect(() => sql(save(null))).toThrow(/card_unavailable/);
+    expect(sql('SELECT count(*) FROM flashcard_cards;')).toBe('1');
+  });
   it('teacher RLS reads its mappings, not another teacher mappings', () => {
     sql(save());
     expect(sql(`SET request.jwt.claim.sub='${teacher}'; SET ROLE authenticated; SELECT count(*) FROM homework_mistake_sets;`).split('\n').at(-1)).toBe('1');
     expect(sql(`SET request.jwt.claim.sub='00000000-0000-4000-8000-000000000009'; SET ROLE authenticated; SELECT count(*) FROM homework_mistake_sets;`).split('\n').at(-1)).toBe('0');
+  });
+  it('both provenance tables deny anonymous reads and authenticated mutation', () => {
+    for (const table of ['homework_mistake_sets','homework_mistake_cards']) {
+      expect(sql(`SELECT has_table_privilege('anon','public.${table}','SELECT'),has_table_privilege('authenticated','public.${table}','INSERT'),has_table_privilege('authenticated','public.${table}','UPDATE'),has_table_privilege('authenticated','public.${table}','DELETE');`)).toBe('f|f|f|f');
+      expect(() => sql(`SET ROLE anon; SELECT count(*) FROM ${table};`)).toThrow(/permission denied/);
+    }
+    sql(save());
+    expect(sql(`SET request.jwt.claim.sub='${teacher}'; SET ROLE authenticated; SELECT count(*) FROM homework_mistake_cards;`).split('\n').at(-1)).toBe('1');
+    expect(sql(`SET request.jwt.claim.sub='00000000-0000-4000-8000-000000000009'; SET ROLE authenticated; SELECT count(*) FROM homework_mistake_cards;`).split('\n').at(-1)).toBe('0');
   });
 });
