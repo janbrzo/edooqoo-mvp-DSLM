@@ -50,4 +50,17 @@ describe('Mistake conversion authorization and no-grade contract', () => {
     expect(source).toEqual(before); expect(d.save.mock.calls[0]?.[2]).toBe('owner');
     expect(Object.keys(d.save.mock.calls[0]?.[1]?.[0] ?? {}).sort()).toEqual(['back_text','exercise_index','front_example','front_text','question_index']);
   });
+  it('preview and create accept the same existing 500-card batch boundary', async () => {
+    const d = deps({ ...source, homework: { ...source.homework, selected_exercises: Array.from({ length: 500 }, () => source.homework.selected_exercises[0]) }, answers: Array.from({ length: 500 }, (_, exercise_index) => ({ ...source.answers[0], exercise_index })) });
+    expect(await handleMistakes({ ...request, mode: 'preview' }, null, d)).toEqual({ count: 500 });
+    await handleMistakes(request, null, d);
+    expect(d.save.mock.calls[0]?.[1]).toHaveLength(500);
+  });
+  it.each(['preview','create'] as const)('501-card %s rejects overflow without truncation or a partial write', async mode => {
+    const selected = source.homework.selected_exercises;
+    if (!Array.isArray(selected)) throw new Error('Expected fixture exercise array');
+    const d = deps({ ...source, homework: { ...source.homework, selected_exercises: Array.from({ length: 501 }, () => selected[0]) }, answers: Array.from({ length: 501 }, (_, exercise_index) => ({ ...source.answers[0], exercise_index })) });
+    await expect(handleMistakes({ ...request, mode }, null, d)).rejects.toMatchObject({ code: 'too_many_mistakes', status: 409 });
+    expect(d.save).not.toHaveBeenCalled();
+  });
 });

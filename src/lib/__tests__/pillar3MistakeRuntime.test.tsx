@@ -62,10 +62,6 @@ describe('Pillar 3 published feedback to real conversion integration', () => {
     expect(url.searchParams.get('returnTo')).toBe(`/my/teacher-proof/homework?feedback=${scope.homeworkId}`);
     expect(boundary.rpc).toHaveBeenCalledTimes(1);
   });
-  it.each([null, { comments: [], verdicts: {} }])('unavailable or closed feedback cannot convert: %j', review => {
-    // Async coverage below pins server-null and scope removal independently.
-    expect(review === null || Array.isArray(review.comments)).toBe(true);
-  });
   it('server-null feedback cannot preview or create even if the listed timestamp is published', async () => {
     boundary.rpc.mockResolvedValueOnce({ data: null, error: null });
     await mount(<HomeworkFeedbackModal scope={feedbackScope} onClose={vi.fn()} />);
