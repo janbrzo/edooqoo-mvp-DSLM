@@ -16,6 +16,7 @@ The implemented slice adds teacher/student actions and transactional provenance.
 - Open cards require a real written answer, real source item and existing suggested/model answer. They are labeled Suggested answer, never represented as an AI-generated correction of the learner's own text.
 - Audio, image, speaking and passage/transcript-dependent tasks are skipped because a standalone text card would lose necessary context. No source media or raw private answers are added to the Hub feedback payload.
 - One question becomes at most one card even when it has multiple skill ratings. Text is plain, trimmed, nonempty and bounded; no invented examples or AI generation calls are used.
+- Multiple-choice source questions must themselves be usable text before options are appended; an options-only prompt is not eligible. Preview and creation both reject more than 500 eligible cards with too_many_mistakes (409), matching the existing batch contract without silent truncation.
 
 ## Teacher and student interactions
 
@@ -42,8 +43,10 @@ The implemented slice adds teacher/student actions and transactional provenance.
 
 - homeworkMistakeExtractor.test.ts: confirmed versus uncertain/accepted/conflicting evidence, teacher authority, deduplication, grammar matcher, absent keys, multi-blank ambiguity, suggested open answers and missing source/media context.
 - homeworkMistakeService.test.ts: owner versus learner proof, deleted/cross-owner source, publication and reopen gates, no empty set and no source mutation.
-- pillar3MistakeRuntime.test.tsx: exact request identity, missing proof, demo guards, double click, stale preview/save, A-to-B-to-A, retry and study handoff.
-- homeworkMistakeSql.test.ts: actual tool-managed migrations executed against an isolated temporary PostgreSQL schema, email/timestamp parity, sequential/concurrent deduplication, grants/RLS, rejected scopes, source changes, rollback and contribution/deletion gates.
+- pillar3MistakeRuntime.test.tsx: real Hub feedback modal plus conversion hooks/action, delayed authorized review, server-null and learner-switch gates, exact request identity, missing proof, demo guards, double click, stale preview/save, A-to-B-to-A, retry and study handoff.
+- homeworkMistakeSql.test.ts: 27 cases with actual tool-managed migrations executed against an isolated temporary PostgreSQL schema, email/timestamp parity, sequential/concurrent deduplication, grants/RLS for both mappings, rejected scopes, changed source/proof, valid-then-invalid batch rollback, contribution/deletion gates and seeded before/after lifecycle/answer/learning preservation.
+- homework-mistake-flashcards/http_test.ts: 18 tests of the actual exported handler, including malformed/oversized/injected input, preflight/method, anonymous/owner/foreign/learner callers, exact privileged load/save payload, publication and safe error translation. Synthetic fetch responses do not establish hosted authorization.
+- CI installs isolated PostgreSQL and runs the complete Vitest suite and explicit-config Deno tests before the existing production build. It does not skip failing cases or bypass Deno checking.
 - Existing lifecycle, review, answer validation and DSLM baseline suites remain authoritative. The isolated database supplies minimal tables, not all existing hosted triggers: it does not certify production side effects.
 
 ## Verification boundaries
@@ -54,4 +57,12 @@ Verification on 2026-10-31: 2772 tests passed in 190 available suites, including
 
 The sandbox reports external_unmanaged and cannot mint a real teacher/student session. Local browser fixtures and isolated PostgreSQL are not authenticated hosted certification. Full real homework submission -> teacher review -> mistake conversion -> saved practice readback and later learner evidence require an authorized dedicated test session. The whole Pillar 3 remains unverified in that hosted sense.
 
-The existing full-suite environment also has five jsdom files blocked by a missing optional canvas.node binary. These are not treated as passing, deleted or hidden by changing production dependencies. Supabase reports 158 pre-existing linter findings, none introduced by these migrations; remediation is outside this slice.
+The earlier full-suite environment had five jsdom files blocked by a missing optional canvas.node binary. Stage 3.4 temporarily quarantined that broken optional package so jsdom used its normal fallback; all five suites then ran. No source dependencies or test exclusions were changed. Supabase reports 158 pre-existing linter findings, none introduced by these migrations; remediation is outside this slice.
+
+### Stage 3.4 superseding verification (2026-11-01)
+
+The complete local suite passed: 195 files / 2841 tests, including 27 actual isolated PostgreSQL cases. Explicit-config Deno tests passed 21 cases (18 HTTP, 3 service). The Supabase generic runner still has a separate root npm-resolution limitation; use the exact per-function config command recorded in CI.
+
+The final endpoint was redeployed after the options-only prompt and 500/501 batch corrections. Live negative requests returned 403, 400 and 405 for unauthorized preview, browser-authored cards and GET respectively. Real signed-out teacher/Hub redirects and a fresh synthetic Hub goals -> feedback -> convert -> study -> reveal -> saved practice-response flow passed with zero page errors. Existing conversion, empty candidates, invalid assignment selection and error/retry passed. Automatic preview build reports OK. The Stage 3.4 baseline contains 107 protected engine/llms files, all byte-identical at closeout; this does not retrospectively reconstruct the lost Stage 3.3 baseline.
+
+Independent final review found no actionable new defect, without independently rerunning the reported commands. Hosted GitHub CI and the full SEO production build were not run locally. The dedicated hosted teacher/student authorization and real persisted practice/evidence loop remain blocked, so this feature stays BETA. Local fixture and isolated-schema assertions must never be described as production certification.
