@@ -121,6 +121,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
 ## AI Defensibility, Pillar 3
 
+- [ ] Stage 3.4 final closure: cross-stage regression baseline, unfiltered full-suite run, independent review, browser recheck and evidence-based closeout; retain explicit hosted-session blockers.
 - [x] Stage 3.3: source-bound self-contained confirmed homework mistakes to shared learner flashcards, teacher review and verified student/Hub actions; service-only snapshot parity and atomic per-attempt/question deduplication. No grading, events, mastery or progress writes on creation. Spec: `docs/ux/pillar3-mistake-flashcards-spec.md`.
 - [x] Stage 3.4 for 3.3: 2772 tests across 190 available suites and 3 Deno tests passed, including 13 actual isolated PostgreSQL transaction/RLS/concurrency cases. Real signed-out teacher review redirected to login. Synthetic browser Hub feedback -> create -> study -> reveal -> practice readback, repeated conversion, empty/error/retry, desktop/390px modal passed with 0 page errors. Independent reviews completed; architecture/spec synchronized; automatic build OK.
 - [ ] Stage 3.3 hosted end-to-end: blocked by external unmanaged Supabase with no authorized teacher/student test session; local browser fixtures and isolated minimal PostgreSQL do not certify existing production triggers, permissions or the real submit/review/convert/practice evidence loop.
