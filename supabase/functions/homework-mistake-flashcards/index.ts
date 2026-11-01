@@ -10,7 +10,8 @@ const schema = z.object({
   student_email: z.string().trim().email().max(254).optional(),
 }).strict();
 
-Deno.serve(async req => {
+/** Export the actual HTTP boundary so Deno tests exercise the deployed adapter. */
+export async function handleRequest(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405, corsHeaders);
   try {
@@ -68,4 +69,6 @@ Deno.serve(async req => {
   } catch (error) {
     return jsonResponse({ error: error instanceof MistakeFailure ? error.code : 'service_unavailable' }, error instanceof MistakeFailure ? error.status : 503, corsHeaders);
   }
-});
+}
+
+if (import.meta.main) Deno.serve(handleRequest);
