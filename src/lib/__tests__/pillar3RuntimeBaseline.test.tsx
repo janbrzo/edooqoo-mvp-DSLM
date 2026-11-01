@@ -176,6 +176,20 @@ describe('Pillar 3 Hub identity safety', () => {
     await act(async () => old.resolve({ data: { ...hubPayload, studentName: 'Learner B' }, error: null }));
     expect(hub?.data?.studentName).toBe('Learner C');
   });
+  it('confirmed goals belong to the current Hub response and disappear during learner switches', async () => {
+    const goalA = { id: 'goal-a', title: 'Lead client negotiations', description: null, goal_type: 'custom', target_date: null, is_achieved: false, achieved_at: null, manual_progress_pct: 35, display_order: 0 };
+    boundary.invoke.mockResolvedValueOnce({ data: { ...hubPayload, goals: [goalA] }, error: null });
+    await mount(<HubProbe />);
+    expect(hub?.data?.goals).toEqual([goalA]);
+    const pending = deferred<{ data: typeof hubPayload & { goals: Array<typeof goalA> }; error: null }>();
+    boundary.invoke.mockReturnValueOnce(pending.promise);
+    await update(<HubProbe email="learner-b@example.test" />);
+    expect(hub?.data).toBeNull();
+    const goalB = { ...goalA, id: 'goal-b', title: 'Explain project deadlines', manual_progress_pct: null };
+    await act(async () => pending.resolve({ data: { ...hubPayload, studentEmail: 'learner-b@example.test', goals: [goalB] }, error: null }));
+    expect(hub?.data?.goals).toEqual([goalB]);
+    expect(boundary.invoke.mock.calls.at(-1)?.[1].body.email).toBe('learner-b@example.test');
+  });
   it('failed password proof clears both data and stored session on refetch', async () => {
     sessionStorage.setItem('student_hub_session', 'synthetic-proof');
     await mount(<HubProbe />);
