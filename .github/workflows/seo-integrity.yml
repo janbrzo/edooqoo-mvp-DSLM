@@ -72,6 +72,14 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Set up Deno for homework HTTP boundary tests
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Homework mistake service and HTTP boundary tests
+        run: deno test --config supabase/functions/homework-mistake-flashcards/deno.json --allow-net --allow-env supabase/functions/homework-mistake-flashcards/*_test.ts
+
       - name: Full SEO production build
         run: npm run build:seo
 
