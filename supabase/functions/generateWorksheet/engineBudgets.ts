@@ -14,8 +14,9 @@ export const ENGINE_BUDGETS = {
   totalMs: 140_000,
   /** Kept free after the last model call for parse, save and the response. */
   postModelReserveMs: 12_000,
-  /** Streaming: no first chunk within this long means the call is stuck. */
-  streamFirstChunkMs: 60_000,
+  /** Streaming: no first chunk within this long means the call is stuck. Kept
+   * short so a silent primary leaves the fallback model a real budget. */
+  streamFirstChunkMs: 25_000,
   /** Streaming: silence this long after the first chunk means a stall. */
   streamStallMs: 30_000,
   /** Primary streaming call: past this it is aborted unless it is still streaming. */
