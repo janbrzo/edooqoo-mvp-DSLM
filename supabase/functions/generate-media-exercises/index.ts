@@ -1,11 +1,10 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import OpenAI from "npm:openai@4.77.0";
+import { executeAiCall } from "../_shared/aiGateway.ts";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { loadWorksheetJson } from "../_shared/worksheetContent.ts";
 
-const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY')! });
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -190,21 +189,21 @@ REQUIREMENTS:
 
 CRITICAL: Return ONLY the JSON exercise object, no additional text or markdown.`;
 
-    console.log('[GENERATE-MEDIA] Calling OpenAI for content generation...');
+    console.log('[GENERATE-MEDIA] Calling AI gateway (media-passages) for content generation...');
 
-    const aiResponse = await openai.chat.completions.create({
-      model: "gpt-4.1-2025-04-14",
+    const aiResponse = await executeAiCall('media-passages', {
       temperature: 0.3,
       messages: [
         { role: "system", content: systemPrompt + NO_EM_DASH_RULE },
         { role: "user", content: "Generate the complete picture-based exercise content now." }
       ],
-      max_completion_tokens: 2000
-    });
+      maxOutputTokens: 2000
+    }, { functionName: 'generate-media-exercises' });
+    console.log(`[GENERATE-MEDIA] Gateway answered with ${aiResponse.provider}/${aiResponse.model}${aiResponse.usedFallback ? ' (fallback)' : ''}`);
 
     let generatedExercise;
     try {
-      const responseText = aiResponse.choices[0].message.content?.trim() || '';
+      const responseText = aiResponse.text.trim();
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       generatedExercise = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(responseText);
     } catch (parseError) {
