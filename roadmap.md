@@ -166,3 +166,9 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] Step 3: Martha filter: 12 school-only articles 301-merged (sitemap 252 -> 240), retired-link rewriter in sync, Martha audit hard-fails school signals in indexable blog title/H1/meta.
 - [x] Step 4: root pSEO pages enrichment (Gallery examples, CTA, common B1 errors).
 - [ ] Publication + GSC "Validate fix" (requires publish).
+
+## Pillar 4: Model-agnostic gateway and extensible formats
+- [x] Stage 4.1: `_shared/aiGateway.ts` (semantic roles from the model registry, env override, one fallback role), `generate-media-exercises` migrated with an unchanged prompt, deployed; 17 gateway tests, full suite 2859/196 passed. Live AI call through the deployed function not verified (needs a teacher session).
+- [ ] Stage 4.2: exercise schema registry, `roleplay` and `audio-prompt` open types, safe fallback renderer
+- [ ] Stage 4.3: roleplay and audio prompt exercise components
+- [ ] Stage 4.4: Pillar 4 baseline, docs and llm-context closeout
