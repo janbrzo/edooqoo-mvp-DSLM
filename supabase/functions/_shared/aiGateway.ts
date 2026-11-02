@@ -186,7 +186,9 @@ function defaultGetEnv(name: string): string | undefined {
 }
 
 async function defaultLogFailure(entry: FailureLogEntry): Promise<void> {
-  const mod = await import("./modelFailureLogger.ts");
+  // Non-literal specifier keeps the remote-importing logger out of browser/Vitest type graphs.
+  const loggerPath = "./modelFailureLogger.ts";
+  const mod = await import(/* @vite-ignore */ loggerPath);
   await mod.logModelFailure(entry);
 }
 
@@ -257,7 +259,7 @@ export async function executeAiCall(
   for (let i = 0; i < chain.length; i++) {
     const target = chain[i];
     const result = await attempt(target, payload, deps, options.functionName);
-    if (result.ok) {
+    if (result.ok === true) {
       return { text: result.text, role, provider: target.provider, model: target.model, usedFallback: i > 0 };
     }
     last = { status: result.status, message: result.message, target };
