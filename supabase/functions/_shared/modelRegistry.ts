@@ -83,6 +83,7 @@ export const MODEL_REGISTRY: ModelRegistryEntry[] = [
     id: "gemini-2.5-flash",
     provider: "google",
     role: "chat-primary",
+    gatewayFallbackRole: "chat-fallback",
     useCase:
       "Primary text model: worksheet JSON generation (streaming, JSON mode, ~30k output tokens), " +
       "open-answer verification, exercise suggestions, knowledge classification, curriculum phases, " +
@@ -90,6 +91,7 @@ export const MODEL_REGISTRY: ModelRegistryEntry[] = [
     consumers: [
       "generateWorksheet",
       "_shared/aiChat.ts",
+      "_shared/aiGateway.ts",
       "verify-open-answers",
       "suggest-exercises",
       "classify-knowledge-entry",
@@ -115,6 +117,7 @@ export const MODEL_REGISTRY: ModelRegistryEntry[] = [
     id: "gemini-2.5-flash-lite",
     provider: "google",
     role: "chat-lightweight",
+    gatewayFallbackRole: "chat-fallback",
     useCase: "Short flashcard translation and fallback image description (low latency, low cost).",
     consumers: ["translate-flashcard", "generate-image"],
     probe: "gemini-generate",
@@ -135,7 +138,7 @@ export const MODEL_REGISTRY: ModelRegistryEntry[] = [
     useCase:
       "Fallback chat model for the aiChat helper, broken-JSON repair in worksheet generation, " +
       "the text step of generate-audio and the extract-student-profile fallback.",
-    consumers: ["_shared/aiChat.ts", "generateWorksheet", "generate-audio", "extract-student-profile"],
+    consumers: ["_shared/aiChat.ts", "_shared/aiGateway.ts", "generateWorksheet", "generate-audio", "extract-student-profile"],
     protectedEngine: true,
     probe: "openai-chat",
     lifecycle: {
@@ -170,8 +173,9 @@ export const MODEL_REGISTRY: ModelRegistryEntry[] = [
     id: "gpt-4.1-2025-04-14",
     provider: "openai",
     role: "media-passages",
+    gatewayFallbackRole: "chat-primary",
     useCase: "Reading and listening passage generation in generate-media-exercises.",
-    consumers: ["generate-media-exercises"],
+    consumers: ["generate-media-exercises", "_shared/aiGateway.ts"],
     probe: "openai-chat",
     lifecycle: {
       shutdownDate: null,
@@ -277,4 +281,9 @@ export const MODEL_ENV_OVERRIDES: Array<{
     ignoredValues: ["gemini-3.1-flash-image-preview"],
   },
   { envVar: "GEMINI_DESCRIPTION_MODEL", provider: "google", role: "image-description-override" },
+  // Pillar 4 gateway overrides (see aiGateway.ts overrideEnvVar): same provider, other model id.
+  { envVar: "AI_GATEWAY_MODEL_CHAT_PRIMARY", provider: "google", role: "gateway-chat-primary-override" },
+  { envVar: "AI_GATEWAY_MODEL_CHAT_LIGHTWEIGHT", provider: "google", role: "gateway-chat-lightweight-override" },
+  { envVar: "AI_GATEWAY_MODEL_CHAT_FALLBACK", provider: "openai", role: "gateway-chat-fallback-override" },
+  { envVar: "AI_GATEWAY_MODEL_MEDIA_PASSAGES", provider: "openai", role: "gateway-media-passages-override" },
 ];
