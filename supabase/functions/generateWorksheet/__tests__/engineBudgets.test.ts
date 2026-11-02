@@ -58,8 +58,8 @@ describe('evaluateStream', () => {
   });
 
   it('aborts a call that produced no first chunk', () => {
-    expect(evaluateStream(clock(59 * S, null), PRIMARY_STREAM_LIMITS)).toEqual({ ok: true });
-    expect(evaluateStream(clock(60 * S, null), PRIMARY_STREAM_LIMITS)).toEqual({ ok: false, reason: 'first_chunk_timeout' });
+    expect(evaluateStream(clock(24 * S, null), PRIMARY_STREAM_LIMITS)).toEqual({ ok: true });
+    expect(evaluateStream(clock(25 * S, null), PRIMARY_STREAM_LIMITS)).toEqual({ ok: false, reason: 'first_chunk_timeout' });
   });
 
   it('aborts a stalled stream', () => {
