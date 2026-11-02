@@ -56,6 +56,11 @@ export interface ModelRegistryEntry {
   consumers: string[];
   /** True when changing the model touches the protected Worksheet Generation Engine. */
   protectedEngine?: boolean;
+  /**
+   * Role tried once by `_shared/aiGateway.ts` when this role's provider fails
+   * transiently. Only read by the gateway; direct callers keep their own logic.
+   */
+  gatewayFallbackRole?: string;
   probe: ProbeKind;
   lifecycle: ModelLifecycle;
 }
