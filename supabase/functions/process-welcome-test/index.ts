@@ -27,6 +27,7 @@ import {
   interpretationVersionOf,
 } from "../_shared/welcomeTestInterpretation.ts";
 import { WELCOME_TEST_EVENT_QUESTIONS } from "../_shared/welcomeTestQuestionMeta.ts";
+import { detectGoalConflict, isMainGoalMissing, mainGoalToTrack } from "../_shared/goalTaxonomy.ts";
 import {
   answerBehaviour,
   computeDivergences,
