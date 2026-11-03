@@ -12,6 +12,8 @@
  * Pure TypeScript, no Deno APIs: imported by Edge Functions and by vitest.
  */
 
+import { trackPacingDelta } from './goalTaxonomy.ts';
+
 export function clampPacing(n: number, min = 0, max = 100): number {
   return Math.max(min, Math.min(max, n));
 }
