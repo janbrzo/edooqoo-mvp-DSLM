@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { devWarn } from '@/utils/logger';
 import type { ProgressGoal } from '@/types/studentProgress';
 import { isSuggestedGoal } from '@/lib/dslm/goals';
+import { divergentSuggestion } from '@/lib/dslm/goalConflict';
 
 interface SuggestedGoalsCardProps {
   goals: readonly ProgressGoal[];
@@ -105,6 +106,7 @@ export const SuggestedGoalsCard: React.FC<SuggestedGoalsCardProps> = ({ goals, u
   };
 
   if (suggestedGoals.length === 0) return null;
+  const divergence = divergentSuggestion(suggestedGoals);
 
   return (
     <Card className="border-primary/40 bg-primary/5">
@@ -125,6 +127,11 @@ export const SuggestedGoalsCard: React.FC<SuggestedGoalsCardProps> = ({ goals, u
         <p className="text-xs text-muted-foreground">
           These goals were inferred from the student's Welcome Test results. Accept to keep them in the plan, dismiss to remove, or edit individual goals below.
         </p>
+        {divergence && (
+          <p className="rounded-md border border-border/60 bg-background/60 px-2 py-1.5 text-xs text-muted-foreground" role="note">
+            The Welcome Test points to a different focus ({divergence.suggested}) than the main goal you set ({divergence.tutor}). Your main goal stays in charge; accept these only if they fit it.
+          </p>
+        )}
         <ul className="space-y-1.5 pl-1 text-xs">
           {suggestedGoals.map((g) => (
             <li
