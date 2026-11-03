@@ -3481,10 +3481,12 @@ export type Database = {
           goal_type: string
           id: string
           is_achieved: boolean | null
+          kind: string
           manual_progress_pct: number | null
           metadata: Json
           source: string | null
           student_id: string
+          target_category: string
           target_date: string | null
           teacher_id: string
           title: string
@@ -3501,10 +3503,12 @@ export type Database = {
           goal_type: string
           id?: string
           is_achieved?: boolean | null
+          kind?: string
           manual_progress_pct?: number | null
           metadata?: Json
           source?: string | null
           student_id: string
+          target_category?: string
           target_date?: string | null
           teacher_id: string
           title: string
@@ -3521,10 +3525,12 @@ export type Database = {
           goal_type?: string
           id?: string
           is_achieved?: boolean | null
+          kind?: string
           manual_progress_pct?: number | null
           metadata?: Json
           source?: string | null
           student_id?: string
+          target_category?: string
           target_date?: string | null
           teacher_id?: string
           title?: string
@@ -3869,6 +3875,7 @@ export type Database = {
           last_pacing_reasoning: Json | null
           last_pacing_recalc_at: string | null
           last_pacing_set_manually: boolean | null
+          learning_track: string
           main_goal: string | null
           main_goal_deadline: string | null
           main_goal_target_date: string | null
@@ -3892,6 +3899,7 @@ export type Database = {
           last_pacing_reasoning?: Json | null
           last_pacing_recalc_at?: string | null
           last_pacing_set_manually?: boolean | null
+          learning_track?: string
           main_goal?: string | null
           main_goal_deadline?: string | null
           main_goal_target_date?: string | null
@@ -3915,6 +3923,7 @@ export type Database = {
           last_pacing_reasoning?: Json | null
           last_pacing_recalc_at?: string | null
           last_pacing_set_manually?: boolean | null
+          learning_track?: string
           main_goal?: string | null
           main_goal_deadline?: string | null
           main_goal_target_date?: string | null

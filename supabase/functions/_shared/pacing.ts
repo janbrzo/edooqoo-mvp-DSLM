@@ -12,6 +12,8 @@
  * Pure TypeScript, no Deno APIs: imported by Edge Functions and by vitest.
  */
 
+import { trackPacingDelta } from './goalTaxonomy.ts';
+
 export function clampPacing(n: number, min = 0, max = 100): number {
   return Math.max(min, Math.min(max, n));
 }
@@ -27,6 +29,8 @@ export const DEFAULT_PACING_MODE = 50;
 
 export interface PacingStudent {
   main_goal?: string | null;
+  /** Derived learning track; used only when main_goal matches no pacing keyword. */
+  learning_track?: string | null;
   english_level?: string | null;
   main_goal_target_date?: string | null;
 }
@@ -159,6 +163,9 @@ function deadlineDaysList(
 /** A goal date passed more than this many days ago is stale, not urgent. */
 export const STALE_DEADLINE_DAYS = 14;
 
+/** Any main_goal keyword the pacing rules already score. */
+const GOAL_KEYWORD_RE = /academic|exam|cae|fce|cpe|ielts|toefl|work|business|career|travel|conversation|social|meeting|interview/;
+
 /**
  * Style pacing (Scientific 0 to Pragmatic 100) from goals, deadlines, level,
  * mastery, trend, the Welcome Test profile and the Self-Profile.
@@ -175,6 +182,10 @@ export function computeStylePacing(input: StylePacingInput): StylePacingResult {
   const goal = (student?.main_goal || '').toLowerCase();
   if (/academic|exam|cae|fce|cpe|ielts|toefl/.test(goal)) { p -= 30; reasoning.push('Academic/exam goal → −30 (Scientific)'); }
   if (/work|business|career|travel|conversation|social|meeting|interview/.test(goal)) { p += 20; reasoning.push('Work/travel/conversation goal → +20 (Pragmatic)'); }
+  if (!GOAL_KEYWORD_RE.test(goal)) {
+    const delta = trackPacingDelta(student?.learning_track);
+    if (delta !== 0) { p += delta; reasoning.push(`Learning track ${student?.learning_track} → ${delta > 0 ? '+' : '−'}${Math.abs(delta)}`); }
+  }
 
   // Scan ALL active goals (main + supporting + additional) and the legacy
   // students.main_goal_target_date. The shortest effective deadline wins.
@@ -362,6 +373,7 @@ export function computeIntensity(learningPath: unknown, deadlineDays: number | n
 
 export interface PromptPacingStudent {
   main_goal?: string | null;
+  learning_track?: string | null;
   english_level?: string | null;
   dslm_pacing_mode?: number | null;
   /** true: the teacher set it; false: recalculate-pacing (apply) or an accepted proposal wrote it; null: never set. */
@@ -377,6 +389,7 @@ export function autoPacingIndex(student: PromptPacingStudent, weeksUntilDeadline
 
   if (/academic|exam|cae|fce|cpe|ielts|toefl/.test(goal)) p -= 30;
   if (/work|business|career|travel|conversation|social|meeting|interview/.test(goal)) p += 20;
+  if (!GOAL_KEYWORD_RE.test(goal)) p += trackPacingDelta(student?.learning_track);
 
   if (weeksUntilDeadline !== null) {
     if (weeksUntilDeadline <= 8) p += 25;

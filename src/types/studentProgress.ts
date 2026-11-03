@@ -34,6 +34,10 @@ export interface ProgressGoal {
   manual_progress_pct?: number | null;
   accepted_at?: string | null;
   source?: string | null;
+  /** milestone | skill | task (see supabase/functions/_shared/goalTaxonomy.ts). */
+  kind?: string | null;
+  target_category?: string | null;
+  metadata?: unknown;
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
