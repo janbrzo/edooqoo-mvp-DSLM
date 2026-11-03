@@ -165,7 +165,7 @@ serve(async (req) => {
     const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, existingPhasesRes, learningProfileRes, wtProfileRes] = await Promise.all([
       supabase
         .from('students')
-        .select('name, english_level, native_language, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap')
+        .select('name, english_level, native_language, main_goal, learning_track, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap')
         .eq('id', studentId)
         .eq('teacher_id', teacherId)
         .single(),
