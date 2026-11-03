@@ -1152,14 +1152,14 @@ serve(async (req) => {
       }
       if (!VALID_MAIN_GOALS.has(suggestedMainGoal)) suggestedMainGoal = 'general';
       const currentMainGoal = (studentRowForAutoFill as any)?.main_goal;
-      const isMissingMainGoal =
-        !currentMainGoal ||
-        String(currentMainGoal).trim() === '' ||
-        String(currentMainGoal).trim().toLowerCase() === 'custom';
+      // Tutor supremacy: a goal the tutor set (including "custom") is never
+      // overwritten; a mismatch is only flagged on the suggestions.
+      const isMissingMainGoal = isMainGoalMissing(currentMainGoal);
+      const conflictStatus = detectGoalConflict(currentMainGoal, suggestedMainGoal);
       if (isMissingMainGoal) {
         await supabase
           .from('students')
-          .update({ main_goal: suggestedMainGoal })
+          .update({ main_goal: suggestedMainGoal, learning_track: mainGoalToTrack(suggestedMainGoal) })
           .eq('id', student_id);
       }
 
@@ -1191,7 +1191,7 @@ serve(async (req) => {
             goal_type: 'supporting',
             title: `Improve ${skillLabel(weakest)}`,
             description: `Welcome Test marked ${skillLabel(weakest)} as the weakest skill. Focused practice should lift overall CEFR confidence.`,
-            meta: { from: 'welcome_test', test_id, signal: 'weakest_skill', value: weakest, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal },
+            meta: { from: 'welcome_test', test_id, signal: 'weakest_skill', value: weakest, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal, tutor_main_goal: currentMainGoal ?? null, conflict_status: conflictStatus },
           });
         }
         if (strongest && strongest !== weakest) {
@@ -1199,7 +1199,7 @@ serve(async (req) => {
             goal_type: 'supporting',
             title: `Build confidence from ${skillLabel(strongest)}`,
             description: `Welcome Test marked ${skillLabel(strongest)} as the strongest skill. Use it as a confidence anchor while building weaker areas.`,
-            meta: { from: 'welcome_test', test_id, signal: 'strongest_skill', value: strongest, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal },
+            meta: { from: 'welcome_test', test_id, signal: 'strongest_skill', value: strongest, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal, tutor_main_goal: currentMainGoal ?? null, conflict_status: conflictStatus },
           });
         }
         if (Array.isArray(interestTopics) && interestTopics.length > 0) {
@@ -1208,7 +1208,7 @@ serve(async (req) => {
             goal_type: 'additional',
             title: `Practice English around ${topic}`,
             description: `Welcome Test surfaced "${topic}" as an interest area. Anchoring lessons here boosts motivation.`,
-            meta: { from: 'welcome_test', test_id, signal: 'interest_topic', value: topic, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal },
+            meta: { from: 'welcome_test', test_id, signal: 'interest_topic', value: topic, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal, tutor_main_goal: currentMainGoal ?? null, conflict_status: conflictStatus },
           });
         }
 
@@ -1221,6 +1221,8 @@ serve(async (req) => {
             description: s.description,
             display_order: i,
             source: 'welcome_test_auto',
+            kind: s.meta.signal === 'interest_topic' ? 'milestone' : 'skill',
+            target_category: s.meta.signal === 'interest_topic' ? 'general' : String(s.meta.value || 'general'),
             metadata: s.meta,
           }));
           await supabase.from('student_progress_goals').insert(rows);
