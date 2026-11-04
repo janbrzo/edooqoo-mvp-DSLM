@@ -25,6 +25,7 @@ import { useGoalProgress } from '@/hooks/useGoalProgress';
 import { GoalProgressBar } from '@/components/student-progress/GoalProgressBar';
 import { SuggestedGoalsCard } from './plan/SuggestedGoalsCard';
 import { AddGoalDialog, type NewGoalValue } from './plan/AddGoalDialog';
+import { useGoalEvidenceAudit } from '@/hooks/useGoalEvidenceAudit';
 
 interface GoalsViewProps {
   studentId: string;
@@ -79,6 +80,12 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
   const archivedGoals = goals.filter(g => !!(g as any).archived_at);
 
   const { map: progressMap, mainAggregate } = useGoalProgress(goals as any, studentId, teacherId);
+  const { auditMap, pending: pendingAudits } = useGoalEvidenceAudit(goals as any, studentId, teacherId);
+  const applyAllSuggested = async () => {
+    for (const a of pendingAudits) {
+      if (a.suggestedProgressPct !== null) await updateGoal(a.goalId, { manual_progress_pct: a.suggestedProgressPct } as any);
+    }
+  };
   const editingGoal = editingGoalId ? (goals.find(g => g.id === editingGoalId) || null) : null;
 
   // v6.9.29: open Add-Goal modal when DSLMTab signals a pending request.
@@ -130,6 +137,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         onMarkAchieved={() => updateGoal(goal.id, { is_achieved: true })}
         onSetManualProgress={(pct) => updateGoal(goal.id, { manual_progress_pct: pct } as any)}
         isSuggested={goal.source === 'welcome_test_auto' && !goal.accepted_at}
+        audit={auditMap.get(goal.id)}
       />
     );
   };
@@ -230,6 +238,12 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
       </Card>
 
       <SuggestedGoalsCard goals={goals} updateGoal={updateGoal} deleteGoal={deleteGoal} />
+      {pendingAudits.length > 1 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+          <span>DSLM found new practice evidence for {pendingAudits.length} goals.</span>
+          <Button size="sm" variant="outline" className="ml-auto h-7 text-xs" onClick={applyAllSuggested}>Apply all suggestions</Button>
+        </div>
+      )}
 
       {/* Supporting Goals: open by default */}
       <CollapsibleSection
