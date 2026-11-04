@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { auditGoal, type AuditMetric } from '../goalEvidenceAuditor';
+import { auditGoal, type AuditGoal, type AuditMetric } from '../goalEvidenceAuditor';
 
 const now = new Date('2026-11-04T08:00:00Z');
 const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000).toISOString();
 const m = (skill_name: string, mastery: number, events: number, last = daysAgo(1), cat = 'vocabulary', micro: string | null = null): AuditMetric => ({
   skill_name, skill_category: cat, micro_skill: micro, current_mastery: mastery, total_events: events, last_event_at: last,
 });
-const goal = (over: Record<string, unknown> = {}) => ({ id: 'g1', title: 'Negotiation vocabulary for meetings', ...over });
+const goal = (over: Partial<AuditGoal> = {}): AuditGoal => ({ id: 'g1', title: 'Negotiation vocabulary for meetings', ...over });
 
 describe('goalEvidenceAuditor', () => {
   it('no matching metrics gives no suggestion and no confidence', () => {
