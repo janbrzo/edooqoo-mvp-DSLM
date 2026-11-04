@@ -11,6 +11,8 @@ import { Slider } from '@/components/ui/slider';
 import { GoalProgressBar } from './GoalProgressBar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import type { GoalAuditResult } from '@/lib/dslm/goalEvidenceAuditor';
+import { GoalEvidenceSuggestion } from './GoalEvidenceSuggestion';
 
 interface GoalCardProps {
   goal: any;
@@ -28,6 +30,8 @@ interface GoalCardProps {
   isManualOverride?: boolean;
   signalsLabel?: string;
   isSuggested?: boolean;
+  /** Goals Step 2: teacher-only DSLM evidence suggestion. */
+  audit?: GoalAuditResult;
 }
 
 const formatDeadline = (targetDate?: string | null): string | null => {
@@ -45,7 +49,7 @@ const formatDeadline = (targetDate?: string | null): string | null => {
 export const GoalCard: React.FC<GoalCardProps> = ({
   goal, onDelete, onAddElement, onRateElement, onDeleteElement,
   onEdit, onArchive, onUnarchive, onMarkAchieved, onSetManualProgress,
-  progressPct, isManualOverride, signalsLabel, isSuggested,
+  progressPct, isManualOverride, signalsLabel, isSuggested, audit,
 }) => {
   const deadline = formatDeadline(goal.target_date);
   const isArchived = !!goal.archived_at;
@@ -157,6 +161,9 @@ export const GoalCard: React.FC<GoalCardProps> = ({
         </div>
         </TooltipProvider>
       </div>
+      {audit && onSetManualProgress && !isArchived && !isAchieved && !isSuggested && (
+        <GoalEvidenceSuggestion audit={audit} onApply={(pct) => onSetManualProgress(pct)} onMarkAchieved={onMarkAchieved} />
+      )}
       {goal.elements?.length > 0 && (
         <div className="space-y-1 pt-2 border-t">
           {goal.elements.map((el: any) => (
