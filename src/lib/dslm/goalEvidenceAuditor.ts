@@ -83,7 +83,7 @@ const STOPWORDS = new Set([
 
 const tokensOf = (text: string): string[] =>
   String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').split(' ')
-    .filter((t) => t.length >= 4 && !STOPWORDS.has(t))
+    .filter((t) => t.length >= 4 && !STOPWORDS.has(t) && !SKILL_CATEGORIES.has(t) && t !== 'vocab')
     .map((t) => (t.length > 5 && t.endsWith('s') ? t.slice(0, -1) : t));
 
 const metricText = (m: AuditMetric): string =>
