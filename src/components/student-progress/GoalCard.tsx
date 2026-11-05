@@ -13,6 +13,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import type { GoalAuditResult } from '@/lib/dslm/goalEvidenceAuditor';
 import { GoalEvidenceSuggestion } from './GoalEvidenceSuggestion';
+import { GoalVelocityHint } from './GoalVelocityHint';
+import { computeGoalVelocity } from '@/lib/dslm/deadlineVelocity';
 
 interface GoalCardProps {
   goal: any;
@@ -32,6 +34,8 @@ interface GoalCardProps {
   isSuggested?: boolean;
   /** Goals Step 2: teacher-only DSLM evidence suggestion. */
   audit?: GoalAuditResult;
+  /** Goals Step 3: explicit teacher action moving the target date. */
+  onSetTargetDate?: (isoDate: string) => void;
 }
 
 const formatDeadline = (targetDate?: string | null): string | null => {
@@ -49,7 +53,7 @@ const formatDeadline = (targetDate?: string | null): string | null => {
 export const GoalCard: React.FC<GoalCardProps> = ({
   goal, onDelete, onAddElement, onRateElement, onDeleteElement,
   onEdit, onArchive, onUnarchive, onMarkAchieved, onSetManualProgress,
-  progressPct, isManualOverride, signalsLabel, isSuggested, audit,
+  progressPct, isManualOverride, signalsLabel, isSuggested, audit, onSetTargetDate,
 }) => {
   const deadline = formatDeadline(goal.target_date);
   const isArchived = !!goal.archived_at;
@@ -163,6 +167,21 @@ export const GoalCard: React.FC<GoalCardProps> = ({
       </div>
       {audit && onSetManualProgress && !isArchived && !isAchieved && !isSuggested && (
         <GoalEvidenceSuggestion audit={audit} onApply={(pct) => onSetManualProgress(pct)} onMarkAchieved={onMarkAchieved} />
+      )}
+      {!isArchived && !isAchieved && !isSuggested && goal.target_date && (
+        <GoalVelocityHint
+          velocity={computeGoalVelocity({
+            title: goal.title ?? '',
+            description: goal.description,
+            createdAt: goal.created_at ?? null,
+            targetDate: goal.target_date,
+            progressPct: typeof goal.manual_progress_pct === 'number'
+              ? goal.manual_progress_pct
+              : (audit?.suggestedProgressPct ?? (typeof progressPct === 'number' ? progressPct : null)),
+            now: new Date(),
+          })}
+          onSetTargetDate={onSetTargetDate}
+        />
       )}
       {goal.elements?.length > 0 && (
         <div className="space-y-1 pt-2 border-t">

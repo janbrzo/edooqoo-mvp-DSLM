@@ -138,6 +138,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         onSetManualProgress={(pct) => updateGoal(goal.id, { manual_progress_pct: pct } as any)}
         isSuggested={goal.source === 'welcome_test_auto' && !goal.accepted_at}
         audit={auditMap.get(goal.id)}
+        onSetTargetDate={(d) => updateGoal(goal.id, { target_date: d })}
       />
     );
   };
