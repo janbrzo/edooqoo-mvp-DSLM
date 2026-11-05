@@ -4,11 +4,11 @@ import { computeGoalVelocity, classifyDeadlineKind } from '../deadlineVelocity';
 const now = new Date('2026-11-05T00:00:00Z');
 const goal = (over: Partial<Parameters<typeof computeGoalVelocity>[0]> = {}) => computeGoalVelocity({
   title: 'Small talk fluency', createdAt: '2026-09-06T00:00:00Z', targetDate: '2026-11-20T00:00:00Z',
-  progressPct: 50, now, ...over,
+  progressPct: 40, now, ...over,
 });
 
 describe('deadlineVelocity', () => {
-  it('flags 50% progress at 80% of time as lagging with an extension for a soft goal', () => {
+  it('flags 40% progress at 80% of time as lagging with an extension for a soft goal', () => {
     const r = goal();
     expect(r.timeElapsedPct).toBe(80);
     expect(r.status).toBe('lagging');
@@ -28,12 +28,16 @@ describe('deadlineVelocity', () => {
     expect(goal({ progressPct: 70 }).status).toBe('on_track');
   });
 
+  it('treats 50% progress at 80% of time as tension', () => {
+    expect(goal({ progressPct: 50 }).status).toBe('tension');
+  });
+
   it('is tension between 0.60 and 0.85', () => {
     expect(goal({ progressPct: 60 }).status).toBe('tension');
   });
 
   it('does not judge pace in the first 20% of the window', () => {
-    expect(goal({ createdAt: '2026-11-01T00:00:00Z', progressPct: 0 }).status).toBe('on_track');
+    expect(goal({ createdAt: '2026-11-03T00:00:00Z', progressPct: 0 }).status).toBe('on_track');
   });
 
   it('suggests a future date for an overdue soft goal', () => {
