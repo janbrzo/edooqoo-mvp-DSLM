@@ -174,6 +174,7 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
         onUnarchive={() => unarchiveGoal(goal.id)}
         onMarkAchieved={() => updateGoal(goal.id, { is_achieved: true })}
         onSetManualProgress={(pct) => updateGoal(goal.id, { manual_progress_pct: pct } as any)}
+        onSetTargetDate={(d) => updateGoal(goal.id, { target_date: d })}
       />
     );
   };
