@@ -484,12 +484,7 @@ const Index = () => {
       
       {!bothWorksheetsReady ? (
         <>
-          <HeroHeadline
-            calculatorValue={oneMinutePrepCalculator}
-            onCalculatorChange={setOneMinutePrepCalculator}
-            onStartOneMinutePrep={() => setShowOneMinutePrepDialog(true)}
-            onTryWorksheetGenerator={scrollToWorksheetForm}
-          />
+          <HeroHeadline onTryWorksheetGenerator={handleHeroWorksheetCta} />
           <div id="worksheet-form" className="scroll-mt-16 pb-10">
             <FormView 
               onSubmit={handleGenerateWorksheet} 
