@@ -34,7 +34,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({ onTryWorksheetGenerator }) 
   const handleDemoClick = () => {
     trackEvent({
       eventType: 'one_minute_hero_cta_click',
-      eventData: { target: 'demo' },
+      eventData: { target: 'one-minute-prep' },
     });
   };
 

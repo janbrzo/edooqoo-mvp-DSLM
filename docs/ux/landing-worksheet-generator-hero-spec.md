@@ -8,7 +8,7 @@ The public homepage must name the searched product category immediately while pr
 
 - Left column: 1-Minute Prep badge, explicit H1, adult-focused product description, one lesson-topic input and a primary CTA to the existing form.
 - Trust copy is limited to existing product behavior: no signup needed, no credit card and two free worksheets.
-- A secondary link opens the existing public teacher-toolkit demo.
+- A secondary link opens the existing 1-Minute Prep explanation. The retired `/demo` route remains redirected and is not presented as an available action.
 - Right column: a visible example worksheet on first render, with optional Welcome Test and 1-Minute Loop previews. All learner names, levels and results are explicitly examples, not testimonials or measured claims.
 - The preview does not promise a fixed generation time or automatic teaching decisions.
 
