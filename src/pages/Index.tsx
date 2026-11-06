@@ -35,6 +35,7 @@ import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
+import { HERO_TOPIC_PREFILL_EVENT, normalizeHeroLessonTopic } from "@/lib/worksheet/heroTopicPrefill";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -173,6 +174,20 @@ const Index = () => {
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
+
+  const handleHeroWorksheetCta = (topic?: string) => {
+    const normalizedTopic = normalizeHeroLessonTopic(topic);
+    if (normalizedTopic) {
+      window.dispatchEvent(new CustomEvent(HERO_TOPIC_PREFILL_EVENT, {
+        detail: { topic: normalizedTopic },
+      }));
+    }
+    scrollToWorksheetForm();
+    window.setTimeout(() => {
+      const topicField = document.querySelector<HTMLInputElement | HTMLTextAreaElement>('[name="lessonTopic"]');
+      topicField?.focus({ preventScroll: true });
+    }, 450);
   };
 
   // Check for pre-selected student from student page
@@ -469,12 +484,7 @@ const Index = () => {
       
       {!bothWorksheetsReady ? (
         <>
-          <HeroHeadline
-            calculatorValue={oneMinutePrepCalculator}
-            onCalculatorChange={setOneMinutePrepCalculator}
-            onStartOneMinutePrep={() => setShowOneMinutePrepDialog(true)}
-            onTryWorksheetGenerator={scrollToWorksheetForm}
-          />
+          <HeroHeadline onTryWorksheetGenerator={handleHeroWorksheetCta} />
           <div id="worksheet-form" className="scroll-mt-16 pb-10">
             <FormView 
               onSubmit={handleGenerateWorksheet} 

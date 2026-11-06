@@ -9,6 +9,7 @@ One rule per entry with a one-line why. Moved from the root AGENTS.md.
 
 ## Runtime Safety
 
+- The anonymous landing hero hands its topic to the mounted form only through `worksheet:heroTopicPrefill` and `src/lib/worksheet/heroTopicPrefill.ts`; the listener updates `lessonTopic` only and never sets auto-generation flags, submits or consumes tokens, because the hero CTA must preserve teacher review and the existing anonymous generation contract.
 - Generation conversion slides own presentation-only rotation and use explicit modal audience/learner props plus the canonical `studentTabPath` for new-tab actions; never fetch learner evidence or modify generation-job lifecycle, because waiting-time promotion must not interrupt worksheets or expose private learning records.
 
 - Public Gallery recommendations use only reviewed source links revalidated through the publication-filtered metadata RPC, fetched without a teacher session; never embed worksheet bodies in SEO snapshots or infer learner mastery from worksheet levels, because publication is revocable and private learning evidence is not promotional content.

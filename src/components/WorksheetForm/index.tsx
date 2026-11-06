@@ -34,6 +34,7 @@ import { StudentContextHint } from "./StudentContextHint";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser, Plus } from "lucide-react";
 import { devLog, devWarn } from '@/utils/logger';
+import { HERO_TOPIC_PREFILL_EVENT, readHeroLessonTopicPrefill } from '@/lib/worksheet/heroTopicPrefill';
 
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
@@ -402,6 +403,15 @@ export default function WorksheetForm({
 
   // REMOVED: Backup initialization to avoid race condition with ExerciseSelector
   // ExerciseSelector is now solely responsible for initialization
+
+  useEffect(() => {
+    const handleHeroTopicPrefill = (event: Event) => {
+      const topic = readHeroLessonTopicPrefill(event);
+      if (topic) setLessonTopic(topic);
+    };
+    window.addEventListener(HERO_TOPIC_PREFILL_EVENT, handleHeroTopicPrefill);
+    return () => window.removeEventListener(HERO_TOPIC_PREFILL_EVENT, handleHeroTopicPrefill);
+  }, []);
 
   useEffect(() => {
     if (preSelectedStudent) {
