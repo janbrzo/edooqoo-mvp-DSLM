@@ -405,6 +405,15 @@ export default function WorksheetForm({
   // ExerciseSelector is now solely responsible for initialization
 
   useEffect(() => {
+    const handleHeroTopicPrefill = (event: Event) => {
+      const topic = readHeroLessonTopicPrefill(event);
+      if (topic) setLessonTopic(topic);
+    };
+    window.addEventListener(HERO_TOPIC_PREFILL_EVENT, handleHeroTopicPrefill);
+    return () => window.removeEventListener(HERO_TOPIC_PREFILL_EVENT, handleHeroTopicPrefill);
+  }, []);
+
+  useEffect(() => {
     if (preSelectedStudent) {
       setSelectedStudentId(preSelectedStudent.id);
     }

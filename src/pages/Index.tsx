@@ -176,6 +176,20 @@ const Index = () => {
     }
   };
 
+  const handleHeroWorksheetCta = (topic?: string) => {
+    const normalizedTopic = normalizeHeroLessonTopic(topic);
+    if (normalizedTopic) {
+      window.dispatchEvent(new CustomEvent(HERO_TOPIC_PREFILL_EVENT, {
+        detail: { topic: normalizedTopic },
+      }));
+    }
+    scrollToWorksheetForm();
+    window.setTimeout(() => {
+      const topicField = document.querySelector<HTMLInputElement | HTMLTextAreaElement>('[name="lessonTopic"]');
+      topicField?.focus({ preventScroll: true });
+    }, 450);
+  };
+
   // Check for pre-selected student from student page
   useEffect(() => {
     const preSelected = sessionStorage.getItem('preSelectedStudent');
