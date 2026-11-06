@@ -24,6 +24,7 @@ Submitting the hero form trims the topic, caps it at 200 characters and emits `w
 
 ## Verification
 
-- Unit coverage for topic normalization and malformed-event handling.
-- Browser verification of first-render preview, all three tabs, topic handoff without generation, demo navigation, desktop and mobile layouts, and console errors.
-- Automatic build and targeted regression tests.
+- Unit coverage passed for topic normalization, the 200-character cap and malformed-event handling.
+- Playwright passed on desktop 1280x889 and mobile 390x844: first-render worksheet, all three tabs, exact topic handoff and focus, no `generateWorksheet` request, 1-Minute Prep navigation, zero horizontal overflow and zero console/page errors.
+- `seo:audit`, TypeScript, the no-em-dash test and the automatic preview build passed.
+- The initially proposed `/demo` action was replaced because the route is intentionally disabled by a hard redirect. No demo behavior was re-enabled.

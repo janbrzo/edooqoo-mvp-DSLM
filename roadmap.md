@@ -8,7 +8,7 @@ Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
 ## Landing worksheet-generator hero
 
-- [ ] Replace the abstract first screen with an explicit AI Worksheet Generator H1, adult 1:1 positioning, an immediately visible worksheet/test/prep-loop preview and a low-friction topic handoff into the existing anonymous form. Preserve generation, pricing, canonical and claim-flow contracts. Spec: `docs/ux/landing-worksheet-generator-hero-spec.md`.
+- [x] Replaced the abstract first screen with an explicit AI Worksheet Generator H1, adult 1:1 positioning, an immediately visible worksheet/test/prep-loop preview and a low-friction topic handoff into the existing anonymous form. Preserved generation, pricing, canonical and claim-flow contracts; retired `/demo` was not revived. Desktop/mobile Playwright, zero-request prefill, SEO audit, typecheck and targeted tests passed. Spec: `docs/ux/landing-worksheet-generator-hero-spec.md`.
 
 ## UX North Star
 
