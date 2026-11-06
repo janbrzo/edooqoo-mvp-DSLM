@@ -34,6 +34,7 @@ import { StudentContextHint } from "./StudentContextHint";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser, Plus } from "lucide-react";
 import { devLog, devWarn } from '@/utils/logger';
+import { HERO_TOPIC_PREFILL_EVENT, readHeroLessonTopicPrefill } from '@/lib/worksheet/heroTopicPrefill';
 
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";

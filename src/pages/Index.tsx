@@ -35,6 +35,7 @@ import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
+import { HERO_TOPIC_PREFILL_EVENT, normalizeHeroLessonTopic } from "@/lib/worksheet/heroTopicPrefill";
 
 /**
  * Main Index page component that handles worksheet generation and display
