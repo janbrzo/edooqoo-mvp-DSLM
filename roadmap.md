@@ -6,6 +6,10 @@ Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
 - [x] Remove the redundant left workflow block and deliver three concise visual slides per audience, safe new-tab signup/learner-plan links and eight-second hover/focus-paused rotation. Twelve regression cases and full suite (1757 tests) passed; real anonymous generation produced a saved worksheet, signup opened in a new tab, all six slides rendered, mobile/dark/laptop with 25 exercises passed, no browser errors and protected engine/llms hashes unchanged. Signed-in presentation verified with fixtures only; authenticated end-to-end remains unavailable on external unmanaged Supabase. Spec: docs/ux/generation-modal-conversion-spec.md.
 
+## Landing worksheet-generator hero
+
+- [ ] Replace the abstract first screen with an explicit AI Worksheet Generator H1, adult 1:1 positioning, an immediately visible worksheet/test/prep-loop preview and a low-friction topic handoff into the existing anonymous form. Preserve generation, pricing, canonical and claim-flow contracts. Spec: `docs/ux/landing-worksheet-generator-hero-spec.md`.
+
 ## UX North Star
 
 Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).

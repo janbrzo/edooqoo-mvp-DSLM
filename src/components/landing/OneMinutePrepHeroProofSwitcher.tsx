@@ -1,310 +1,187 @@
 import React, { useState } from 'react';
 import {
-  Calculator,
+  ArrowRight,
+  BookOpen,
   CheckCircle2,
-  ClipboardList,
+  ClipboardCheck,
   FileText,
   Goal,
-  Lightbulb,
-  Map,
-  PlayCircle,
+  Headphones,
+  Layers,
+  MessagesSquare,
+  RotateCcw,
+  UserRound,
 } from 'lucide-react';
-import {
-  PricingCalculator,
-  type OneMinutePrepCalculatorInput,
-} from '@/components/PricingCalculator';
-import {
-  lessonSignalWorkflowCopy,
-  lessonSignalWorkflowSteps,
-  setupWorkflowSteps,
-  weeklyWorkflowSteps,
-  type WorkflowProofStep,
-} from '@/constants/oneMinutePrepWorkflowProof';
 import { cn } from '@/lib/utils';
 
-type HeroProofPanel = 'calculator' | 'workflow' | 'evidence';
-type ProofIcon = React.ComponentType<{ className?: string }>;
+type HeroProofPanel = 'worksheet' | 'test' | 'loop';
 
-interface OneMinutePrepHeroProofSwitcherProps {
-  calculatorValue: OneMinutePrepCalculatorInput;
-  onCalculatorChange: (value: OneMinutePrepCalculatorInput) => void;
-  /** v6.9.91: no panel is active until hover/tap/focus, to reduce first-screen noise. */
-  initialPanel?: HeroProofPanel | null;
-}
-
-const signalInputs = [
-  'Welcome Test',
-  'Goals',
-  'Live Session',
-  'Homework',
-  'Notes',
-  'Flashcards',
+const panels: Array<{ id: HeroProofPanel; label: string }> = [
+  { id: 'worksheet', label: 'Worksheet' },
+  { id: 'test', label: 'Welcome Test' },
+  { id: 'loop', label: '1-Minute Loop' },
 ];
 
-const evidenceSteps = [
-  { icon: ClipboardList, label: 'Signals' },
-  { icon: Goal, label: 'Nano-skills' },
-  { icon: Map, label: 'Pacing/Roadmap' },
-  { icon: Lightbulb, label: 'Next focus' },
-  { icon: FileText, label: 'Worksheet' },
-];
-
-const FlowStep = ({
-  icon: Icon,
-  label,
-  badge,
-  nowrap,
-  span,
-}: {
-  icon: ProofIcon;
-  label: string;
-  badge?: string;
-  nowrap?: boolean;
-  span?: 'full';
-}) => (
-  <div
-    className={cn(
-      'flex min-w-0 items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-medium text-foreground shadow-sm',
-      span === 'full' && 'sm:col-span-2'
-    )}
-  >
-    <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-    <span className={cn('min-w-0 flex-1 leading-snug', nowrap && 'whitespace-nowrap text-[11px] sm:text-xs')}>{label}</span>
-    {badge ? (
-      <span className="shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary">
-        {badge}
-      </span>
-    ) : null}
-  </div>
-);
-
-const CompactBadge = ({
-  icon: Icon,
-  label,
-  nowrap,
-}: {
-  icon: ProofIcon;
-  label: string;
-  nowrap?: boolean;
-}) => (
-  <span
-    className={cn(
-      'inline-flex min-w-0 items-center gap-1.5 rounded-full border border-border bg-white px-2 py-1 text-[11px] font-medium text-foreground shadow-sm',
-      nowrap && 'whitespace-nowrap'
-    )}
-  >
-    <Icon className="h-3 w-3 shrink-0 text-primary" />
-    <span className="min-w-0 leading-tight">{label}</span>
-  </span>
-);
-
-const CompactWorkflowProofPanel = () => (
-  <div
-    id="one-minute-hero-workflow-panel"
-    role="tabpanel"
-    aria-labelledby="one-minute-hero-workflow-tab"
-    className="rounded-2xl border-2 border-violet-100 bg-white p-3 shadow-xl shadow-violet-500/10 sm:p-4"
-  >
-    <div className="flex items-center gap-2">
-      <PlayCircle className="h-5 w-5 text-primary" />
+const WorksheetPreview = () => (
+  <div id="hero-worksheet-panel" role="tabpanel" aria-labelledby="hero-worksheet-tab">
+    <div className="flex items-start justify-between gap-3 border-b border-border pb-4">
       <div>
-        <h2 className="text-base font-semibold text-gray-900">Workflow proof</h2>
-        <p className="text-xs text-muted-foreground">Setup is separate from weekly prep.</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary">Example worksheet</p>
+        <h2 className="mt-1.5 text-xl font-bold leading-tight text-foreground">Cross-Cultural Negotiations in Tech</h2>
       </div>
+      <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">B2/C1</span>
     </div>
 
-    <div className="mt-3 space-y-2.5">
-      <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-2.5 sm:p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">Phase 1: One-time student setup</p>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          First create the learner context that the recurring prep flow can use.
-        </p>
-        <div className="mt-2 grid gap-2 sm:grid-cols-2">
-          {setupWorkflowSteps.map((step) => (
-            <FlowStep key={step.label} {...step} />
-          ))}
-        </div>
-      </div>
+    <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
+      <UserRound className="h-4 w-4 text-primary" />
+      <span>Marta, Senior Product Manager</span>
+    </div>
 
-      <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-2.5 sm:p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-700">{lessonSignalWorkflowCopy.eyebrow}</p>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground">{lessonSignalWorkflowCopy.description}</p>
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {lessonSignalWorkflowSteps.map(({ icon: Icon, label, nowrap, span }: WorkflowProofStep) => (
-            <span
-              key={label}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-white px-2 py-1 text-[11px] font-medium text-blue-900',
-                nowrap && 'whitespace-nowrap',
-                span === 'full' && 'basis-full sm:basis-auto'
-              )}
-            >
-              <Icon className="h-3 w-3 shrink-0 text-primary" />
-              {label}
-            </span>
-          ))}
+    <div className="space-y-2.5">
+      <article className="rounded-xl border border-border bg-background p-3.5">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Headphones className="h-4 w-4 text-primary" />
+          Audio discussion
         </div>
-      </div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">Compare two approaches to a delayed product launch.</p>
+      </article>
+      <article className="rounded-xl border border-border bg-background p-3.5">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <BookOpen className="h-4 w-4 text-primary" />
+          Vocabulary in context
+        </div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose the phrase that softens a disagreement.</p>
+      </article>
+      <article className="rounded-xl border border-border bg-background p-3.5">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <MessagesSquare className="h-4 w-4 text-primary" />
+          Roleplay prompt
+        </div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">Renegotiate a deadline without damaging trust.</p>
+      </article>
+    </div>
 
-      <div className="rounded-xl border border-green-100 bg-green-50/70 p-2.5 sm:p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">Phase 2: Weekly 1-Minute Prep flow</p>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          Then use stored context to choose the next focus before the worksheet is generated.
-        </p>
-        <div className="mt-2 grid gap-2 sm:grid-cols-2">
-          {weeklyWorkflowSteps.map((step) => (
-            <FlowStep key={step.label} {...step} />
-          ))}
-        </div>
-      </div>
+    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-muted-foreground">
+      <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />Adult-focused</span>
+      <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />Editable</span>
+      <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />Ready to share</span>
     </div>
   </div>
 );
 
-const CompactEvidenceStackPanel = () => (
-  <div
-    id="one-minute-hero-evidence-panel"
-    role="tabpanel"
-    aria-labelledby="one-minute-hero-evidence-tab"
-    className="rounded-2xl border-2 border-violet-100 bg-white p-4 shadow-xl shadow-violet-500/10"
-  >
-    <div className="flex items-center gap-2">
-      <PlayCircle className="h-5 w-5 text-primary" />
-      <div>
-        <h2 className="text-base font-semibold text-gray-900">Evidence stack</h2>
-        <p className="text-xs text-muted-foreground">Why the next focus is not guessed from scratch.</p>
+const WelcomeTestPreview = () => (
+  <div id="hero-test-panel" role="tabpanel" aria-labelledby="hero-test-tab">
+    <div className="border-b border-border pb-4">
+      <p className="text-xs font-semibold uppercase tracking-wider text-primary">Example student profile</p>
+      <h2 className="mt-1.5 text-xl font-bold text-foreground">Start with evidence, not a blank prompt</h2>
+    </div>
+
+    <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Marta's learning context</p>
+          <p className="mt-1 text-sm text-muted-foreground">Goal: Lead international client meetings</p>
+        </div>
+        <span className="rounded-full bg-card px-3 py-1 text-sm font-bold text-primary shadow-sm">B2</span>
       </div>
     </div>
 
     <div className="mt-4 space-y-3">
-      <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">Stored learner evidence</p>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          DSLM reads available student-specific signals before the worksheet prompt is used.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {signalInputs.map((input) => (
-            <span key={input} className="rounded-full border border-violet-200 bg-white px-2 py-1 text-[11px] font-medium text-violet-800">
-              {input}
-            </span>
-          ))}
+      {[
+        ['Speaking', 'Strong interaction, precision needs work'],
+        ['Listening', 'Follow-up practice recommended'],
+        ['Vocabulary', 'Business phrases ready to reuse'],
+      ].map(([label, detail]) => (
+        <div key={label} className="flex items-start gap-3 rounded-xl border border-border bg-background p-3.5">
+          <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">{label}</p>
+            <p className="mt-1 text-sm leading-5 text-muted-foreground">{detail}</p>
+          </div>
         </div>
-      </div>
+      ))}
+    </div>
 
-      <div className="rounded-xl border border-green-100 bg-green-50/70 p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">Decision path</p>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          Signals become nano-skill evidence, pacing context, and a teacher-reviewed next focus.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {evidenceSteps.map((step) => (
-            <CompactBadge key={step.label} {...step} />
-          ))}
+    <p className="mt-4 text-xs leading-5 text-muted-foreground">The teacher reviews the profile and suggested goals before using them in lesson planning.</p>
+  </div>
+);
+
+const loopSteps = [
+  { icon: ClipboardCheck, title: 'Welcome Test', detail: 'Establish level, goals and a useful starting point.' },
+  { icon: FileText, title: 'Worksheet', detail: 'Teach with material built for the next lesson.' },
+  { icon: Layers, title: 'Homework + flashcards', detail: 'Keep mistakes and vocabulary attached to the student.' },
+  { icon: RotateCcw, title: 'Next lesson', detail: 'Review the suggested focus instead of starting over.' },
+];
+
+const LoopPreview = () => (
+  <div id="hero-loop-panel" role="tabpanel" aria-labelledby="hero-loop-tab">
+    <div className="border-b border-border pb-4">
+      <p className="text-xs font-semibold uppercase tracking-wider text-primary">The 1-Minute Prep loop</p>
+      <h2 className="mt-1.5 text-xl font-bold text-foreground">One student context, reused every week</h2>
+    </div>
+
+    <div className="mt-4 space-y-2">
+      {loopSteps.map(({ icon: Icon, title, detail }, index) => (
+        <div key={title} className="relative flex gap-3 rounded-xl border border-border bg-background p-3.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Icon className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-primary">0{index + 1}</span>
+              <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+            </div>
+            <p className="mt-1 text-sm leading-5 text-muted-foreground">{detail}</p>
+          </div>
         </div>
-      </div>
+      ))}
+    </div>
 
-      <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">
-        <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-        <span>Worksheet generation remains the output layer after teacher review.</span>
-      </div>
+    <div className="mt-4 flex items-center gap-2 rounded-xl bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
+      <Goal className="h-4 w-4 shrink-0 text-primary" />
+      You review the next focus before anything is generated.
     </div>
   </div>
 );
 
-const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherProps> = ({
-  calculatorValue,
-  onCalculatorChange,
-  initialPanel = null,
-}) => {
-  const [activePanel, setActivePanel] = useState<HeroProofPanel | null>(initialPanel);
-
-  const activatePanel = (panel: HeroProofPanel) => {
-    setActivePanel(panel);
-  };
-
-  const tabClassName = (panel: HeroProofPanel) =>
-    cn(
-      'flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full px-2 text-[11px] font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:gap-2 sm:px-3 sm:text-xs',
-      activePanel === panel
-        ? 'bg-primary text-primary-foreground shadow-sm'
-        : 'text-muted-foreground hover:bg-violet-50 hover:text-primary'
-    );
+const OneMinutePrepHeroProofSwitcher: React.FC = () => {
+  const [activePanel, setActivePanel] = useState<HeroProofPanel>('worksheet');
 
   return (
-    <div className="w-full max-w-[460px]">
-      <div
-        className="mb-3 grid grid-cols-3 gap-1 rounded-full border border-violet-100 bg-white/90 p-1 shadow-sm"
-        role="tablist"
-        aria-label="1-Minute Prep hero proof"
-      >
-        <button
-          id="one-minute-hero-calculator-tab"
-          type="button"
-          role="tab"
-          aria-selected={activePanel === 'calculator'}
-          aria-controls="one-minute-hero-calculator-panel"
-          className={tabClassName('calculator')}
-          onClick={() => activatePanel('calculator')}
-          onMouseEnter={() => activatePanel('calculator')}
-          onFocus={() => activatePanel('calculator')}
-        >
-          <Calculator className="h-3.5 w-3.5 shrink-0" />
-          <span className="min-w-0">Prep impact</span>
-        </button>
-        <button
-          id="one-minute-hero-workflow-tab"
-          type="button"
-          role="tab"
-          aria-selected={activePanel === 'workflow'}
-          aria-controls="one-minute-hero-workflow-panel"
-          className={tabClassName('workflow')}
-          onClick={() => activatePanel('workflow')}
-          onMouseEnter={() => activatePanel('workflow')}
-          onFocus={() => activatePanel('workflow')}
-        >
-          <PlayCircle className="h-3.5 w-3.5 shrink-0" />
-          <span className="min-w-0">Workflow proof</span>
-        </button>
-        <button
-          id="one-minute-hero-evidence-tab"
-          type="button"
-          role="tab"
-          aria-selected={activePanel === 'evidence'}
-          aria-controls="one-minute-hero-evidence-panel"
-          className={tabClassName('evidence')}
-          onClick={() => activatePanel('evidence')}
-          onMouseEnter={() => activatePanel('evidence')}
-          onFocus={() => activatePanel('evidence')}
-        >
-          <ClipboardList className="h-3.5 w-3.5 shrink-0" />
-          <span className="min-w-0">Evidence stack</span>
-        </button>
+    <div className="w-full max-w-[500px]">
+      <div className="mb-3 grid grid-cols-3 gap-1 rounded-full border border-border bg-card p-1 shadow-sm" role="tablist" aria-label="Edooqoo product preview">
+        {panels.map((panel) => (
+          <button
+            key={panel.id}
+            id={`hero-${panel.id}-tab`}
+            type="button"
+            role="tab"
+            aria-selected={activePanel === panel.id}
+            aria-controls={`hero-${panel.id}-panel`}
+            onClick={() => setActivePanel(panel.id)}
+            className={cn(
+              'flex h-9 min-w-0 items-center justify-center rounded-full px-2 text-[11px] font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-3 sm:text-xs',
+              activePanel === panel.id
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+            )}
+          >
+            {panel.label}
+          </button>
+        ))}
       </div>
 
-      {activePanel === 'calculator' ? (
-        <div
-          id="one-minute-hero-calculator-panel"
-          role="tabpanel"
-          aria-labelledby="one-minute-hero-calculator-tab"
-        >
-          <PricingCalculator
-            variant="hero"
-            value={calculatorValue}
-            onValueChange={onCalculatorChange}
-          />
+      <div className="relative">
+        <div className="absolute -inset-3 -z-10 rounded-[2rem] bg-primary/5" />
+        <div className="min-h-[480px] rounded-2xl border border-border bg-card p-4 shadow-xl shadow-primary/10 sm:min-h-[500px] sm:p-5">
+          {activePanel === 'worksheet' ? <WorksheetPreview /> : activePanel === 'test' ? <WelcomeTestPreview /> : <LoopPreview />}
         </div>
-      ) : activePanel === 'workflow' ? (
-        <CompactWorkflowProofPanel />
-      ) : activePanel === 'evidence' ? (
-        <CompactEvidenceStackPanel />
-      ) : (
-        <div className="rounded-2xl border border-dashed border-violet-200 bg-white/70 px-4 py-6 text-center">
-          <p className="text-sm font-medium text-foreground">Hover or tap a tab to see the proof</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Prep impact, workflow proof, and the evidence stack behind the next focus.
-          </p>
-        </div>
-      )}
+      </div>
+
+      <div className="mt-4 flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
+        <span>From one worksheet to a connected student loop</span>
+        <ArrowRight className="h-3.5 w-3.5 text-primary" />
+      </div>
     </div>
   );
 };
