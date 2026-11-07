@@ -34,15 +34,15 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({ onTryWorksheetGenerator, on
   };
 
   return (
-    <section className="relative px-4 pb-10 pt-8 sm:pt-10 lg:pb-12 lg:pt-12">
-      <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-10">
+    <section className="relative px-4 pb-10 pt-6 sm:pt-10 lg:pb-12 lg:pt-12">
+      <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-10">
         <div className="min-w-0 max-w-full text-center lg:text-left">
           <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-primary sm:text-sm"><Clock3 className="h-4 w-4" />1-Minute Prep System for 1:1 English Teachers</p>
           <h1 className="max-w-full break-words text-4xl font-extrabold leading-[1.1] tracking-normal text-foreground sm:text-5xl xl:text-6xl">
             AI Worksheet Generator <span className="text-primary">& Teaching Toolkit</span>
           </h1>
           <p className="mt-3 text-lg font-semibold leading-7 text-foreground sm:text-xl">Tailored to your 1:1 adult English students</p>
-          <p className="mx-auto mb-6 mt-4 max-w-2xl text-base leading-7 text-muted-foreground lg:mx-0 sm:text-lg">
+          <p className="mx-auto mb-4 mt-4 max-w-2xl text-base leading-7 text-muted-foreground lg:mx-0 sm:mb-6 sm:text-lg">
             Placement tests, custom worksheets with audio, AI-assisted homework review and flashcards, in one place. Turn what your student practises into a starting point for the next lesson.
           </p>
           <form onSubmit={handleTopicSubmit} className="mx-auto max-w-2xl lg:mx-0" aria-label="Start a worksheet from a lesson topic">
