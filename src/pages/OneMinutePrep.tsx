@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import LessonSignalCaptureSection from '@/components/landing/LessonSignalCaptureSection';
 import OneMinutePrepProofSection from '@/components/landing/OneMinutePrepProofSection';
+import TeacherFilmPlayer from '@/components/landing/TeacherFilmPlayer';
 import PublicWorkflowNav from '@/components/public/PublicWorkflowNav';
 import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import {
@@ -234,6 +235,14 @@ const OneMinutePrep: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </section>
+
+        <section id="interactive-tour" className="scroll-mt-20 border-b border-border py-12 sm:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <p className="text-xs font-semibold uppercase text-primary">Interactive teacher tour</p>
+            <h2 className="mb-6 mt-2 text-2xl font-bold tracking-normal text-foreground sm:text-3xl">See the 1-Minute Prep loop in action</h2>
+            <TeacherFilmPlayer />
           </div>
         </section>
 
