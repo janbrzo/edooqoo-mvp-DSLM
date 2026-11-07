@@ -44,7 +44,7 @@ describe('public preview safety', () => {
     if (!option) throw new Error('Sample options missing');
     act(() => option.props.onClick());
     expect(view.root.findAllByType('button').filter((button) => button.props['aria-pressed'] === true)).toHaveLength(1);
-    const dialog = view.root.findAll((node) => typeof node.props.onOpenChange === 'function')[0];
+    const dialog = view.root.findAll((node) => node.type !== PlacementTestPreviewDialog && typeof node.props.onOpenChange === 'function')[0];
     if (!dialog) throw new Error('Dialog boundary missing');
     act(() => dialog.props.onOpenChange(false));
     expect(onOpenChange).toHaveBeenCalledWith(false);
