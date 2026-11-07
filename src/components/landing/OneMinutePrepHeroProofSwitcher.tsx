@@ -92,7 +92,7 @@ const OneMinutePrepHeroProofSwitcher: React.FC = () => (
           ['worksheet', 'Worksheet'], ['test', 'Placement Test'], ['homework', 'Homework & Cards'], ['film', '1-Minute Loop'],
         ].map(([id, label]) => <TabsTrigger key={id} value={id} className="h-10 whitespace-normal px-1.5 text-center text-xs leading-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{label}</TabsTrigger>)}
       </TabsList>
-      <div className="mt-3 min-h-[510px] border-y border-border bg-card/80 px-4 py-5 sm:min-h-[510px] sm:px-5">
+      <div className="mt-3 min-h-[640px] border-y border-border bg-card/80 px-4 py-5 sm:min-h-[560px] sm:px-5">
         <TabsContent value="worksheet" className="mt-0"><WorksheetPreview /></TabsContent>
         <TabsContent value="test" className="mt-0"><WelcomeTestPreview /></TabsContent>
         <TabsContent value="homework" className="mt-0"><HomeworkPreview /></TabsContent>
