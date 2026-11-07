@@ -39,7 +39,10 @@ Submitting the hero form trims the topic, caps it at 200 characters and emits `w
 
 ## Verification
 
-- Unit coverage passed for topic normalization, the 200-character cap and malformed-event handling.
-- Playwright passed on desktop 1280x889 and mobile 390x844: first-render worksheet, all three tabs, exact topic handoff and focus, no `generateWorksheet` request, 1-Minute Prep navigation, zero horizontal overflow and zero console/page errors.
-- `seo:audit`, TypeScript, the no-em-dash test and the automatic preview build passed.
-- The initially proposed `/demo` action was replaced because the route is intentionally disabled by a hard redirect. No demo behavior was re-enabled.
+- 33 targeted Vitest tests passed across six suites: topic normalization/cap, malformed events, genuine preview-question selection, preview scoring-field exclusion, explicit-play iframe isolation, local-answer reset on close, the existing test flow, form safety and no-em-dash coverage.
+- Playwright passed on desktop 1212x889 and mobile 390x844: all four tabs, no iframe request before Play, moving playback, pause, restart, keyboard seeking, full-size tour, local question selection/back/writing/speaking sample/completion, close/reopen reset, signup navigation and exact topic handoff/focus without generation or student-test requests. Existing tracking and subscription-check requests were not misclassified as student writes.
+- Additional 360x800, 768x1024 and 1920x1080 layout checks passed with zero horizontal overflow. Switching among all panels moves the following form by exactly zero pixels at all five tested widths. Mobile uses a two-by-two tab layout. The first viewport retains a hint of subsequent content.
+- Fullscreen playback passed. Reduced-motion playback remains still until an explicit chapter action, with no continuous rendering. Screenshots were inspected for desktop/mobile home, film, modal, full-size tour and fullscreen framing; page errors: zero.
+- `seo:audit` and the automatic preview build passed. An independent source review found no blockers. All 107 protected engine and llms hashes remained unchanged.
+- No full live placement test, AI evaluation, paid generation or authenticated learner workflow was run: these existing contracts were not changed. Public browser checks certify the preview paths only, not production teaching/evaluation outcomes. No publication was performed.
+- `/demo` remains disabled; no demo behavior was re-enabled. The earlier 60-second film, fixed question count and sample-level claims were corrected against the actual source rather than implemented as unsupported promises.
