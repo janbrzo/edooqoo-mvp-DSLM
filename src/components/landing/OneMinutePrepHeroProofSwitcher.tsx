@@ -1,189 +1,115 @@
-import React, { useState } from 'react';
-import {
-  ArrowRight,
-  BookOpen,
-  CheckCircle2,
-  ClipboardCheck,
-  FileText,
-  Goal,
-  Headphones,
-  Layers,
-  MessagesSquare,
-  RotateCcw,
-  UserRound,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-type HeroProofPanel = 'worksheet' | 'test' | 'loop';
-
-const panels: Array<{ id: HeroProofPanel; label: string }> = [
-  { id: 'worksheet', label: 'Worksheet' },
-  { id: 'test', label: 'Welcome Test' },
-  { id: 'loop', label: '1-Minute Loop' },
-];
+import React from 'react';
+import { ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, FileText, Headphones, Layers, MessagesSquare, Play, UserRound } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import TeacherFilmPlayer from '@/components/landing/TeacherFilmPlayer';
 
 const WorksheetPreview = () => (
-  <div id="hero-worksheet-panel" role="tabpanel" aria-labelledby="hero-worksheet-tab">
+  <>
     <div className="flex items-start justify-between gap-3 border-b border-border pb-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-primary">Example worksheet</p>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase text-primary">Example worksheet</p>
         <h2 className="mt-1.5 text-xl font-bold leading-tight text-foreground">Cross-Cultural Negotiations in Tech</h2>
       </div>
-      <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">B2/C1</span>
+      <span className="shrink-0 rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">B2/C1</span>
     </div>
-
     <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
-      <UserRound className="h-4 w-4 text-primary" />
-      <span>Marta, Senior Product Manager</span>
+      <UserRound className="h-4 w-4 shrink-0 text-primary" />Marta, Senior Product Manager
     </div>
-
-    <div className="space-y-2.5">
-      <article className="rounded-xl border border-border bg-background p-3.5">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Headphones className="h-4 w-4 text-primary" />
-          Audio discussion
-        </div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">Compare two approaches to a delayed product launch.</p>
-      </article>
-      <article className="rounded-xl border border-border bg-background p-3.5">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <BookOpen className="h-4 w-4 text-primary" />
-          Vocabulary in context
-        </div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose the phrase that softens a disagreement.</p>
-      </article>
-      <article className="rounded-xl border border-border bg-background p-3.5">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <MessagesSquare className="h-4 w-4 text-primary" />
-          Roleplay prompt
-        </div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">Renegotiate a deadline without damaging trust.</p>
-      </article>
+    <div className="divide-y divide-border">
+      {[
+        { icon: Headphones, title: 'Audio discussion', detail: 'Compare two approaches to a delayed product launch.' },
+        { icon: BookOpen, title: 'Vocabulary in context', detail: 'Choose the phrase that softens a disagreement.' },
+        { icon: MessagesSquare, title: 'Speaking practice', detail: 'Renegotiate a deadline without damaging trust.' },
+      ].map(({ icon: Icon, title, detail }) => (
+        <article key={title} className="py-4">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground"><Icon className="h-4 w-4 text-primary" />{title}</h3>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{detail}</p>
+        </article>
+      ))}
     </div>
-
-    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-muted-foreground">
-      <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />Adult-focused</span>
-      <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />Editable</span>
-      <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />Ready to share</span>
+    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-2 text-xs font-medium text-muted-foreground">
+      {['Adult-focused', 'Teacher-editable', 'Ready to share'].map((label) => <span key={label} className="inline-flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />{label}</span>)}
     </div>
-  </div>
+  </>
 );
 
 const WelcomeTestPreview = () => (
-  <div id="hero-test-panel" role="tabpanel" aria-labelledby="hero-test-tab">
+  <>
     <div className="border-b border-border pb-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-primary">Example student profile</p>
-      <h2 className="mt-1.5 text-xl font-bold text-foreground">Start with evidence, not a blank prompt</h2>
+      <p className="text-xs font-semibold uppercase text-primary">Example placement profile</p>
+      <h2 className="mt-1.5 text-xl font-bold leading-tight text-foreground">Know who you are teaching</h2>
     </div>
-
-    <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-foreground">Marta's learning context</p>
-          <p className="mt-1 text-sm text-muted-foreground">Goal: Lead international client meetings</p>
-        </div>
-        <span className="rounded-full bg-card px-3 py-1 text-sm font-bold text-primary shadow-sm">B2</span>
-      </div>
+    <div className="mt-4 flex items-center justify-between gap-3 rounded-md bg-primary/5 p-4">
+      <div className="min-w-0"><p className="text-sm font-semibold text-foreground">Marta's starting point</p><p className="mt-1 text-xs leading-5 text-muted-foreground">B2 Upper-Intermediate</p></div>
+      <span className="text-2xl font-bold text-primary">B2</span>
     </div>
-
-    <div className="mt-4 space-y-3">
+    <dl className="mt-2 divide-y divide-border">
       {[
-        ['Speaking', 'Strong interaction, precision needs work'],
-        ['Listening', 'Follow-up practice recommended'],
-        ['Vocabulary', 'Business phrases ready to reuse'],
+        ['Speaking', 'Precision and nuance need practice'],
+        ['Learning goal', 'Pitch ideas to international clients'],
+        ['Next focus', 'Clear, confident client conversations'],
       ].map(([label, detail]) => (
-        <div key={label} className="flex items-start gap-3 rounded-xl border border-border bg-background p-3.5">
-          <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-          <div>
-            <p className="text-sm font-semibold text-foreground">{label}</p>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">{detail}</p>
-          </div>
-        </div>
+        <div key={label} className="py-4"><dt className="text-sm font-semibold text-foreground">{label}</dt><dd className="mt-1 text-sm leading-6 text-muted-foreground">{detail}</dd></div>
       ))}
-    </div>
-
-    <p className="mt-4 text-xs leading-5 text-muted-foreground">The teacher reviews the profile and suggested goals before using them in lesson planning.</p>
-  </div>
+    </dl>
+    <p className="mt-3 text-xs leading-5 text-muted-foreground">Sent by link. Completed on the student's device. Suggested goals are reviewed by the teacher.</p>
+  </>
 );
 
-const loopSteps = [
-  { icon: ClipboardCheck, title: 'Welcome Test', detail: 'Establish level, goals and a useful starting point.' },
-  { icon: FileText, title: 'Worksheet', detail: 'Teach with material built for the next lesson.' },
-  { icon: Layers, title: 'Homework + flashcards', detail: 'Keep mistakes and vocabulary attached to the student.' },
-  { icon: RotateCcw, title: 'Next lesson', detail: 'Review the suggested focus instead of starting over.' },
+const HomeworkPreview = () => (
+  <>
+    <div className="border-b border-border pb-4">
+      <p className="text-xs font-semibold uppercase text-primary">Example homework & flashcards</p>
+      <h2 className="mt-1.5 text-xl font-bold leading-tight text-foreground">Keep learning between lessons</h2>
+    </div>
+    <div className="mt-4 border-l-2 border-primary pl-4">
+      <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold text-foreground">Marta's homework</h3><span className="text-xs font-medium text-success">Reviewed</span></div>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">Describe a project delay and explain what happened.</p>
+      <p className="mt-3 text-sm italic leading-6 text-foreground">“We were testing the update when the client called.”</p>
+      <div className="mt-3 rounded-md bg-muted p-3"><p className="text-xs font-semibold text-primary">AI-assisted feedback</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Clear sequence. Use past continuous for the action already in progress.</p></div>
+    </div>
+    <div className="my-4 flex items-center gap-2 text-xs text-muted-foreground"><ArrowRight className="h-4 w-4 text-primary" />Vocabulary ready for another encounter</div>
+    <div className="rounded-lg border border-border bg-background p-4">
+      <p className="text-xs font-semibold uppercase text-primary">Example flashcard</p><p className="mt-2 text-lg font-bold text-foreground">follow up</p><p className="mt-1 text-sm leading-6 text-muted-foreground">Contact someone again after a first conversation.</p>
+    </div>
+    <p className="mt-3 text-xs leading-5 text-muted-foreground">Teacher review stays in control. Flashcards from confirmed homework mistakes are beta.</p>
+  </>
+);
+
+const ecosystem = [
+  { icon: ClipboardCheck, label: 'Placement' },
+  { icon: FileText, label: 'Worksheet' },
+  { icon: ClipboardCheck, label: 'Homework' },
+  { icon: Layers, label: 'Flashcards' },
+  { icon: Play, label: 'Next prep' },
 ];
 
-const LoopPreview = () => (
-  <div id="hero-loop-panel" role="tabpanel" aria-labelledby="hero-loop-tab">
-    <div className="border-b border-border pb-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-primary">The 1-Minute Prep loop</p>
-      <h2 className="mt-1.5 text-xl font-bold text-foreground">One student context, reused every week</h2>
-    </div>
-
-    <div className="mt-4 space-y-2">
-      {loopSteps.map(({ icon: Icon, title, detail }, index) => (
-        <div key={title} className="relative flex gap-3 rounded-xl border border-border bg-background p-3.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Icon className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-primary">0{index + 1}</span>
-              <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-            </div>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">{detail}</p>
-          </div>
-        </div>
+const OneMinutePrepHeroProofSwitcher: React.FC = () => (
+  <div className="w-full min-w-0">
+    <Tabs defaultValue="worksheet" activationMode="manual">
+      <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-lg border border-border bg-background p-1 sm:grid-cols-4" aria-label="Edooqoo product preview">
+        {[
+          ['worksheet', 'Worksheet'], ['test', 'Placement Test'], ['homework', 'Homework & Cards'], ['film', '1-Minute Loop'],
+        ].map(([id, label]) => <TabsTrigger key={id} value={id} className="h-10 whitespace-normal px-1.5 text-center text-xs leading-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{label}</TabsTrigger>)}
+      </TabsList>
+      <div className="mt-3 min-h-[640px] border-y border-border bg-card/80 px-4 py-5 sm:min-h-[560px] sm:px-5">
+        <TabsContent value="worksheet" className="mt-0"><WorksheetPreview /></TabsContent>
+        <TabsContent value="test" className="mt-0"><WelcomeTestPreview /></TabsContent>
+        <TabsContent value="homework" className="mt-0"><HomeworkPreview /></TabsContent>
+        <TabsContent value="film" className="mt-0">
+          <div className="mb-4"><p className="text-xs font-semibold uppercase text-primary">Interactive teacher tour</p><h2 className="mt-1.5 text-xl font-bold leading-tight text-foreground">See the tools work together</h2></div>
+          <TeacherFilmPlayer compact />
+        </TabsContent>
+      </div>
+    </Tabs>
+    <ol className="mt-4 grid grid-cols-5 gap-1" aria-label="Connected teaching workflow">
+      {ecosystem.map(({ icon: Icon, label }, index) => (
+        <li key={label} className="relative flex min-w-0 flex-col items-center gap-1 text-center text-[10px] font-medium text-muted-foreground sm:text-[11px]">
+          <Icon className="h-4 w-4 text-primary" /><span>{label}</span>{index < ecosystem.length - 1 && <ArrowRight className="absolute -right-2 top-0.5 h-3 w-3 text-muted-foreground" />}
+        </li>
       ))}
-    </div>
-
-    <div className="mt-4 flex items-center gap-2 rounded-xl bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
-      <Goal className="h-4 w-4 shrink-0 text-primary" />
-      You review the next focus before anything is generated.
-    </div>
+    </ol>
   </div>
 );
-
-const OneMinutePrepHeroProofSwitcher: React.FC = () => {
-  const [activePanel, setActivePanel] = useState<HeroProofPanel>('worksheet');
-
-  return (
-    <div className="w-full max-w-[500px]">
-      <div className="mb-3 grid grid-cols-3 gap-1 rounded-full border border-border bg-card p-1 shadow-sm" role="tablist" aria-label="Edooqoo product preview">
-        {panels.map((panel) => (
-          <button
-            key={panel.id}
-            id={`hero-${panel.id}-tab`}
-            type="button"
-            role="tab"
-            aria-selected={activePanel === panel.id}
-            aria-controls={`hero-${panel.id}-panel`}
-            onClick={() => setActivePanel(panel.id)}
-            className={cn(
-              'flex h-9 min-w-0 items-center justify-center rounded-full px-2 text-[11px] font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-3 sm:text-xs',
-              activePanel === panel.id
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-            )}
-          >
-            {panel.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="relative">
-        <div className="absolute -inset-3 -z-10 rounded-[2rem] bg-primary/5" />
-        <div className="min-h-[480px] rounded-2xl border border-border bg-card p-4 shadow-xl shadow-primary/10 sm:min-h-[500px] sm:p-5">
-          {activePanel === 'worksheet' ? <WorksheetPreview /> : activePanel === 'test' ? <WelcomeTestPreview /> : <LoopPreview />}
-        </div>
-      </div>
-
-      <div className="mt-4 flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
-        <span>From one worksheet to a connected student loop</span>
-        <ArrowRight className="h-3.5 w-3.5 text-primary" />
-      </div>
-    </div>
-  );
-};
 
 export default OneMinutePrepHeroProofSwitcher;
