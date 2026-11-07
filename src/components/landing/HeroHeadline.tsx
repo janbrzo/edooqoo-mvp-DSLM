@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowDown, ArrowRight, CheckCircle2, Clock3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useEventTracking } from '@/hooks/useEventTracking';
@@ -15,54 +16,100 @@ const canonicalCitationLinks = [
 
 interface HeroHeadlineProps {
   onTryWorksheetGenerator: (topic?: string) => void;
-  onPreviewPlacementTest: () => void;
 }
 
-const HeroHeadline: React.FC<HeroHeadlineProps> = ({ onTryWorksheetGenerator, onPreviewPlacementTest }) => {
+const HeroHeadline: React.FC<HeroHeadlineProps> = ({ onTryWorksheetGenerator }) => {
   const { trackEvent } = useEventTracking();
   const [lessonTopic, setLessonTopic] = useState('');
 
   const handleTopicSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    trackEvent({ eventType: 'one_minute_secondary_cta_click', eventData: { target: 'worksheet-form', source: 'hero-topic', hasTopic: lessonTopic.trim().length > 0 } });
+    trackEvent({
+      eventType: 'one_minute_secondary_cta_click',
+      eventData: { target: 'worksheet-form', source: 'hero-topic', hasTopic: lessonTopic.trim().length > 0 },
+    });
     onTryWorksheetGenerator(lessonTopic);
   };
 
-  const handlePreview = () => {
-    trackEvent({ eventType: 'one_minute_hero_cta_click', eventData: { target: 'placement-test-preview' } });
-    onPreviewPlacementTest();
+  const handleDemoClick = () => {
+    trackEvent({
+      eventType: 'one_minute_hero_cta_click',
+      eventData: { target: 'one-minute-prep' },
+    });
   };
 
   return (
-    <section className="relative px-4 pb-10 pt-6 sm:pt-10 lg:pb-12 lg:pt-12">
-      <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-10">
+    <section className="relative overflow-hidden px-4 pb-12 pt-9 sm:pt-12 lg:pb-16 lg:pt-14">
+      <div className="pointer-events-none absolute -right-24 top-0 -z-10 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
+
+      <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)] lg:gap-14">
         <div className="min-w-0 max-w-full text-center lg:text-left">
-          <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-primary sm:text-sm"><Clock3 className="h-4 w-4" />1-Minute Prep System for 1:1 English Teachers</p>
-          <h1 className="max-w-full break-words text-4xl font-extrabold leading-[1.1] tracking-normal text-foreground sm:text-5xl xl:text-6xl">
-            AI Worksheet Generator <span className="text-primary">& Teaching Toolkit</span>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+            <Clock3 className="h-3.5 w-3.5" />
+            1-Minute Prep for recurring lessons
+          </div>
+
+          <h1 className="max-w-full break-words text-[2.55rem] font-extrabold leading-[1.06] tracking-tight text-foreground sm:text-6xl lg:text-[4rem] xl:text-[4.65rem]">
+            <span className="block">AI Worksheet Generator</span>
+            <span className="mt-1 block pb-2 text-primary">for 1:1 English Teachers</span>
           </h1>
-          <p className="mt-3 text-lg font-semibold leading-7 text-foreground sm:text-xl">Tailored to your 1:1 adult English students</p>
-          <p className="mx-auto mb-4 mt-4 max-w-2xl text-base leading-7 text-muted-foreground lg:mx-0 sm:mb-6 sm:text-lg">
-            Placement tests, custom worksheets with audio, AI-assisted homework review and flashcards, in one place. Turn what your student practises into a starting point for the next lesson.
+
+          <p
+            className="mx-auto mb-7 mt-5 max-w-full text-lg leading-relaxed text-muted-foreground sm:max-w-2xl sm:text-xl lg:mx-0 lg:max-w-[39rem]"
+            // @ts-expect-error fetchpriority is valid HTML but not yet typed in React
+            fetchpriority="high"
+          >
+            Create adult-focused lesson materials with audio, vocabulary and speaking practice. Start with a topic, then connect every worksheet to student goals, homework and learning history.
           </p>
+
           <form onSubmit={handleTopicSubmit} className="mx-auto max-w-2xl lg:mx-0" aria-label="Start a worksheet from a lesson topic">
             <label htmlFor="hero-lesson-topic" className="sr-only">Lesson topic</label>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input id="hero-lesson-topic" name="heroLessonTopic" value={lessonTopic} onChange={(event) => setLessonTopic(event.target.value)} maxLength={200} autoComplete="off"
-                placeholder="e.g. Negotiating a project deadline" className="h-12 min-w-0 flex-1 bg-card px-3 text-base" />
-              <Button type="submit" size="lg" className="h-12 shrink-0 px-4 font-semibold">Generate free worksheet<ArrowDown className="h-4 w-4" /></Button>
+            <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-2 shadow-lg shadow-primary/10 sm:flex-row sm:rounded-full">
+              <Input
+                id="hero-lesson-topic"
+                name="heroLessonTopic"
+                value={lessonTopic}
+                onChange={(event) => setLessonTopic(event.target.value)}
+                maxLength={200}
+                autoComplete="off"
+                placeholder="e.g. Negotiating a deadline with a client"
+                className="h-12 min-w-0 flex-1 border-0 bg-transparent px-4 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 sm:h-12"
+              />
+              <Button type="submit" size="lg" className="h-12 shrink-0 rounded-xl px-5 text-base font-semibold sm:rounded-full sm:px-6">
+                Generate free worksheet
+                <ArrowDown className="ml-2 h-4 w-4" />
+              </Button>
             </div>
-            <p className="mt-2 text-xs leading-5 text-muted-foreground">2 free worksheets. No signup needed. Review your options before generating.</p>
+            <p className="mt-2.5 text-xs leading-5 text-muted-foreground sm:text-sm">
+              Start with a topic. Review your options before generating.
+            </p>
           </form>
-          <Button variant="outline" onClick={handlePreview} className="mt-4 h-11 bg-card px-4">Preview Placement Test<ArrowRight className="h-4 w-4" /></Button>
-          <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2 text-left text-xs text-muted-foreground sm:text-sm">
-            {['Built for adult professionals', 'CEFR-aligned (A1–C2)', 'Fully teacher-editable', 'No credit card required'].map((label) => (
-              <span key={label} className="inline-flex min-w-0 items-start gap-1.5 leading-5"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{label}</span>
-            ))}
+
+          <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground lg:justify-start">
+            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-primary" />No signup needed</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-primary" />No credit card</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-primary" />2 worksheets free</span>
           </div>
-          <nav aria-label="Edooqoo canonical teacher workflows" className="sr-only">{canonicalCitationLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</nav>
+
+          <Link
+            to="/one-minute-prep"
+            onClick={handleDemoClick}
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            See how 1-Minute Prep works
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+
+          <nav aria-label="Edooqoo canonical teacher workflows" className="sr-only">
+            {canonicalCitationLinks.map((link) => (
+              <a key={link.href} href={link.href}>{link.label}</a>
+            ))}
+          </nav>
         </div>
-        <div className="mx-auto w-full min-w-0 max-w-[540px] lg:mx-0 lg:justify-self-end"><OneMinutePrepHeroProofSwitcher /></div>
+
+        <div className="mx-auto w-full min-w-0 max-w-full sm:max-w-[500px] lg:mx-0 lg:justify-self-end">
+          <OneMinutePrepHeroProofSwitcher />
+        </div>
       </div>
     </section>
   );

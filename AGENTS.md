@@ -19,8 +19,6 @@ Subdirectories `src/` and `supabase/` have their own `AGENTS.md`; read them befo
 
 ## Documentation & AI Resources
 
-- User-provided standalone product tours live under `public/embeds/` with `noindex` and a scripts-only sandbox, loaded only after explicit Play; local placement previews never mount token-backed test hooks, because promotional previews must stay isolated from indexed pages and learner records.
-
 - Public HTML generators must not render bot-directed citation instructions or keyword sections; keep valid JSON-LD keywords/audiences, factual citation paragraphs and dedicated AI resources, because human-facing pages and machine-readable discovery have separate contracts.
 
 - Additional strategic article links are allocated by `scripts/seo/strategic-link-rotation.mjs` to registry-indexable, topic-matched destinations, with at most three new distinct targets per donor; preserve existing recommendations and the graph audit's 10/5 thresholds, because replacing a narrow rotation can silently orphan previously covered pages.

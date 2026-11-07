@@ -230,7 +230,7 @@ const OneMinutePrepProofSection: React.FC<OneMinutePrepProofSectionProps> = ({
             {activePanelMeta.label}
           </div>
           <h2 id="one-minute-prep-proof-heading" className="text-2xl font-bold text-foreground sm:text-3xl">
-            Explore the 1-Minute Prep workflow
+            See the 1-Minute Prep proof before the video is ready
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
             First setup builds the student context. Lesson activity adds evidence. Weekly prep uses that context, optional calendar timing, and DSLM evidence before the worksheet output layer.

@@ -29,7 +29,6 @@ import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
 import AnonPreWorksheetBanner from "@/components/anon/AnonPreWorksheetBanner";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDialog";
-import PlacementTestPreviewDialog from "@/components/landing/PlacementTestPreviewDialog";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devError, devLog, devWarn } from '@/utils/logger';
 import { loadWorksheetContent } from '@/lib/worksheet/loadWorksheetContent';
@@ -95,7 +94,6 @@ const Index = () => {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
-  const [showPlacementPreview, setShowPlacementPreview] = useState(false);
   // v6.9.33: open Add Student modal on `?action=add-student` (sent by Signup
   // page right after first-time login, and by other deep links).
   const [addStudentOpen, setAddStudentOpen] = useState(false);
@@ -486,7 +484,7 @@ const Index = () => {
       
       {!bothWorksheetsReady ? (
         <>
-          <HeroHeadline onTryWorksheetGenerator={handleHeroWorksheetCta} onPreviewPlacementTest={() => setShowPlacementPreview(true)} />
+          <HeroHeadline onTryWorksheetGenerator={handleHeroWorksheetCta} />
           <div id="worksheet-form" className="scroll-mt-16 pb-10">
             <FormView 
               onSubmit={handleGenerateWorksheet} 
@@ -561,8 +559,6 @@ const Index = () => {
         onOpenChange={setShowOneMinutePrepDialog}
         onTryWorksheetGenerator={scrollToWorksheetForm}
       />
-
-      <PlacementTestPreviewDialog open={showPlacementPreview} onOpenChange={setShowPlacementPreview} />
 
       {/* v6.9.33: first-time Add Student dialog after signup. */}
       <AddStudentDialog
