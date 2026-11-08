@@ -24,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TeacherFilmPlayer from '@/components/landing/TeacherFilmPlayer';
 
 const EXAMPLE_WORKSHEET_TOPIC = 'Cross-Cultural Negotiations in Tech';
-const previewBodyClass = 'flex min-h-[684px] flex-col sm:min-h-[564px]';
+const previewBodyClass = 'flex min-h-[744px] flex-col sm:min-h-[604px]';
 const previewCtaClass = 'mt-auto h-auto min-h-11 w-full whitespace-normal rounded-full px-4 py-2.5';
 
 interface OneMinutePrepHeroProofSwitcherProps {
