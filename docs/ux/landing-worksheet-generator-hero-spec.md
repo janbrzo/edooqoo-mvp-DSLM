@@ -9,8 +9,17 @@ The public homepage must name the searched product category immediately while pr
 - Left column: 1-Minute Prep kicker, explicit H1, adult-focused product description, one lesson-topic input and a primary CTA to the existing form.
 - Trust copy emphasizes adult professionals, CEFR alignment, teacher editing and no credit card. The existing anonymous two-worksheet allowance remains unchanged.
 - The secondary CTA opens a local Placement Test preview. The retired `/demo` route remains redirected and is not presented as an available action.
-- Right column: a visible example worksheet on first render, with optional Placement Test, Homework & Cards and 1-Minute Loop film previews. All learner names, levels and results are explicitly examples, not testimonials or measured claims.
+- Right column: a visible example worksheet on first render, with optional Placement Test, Homework, Flashcards and 1-Minute Loop film previews. All learner names, levels, scores and study results are explicitly illustrative examples, not testimonials or measured claims.
 - The preview does not promise a fixed generation time or automatic teaching decisions.
+
+## Five product previews and card actions
+
+- Worksheet shows an adult B2/C1 business lesson with an illustrative audio track, vocabulary prompt and speaking roleplay. `Generate Worksheet on this Topic` passes `Cross-Cultural Negotiations in Tech` through the existing topic-prefill callback; it never starts generation.
+- Placement Test shows Marta's explicitly illustrative B2 report, skill bars and suggested goals. `Send Placement to Student` opens `/dashboard?action=add-student`, whose existing teacher-auth redirect preserves the action for signed-out visitors. `Preview Placement Test` opens the existing local sample dialog.
+- Homework is separate from Flashcards and shows a student voice answer, AI-assisted evaluation and teacher verification. Its CTA opens `/features/homework`.
+- Flashcards shows `follow up`, pronunciation, an optional locally revealed definition/example and illustrative SM-2 progress. Revealing the card changes only component state and saves nothing. Its CTA opens `/features/flashcards`.
+- 1-Minute Loop retains the explicit-play sandboxed Teacher Film and adds a direct link to `/one-minute-prep#interactive-tour`.
+- All five panels share minimum heights at mobile and desktop widths so changing tabs does not move the worksheet form. Every CTA uses the existing public or authenticated route contract; no learner record, test, homework, flashcard set or generation job is created by a preview.
 
 ## Placement preview boundary
 
@@ -39,6 +48,8 @@ Submitting the hero form trims the topic, caps it at 200 characters and emits `w
 
 ## Verification
 
+- Step 2 refinement: nine targeted Vitest tests passed for worksheet topic handoff, placement destinations and preview, homework/flashcards/tour destinations, local flashcard reveal, film isolation, sample reset and copy safety. Typecheck, SEO audit and automatic preview build passed.
+- Browser verification exercised every card CTA, the signed-out placement-to-login redirect, placement dialog open/close, flashcard reveal and exact worksheet topic handoff with zero `generateWorksheet` requests. At 360, 390, 768, 1380 and 1920px every panel produced the same worksheet-form document position, with no horizontal overflow and no page errors. Desktop and clean mobile screenshots were inspected.
 - 33 targeted Vitest tests passed across six suites: topic normalization/cap, malformed events, genuine preview-question selection, preview scoring-field exclusion, explicit-play iframe isolation, local-answer reset on close, the existing test flow, form safety and no-em-dash coverage.
 - Playwright passed on desktop 1212x889 and mobile 390x844: all four tabs, no iframe request before Play, moving playback, pause, restart, keyboard seeking, full-size tour, local question selection/back/writing/speaking sample/completion, close/reopen reset, signup navigation and exact topic handoff/focus without generation or student-test requests. Existing tracking and subscription-check requests were not misclassified as student writes.
 - Additional 360x800, 768x1024 and 1920x1080 layout checks passed with zero horizontal overflow. Switching among all panels moves the following form by exactly zero pixels at all five tested widths. Mobile uses a two-by-two tab layout. The first viewport retains a hint of subsequent content.
