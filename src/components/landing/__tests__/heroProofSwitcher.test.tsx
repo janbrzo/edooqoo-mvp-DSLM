@@ -42,6 +42,10 @@ function textOf(node: ReturnType<ReactTestRenderer['root']['find']>): string {
 function clickButton(view: ReactTestRenderer, label: string) {
   const button = view.root.findAllByType('button').find((candidate) => textOf(candidate).includes(label));
   if (!button) throw new Error(`Button not found: ${label}`);
+  if (button.props.role === 'tab') {
+    act(() => button.props.onMouseDown({ button: 0, ctrlKey: false, preventDefault: vi.fn() }));
+    return;
+  }
   act(() => button.props.onClick({ preventDefault: vi.fn() }));
 }
 
