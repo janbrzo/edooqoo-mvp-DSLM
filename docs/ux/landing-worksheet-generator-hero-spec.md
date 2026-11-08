@@ -9,7 +9,7 @@ The public homepage must name the searched product category immediately while pr
 - Left column: 1-Minute Prep kicker, explicit H1, adult-focused product description, one lesson-topic input and a primary CTA to the existing form.
 - Trust copy emphasizes adult professionals, CEFR alignment, teacher editing and no credit card. The existing anonymous two-worksheet allowance remains unchanged.
 - The secondary CTA opens a local Placement Test preview. The retired `/demo` route remains redirected and is not presented as an available action.
-- Right column: a visible example worksheet on first render, with optional Placement Test, Homework & Cards and 1-Minute Loop film previews. All learner names, levels and results are explicitly examples, not testimonials or measured claims.
+- Right column: a visible example worksheet on first render, with optional Placement Test, Homework, Flashcards and 1-Minute Loop film previews. All learner names, levels, scores and study results are explicitly illustrative examples, not testimonials or measured claims.
 - The preview does not promise a fixed generation time or automatic teaching decisions.
 
 ## Placement preview boundary
