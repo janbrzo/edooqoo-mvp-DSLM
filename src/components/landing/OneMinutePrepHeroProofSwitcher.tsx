@@ -241,7 +241,7 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
           </TabsTrigger>
         ))}
       </TabsList>
-      <div className="mt-3 min-h-[740px] rounded-3xl border border-border bg-card/90 p-5 shadow-lg sm:min-h-[620px] sm:p-6">
+      <div className="mt-3 min-h-[800px] rounded-3xl border border-border bg-card/90 p-5 shadow-lg sm:min-h-[660px] sm:p-6">
         <TabsContent value="worksheet" className="mt-0"><WorksheetPreview onGenerateWorksheet={onGenerateWorksheet} /></TabsContent>
         <TabsContent value="test" className="mt-0"><WelcomeTestPreview onPreviewPlacementTest={onPreviewPlacementTest} /></TabsContent>
         <TabsContent value="homework" className="mt-0"><HomeworkPreview /></TabsContent>
