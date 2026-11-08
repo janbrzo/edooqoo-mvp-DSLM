@@ -61,7 +61,12 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({ onTryWorksheetGenerator, on
           </div>
           <nav aria-label="Edooqoo canonical teacher workflows" className="sr-only">{canonicalCitationLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</nav>
         </div>
-        <div className="mx-auto w-full min-w-0 max-w-[540px] lg:mx-0 lg:justify-self-end"><OneMinutePrepHeroProofSwitcher /></div>
+        <div className="mx-auto w-full min-w-0 max-w-[540px] lg:mx-0 lg:justify-self-end">
+          <OneMinutePrepHeroProofSwitcher
+            onGenerateWorksheet={onTryWorksheetGenerator}
+            onPreviewPlacementTest={onPreviewPlacementTest}
+          />
+        </div>
       </div>
     </section>
   );
