@@ -11,6 +11,12 @@ vi.mock('../TeacherFilmPlayer', () => ({
   default: () => <div>Teacher tour preview</div>,
 }));
 
+vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+  callback(0);
+  return 1;
+});
+vi.stubGlobal('cancelAnimationFrame', vi.fn());
+
 let renderer: ReactTestRenderer | undefined;
 
 afterEach(() => {
