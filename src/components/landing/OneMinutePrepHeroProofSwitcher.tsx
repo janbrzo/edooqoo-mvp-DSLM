@@ -87,12 +87,12 @@ const ecosystem = [
 const OneMinutePrepHeroProofSwitcher: React.FC = () => (
   <div className="w-full min-w-0">
     <Tabs defaultValue="worksheet" activationMode="manual">
-      <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-lg border border-border bg-background p-1 sm:grid-cols-4" aria-label="Edooqoo product preview">
+      <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-full border border-border bg-card/80 p-1.5 shadow-sm sm:grid-cols-4" aria-label="Edooqoo product preview">
         {[
           ['worksheet', 'Worksheet'], ['test', 'Placement Test'], ['homework', 'Homework & Cards'], ['film', '1-Minute Loop'],
-        ].map(([id, label]) => <TabsTrigger key={id} value={id} className="h-10 whitespace-normal px-1.5 text-center text-xs leading-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{label}</TabsTrigger>)}
+        ].map(([id, label]) => <TabsTrigger key={id} value={id} className="h-10 whitespace-normal rounded-full px-1.5 text-center text-xs leading-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">{label}</TabsTrigger>)}
       </TabsList>
-      <div className="mt-3 min-h-[640px] border-y border-border bg-card/80 px-4 py-5 sm:min-h-[560px] sm:px-5">
+      <div className="mt-3 min-h-[640px] rounded-3xl border border-border bg-card/90 p-5 shadow-lg sm:min-h-[560px] sm:p-6">
         <TabsContent value="worksheet" className="mt-0"><WorksheetPreview /></TabsContent>
         <TabsContent value="test" className="mt-0"><WelcomeTestPreview /></TabsContent>
         <TabsContent value="homework" className="mt-0"><HomeworkPreview /></TabsContent>
