@@ -11,11 +11,24 @@ vi.mock('../TeacherFilmPlayer', () => ({
   default: () => <div>Teacher tour preview</div>,
 }));
 
-vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-  callback(0);
-  return 1;
+vi.mock('@/components/ui/tabs', () => {
+  const TabsContext = React.createContext<{ value: string; setValue: (value: string) => void }>({ value: '', setValue: () => undefined });
+  return {
+    Tabs: ({ children, defaultValue }: React.PropsWithChildren<{ defaultValue: string }>) => {
+      const [value, setValue] = React.useState(defaultValue);
+      return <TabsContext.Provider value={{ value, setValue }}>{children}</TabsContext.Provider>;
+    },
+    TabsList: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <div {...props}>{children}</div>,
+    TabsTrigger: ({ children, value, ...props }: React.PropsWithChildren<{ value: string }>) => {
+      const tabs = React.useContext(TabsContext);
+      return <button type="button" onClick={() => tabs.setValue(value)} {...props}>{children}</button>;
+    },
+    TabsContent: ({ children, value }: React.PropsWithChildren<{ value: string }>) => {
+      const tabs = React.useContext(TabsContext);
+      return tabs.value === value ? <div>{children}</div> : null;
+    },
+  };
 });
-vi.stubGlobal('cancelAnimationFrame', vi.fn());
 
 let renderer: ReactTestRenderer | undefined;
 
