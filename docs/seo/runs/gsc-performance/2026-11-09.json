@@ -1,0 +1,6843 @@
+{
+  "generatedAt": "2026-11-09T16:10:31.806Z",
+  "status": "ok",
+  "siteUrl": "sc-domain:edooqoo.com",
+  "reports": [
+    {
+      "id": "7d-date-page",
+      "startDate": "2026-10-30",
+      "endDate": "2026-11-06",
+      "dimensions": [
+        "date",
+        "page"
+      ],
+      "rowLimit": 25000,
+      "filterSet": "all-web",
+      "rows": [
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 1,
+          "impressions": 1,
+          "ctr": 1,
+          "position": 15
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/past-simple-worksheets.html"
+          ],
+          "clicks": 1,
+          "impressions": 1,
+          "ctr": 1,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 1,
+          "impressions": 7,
+          "ctr": 0.14285714285714285,
+          "position": 9.285714285714286
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 1,
+          "impressions": 3,
+          "ctr": 0.3333333333333333,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 1,
+          "impressions": 30,
+          "ctr": 0.03333333333333333,
+          "position": 5.7
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 1,
+          "impressions": 6,
+          "ctr": 0.16666666666666666,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/english-for/sales-reps"
+          ],
+          "clicks": 1,
+          "impressions": 7,
+          "ctr": 0.14285714285714285,
+          "position": 40.285714285714285
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 1,
+          "impressions": 5,
+          "ctr": 0.2,
+          "position": 8.2
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/tools"
+          ],
+          "clicks": 1,
+          "impressions": 1,
+          "ctr": 1,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 1,
+          "impressions": 5,
+          "ctr": 0.2,
+          "position": 6.2
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 1,
+          "impressions": 18,
+          "ctr": 0.05555555555555555,
+          "position": 5.388888888888889
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 1,
+          "impressions": 9,
+          "ctr": 0.1111111111111111,
+          "position": 7.111111111111111
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 5.625
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/best-apps-learning-english-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 13
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 0,
+          "impressions": 29,
+          "ctr": 0,
+          "position": 8.482758620689655
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/ipa-phonetic-alphabet-esl-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 6.333333333333333
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 45
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/pair-work-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/edooqoo-vs-islcollective.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/english-for/hr-professionals"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 51
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/esl-worksheets"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 8.25
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/exercise-types"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 9.5
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/future-tenses-worksheets-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 1.3333333333333333
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/passive-voice-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/present-perfect-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 12
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/reported-speech-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 3.5
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/ai-chatbot-vs-student-context-system.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 88.75
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 6.333333333333333
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/best-apps-learning-english-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 0,
+          "impressions": 42,
+          "ctr": 0,
+          "position": 5.809523809523809
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/ipa-phonetic-alphabet-esl-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 6.666666666666667
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/using-films-english-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 12
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 52.5
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/chatgpt-for-esl-teachers-limitations.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/english-for/hr-professionals"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 53.666666666666664
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/esl-worksheets"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/exercise-types"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/features/homework"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 61.5
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/past-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/present-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/reported-speech-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 62
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 8.5
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/best-apps-learning-english-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 0,
+          "impressions": 16,
+          "ctr": 0,
+          "position": 5.0625
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/how-to-turn-homework-errors-into-next-lesson-focus.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 42
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/role-play-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 33
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/teaching-mixed-conditionals-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/teaching-word-stress-patterns-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 18
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/washback-effect-language-testing.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 42
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 33.25
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 9.5
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/edooqoo-vs-gemini.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/english-for/hr-professionals"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 57.25
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/exercise-types"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/features/homework"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 73.5
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/features/student-hub"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/future-tenses-worksheets-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/modal-verbs-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/online-english-teaching-tools.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 16
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/passive-voice-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/present-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 8.5
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/pricing"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/tools"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/about"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 6.857142857142857
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/best-apps-learning-english-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/ipa-phonetic-alphabet-esl-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/pair-work-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/role-play-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 44.2
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/syllabus-design-esl-courses.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/teaching-english-online-complete-guide.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/teaching-word-stress-patterns-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 23.666666666666668
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/english-for/hr-professionals"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 64.5
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/esl-worksheets"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/exercise-types"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/features/homework"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 39
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 8.75
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/modal-verbs-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/passive-voice-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/present-perfect-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/present-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 4.666666666666666
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/speaking-activities-esl-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 31,
+          "ctr": 0,
+          "position": 11.03225806451613
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 5.842105263157895
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/accent-coaching-techniques-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 6.6
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/diagnostic-testing-english-learners.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/five-minute-filler-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/ipa-phonetic-alphabet-esl-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 8.333333333333332
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 8.5
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/pair-work-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 12
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/role-play-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 46.166666666666664
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/teaching-formal-informal-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/washback-effect-language-testing.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 38.6
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/english-for/hr-professionals"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 45.4
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/esl-worksheets"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/exercise-types"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/features/calendar"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/features/homework"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 35.8
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/for-english-tutors"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/future-tenses-worksheets-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/passive-voice-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/present-perfect-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/pricing"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/reported-speech-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 7.25
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/about"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/ai-tools-for-esl-progress-tracking.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 32
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/authors/jan-brzostowski"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 30,
+          "ctr": 0,
+          "position": 6.033333333333333
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 6.222222222222222
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 16,
+          "ctr": 0,
+          "position": 7.6875
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/adult-esl-lesson-ideas-by-level.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 43
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/course-evaluation-esl-programs.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/five-minute-filler-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/ipa-phonetic-alphabet-esl-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/pair-work-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 22
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/role-play-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 34.75
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 17
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/using-podcasts-esl-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 13.625
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5.25
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/edooqoo-vs-chatgpt.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/edooqoo-vs-general-purpose-ai.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/english-for/hr-professionals"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 40.44444444444444
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/english-for/sales-reps"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 54
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/esl-worksheets"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/features/flashcards"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 55
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/future-tenses-worksheets-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/modal-verbs-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/one-minute-prep"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/passive-voice-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/past-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/pricing"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/status"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/terms"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/ai-chatbot-vs-student-context-system.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 28,
+          "ctr": 0,
+          "position": 5.714285714285714
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 14,
+          "ctr": 0,
+          "position": 7.571428571428571
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 8.125
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/blog/five-minute-filler-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/blog/ipa-phonetic-alphabet-esl-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 11.142857142857142
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/blog/pair-work-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/blog/role-play-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 21.4
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 20.666666666666668
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 9.333333333333334
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/edooqoo-vs-chatgpt.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/english-for/sales-reps"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 72
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/esl-worksheets"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/exercise-types"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/for-english-tutors"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 4.75
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/online-english-teaching-tools.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 17
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/passive-voice-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/past-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/phrasal-verbs-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/present-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/pricing"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/reported-speech-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/tools"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "2026-11-05",
+            "https://edooqoo.com/tools/vocab-cefr-checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 77
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 6.7368421052631575
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 23,
+          "ctr": 0,
+          "position": 6.130434782608695
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 8.2
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 0,
+          "impressions": 13,
+          "ctr": 0,
+          "position": 9.23076923076923
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/five-minute-filler-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/ipa-phonetic-alphabet-esl-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 2.5
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 55
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/role-play-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 36
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/teaching-study-skills-english-learners.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 42
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 8.5
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/business-english-worksheet-generator.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/english-for/hr-professionals"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 58.4
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/english-for/sales-reps"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 52.8
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/esl-worksheets"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 17.75
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/features/flashcards"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 8.333333333333332
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/grammar-worksheet-generator.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/how-it-works"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/modal-verbs-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 7.5
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/online-english-teaching-tools.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/passive-voice-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/past-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/phrasal-verbs-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/present-perfect-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 3.6666666666666665
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/reported-speech-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 1.5
+        },
+        {
+          "keys": [
+            "2026-11-06",
+            "https://edooqoo.com/tools/vocab-cefr-checker"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 12
+        }
+      ],
+      "responseAggregationType": "byPage",
+      "metadata": null
+    },
+    {
+      "id": "28d-page-query",
+      "startDate": "2026-10-09",
+      "endDate": "2026-11-06",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 25000,
+      "filterSet": "all-web",
+      "rows": [
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching activities"
+          ],
+          "clicks": 2,
+          "impressions": 58,
+          "ctr": 0.034482758620689655,
+          "position": 7.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "edoo esl"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 7.2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "edoo esl application"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "edoo esl apply"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "edugoo"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/about",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 3.888888888888889
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/ai-chatbot-vs-student-context-system.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 18
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/ai-tools-for-online-esl-teachers.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 20
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "do my english homework for me"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 79
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "english homework help"
+          ],
+          "clicks": 0,
+          "impressions": 15,
+          "ctr": 0,
+          "position": 93.86666666666666
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "english learning and homework study assistant"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 24
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "what premium ai tutoring apps offer personalized english lesson plans?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "which homework assistants are useful for language arts assignments?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html",
+            "esl worksheet generator"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 30.8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 22
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "evaluate the customizable worksheets educational technology company easy peasy on worksheet generator ai"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "evaluate the customizable worksheets educational technology company worksheets ai on personalized learning tools"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5.25
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "evaluate the teacher resource platforms & ai educational tools company classtools on ai worksheet generator"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "evaluate the teacher resource platforms & ai educational tools company classtools on worksheet maker ai"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 23
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-chatgpt-alternatives-for-esl-teachers.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 16
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/authentic-listening-materials-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"communicative syllabus\" \"teacher\" \"model\" \"target language\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"communicative syllabus\" \"teacher\" \"target language\" \"model\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"tasks and activities that engage the students\" \"teacher\" \"communicative\""
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 16.25
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities examples"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 2.875
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities examples in the classroom"
+          ],
+          "clicks": 0,
+          "impressions": 78,
+          "ctr": 0,
+          "position": 4.333333333333334
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative english activities"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 40
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching activities examples pdf"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching examples"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching lesson plan"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 29
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching materials"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching questions"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 14.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative tasks"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "community language learning activities"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 24.333333333333332
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 7.75
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "what is communicative language teaching example"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 53
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/debate-activities-english-class.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/formative-assessment-english-teaching.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "lexical approach"
+          ],
+          "clicks": 0,
+          "impressions": 10,
+          "ctr": 0,
+          "position": 36.2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "lexical approach meaning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 43
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 9.75
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "teaching grammar lexically"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 80
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "the lexical approach"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 50
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/mentoring-new-esl-teachers.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 13
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html",
+            "welke online engelse lessen zijn de beste en meest gepersonaliseerd?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html",
+            "what are the most personalized online platforms to find english tutors?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair activities"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 59
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair activity"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 93
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair activity for students"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 63
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair task"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 22
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair work"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 16.333333333333336
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair work activities examples"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "paired work"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 53
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/role-play-activities-esl.html",
+            "english roleplay practice"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 99
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/role-play-activities-esl.html",
+            "english roleplay simulator"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 28.333333333333332
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/role-play-activities-esl.html",
+            "esl role play speaking practice"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 61.416666666666664
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-determiners-quantifiers-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 8.75
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-english-tenses-complete-guide.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 21
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-listening-strategies-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-mixed-conditionals-esl.html",
+            "mixed conditionals lesson plan"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 30
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-mixed-conditionals-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 14
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-passive-voice-activities.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html",
+            "how to teach reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 13.8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html",
+            "pedagogical strategies for teaching backshift in reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html",
+            "teach this reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 12
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "test washback positive negative efl teaching learning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 33
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "washback effect in language testing"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "washback effect in testing"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 27
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "washback meaning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 42
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "exercises of word formation"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 40
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "strong word formation"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 39
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "word formation activities"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 56
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "word formation exercises"
+          ],
+          "clicks": 0,
+          "impressions": 14,
+          "ctr": 0,
+          "position": 49.142857142857146
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "word formation practice"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 50
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html",
+            "esl progress report"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html",
+            "esl progress report samples pdf"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 26.75
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html",
+            "esl reports"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 15
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 10.833333333333334
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "english for hr"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 65
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 16,
+          "ctr": 0,
+          "position": 62.1875
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "professional english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 55.73684210526316
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "professional english for recruiters"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 45.333333333333336
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "spoken english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 53.916666666666664
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "english for sales"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 62.666666666666664
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "english for sales professionals"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 84.66666666666667
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "اللغة الإنجليزية لفرق المبيعات"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 35.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/esl-worksheets",
+            "esl worksheet generator"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 35
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/esl-worksheets",
+            "prepbanker.com"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 27.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/esl-worksheets",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/exercise-types",
+            "types of exercises in teaching english"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 4.333333333333334
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "do ela homework"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 32
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "do my english homework for me"
+          ],
+          "clicks": 0,
+          "impressions": 22,
+          "ctr": 0,
+          "position": 66.0909090909091
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "english placement test rubric helper"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "free placement test"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 17
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "welcome test"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/future-tenses-worksheets-english.html",
+            "future tenses b1 exercises"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/future-tenses-worksheets-english.html",
+            "future tenses exercises will going to present simple present continuous"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 7.333333333333333
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/glossary",
+            "edoo esl"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/glossary",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/modal-verbs-worksheets-esl.html",
+            "what is the modal verb and example of no obligation?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 82
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/online-english-teaching-tools.html",
+            "edoo esl"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/online-english-teaching-tools.html",
+            "english online research tool"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 14
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/online-english-teaching-tools.html",
+            "tool for english teachers"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 72
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/passive-voice-worksheets-esl.html",
+            "passive voice correction"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/present-simple-worksheets.html",
+            "present simple ai"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/pricing",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 4.888888888888889
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/privacy-policy",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/status",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 3.2222222222222223
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/teacher-controlled-ai-for-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 17
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/terms",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/tools",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/tools/vocab-cefr-checker",
+            "cefr checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/tools/vocab-cefr-checker",
+            "cefr level checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 38
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/tools/vocab-cefr-checker",
+            "cefr level word checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/tools/vocab-cefr-checker",
+            "cefr word check"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/tools/vocab-cefr-checker",
+            "cefr word checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/tools/vocab-cefr-checker",
+            "cefr word level checker"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5.25
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/tools/vocab-cefr-checker",
+            "vocabulary checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        }
+      ],
+      "responseAggregationType": "byPage",
+      "metadata": null
+    },
+    {
+      "id": "28d-query",
+      "startDate": "2026-10-09",
+      "endDate": "2026-11-06",
+      "dimensions": [
+        "query"
+      ],
+      "rowLimit": 25000,
+      "filterSet": "all-web",
+      "rows": [
+        {
+          "keys": [
+            "communicative language teaching activities"
+          ],
+          "clicks": 2,
+          "impressions": 58,
+          "ctr": 0.034482758620689655,
+          "position": 7.5
+        },
+        {
+          "keys": [
+            "\"communicative syllabus\" \"teacher\" \"model\" \"target language\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "\"communicative syllabus\" \"teacher\" \"target language\" \"model\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "\"tasks and activities that engage the students\" \"teacher\" \"communicative\""
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "cefr checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "cefr level checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 38
+        },
+        {
+          "keys": [
+            "cefr level word checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "cefr word check"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "cefr word checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "cefr word level checker"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5.25
+        },
+        {
+          "keys": [
+            "communicative activities"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 16.25
+        },
+        {
+          "keys": [
+            "communicative activities examples"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 2.875
+        },
+        {
+          "keys": [
+            "communicative activities examples in the classroom"
+          ],
+          "clicks": 0,
+          "impressions": 78,
+          "ctr": 0,
+          "position": 4.333333333333334
+        },
+        {
+          "keys": [
+            "communicative english activities"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 40
+        },
+        {
+          "keys": [
+            "communicative language teaching activities examples pdf"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "communicative language teaching examples"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "communicative language teaching lesson plan"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 29
+        },
+        {
+          "keys": [
+            "communicative language teaching materials"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "communicative language teaching questions"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 14.5
+        },
+        {
+          "keys": [
+            "communicative tasks"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "community language learning activities"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 24.333333333333332
+        },
+        {
+          "keys": [
+            "do ela homework"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 32
+        },
+        {
+          "keys": [
+            "do my english homework for me"
+          ],
+          "clicks": 0,
+          "impressions": 25,
+          "ctr": 0,
+          "position": 67.52
+        },
+        {
+          "keys": [
+            "edoo esl"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 7.571428571428571
+        },
+        {
+          "keys": [
+            "edoo esl application"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "edoo esl apply"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "edugoo"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "english for hr"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 65
+        },
+        {
+          "keys": [
+            "english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 16,
+          "ctr": 0,
+          "position": 62.1875
+        },
+        {
+          "keys": [
+            "english for sales"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 62.666666666666664
+        },
+        {
+          "keys": [
+            "english for sales professionals"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 84.66666666666667
+        },
+        {
+          "keys": [
+            "english homework help"
+          ],
+          "clicks": 0,
+          "impressions": 15,
+          "ctr": 0,
+          "position": 93.86666666666666
+        },
+        {
+          "keys": [
+            "english learning and homework study assistant"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "english online research tool"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 14
+        },
+        {
+          "keys": [
+            "english placement test rubric helper"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "english roleplay practice"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 99
+        },
+        {
+          "keys": [
+            "english roleplay simulator"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 28.333333333333332
+        },
+        {
+          "keys": [
+            "esl progress report"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "esl progress report samples pdf"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 26.75
+        },
+        {
+          "keys": [
+            "esl reports"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "esl role play speaking practice"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 61.416666666666664
+        },
+        {
+          "keys": [
+            "esl worksheet generator"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 31.5
+        },
+        {
+          "keys": [
+            "evaluate the customizable worksheets educational technology company easy peasy on worksheet generator ai"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "evaluate the customizable worksheets educational technology company worksheets ai on personalized learning tools"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5.25
+        },
+        {
+          "keys": [
+            "evaluate the teacher resource platforms & ai educational tools company classtools on ai worksheet generator"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "evaluate the teacher resource platforms & ai educational tools company classtools on worksheet maker ai"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "exercises of word formation"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 40
+        },
+        {
+          "keys": [
+            "free placement test"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 17
+        },
+        {
+          "keys": [
+            "future tenses b1 exercises"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "future tenses exercises will going to present simple present continuous"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 7.333333333333333
+        },
+        {
+          "keys": [
+            "how to teach reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 13.8
+        },
+        {
+          "keys": [
+            "lexical approach"
+          ],
+          "clicks": 0,
+          "impressions": 10,
+          "ctr": 0,
+          "position": 36.2
+        },
+        {
+          "keys": [
+            "lexical approach meaning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 43
+        },
+        {
+          "keys": [
+            "mixed conditionals lesson plan"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 30
+        },
+        {
+          "keys": [
+            "pair activities"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 59
+        },
+        {
+          "keys": [
+            "pair activity"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 93
+        },
+        {
+          "keys": [
+            "pair activity for students"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 63
+        },
+        {
+          "keys": [
+            "pair task"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 22
+        },
+        {
+          "keys": [
+            "pair work"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 16.333333333333336
+        },
+        {
+          "keys": [
+            "pair work activities examples"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "paired work"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 53
+        },
+        {
+          "keys": [
+            "passive voice correction"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "pedagogical strategies for teaching backshift in reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "prepbanker.com"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 27.5
+        },
+        {
+          "keys": [
+            "present simple ai"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "professional english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 55.73684210526316
+        },
+        {
+          "keys": [
+            "professional english for recruiters"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 45.333333333333336
+        },
+        {
+          "keys": [
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 25,
+          "ctr": 0,
+          "position": 8.6
+        },
+        {
+          "keys": [
+            "spoken english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 53.916666666666664
+        },
+        {
+          "keys": [
+            "strong word formation"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 39
+        },
+        {
+          "keys": [
+            "teach this reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "teaching grammar lexically"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 80
+        },
+        {
+          "keys": [
+            "test washback positive negative efl teaching learning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 33
+        },
+        {
+          "keys": [
+            "the lexical approach"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 50
+        },
+        {
+          "keys": [
+            "tool for english teachers"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 72
+        },
+        {
+          "keys": [
+            "types of exercises in teaching english"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 4.333333333333334
+        },
+        {
+          "keys": [
+            "vocabulary checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "washback effect in language testing"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "washback effect in testing"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 27
+        },
+        {
+          "keys": [
+            "washback meaning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 42
+        },
+        {
+          "keys": [
+            "welcome test"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "welke online engelse lessen zijn de beste en meest gepersonaliseerd?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "what are the most personalized online platforms to find english tutors?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "what is communicative language teaching example"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 53
+        },
+        {
+          "keys": [
+            "what is the modal verb and example of no obligation?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 82
+        },
+        {
+          "keys": [
+            "what premium ai tutoring apps offer personalized english lesson plans?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "which homework assistants are useful for language arts assignments?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "word formation activities"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 56
+        },
+        {
+          "keys": [
+            "word formation exercises"
+          ],
+          "clicks": 0,
+          "impressions": 14,
+          "ctr": 0,
+          "position": 49.142857142857146
+        },
+        {
+          "keys": [
+            "word formation practice"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 50
+        },
+        {
+          "keys": [
+            "اللغة الإنجليزية لفرق المبيعات"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 35.5
+        }
+      ],
+      "responseAggregationType": "byProperty",
+      "metadata": null
+    },
+    {
+      "id": "28d-device-page",
+      "startDate": "2026-10-09",
+      "endDate": "2026-11-06",
+      "dimensions": [
+        "device",
+        "page"
+      ],
+      "rowLimit": 25000,
+      "filterSet": "all-web",
+      "rows": [
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 1,
+          "impressions": 172,
+          "ctr": 0.005813953488372093,
+          "position": 7.215116279069767
+        },
+        {
+          "keys": [
+            "TABLET",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 1,
+          "impressions": 1,
+          "ctr": 1,
+          "position": 10
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/"
+          ],
+          "clicks": 0,
+          "impressions": 14,
+          "ctr": 0,
+          "position": 4.142857142857142
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/about"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 3.888888888888889
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/ai-chatbot-vs-student-context-system.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 18
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/ai-tools-for-online-esl-teachers.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 20
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 35,
+          "ctr": 0,
+          "position": 61.08571428571429
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 25.666666666666668
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 14,
+          "ctr": 0,
+          "position": 14.5
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/best-chatgpt-alternatives-for-esl-teachers.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 16
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/authentic-listening-materials-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/debate-activities-english-class.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/formative-assessment-english-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 34.111111111111114
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/mentoring-new-esl-teachers.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 13
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 16.285714285714285
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/pair-work-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 13,
+          "ctr": 0,
+          "position": 34.84615384615385
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/role-play-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 52.94736842105263
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/teaching-determiners-quantifiers-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 8.75
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/teaching-english-tenses-complete-guide.html"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 21
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/teaching-listening-strategies-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/teaching-mixed-conditionals-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 16.666666666666664
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/teaching-passive-voice-activities.html"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 10,
+          "ctr": 0,
+          "position": 9.2
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/washback-effect-language-testing.html"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 20.25
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 17,
+          "ctr": 0,
+          "position": 48.23529411764706
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 17.916666666666668
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 10.833333333333334
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/english-for/hr-professionals"
+          ],
+          "clicks": 0,
+          "impressions": 51,
+          "ctr": 0,
+          "position": 56.90196078431372
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/english-for/sales-reps"
+          ],
+          "clicks": 0,
+          "impressions": 11,
+          "ctr": 0,
+          "position": 64.36363636363637
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/esl-worksheets"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 14.25
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/exercise-types"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 4.666666666666666
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/features/homework"
+          ],
+          "clicks": 0,
+          "impressions": 21,
+          "ctr": 0,
+          "position": 39.333333333333336
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 15
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/future-tenses-worksheets-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/glossary"
+          ],
+          "clicks": 0,
+          "impressions": 10,
+          "ctr": 0,
+          "position": 2.5
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/modal-verbs-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 82
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/online-english-teaching-tools.html"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 23
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/present-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/pricing"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 4.888888888888889
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/privacy-policy"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/status"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 3.2222222222222223
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/teacher-controlled-ai-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 17
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/terms"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/tools"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/tools/vocab-cefr-checker"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 9.428571428571429
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 7.333333333333333
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 81.25
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 14
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 33.375
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/blog/pair-work-activities-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 15
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/blog/washback-effect-language-testing.html"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/blog/word-formation-exercises-english.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 53
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/english-for/sales-reps"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 32
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/exercise-types"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/features/homework"
+          ],
+          "clicks": 0,
+          "impressions": 11,
+          "ctr": 0,
+          "position": 68.18181818181819
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/features/placement-test"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/passive-voice-worksheets-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/present-simple-worksheets.html"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "MOBILE",
+            "https://edooqoo.com/tools/vocab-cefr-checker"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "TABLET",
+            "https://edooqoo.com/tools/vocab-cefr-checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        }
+      ],
+      "responseAggregationType": "byPage",
+      "metadata": null
+    },
+    {
+      "id": "28d-blog-page-query",
+      "startDate": "2026-10-09",
+      "endDate": "2026-11-06",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 10000,
+      "filterSet": "blog",
+      "rows": [
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching activities"
+          ],
+          "clicks": 2,
+          "impressions": 58,
+          "ctr": 0.034482758620689655,
+          "position": 7.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/authentic-listening-materials-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"communicative syllabus\" \"teacher\" \"model\" \"target language\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"communicative syllabus\" \"teacher\" \"target language\" \"model\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"tasks and activities that engage the students\" \"teacher\" \"communicative\""
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 16.25
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities examples"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 2.875
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities examples in the classroom"
+          ],
+          "clicks": 0,
+          "impressions": 78,
+          "ctr": 0,
+          "position": 4.333333333333334
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative english activities"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 40
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching activities examples pdf"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching examples"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching lesson plan"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 29
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching materials"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching questions"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 14.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative tasks"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "community language learning activities"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 24.333333333333332
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 7.75
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "what is communicative language teaching example"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 53
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/debate-activities-english-class.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/formative-assessment-english-teaching.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 4
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "lexical approach"
+          ],
+          "clicks": 0,
+          "impressions": 10,
+          "ctr": 0,
+          "position": 36.2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "lexical approach meaning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 43
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 9.75
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "teaching grammar lexically"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 80
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+            "the lexical approach"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 50
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/mentoring-new-esl-teachers.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 13
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html",
+            "welke online engelse lessen zijn de beste en meest gepersonaliseerd?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/online-english-tutor-tools-2026.html",
+            "what are the most personalized online platforms to find english tutors?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair activities"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 59
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair activity"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 93
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair activity for students"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 63
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair task"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 22
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair work"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 16.333333333333336
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "pair work activities examples"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "paired work"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 53
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/pair-work-activities-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/role-play-activities-esl.html",
+            "english roleplay practice"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 99
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/role-play-activities-esl.html",
+            "english roleplay simulator"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 28.333333333333332
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/role-play-activities-esl.html",
+            "esl role play speaking practice"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 61.416666666666664
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-determiners-quantifiers-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 8.75
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-english-tenses-complete-guide.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 21
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-listening-strategies-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-mixed-conditionals-esl.html",
+            "mixed conditionals lesson plan"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 30
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-mixed-conditionals-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 14
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-passive-voice-activities.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html",
+            "how to teach reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 13.8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html",
+            "pedagogical strategies for teaching backshift in reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 9
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html",
+            "teach this reported speech"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 12
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "test washback positive negative efl teaching learning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 33
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "washback effect in language testing"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "washback effect in testing"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 27
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/washback-effect-language-testing.html",
+            "washback meaning"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 42
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "exercises of word formation"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 40
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "strong word formation"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 39
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "word formation activities"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 56
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "word formation exercises"
+          ],
+          "clicks": 0,
+          "impressions": 14,
+          "ctr": 0,
+          "position": 49.142857142857146
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/word-formation-exercises-english.html",
+            "word formation practice"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 50
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html",
+            "esl progress report"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 11
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html",
+            "esl progress report samples pdf"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 26.75
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html",
+            "esl reports"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 15
+        }
+      ],
+      "responseAggregationType": "byPage",
+      "metadata": null
+    },
+    {
+      "id": "28d-comparison-page-query",
+      "startDate": "2026-10-09",
+      "endDate": "2026-11-06",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 10000,
+      "filterSet": "comparison",
+      "rows": [
+        {
+          "keys": [
+            "https://edooqoo.com/ai-chatbot-vs-student-context-system.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 18
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/ai-tools-for-online-esl-teachers.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 20
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "do my english homework for me"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 79
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "english homework help"
+          ],
+          "clicks": 0,
+          "impressions": 15,
+          "ctr": 0,
+          "position": 93.86666666666666
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "english learning and homework study assistant"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 24
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "what premium ai tutoring apps offer personalized english lesson plans?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "which homework assistants are useful for language arts assignments?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html",
+            "esl worksheet generator"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 30.8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 22
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "evaluate the customizable worksheets educational technology company easy peasy on worksheet generator ai"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "evaluate the customizable worksheets educational technology company worksheets ai on personalized learning tools"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5.25
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "evaluate the teacher resource platforms & ai educational tools company classtools on ai worksheet generator"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "evaluate the teacher resource platforms & ai educational tools company classtools on worksheet maker ai"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 23
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-chatgpt-alternatives-for-esl-teachers.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 16
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 10.833333333333334
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/teacher-controlled-ai-for-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 17
+        }
+      ],
+      "responseAggregationType": "byPage",
+      "metadata": null
+    },
+    {
+      "id": "28d-workflow-page-query",
+      "startDate": "2026-10-09",
+      "endDate": "2026-11-06",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 10000,
+      "filterSet": "workflow",
+      "rows": [
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "do ela homework"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 32
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "do my english homework for me"
+          ],
+          "clicks": 0,
+          "impressions": 22,
+          "ctr": 0,
+          "position": 66.0909090909091
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "english placement test rubric helper"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "free placement test"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 17
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "welcome test"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 10
+        }
+      ],
+      "responseAggregationType": "byPage",
+      "metadata": null
+    },
+    {
+      "id": "28d-pseo-indexable-page-query",
+      "startDate": "2026-10-09",
+      "endDate": "2026-11-06",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 10000,
+      "filterSet": "pseo-indexable",
+      "rows": [
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "english for hr"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 65
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 16,
+          "ctr": 0,
+          "position": 62.1875
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "professional english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 55.73684210526316
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "professional english for recruiters"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 45.333333333333336
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "spoken english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 53.916666666666664
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "english for sales"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 62.666666666666664
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "english for sales professionals"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 84.66666666666667
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "اللغة الإنجليزية لفرق المبيعات"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 35.5
+        }
+      ],
+      "responseAggregationType": "byPage",
+      "metadata": null
+    }
+  ],
+  "summary": {
+    "7d-date-page": {
+      "rows": 224,
+      "clicks": 12,
+      "impressions": 829,
+      "topRows": [
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/blog/teaching-reported-speech-esl.html"
+          ],
+          "clicks": 1,
+          "impressions": 1,
+          "ctr": 1,
+          "position": 15
+        },
+        {
+          "keys": [
+            "2026-10-30",
+            "https://edooqoo.com/past-simple-worksheets.html"
+          ],
+          "clicks": 1,
+          "impressions": 1,
+          "ctr": 1,
+          "position": 9
+        },
+        {
+          "keys": [
+            "2026-10-31",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 1,
+          "impressions": 7,
+          "ctr": 0.14285714285714285,
+          "position": 9.285714285714286
+        },
+        {
+          "keys": [
+            "2026-11-01",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 1,
+          "impressions": 3,
+          "ctr": 0.3333333333333333,
+          "position": 5
+        },
+        {
+          "keys": [
+            "2026-11-02",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 1,
+          "impressions": 30,
+          "ctr": 0.03333333333333333,
+          "position": 5.7
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/blog/writing-student-progress-reports-esl.html"
+          ],
+          "clicks": 1,
+          "impressions": 6,
+          "ctr": 0.16666666666666666,
+          "position": 6
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/english-for/sales-reps"
+          ],
+          "clicks": 1,
+          "impressions": 7,
+          "ctr": 0.14285714285714285,
+          "position": 40.285714285714285
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 1,
+          "impressions": 5,
+          "ctr": 0.2,
+          "position": 8.2
+        },
+        {
+          "keys": [
+            "2026-11-03",
+            "https://edooqoo.com/tools"
+          ],
+          "clicks": 1,
+          "impressions": 1,
+          "ctr": 1,
+          "position": 10
+        },
+        {
+          "keys": [
+            "2026-11-04",
+            "https://edooqoo.com/esl-worksheets/news-media/c1-advanced"
+          ],
+          "clicks": 1,
+          "impressions": 5,
+          "ctr": 0.2,
+          "position": 6.2
+        }
+      ]
+    },
+    "28d-page-query": {
+      "rows": 128,
+      "clicks": 2,
+      "impressions": 651,
+      "topRows": [
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching activities"
+          ],
+          "clicks": 2,
+          "impressions": 58,
+          "ctr": 0.034482758620689655,
+          "position": 7.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "edoo esl"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 7.2
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "edoo esl application"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "edoo esl apply"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "edugoo"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/about",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 3.888888888888889
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/ai-chatbot-vs-student-context-system.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 18
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/ai-tools-for-online-esl-teachers.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 20
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "do my english homework for me"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 79
+        }
+      ]
+    },
+    "28d-query": {
+      "rows": 91,
+      "clicks": 2,
+      "impressions": 452,
+      "topRows": [
+        {
+          "keys": [
+            "communicative language teaching activities"
+          ],
+          "clicks": 2,
+          "impressions": 58,
+          "ctr": 0.034482758620689655,
+          "position": 7.5
+        },
+        {
+          "keys": [
+            "\"communicative syllabus\" \"teacher\" \"model\" \"target language\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "\"communicative syllabus\" \"teacher\" \"target language\" \"model\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "\"tasks and activities that engage the students\" \"teacher\" \"communicative\""
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "cefr checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "cefr level checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 38
+        },
+        {
+          "keys": [
+            "cefr level word checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 6
+        },
+        {
+          "keys": [
+            "cefr word check"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 2
+        },
+        {
+          "keys": [
+            "cefr word checker"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 5
+        },
+        {
+          "keys": [
+            "cefr word level checker"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 5.25
+        }
+      ]
+    },
+    "28d-device-page": {
+      "rows": 63,
+      "clicks": 2,
+      "impressions": 651,
+      "topRows": [
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 1,
+          "impressions": 172,
+          "ctr": 0.005813953488372093,
+          "position": 7.215116279069767
+        },
+        {
+          "keys": [
+            "TABLET",
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+          ],
+          "clicks": 1,
+          "impressions": 1,
+          "ctr": 1,
+          "position": 10
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/"
+          ],
+          "clicks": 0,
+          "impressions": 14,
+          "ctr": 0,
+          "position": 4.142857142857142
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/about"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 3.888888888888889
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/ai-chatbot-vs-student-context-system.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 18
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/ai-tools-for-online-esl-teachers.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 20
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 35,
+          "ctr": 0,
+          "position": 61.08571428571429
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 25.666666666666668
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/best-ai-worksheet-tools-for-english-tutors.html"
+          ],
+          "clicks": 0,
+          "impressions": 14,
+          "ctr": 0,
+          "position": 14.5
+        },
+        {
+          "keys": [
+            "DESKTOP",
+            "https://edooqoo.com/best-chatgpt-alternatives-for-esl-teachers.html"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 16
+        }
+      ]
+    },
+    "28d-blog-page-query": {
+      "rows": 64,
+      "clicks": 2,
+      "impressions": 329,
+      "topRows": [
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching activities"
+          ],
+          "clicks": 2,
+          "impressions": 58,
+          "ctr": 0.034482758620689655,
+          "position": 7.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/authentic-listening-materials-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 1
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"communicative syllabus\" \"teacher\" \"model\" \"target language\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"communicative syllabus\" \"teacher\" \"target language\" \"model\""
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "\"tasks and activities that engage the students\" \"teacher\" \"communicative\""
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 16.25
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities examples"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 2.875
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative activities examples in the classroom"
+          ],
+          "clicks": 0,
+          "impressions": 78,
+          "ctr": 0,
+          "position": 4.333333333333334
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative english activities"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 40
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+            "communicative language teaching activities examples pdf"
+          ],
+          "clicks": 0,
+          "impressions": 8,
+          "ctr": 0,
+          "position": 8
+        }
+      ]
+    },
+    "28d-comparison-page-query": {
+      "rows": 18,
+      "clicks": 0,
+      "impressions": 99,
+      "topRows": [
+        {
+          "keys": [
+            "https://edooqoo.com/ai-chatbot-vs-student-context-system.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 18
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/ai-tools-for-online-esl-teachers.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 20
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "do my english homework for me"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 79
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "english homework help"
+          ],
+          "clicks": 0,
+          "impressions": 15,
+          "ctr": 0,
+          "position": 93.86666666666666
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "english learning and homework study assistant"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 6.5
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 24
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "what premium ai tutoring apps offer personalized english lesson plans?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 3
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-homework-tools-for-private-english-tutors.html",
+            "which homework assistants are useful for language arts assignments?"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 7
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html",
+            "esl worksheet generator"
+          ],
+          "clicks": 0,
+          "impressions": 5,
+          "ctr": 0,
+          "position": 30.8
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/best-ai-worksheet-generator-for-adult-esl.html",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 7,
+          "ctr": 0,
+          "position": 22
+        }
+      ]
+    },
+    "28d-workflow-page-query": {
+      "rows": 6,
+      "clicks": 0,
+      "impressions": 36,
+      "topRows": [
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "do ela homework"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 32
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "do my english homework for me"
+          ],
+          "clicks": 0,
+          "impressions": 22,
+          "ctr": 0,
+          "position": 66.0909090909091
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/homework",
+            "site:edooqoo.com"
+          ],
+          "clicks": 0,
+          "impressions": 9,
+          "ctr": 0,
+          "position": 10
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "english placement test rubric helper"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 19
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "free placement test"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 17
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/features/placement-test",
+            "welcome test"
+          ],
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 10
+        }
+      ]
+    },
+    "28d-pseo-indexable-page-query": {
+      "rows": 8,
+      "clicks": 0,
+      "impressions": 64,
+      "topRows": [
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "english for hr"
+          ],
+          "clicks": 0,
+          "impressions": 1,
+          "ctr": 0,
+          "position": 65
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 16,
+          "ctr": 0,
+          "position": 62.1875
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "professional english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 19,
+          "ctr": 0,
+          "position": 55.73684210526316
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "professional english for recruiters"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 45.333333333333336
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/hr-professionals",
+            "spoken english for hr professionals"
+          ],
+          "clicks": 0,
+          "impressions": 12,
+          "ctr": 0,
+          "position": 53.916666666666664
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "english for sales"
+          ],
+          "clicks": 0,
+          "impressions": 6,
+          "ctr": 0,
+          "position": 62.666666666666664
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "english for sales professionals"
+          ],
+          "clicks": 0,
+          "impressions": 3,
+          "ctr": 0,
+          "position": 84.66666666666667
+        },
+        {
+          "keys": [
+            "https://edooqoo.com/english-for/sales-reps",
+            "اللغة الإنجليزية لفرق المبيعات"
+          ],
+          "clicks": 0,
+          "impressions": 4,
+          "ctr": 0,
+          "position": 35.5
+        }
+      ]
+    }
+  }
+}
