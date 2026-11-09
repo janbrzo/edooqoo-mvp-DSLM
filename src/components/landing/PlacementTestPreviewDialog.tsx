@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Headphones, Mic, RotateCcw, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Brain, CheckCircle2, ClipboardCheck, Compass, Headphones, Mic, Minus, RotateCcw, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,16 +12,21 @@ interface PlacementTestPreviewDialogProps {
 }
 
 const skillAreas = [
-  { icon: BookOpen, title: 'Grammar & vocabulary', detail: 'From core structures to practical expressions' },
-  { icon: Headphones, title: 'Reading & listening', detail: 'Comprehension in everyday situations' },
-  { icon: Mic, title: 'Writing & speaking', detail: 'Real answers, not just multiple choice' },
-  { icon: ClipboardCheck, title: 'Goals & preferences', detail: 'A starting point the teacher reviews' },
+  { icon: Compass, title: 'Real needs vs declared goals', detail: 'Decision scenarios reveal what the learner actually needs at work, not only what they say they want.' },
+  { icon: Brain, title: 'Learner profile', detail: 'Self-awareness, confidence and learning preferences, so you know how to teach this adult.' },
+  { icon: Mic, title: 'Writing & speaking', detail: 'Open answers and a recorded speaking task, not only multiple choice.' },
+  { icon: Headphones, title: 'Grammar, vocabulary & listening', detail: 'Practical structures and expressions measured in everyday professional situations.' },
+];
+
+const marketContrast = [
+  { label: 'Typical level test', points: ['Multiple choice grammar', 'One CEFR label', 'No idea what to teach first'] },
+  { label: 'Edooqoo Placement Test', points: ['Four skills with real production', 'Declared vs actual needs', 'Suggested goals you review'] },
 ];
 
 const flowSteps = [
-  { title: 'Send a private test link', detail: 'Choose or add your student in the teacher dashboard.' },
-  { title: 'Your student completes it', detail: 'They answer on their own device, including writing and speaking tasks.' },
-  { title: 'Review the starting point', detail: 'See the skill profile and suggested goals, then decide what to teach.' },
+  { title: 'Enter the student and your email', detail: 'You get a private test link in seconds and can share it by email, WhatsApp or Messenger.' },
+  { title: 'Your student completes it', detail: 'About 20 to 25 minutes on their phone or laptop, including writing and speaking tasks.' },
+  { title: 'Receive the teaching profile', detail: 'Skill profile, real needs and suggested goals arrive before lesson one. You decide what to teach.' },
 ];
 
 const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({ open, onOpenChange }) => {
@@ -74,6 +79,25 @@ const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({
               </ol>
             </section>
 
+            <section aria-labelledby="placement-contrast-title" className="space-y-3">
+              <h3 id="placement-contrast-title" className="text-sm font-semibold text-foreground">More than a level: who your student is and what they really need</h3>
+              <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+                {marketContrast.map((column, index) => (
+                  <div key={column.label} className={`rounded-2xl border p-3.5 ${index === 1 ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'}`}>
+                    <p className={`text-xs font-semibold uppercase ${index === 1 ? 'text-primary' : 'text-muted-foreground'}`}>{column.label}</p>
+                    <ul className="mt-2 space-y-1.5">
+                      {column.points.map((point) => (
+                        <li key={point} className="flex items-start gap-2 text-xs leading-5 text-foreground">
+                          {index === 1 ? <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" /> : <Minus className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
               {skillAreas.map(({ icon: Icon, title, detail }) => (
                 <div key={title} className="min-w-0 rounded-2xl border border-border bg-card p-3.5">
@@ -87,10 +111,10 @@ const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({
             <div className="grid gap-2 sm:grid-cols-2">
               {sendPlacementButton}
               <Button variant="outline" size="lg" className="h-auto min-h-11 w-full whitespace-normal rounded-full px-5" onClick={() => setStep(0)}>
-                Try Sample Test as Student<ArrowRight className="h-4 w-4" />
+                Try Placement Test as Student<ArrowRight className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-center text-xs leading-5 text-muted-foreground">The sample is local: it creates no student, saves no answers and calculates no CEFR level.</p>
+            <p className="text-center text-xs leading-5 text-muted-foreground">Trying the test creates no student and saves no answers.</p>
           </>
         ) : complete ? (
           <div className="space-y-4 border-y border-border py-5">

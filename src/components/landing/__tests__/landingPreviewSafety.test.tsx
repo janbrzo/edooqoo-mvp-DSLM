@@ -28,7 +28,7 @@ describe('public preview safety', () => {
     const sendLink = view.root.findAllByType('a').find((link) => link.props.href === '/dashboard?action=add-student');
     if (!sendLink) throw new Error('Send Placement action missing');
     expect(sendLink.children).toContain('Send Placement to Student');
-    expect(view.root.findAllByType('button').some((button) => button.children.includes('Try Sample Test as Student'))).toBe(true);
+    expect(view.root.findAllByType('button').some((button) => button.children.includes('Try Placement Test as Student'))).toBe(true);
     expect(view.root.findAllByType('a').some((link) => link.props.href === '/signup')).toBe(false);
     act(() => sendLink.props.onClick());
     expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -47,7 +47,7 @@ describe('public preview safety', () => {
   it('keeps sample answers local and discards them on close', () => {
     const onOpenChange = vi.fn();
     const view = mount(<PlacementTestPreviewDialog open onOpenChange={onOpenChange} />);
-    const tryButton = () => view.root.findAllByType('button').find((button) => button.children.includes('Try Sample Test as Student'));
+    const tryButton = () => view.root.findAllByType('button').find((button) => button.children.includes('Try Placement Test as Student'));
     const start = tryButton();
     if (!start) throw new Error('Sample action missing');
     act(() => start.props.onClick());
