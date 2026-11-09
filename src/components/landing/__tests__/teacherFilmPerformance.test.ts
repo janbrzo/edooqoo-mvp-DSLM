@@ -9,12 +9,17 @@ function createVisionHarness() {
   const start = html.indexOf('/* ---------- vision (canvas) ---------- */');
   const end = html.indexOf('/* ---------- main render ---------- */', start);
   if (start < 0 || end < 0) throw new Error('Film vision section missing');
-  const calls = { gradients: 0, clears: 0, hitReads: [] as number[] };
+  const calls = { gradients: 0, clears: 0, hitReads: [] as number[], radii: [] as number[] };
   const elements = new Map<string, { style: Record<string, unknown>; getContext: () => unknown }>();
   const noop = () => undefined;
   const canvas = {
     setTransform: noop, clearRect: () => { calls.clears += 1; },
-    beginPath: noop, arc: noop, fill: noop, stroke: noop, setLineDash: noop,
+    beginPath: noop,
+    arc: (_x: number, _y: number, radius: number) => {
+      if (!Number.isFinite(radius) || radius < 0) throw new RangeError('Canvas arc radius must be finite and nonnegative');
+      calls.radii.push(radius);
+    },
+    fill: noop, stroke: noop, setLineDash: noop,
     moveTo: noop, lineTo: noop, fillText: noop, bezierCurveTo: noop,
     roundRect: noop, closePath: noop,
     createRadialGradient: () => { calls.gradients += 1; return { addColorStop: noop }; },
@@ -47,12 +52,22 @@ function createVisionHarness() {
       calls.gradients = 0;
       calls.clears = 0;
       calls.hitReads = [];
+      calls.radii = [];
       runInContext(`drawVision(${time})`, context);
     },
   };
 }
 
 describe('teacher film vision work budget', () => {
+  it('never passes a negative radius to canvas when the review pulse starts at 83.2 seconds', () => {
+    const vision = createVisionHarness();
+    for (const time of [83.2001, 83.21, 83.3, 83.4999, 83.5, 83.9, 84.8]) {
+      expect(() => vision.draw(time)).not.toThrow();
+      expect(vision.calls.radii.length).toBeGreaterThan(0);
+      expect(vision.calls.radii.every((radius) => radius >= 0)).toBe(true);
+    }
+  });
+
   it('does no canvas or evidence work outside the visible chapter', () => {
     const vision = createVisionHarness();
     for (const time of [0, 54, 74, 92, 109]) {
