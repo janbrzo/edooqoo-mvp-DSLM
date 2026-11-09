@@ -5,8 +5,7 @@ import TeacherFilmPlayer from '../TeacherFilmPlayer';
 import PlacementTestPreviewDialog from '../PlacementTestPreviewDialog';
 
 vi.mock('react-router-dom', () => ({
-  useLocation: () => ({ pathname: '/', search: '' }),
-  Link: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <a {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: React.PropsWithChildren<{ to: string }>) => <a href={to} {...props}>{children}</a>,
 }));
 vi.mock('@/components/ui/dialog', () => {
   const Container = ({ children }: React.PropsWithChildren) => <div>{children}</div>;
@@ -23,6 +22,18 @@ function mount(element: React.ReactElement) {
 }
 
 describe('public preview safety', () => {
+  it('makes student setup the primary placement action and keeps the sample secondary', () => {
+    const onOpenChange = vi.fn();
+    const view = mount(<PlacementTestPreviewDialog open onOpenChange={onOpenChange} />);
+    const sendLink = view.root.findAllByType('a').find((link) => link.props.href === '/dashboard?action=add-student');
+    if (!sendLink) throw new Error('Send Placement action missing');
+    expect(sendLink.children).toContain('Send Placement to Student');
+    expect(view.root.findAllByType('button').some((button) => button.children.includes('Try Sample Test as Student'))).toBe(true);
+    expect(view.root.findAllByType('a').some((link) => link.props.href === '/signup')).toBe(false);
+    act(() => sendLink.props.onClick());
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
   it('loads no film until explicit Play and then restricts the iframe to scripts only', () => {
     const view = mount(<TeacherFilmPlayer />);
     expect(view.root.findAllByType('iframe')).toHaveLength(0);
@@ -36,7 +47,7 @@ describe('public preview safety', () => {
   it('keeps sample answers local and discards them on close', () => {
     const onOpenChange = vi.fn();
     const view = mount(<PlacementTestPreviewDialog open onOpenChange={onOpenChange} />);
-    const tryButton = () => view.root.findAllByType('button').find((button) => button.children.includes('Try Placement Test as Student'));
+    const tryButton = () => view.root.findAllByType('button').find((button) => button.children.includes('Try Sample Test as Student'));
     const start = tryButton();
     if (!start) throw new Error('Sample action missing');
     act(() => start.props.onClick());
