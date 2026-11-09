@@ -878,6 +878,7 @@ function drawVision(t){
   const m=sg(t,89.4,91.0);const K=lerp(1,.34,m);const R=[lerp(VC.x,600,m),lerp(VC.y,410,m)];
   const proj=(x,y)=>{let sx=(x-fx)*Z+600,sy=(y-fy)*Z+450;sx=R[0]+(sx-VC.x)*K;sy=R[1]+(sy-VC.y)*K;return[sx,sy]};
   const sc=Z*K;
+  const inView=(x,y,r)=>x+r>=0&&x-r<=1200&&y+r>=0&&y-r<=900;
   const lights=sg(t,75.9,76.6);
   const rest=1-sg(t,89.0,90.0);
   // lights
@@ -885,6 +886,7 @@ function drawVision(t){
     const fire=t-s[3];const pulse=fire>0?Math.exp(-fire/.9):0;
     const [px,py]=proj(s[0],s[1]);
     const rr=(i===2?10:17)*(1+.25*pulse);
+    if(lights*rest<=.01||!inView(px,py,rr*3.2))return;
     const g=cx.createRadialGradient(px,py,0,px,py,rr*3.2);g.addColorStop(0,`rgba(124,92,240,${(.75+.2*pulse)*lights*rest})`);g.addColorStop(1,'rgba(124,92,240,0)');
     cx.fillStyle=g;cx.beginPath();cx.arc(px,py,rr*3.2,0,7);cx.fill();
     cx.fillStyle=`rgba(255,255,255,${.9*lights*rest})`;cx.beginPath();cx.arc(px,py,rr*.4,0,7);cx.fill();
@@ -900,13 +902,13 @@ function drawVision(t){
     cx.fillStyle=g;cx.beginPath();cx.arc(hx,hy,rr*1.25,0,7);cx.fill();
     cx.strokeStyle=`rgba(70,120,230,${.55*halo})`;cx.lineWidth=2;cx.setLineDash([6,10]);cx.lineDashOffset=-t*10;cx.beginPath();cx.arc(hx,hy,rr,0,7);cx.stroke();cx.setLineDash([]);
   }
-  // glow of node (from hits)
+  // Cache only this frame's evidence glow; seeking must recompute it for the new time.
   const nglow=n=>{const hs=HITS[n.i];let acc=0,rec=0;for(let h of hs){if(h<=t){acc+=.16;rec+=Math.exp(-(t-h)/1.2)}}return Math.min(1,acc+rec*.5)};
-  const dimIdx=NODES.mic[6].i;
   const dimNano=NODES.nan[2*9+0];
-  const nanoGlow=n=>{let g=nglow(n);if(n===dimNano)g=g*(1-.85*sg(t,83.2,83.9));return g};
-  const micGlow=m=>{let s=0;for(let j=0;j<3;j++)s+=nanoGlow(NODES.nan[m.i*3+j]);return s/3};
-  const catGlow=c=>{let s=0;for(let k=0;k<3;k++)s+=micGlow(NODES.mic[c.i*3+k]);return s/3};
+  const nanoGlows=[],microGlows=[],categoryGlows=[];
+  const nanoGlow=n=>{if(nanoGlows[n.i]!==undefined)return nanoGlows[n.i];let g=nglow(n);if(n===dimNano)g=g*(1-.85*sg(t,83.2,83.9));nanoGlows[n.i]=g;return g};
+  const micGlow=m=>{if(microGlows[m.i]!==undefined)return microGlows[m.i];let s=0;for(let j=0;j<3;j++)s+=nanoGlow(NODES.nan[m.i*3+j]);microGlows[m.i]=s/3;return s/3};
+  const catGlow=c=>{if(categoryGlows[c.i]!==undefined)return categoryGlows[c.i];let s=0;for(let k=0;k<3;k++)s+=micGlow(NODES.mic[c.i*3+k]);categoryGlows[c.i]=s/3;return s/3};
   // links
   cx.lineWidth=1;
   NODES.cat.forEach(c=>{const a=proj(c.x,c.y);
@@ -915,19 +917,25 @@ function drawVision(t){
       for(let j=0;j<3;j++){const n=NODES.nan[m.i*3+j];const e=proj(n.x,n.y);cx.strokeStyle=`rgba(100,60,221,${.25*appear*nanA})`;cx.beginPath();cx.moveTo(b[0],b[1]);cx.lineTo(e[0],e[1]);cx.stroke()}}
   });
   // nodes
-  const blob=(x,y,r,g,a,col)=>{const [px,py]=proj(x,y);const rr=r*sc;if(a<=.01)return;
+  const blob=(x,y,r,glow,a,col,small=false)=>{const [px,py]=proj(x,y);const rr=r*sc;if(a<=.01||!inView(px,py,rr*2.6))return;
+    const g=glow();
+    // Nano-skill points use simple fills, not 54 zoomed radial gradients per frame.
+    if(small){cx.fillStyle=`rgba(${col},${a*.12*(.6+g)})`;cx.beginPath();cx.arc(px,py,rr*1.25,0,7);cx.fill();}
+    else{
     const gr=cx.createRadialGradient(px,py,0,px,py,rr*2.6);gr.addColorStop(0,`rgba(${col},${a*(.55+.45*g)})`);gr.addColorStop(.4,`rgba(${col},${a*.35*(.6+g)})`);gr.addColorStop(1,`rgba(${col},0)`);
     cx.fillStyle=gr;cx.beginPath();cx.arc(px,py,rr*2.6,0,7);cx.fill();
+    }
     cx.fillStyle=`rgba(${col},${a*(.75+.25*g)})`;cx.beginPath();cx.arc(px,py,rr*.62,0,7);cx.fill();};
   const col='100,60,221';
-  NODES.cat.forEach(c=>{blob(c.x,c.y,26,catGlow(c)*1.6,appear*catA,col);
+  NODES.cat.forEach(c=>{blob(c.x,c.y,26,()=>catGlow(c)*1.6,appear*catA,col);
     if(catA>.2){const [px,py]=proj(c.x,c.y);cx.fillStyle=`rgba(40,20,120,${.8*appear*catA*rest*(1-sg(Z,1.5,2.4))})`;cx.font='600 12px ui-sans-serif,system-ui,sans-serif';cx.textAlign='center';cx.fillText(c.n,px,py+(26*sc)+10)}});
-  NODES.mic.forEach(m=>blob(m.x,m.y,9.5,micGlow(m)*1.6,appear*micA,'92,70,230'));
-  NODES.nan.forEach(n=>blob(n.x,n.y,3.8,nanoGlow(n)*1.8,appear*nanA,'124,92,240'));
+  NODES.mic.forEach(m=>blob(m.x,m.y,9.5,()=>micGlow(m)*1.6,appear*micA,'92,70,230'));
+  NODES.nan.forEach(n=>blob(n.x,n.y,3.8,()=>nanoGlow(n)*1.8,appear*nanA,'124,92,240',true));
   // review ring pulse
   const rv=sg(t,83.2,83.5)*(1-sg(t,84.5,84.9));
   if(rv>0){const [px,py]=proj(dimNano.x,dimNano.y);
-    for(let k=0;k<2;k++){const ph=((t-83.5)*1.1+k*.5)%1;const r2=(6+ph*34)*Math.max(.35,K);cx.strokeStyle=`rgba(100,60,221,${(1-ph)*.7*rv})`;cx.lineWidth=2;cx.beginPath();cx.arc(px,py,r2,0,7);cx.stroke()}
+    // JavaScript remainder is negative before 83.5s; wrap the phase into [0, 1).
+    for(let k=0;k<2;k++){const ph=(((t-83.5)*1.1+k*.5)%1+1)%1;const r2=(6+ph*34)*Math.max(.35,K);cx.strokeStyle=`rgba(100,60,221,${(1-ph)*.7*rv})`;cx.lineWidth=2;cx.beginPath();cx.arc(px,py,r2,0,7);cx.stroke()}
     const rl=$('vl-rev');rl.style.left=(px+90)+'px';rl.style.top=(py-30)+'px';O('vl-rev',rv)}else O('vl-rev',0);
   // particles
   STREAMS.forEach(p=>{
