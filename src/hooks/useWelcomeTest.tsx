@@ -423,13 +423,36 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
   // Persist position on navigation (localStorage only - fast)
   useEffect(() => {
-    if (shareToken && !state.completed) {
+    if (shareToken && !state.completed && !isPublicPreview) {
       localStorage.setItem(`wt_position_${shareToken}`, JSON.stringify({
         sectionIndex: state.currentSectionIndex,
         questionIndex: state.currentQuestionIndex,
       }));
     }
-  }, [state.currentSectionIndex, state.currentQuestionIndex, shareToken, state.completed]);
+  }, [state.currentSectionIndex, state.currentQuestionIndex, shareToken, state.completed, isPublicPreview]);
+
+  // Public answers, position and the deterministic result live together under one
+  // 48-hour key. A shared-result URL is read-only and never overwrites this session.
+  useEffect(() => {
+    if (!isPublicPreview || state.loading || publicShareStatus !== 'none') return;
+    const saved = savePublicPlacementSession({
+      answers: state.answers,
+      currentSectionIndex: state.currentSectionIndex,
+      currentQuestionIndex: state.currentQuestionIndex,
+      completedAt: state.completedAt,
+      result: publicResult,
+    });
+    setPublicStorageError(saved ? null : 'This browser could not save your progress. Keep this tab open or allow local storage.');
+  }, [
+    isPublicPreview,
+    state.loading,
+    state.answers,
+    state.currentSectionIndex,
+    state.currentQuestionIndex,
+    state.completedAt,
+    publicResult,
+    publicShareStatus,
+  ]);
 
   // Commit answer to DB + log event. Text answers arrive here from the debounce,
   // blur, navigation or page-hide flush; radio/checkbox/matrix commit immediately.
@@ -442,6 +465,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     answer: unknown,
     opts: { isIdk?: boolean } = {},
   ): Promise<boolean> => {
+    if (publicPreviewRef.current) return true;
     const ctx = ctxRef.current;
     if (!ctx.testId || ctx.isTeacherMode) return true;
 
@@ -570,6 +594,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   // Retry every failed save (manual button or the browser coming back online).
   const retrySaves = useCallback(async () => {
     await pendingSaves.current.flush();
+    if (publicPreviewRef.current) return true;
     return queueRef.current!.retryFailed();
   }, []);
 
@@ -677,6 +702,51 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
   const resumeTest = useCallback(() => {
     setState(prev => ({ ...prev, paused: false }));
+  }, []);
+
+  const saveLocalRecording = useCallback(async (questionId: string, blob: Blob) => {
+    if (!publicPreviewRef.current) throw new Error('Local recording storage is only available in the public placement test.');
+    return savePublicPlacementRecording(questionId, blob, Date.now() + PUBLIC_PLACEMENT_TTL_MS);
+  }, []);
+
+  const discardLocalRecording = useCallback(async (questionId: string) => {
+    if (publicPreviewRef.current) await deletePublicPlacementRecording(questionId);
+  }, []);
+
+  const resetPublicTest = useCallback(async () => {
+    if (!publicPreviewRef.current) return;
+    clearPublicPlacementSession();
+    try { localStorage.removeItem(`wt_instructions_seen_${PUBLIC_PLACEMENT_TEST_TOKEN}`); } catch { /* Storage unavailable. */ }
+    try { localStorage.removeItem(`wt_position_${PUBLIC_PLACEMENT_TEST_TOKEN}`); } catch { /* Storage unavailable. */ }
+    try {
+      await clearPublicPlacementRecordings();
+    } catch (error) {
+      devWarn('[useWelcomeTest] could not clear local recordings:', error);
+      setPublicStorageError('Your answers were cleared, but old local recordings could not be removed in this browser.');
+    }
+    answersRef.current = {};
+    setPublicResult(null);
+    setPublicShareStatus('none');
+    setCompleteError(null);
+    setState(prev => ({
+      ...prev,
+      testId: null,
+      title: 'Placement Test · Interactive Preview',
+      loading: false,
+      error: null,
+      answers: {},
+      currentSectionIndex: 0,
+      currentQuestionIndex: 0,
+      completed: false,
+      completedAt: null,
+      submitting: false,
+      paused: false,
+      persistedAnsweredCount: null,
+      isTeacherMode: false,
+      bank: CURRENT_WELCOME_BANK,
+      form: 'A',
+    }));
+    window.history.replaceState(null, '', PUBLIC_PLACEMENT_TEST_PATH);
   }, []);
 
   // Complete test. Shows the completed screen only after every answer is
