@@ -164,8 +164,90 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     return () => document.removeEventListener('visibilitychange', handler);
   }, []);
 
-  // Load test by share token
+  // Load test by share token. The public interactive test has an isolated local
+  // session and never calls the token RPCs or the AI grading endpoint.
   useEffect(() => {
+    if (isPublicPreview) {
+      let cancelled = false;
+      const shared = readSharedPublicPlacementResult(window.location.hash);
+      setPublicResult(shared.result);
+      setPublicShareStatus(shared.status);
+      setPublicStorageError(null);
+      if (shared.status !== 'none') {
+        answersRef.current = {};
+        setState(prev => ({
+          ...prev,
+          testId: null,
+          studentId: null,
+          teacherId: null,
+          title: 'Placement Test · Shared Preview',
+          loading: false,
+          error: null,
+          answers: {},
+          currentSectionIndex: 0,
+          currentQuestionIndex: 0,
+          completed: true,
+          submitting: false,
+          paused: false,
+          isTeacherMode: false,
+          bank: CURRENT_WELCOME_BANK,
+          form: 'A',
+          completedAt: shared.result?.completedAt ?? null,
+        }));
+        return () => { cancelled = true; };
+      }
+
+      const session = loadPublicPlacementSession();
+      const restoredSections = sectionsFor(CURRENT_WELCOME_BANK, 'A', session?.answers ?? {});
+      const sectionIndex = Math.min(session?.currentSectionIndex ?? 0, Math.max(0, restoredSections.length - 1));
+      const questionIndex = Math.min(
+        session?.currentQuestionIndex ?? 0,
+        Math.max(0, (restoredSections[sectionIndex]?.questions.length ?? 1) - 1),
+      );
+      const initialAnswers = session?.answers ?? {};
+      answersRef.current = initialAnswers;
+      setPublicResult(session?.result ?? null);
+      setState(prev => ({
+        ...prev,
+        testId: null,
+        studentId: null,
+        teacherId: null,
+        title: 'Placement Test · Interactive Preview',
+        loading: false,
+        error: null,
+        answers: initialAnswers,
+        currentSectionIndex: sectionIndex,
+        currentQuestionIndex: questionIndex,
+        completed: Boolean(session?.completedAt && session.result),
+        submitting: false,
+        paused: false,
+        persistedAnsweredCount: null,
+        isTeacherMode: false,
+        studentNativeLanguage: null,
+        bank: CURRENT_WELCOME_BANK,
+        form: 'A',
+        completedAt: session?.completedAt ?? null,
+      }));
+
+      void loadPublicPlacementRecordings().then((recordings) => {
+        if (cancelled) return;
+        const restored = { ...initialAnswers };
+        for (const [questionId, url] of Object.entries(recordings)) {
+          if (restored[questionId] === `local-recording:${questionId}`) restored[questionId] = url;
+        }
+        answersRef.current = restored;
+        setState(prev => ({ ...prev, answers: restored }));
+      }).catch((error) => {
+        if (!cancelled) {
+          devWarn('[useWelcomeTest] local recordings unavailable:', error);
+          setPublicStorageError('Recordings could not be restored. Your written answers are still available.');
+        }
+      });
+      return () => { cancelled = true; };
+    }
+
+    setPublicResult(null);
+    setPublicShareStatus('none');
     if (!shareToken) {
       setState(prev => ({ ...prev, loading: false, error: 'No test token provided' }));
       return;
