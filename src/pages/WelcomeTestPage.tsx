@@ -32,6 +32,7 @@ import {
   ShieldAlert,
   ExternalLink,
   Eye,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -649,7 +650,14 @@ export default function WelcomeTestPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-1">
+      {isPublicPreview && <Helmet><title>Interactive Placement Test | Edooqoo</title><meta name="robots" content="noindex,follow" /></Helmet>}
       <div className="max-w-2xl mx-auto">
+        {isPublicPreview && (
+          <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 mb-3 px-3 sm:px-4 py-2 bg-card text-card-foreground border border-border shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm font-medium text-center rounded-b-2xl">
+            <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+            <span>Interactive preview: answers and recordings stay on this device for 48 hours.</span>
+          </div>
+        )}
         {/* Teacher Preview Mode, sticky banner. Shown when ?preview=1 or after
             the teacher chose "Preview Test (Read-only)" from the access screen. */}
         {teacherPreviewMode && (
@@ -836,6 +844,12 @@ export default function WelcomeTestPage() {
               translatedOptions={!isSkillQuestion ? currentTranslation?.options : undefined}
               disabled={teacherPreviewMode}
               onNext={!isLastQuestion ? () => { void goToNext(); } : undefined}
+              saveBlob={isPublicPreview ? saveLocalRecording : undefined}
+              onDiscard={isPublicPreview ? (questionId) => {
+                saveAnswer(questionId, undefined);
+                void discardLocalRecording(questionId);
+              } : undefined}
+              storageErrorMessage="We couldn't save this recording on your device. Check browser storage permission and tap Save again."
             />
 
             {/* Answer status + I don't know */}
@@ -887,6 +901,12 @@ export default function WelcomeTestPage() {
             </div>
           </CardContent>
         </Card>
+
+        {isPublicPreview && publicStorageError && (
+          <div className="mb-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive" role="alert">
+            {publicStorageError}
+          </div>
+        )}
 
         {/* Save problems stay visible on every question until resolved */}
         {!teacherPreviewMode && (saveState === 'failed' || saveState === 'retrying') && (
@@ -1024,6 +1044,9 @@ function QuestionInput({
   onNext,
   onBlur,
   onAnswerFor,
+  saveBlob,
+  onDiscard,
+  storageErrorMessage,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
@@ -1033,6 +1056,9 @@ function QuestionInput({
   onNext?: () => void;
   onBlur?: () => void;
   onAnswerFor?: (questionId: string, val: unknown) => void;
+  saveBlob?: (blob: Blob, questionId: string) => Promise<string>;
+  onDiscard?: (questionId: string) => void;
+  storageErrorMessage?: string;
 }) {
   const displayAnswer = answer === "__IDK__" ? "" : answer;
 
@@ -1059,6 +1085,9 @@ function QuestionInput({
       onNext={onNext}
       onBlur={onBlur}
       onAnswerFor={onAnswerFor}
+      saveBlob={saveBlob}
+      onDiscard={onDiscard}
+      storageErrorMessage={storageErrorMessage}
     />
   );
 }
@@ -1071,6 +1100,9 @@ function QuestionInputInner({
   onNext,
   onBlur,
   onAnswerFor,
+  saveBlob,
+  onDiscard,
+  storageErrorMessage,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
@@ -1079,6 +1111,9 @@ function QuestionInputInner({
   onNext?: () => void;
   onBlur?: () => void;
   onAnswerFor?: (questionId: string, val: unknown) => void;
+  saveBlob?: (blob: Blob, questionId: string) => Promise<string>;
+  onDiscard?: (questionId: string) => void;
+  storageErrorMessage?: string;
 }) {
   switch (question.question_type) {
     case "speaking_record":
@@ -1090,6 +1125,9 @@ function QuestionInputInner({
           // finishes after navigation still lands on the right question.
           onAnswer={(url, qId) => (onAnswerFor && qId ? onAnswerFor(qId, url) : onAnswer(url))}
           questionId={question.id}
+          saveBlob={saveBlob}
+          onDiscard={onDiscard}
+          storageErrorMessage={storageErrorMessage}
         />
       );
 
