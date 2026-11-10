@@ -862,6 +862,13 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
   return {
     ...state,
+    isPublicPreview,
+    publicResult,
+    publicShareStatus,
+    publicStorageError,
+    resetPublicTest,
+    saveLocalRecording,
+    discardLocalRecording,
     sections,
     currentSection,
     currentQuestion,
