@@ -411,8 +411,10 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     });
   }, [sections]);
   useEffect(() => {
-    if (currentQuestion) anchorIdRef.current = currentQuestion.id;
-  }, [currentQuestion?.id]);
+    // Do not anchor the placeholder first question while a saved session loads.
+    // Otherwise the adaptive-section effect pulls a restored position back to q1.
+    if (!state.loading && currentQuestion) anchorIdRef.current = currentQuestion.id;
+  }, [currentQuestion?.id, state.loading]);
 
   // Start timer for current question
   useEffect(() => {
