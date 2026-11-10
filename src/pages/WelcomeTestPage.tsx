@@ -844,7 +844,7 @@ export default function WelcomeTestPage() {
               translatedOptions={!isSkillQuestion ? currentTranslation?.options : undefined}
               disabled={teacherPreviewMode}
               onNext={!isLastQuestion ? () => { void goToNext(); } : undefined}
-              saveBlob={isPublicPreview ? saveLocalRecording : undefined}
+              saveBlob={isPublicPreview ? (blob, questionId) => saveLocalRecording(questionId, blob) : undefined}
               onDiscard={isPublicPreview ? (questionId) => {
                 saveAnswer(questionId, undefined);
                 void discardLocalRecording(questionId);
