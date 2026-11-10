@@ -15,7 +15,7 @@ The public homepage must name the searched product category immediately while pr
 ## Five product previews and card actions
 
 - Worksheet shows an adult B2/C1 business lesson with an illustrative audio track, vocabulary prompt and speaking roleplay. `Generate Worksheet on this Topic` passes `Cross-Cultural Negotiations in Tech` through the existing topic-prefill callback; it never starts generation.
-- Placement Test shows Marta's explicitly illustrative B2 report, skill bars and suggested goals. `Send Placement to Student` opens `/dashboard?action=add-student`, whose existing teacher-auth redirect preserves the action for signed-out visitors. `Preview Placement Test` opens the existing local sample dialog.
+- Placement Test shows Marta's explicitly illustrative B2 report, skill bars and suggested goals. `Send Placement to Student` opens `/dashboard?action=add-student`, whose existing teacher-auth redirect preserves the action for signed-out visitors. `Preview Placement Test` opens the placement overview dialog.
 - Homework is separate from Flashcards and shows a student voice answer, AI-assisted evaluation and teacher verification. Its CTA opens `/features/homework`.
 - Flashcards shows `follow up`, pronunciation, an optional locally revealed definition/example and illustrative SM-2 progress. Revealing the card changes only component state and saves nothing. Its CTA opens `/features/flashcards`.
 - 1-Minute Loop retains the explicit-play sandboxed Teacher Film and adds a direct link to `/one-minute-prep#interactive-tour`.
