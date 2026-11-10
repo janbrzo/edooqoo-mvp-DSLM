@@ -58,6 +58,7 @@ import { useForceLightTheme } from "@/hooks/useForceLightTheme";
 import { useNoTranslatePage } from "@/hooks/useNoTranslatePage";
 import { useWelcomeTestIntegrity } from "@/hooks/useWelcomeTestIntegrity";
 import { Helmet } from "react-helmet-async";
+import { PublicPlacementResult } from "@/components/welcome-test/PublicPlacementResult";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   User: <User className="h-4 w-4" />,
@@ -130,6 +131,13 @@ export default function WelcomeTestPage() {
     testId,
     studentId,
     teacherId,
+    isPublicPreview,
+    publicResult,
+    publicShareStatus,
+    publicStorageError,
+    resetPublicTest,
+    saveLocalRecording,
+    discardLocalRecording,
   } = useWelcomeTest({ shareToken: token || null });
 
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
@@ -158,7 +166,7 @@ export default function WelcomeTestPage() {
     currentQuestion?.question_type === 'open_ended' ||
     currentQuestion?.question_type === 'open_reflection';
   useWelcomeTestIntegrity({
-    enabled: !teacherPreviewMode,
+    enabled: !teacherPreviewMode && !isPublicPreview,
     testId: testId || null,
     studentId: studentId || null,
     teacherId: teacherId || null,
@@ -218,7 +226,7 @@ export default function WelcomeTestPage() {
   // On error, ask the DB whether the token is expired or just missing,
   // and surface the teacher's email so the student can request a refresh.
   useEffect(() => {
-    if (!error || !token || linkStatus.checked) return;
+    if (isPublicPreview || !error || !token || linkStatus.checked) return;
     (async () => {
       try {
         const { data } = await supabase.rpc("get_test_status_by_share_token", {
@@ -234,7 +242,7 @@ export default function WelcomeTestPage() {
         setLinkStatus({ checked: true, isExpired: false, teacherEmail: null });
       }
     })();
-  }, [error, token, linkStatus.checked]);
+  }, [error, token, linkStatus.checked, isPublicPreview]);
 
   // Trigger confetti on completion
   useEffect(() => {
@@ -309,9 +317,9 @@ export default function WelcomeTestPage() {
   // Determine stage
   const getStage = (): Stage => {
     if (loading) return "loading";
-    if (error) return "error";
-    if (isTeacherMode && !teacherPreviewMode) return "teacher_block";
-    if (!verifiedEmail && !isTeacherMode) return "email";
+    if (!isPublicPreview && error) return "error";
+    if (!isPublicPreview && isTeacherMode && !teacherPreviewMode) return "teacher_block";
+    if (!isPublicPreview && !verifiedEmail && !isTeacherMode) return "email";
     if (completed) return "completed";
     if (paused) return "paused";
     if (showInstructions) return "instructions";
@@ -525,6 +533,23 @@ export default function WelcomeTestPage() {
   }
 
   // ===== COMPLETED (with confetti) =====
+  if (stage === "completed" && isPublicPreview) {
+    return (
+      <>
+        <Helmet>
+          <title>Placement Test Preview | Edooqoo</title>
+          <meta name="robots" content="noindex,follow" />
+        </Helmet>
+        <PublicPlacementResult
+          result={publicResult}
+          shareStatus={publicShareStatus}
+          storageError={publicStorageError}
+          onReset={resetPublicTest}
+        />
+      </>
+    );
+  }
+
   if (stage === "completed") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
@@ -569,8 +594,9 @@ export default function WelcomeTestPage() {
               <Pause className="h-12 w-12 text-muted-foreground mx-auto" />
               <h2 className="text-xl font-semibold">Test Paused</h2>
               <p className="text-sm text-muted-foreground">
-                Your progress is saved ({answeredCount}/{totalQuestions} answered). You can close this page and come back
-                anytime.
+                Your progress is saved ({answeredCount}/{totalQuestions} answered). {isPublicPreview
+                  ? "It stays on this device for 48 hours after your latest activity."
+                  : "You can close this page and come back anytime."}
               </p>
               <Button onClick={resumeTest} size="lg" className="min-h-[48px]">
                 Resume Test
@@ -585,7 +611,12 @@ export default function WelcomeTestPage() {
 
   // ===== INSTRUCTIONS =====
   if (stage === "instructions") {
-    return <InstructionScreen totalQuestions={totalQuestions} onStart={handleStartTest} />;
+    return (
+      <>
+        {isPublicPreview && <Helmet><title>Interactive Placement Test | Edooqoo</title><meta name="robots" content="noindex,follow" /></Helmet>}
+        <InstructionScreen totalQuestions={totalQuestions} onStart={handleStartTest} />
+      </>
+    );
   }
 
   // ===== SECTION CELEBRATION =====
