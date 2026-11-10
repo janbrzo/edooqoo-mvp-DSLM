@@ -19,6 +19,25 @@ import { checkWelcomeTestKeyedAnswer } from '@/lib/welcomeTest/keyedAnswer';
 import { createAnswerSaveQueue, type AnswerSaveQueue, type SaveSnapshot, type SaveState } from '@/lib/welcomeTest/answerSaveQueue';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { flushSpeaking } from '@/lib/welcomeTest/speakingFlush';
+import { CURRENT_WELCOME_BANK } from '@/lib/welcomeTest/seed';
+import {
+  buildPublicPlacementResult,
+  clearPublicPlacementSession,
+  loadPublicPlacementSession,
+  PUBLIC_PLACEMENT_TEST_PATH,
+  PUBLIC_PLACEMENT_TEST_TOKEN,
+  PUBLIC_PLACEMENT_TTL_MS,
+  readSharedPublicPlacementResult,
+  savePublicPlacementSession,
+  type PublicPlacementResult,
+  type SharedPublicPlacementResult,
+} from '@/lib/welcomeTest/publicPlacementTest';
+import {
+  clearPublicPlacementRecordings,
+  deletePublicPlacementRecording,
+  loadPublicPlacementRecordings,
+  savePublicPlacementRecording,
+} from '@/lib/welcomeTest/publicPlacementRecordings';
 
 interface UseWelcomeTestProps {
   shareToken: string | null;
@@ -43,6 +62,7 @@ interface WelcomeTestState {
   /** Question bank and form the test was seeded with (decides definitions, keys and sections). */
   bank: number;
   form: WelcomeTestForm;
+  completedAt: string | null;
 }
 
 interface SavePayload {
@@ -75,9 +95,16 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     persistedAnsweredCount: null,
     isTeacherMode: false,
     studentNativeLanguage: null,
-    bank: 1,
+    bank: CURRENT_WELCOME_BANK,
     form: 'A',
+    completedAt: null,
   });
+  const isPublicPreview = shareToken === PUBLIC_PLACEMENT_TEST_TOKEN;
+  const publicPreviewRef = useRef(isPublicPreview);
+  publicPreviewRef.current = isPublicPreview;
+  const [publicResult, setPublicResult] = useState<PublicPlacementResult | null>(null);
+  const [publicShareStatus, setPublicShareStatus] = useState<SharedPublicPlacementResult['status']>('none');
+  const [publicStorageError, setPublicStorageError] = useState<string | null>(null);
 
   // Latest values for callbacks that outlive a render (debounced saves, page-hide
   // handlers, speaking uploads) so they never act on a stale closure.

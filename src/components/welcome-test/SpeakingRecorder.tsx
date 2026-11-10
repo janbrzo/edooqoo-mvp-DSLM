@@ -27,6 +27,10 @@ interface SpeakingRecorderProps {
   /** Called once per saved recording with the question it was recorded for. */
   onAnswer: (audioUrl: string, questionId?: string) => void;
   questionId?: string;
+  /** Public interactive tests save the blob locally instead of uploading it. */
+  saveBlob?: (blob: Blob, questionId: string) => Promise<string>;
+  onDiscard?: (questionId: string) => void;
+  storageErrorMessage?: string;
 }
 
 /**
