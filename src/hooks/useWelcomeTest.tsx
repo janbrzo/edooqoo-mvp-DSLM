@@ -755,7 +755,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   // results itself, so the student client never calls calculate_test_results.
   const completeTest = useCallback(async () => {
     const testId = ctxRef.current.testId;
-    if (!testId || completingRef.current) return false;
+    if ((!testId && !isPublicPreview) || completingRef.current) return false;
     completingRef.current = true;
     setCompleteError(null);
     setState(prev => ({ ...prev, submitting: true }));
@@ -772,6 +772,23 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       const speakingOk = await flushSpeakingIfNeeded();
       if (!speakingOk) return fail('Your recording is not saved yet. Save or re-record it, then try again.');
       await flushPendingAnswer();
+
+      if (isPublicPreview) {
+        const completedAt = new Date();
+        const result = buildPublicPlacementResult(allVisibleQuestions, answersRef.current, completedAt);
+        setPublicResult(result);
+        setPublicShareStatus('none');
+        setState(prev => ({
+          ...prev,
+          completed: true,
+          completedAt: completedAt.toISOString(),
+          submitting: false,
+          persistedAnsweredCount: result.answeredCount,
+        }));
+        toast.success('Your placement preview is ready. It stays on this device for 48 hours.');
+        return true;
+      }
+
       const allSaved = await queueRef.current!.flush();
       if (!allSaved) {
         return fail('Some answers are not saved yet. Check your connection and tap "Retry saving".');
@@ -816,7 +833,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     } finally {
       completingRef.current = false;
     }
-  }, [flushPendingAnswer, flushSpeakingIfNeeded, allVisibleQuestions]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded, allVisibleQuestions, isPublicPreview]);
 
   // Progress calculation
   const totalQuestions = allVisibleQuestions.length;
