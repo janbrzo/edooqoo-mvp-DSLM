@@ -27,6 +27,10 @@ interface SpeakingRecorderProps {
   /** Called once per saved recording with the question it was recorded for. */
   onAnswer: (audioUrl: string, questionId?: string) => void;
   questionId?: string;
+  /** Public interactive tests save the blob locally instead of uploading it. */
+  saveBlob?: (blob: Blob, questionId: string) => Promise<string>;
+  onDiscard?: (questionId: string) => void;
+  storageErrorMessage?: string;
 }
 
 /**
@@ -41,7 +45,15 @@ export async function uploadBlobToR2(blob: Blob): Promise<string | null> {
 /** Recordings shorter than this are discarded (accidental taps, empty audio). */
 const MIN_RECORDING_MS = 1500;
 
-export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId }: SpeakingRecorderProps) {
+export function SpeakingRecorder({
+  maxSeconds = 60,
+  answer,
+  onAnswer,
+  questionId,
+  saveBlob,
+  onDiscard,
+  storageErrorMessage,
+}: SpeakingRecorderProps) {
   const [status, setStatus] = useState<'idle' | 'recording' | 'recorded' | 'uploading' | 'done' | 'error'>(
     answer ? 'done' : 'idle'
   );
@@ -113,10 +125,12 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
       setStatus('uploading');
       setErrorMsg(null);
       try {
-        const url = await uploadRecording(blob, {
-          filenamePrefix: 'welcome-test-speaking',
-          onRetry: (attempt) => devLog('[SpeakingRecorder] Upload retry', attempt),
-        });
+        const url = saveBlob
+          ? await saveBlob(blob, targetQuestionId || questionId || 'unknown')
+          : await uploadRecording(blob, {
+            filenamePrefix: 'welcome-test-speaking',
+            onRetry: (attempt) => devLog('[SpeakingRecorder] Upload retry', attempt),
+          });
         blobRef.current = null;
         setAudioUrl(url);
         setStatus('done');
@@ -127,14 +141,14 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
         // Honest failure: keep the blob so the student can retry.
         devLog('[SpeakingRecorder] Upload error:', err);
         setStatus('recorded');
-        setErrorMsg("We couldn't upload your recording. Check your connection and tap Save again.");
+        setErrorMsg(storageErrorMessage ?? "We couldn't upload your recording. Check your connection and tap Save again.");
         toast.error('Recording not saved: please try again.');
         return false;
       }
     })().finally(() => { uploadRef.current = null; });
     uploadRef.current = job;
     return job;
-  }, [stopAndGetBlob]);
+  }, [stopAndGetBlob, saveBlob, storageErrorMessage, questionId]);
 
   // Let the page flush this recording before navigating (Next, Skip, Complete).
   useEffect(() => registerSpeakingFlusher(saveRecording), [saveRecording]);
@@ -273,7 +287,8 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
     setStatus('idle');
     setIsPlaying(false);
     setErrorMsg(null);
-  }, [audioUrl]);
+    if (questionId) onDiscard?.(questionId);
+  }, [audioUrl, onDiscard, questionId]);
 
   const uploadAndSave = useCallback(() => { void saveRecording(); }, [saveRecording]);
 

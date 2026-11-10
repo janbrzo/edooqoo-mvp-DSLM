@@ -32,6 +32,7 @@ import {
   ShieldAlert,
   ExternalLink,
   Eye,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +59,7 @@ import { useForceLightTheme } from "@/hooks/useForceLightTheme";
 import { useNoTranslatePage } from "@/hooks/useNoTranslatePage";
 import { useWelcomeTestIntegrity } from "@/hooks/useWelcomeTestIntegrity";
 import { Helmet } from "react-helmet-async";
+import { PublicPlacementResult } from "@/components/welcome-test/PublicPlacementResult";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   User: <User className="h-4 w-4" />,
@@ -130,6 +132,13 @@ export default function WelcomeTestPage() {
     testId,
     studentId,
     teacherId,
+    isPublicPreview,
+    publicResult,
+    publicShareStatus,
+    publicStorageError,
+    resetPublicTest,
+    saveLocalRecording,
+    discardLocalRecording,
   } = useWelcomeTest({ shareToken: token || null });
 
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
@@ -158,7 +167,7 @@ export default function WelcomeTestPage() {
     currentQuestion?.question_type === 'open_ended' ||
     currentQuestion?.question_type === 'open_reflection';
   useWelcomeTestIntegrity({
-    enabled: !teacherPreviewMode,
+    enabled: !teacherPreviewMode && !isPublicPreview,
     testId: testId || null,
     studentId: studentId || null,
     teacherId: teacherId || null,
@@ -218,7 +227,7 @@ export default function WelcomeTestPage() {
   // On error, ask the DB whether the token is expired or just missing,
   // and surface the teacher's email so the student can request a refresh.
   useEffect(() => {
-    if (!error || !token || linkStatus.checked) return;
+    if (isPublicPreview || !error || !token || linkStatus.checked) return;
     (async () => {
       try {
         const { data } = await supabase.rpc("get_test_status_by_share_token", {
@@ -234,7 +243,7 @@ export default function WelcomeTestPage() {
         setLinkStatus({ checked: true, isExpired: false, teacherEmail: null });
       }
     })();
-  }, [error, token, linkStatus.checked]);
+  }, [error, token, linkStatus.checked, isPublicPreview]);
 
   // Trigger confetti on completion
   useEffect(() => {
@@ -309,9 +318,9 @@ export default function WelcomeTestPage() {
   // Determine stage
   const getStage = (): Stage => {
     if (loading) return "loading";
-    if (error) return "error";
-    if (isTeacherMode && !teacherPreviewMode) return "teacher_block";
-    if (!verifiedEmail && !isTeacherMode) return "email";
+    if (!isPublicPreview && error) return "error";
+    if (!isPublicPreview && isTeacherMode && !teacherPreviewMode) return "teacher_block";
+    if (!isPublicPreview && !verifiedEmail && !isTeacherMode) return "email";
     if (completed) return "completed";
     if (paused) return "paused";
     if (showInstructions) return "instructions";
@@ -525,6 +534,23 @@ export default function WelcomeTestPage() {
   }
 
   // ===== COMPLETED (with confetti) =====
+  if (stage === "completed" && isPublicPreview) {
+    return (
+      <>
+        <Helmet>
+          <title>Placement Test Preview | Edooqoo</title>
+          <meta name="robots" content="noindex,follow" />
+        </Helmet>
+        <PublicPlacementResult
+          result={publicResult}
+          shareStatus={publicShareStatus}
+          storageError={publicStorageError}
+          onReset={resetPublicTest}
+        />
+      </>
+    );
+  }
+
   if (stage === "completed") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
@@ -569,8 +595,9 @@ export default function WelcomeTestPage() {
               <Pause className="h-12 w-12 text-muted-foreground mx-auto" />
               <h2 className="text-xl font-semibold">Test Paused</h2>
               <p className="text-sm text-muted-foreground">
-                Your progress is saved ({answeredCount}/{totalQuestions} answered). You can close this page and come back
-                anytime.
+                Your progress is saved ({answeredCount}/{totalQuestions} answered). {isPublicPreview
+                  ? "It stays on this device for 48 hours after your latest activity."
+                  : "You can close this page and come back anytime."}
               </p>
               <Button onClick={resumeTest} size="lg" className="min-h-[48px]">
                 Resume Test
@@ -585,7 +612,12 @@ export default function WelcomeTestPage() {
 
   // ===== INSTRUCTIONS =====
   if (stage === "instructions") {
-    return <InstructionScreen totalQuestions={totalQuestions} onStart={handleStartTest} />;
+    return (
+      <>
+        {isPublicPreview && <Helmet><title>Interactive Placement Test | Edooqoo</title><meta name="robots" content="noindex,follow" /></Helmet>}
+        <InstructionScreen totalQuestions={totalQuestions} onStart={handleStartTest} />
+      </>
+    );
   }
 
   // ===== SECTION CELEBRATION =====
@@ -618,7 +650,14 @@ export default function WelcomeTestPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-1">
+      {isPublicPreview && <Helmet><title>Interactive Placement Test | Edooqoo</title><meta name="robots" content="noindex,follow" /></Helmet>}
       <div className="max-w-2xl mx-auto">
+        {isPublicPreview && (
+          <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 mb-3 px-3 sm:px-4 py-2 bg-card text-card-foreground border border-border shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm font-medium text-center rounded-b-2xl">
+            <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+            <span>Interactive preview: answers and recordings stay on this device for 48 hours.</span>
+          </div>
+        )}
         {/* Teacher Preview Mode, sticky banner. Shown when ?preview=1 or after
             the teacher chose "Preview Test (Read-only)" from the access screen. */}
         {teacherPreviewMode && (
@@ -805,6 +844,12 @@ export default function WelcomeTestPage() {
               translatedOptions={!isSkillQuestion ? currentTranslation?.options : undefined}
               disabled={teacherPreviewMode}
               onNext={!isLastQuestion ? () => { void goToNext(); } : undefined}
+              saveBlob={isPublicPreview ? (blob, questionId) => saveLocalRecording(questionId, blob) : undefined}
+              onDiscard={isPublicPreview ? (questionId) => {
+                saveAnswer(questionId, undefined);
+                void discardLocalRecording(questionId);
+              } : undefined}
+              storageErrorMessage="We couldn't save this recording on your device. Check browser storage permission and tap Save again."
             />
 
             {/* Answer status + I don't know */}
@@ -856,6 +901,12 @@ export default function WelcomeTestPage() {
             </div>
           </CardContent>
         </Card>
+
+        {isPublicPreview && publicStorageError && (
+          <div className="mb-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive" role="alert">
+            {publicStorageError}
+          </div>
+        )}
 
         {/* Save problems stay visible on every question until resolved */}
         {!teacherPreviewMode && (saveState === 'failed' || saveState === 'retrying') && (
@@ -993,6 +1044,9 @@ function QuestionInput({
   onNext,
   onBlur,
   onAnswerFor,
+  saveBlob,
+  onDiscard,
+  storageErrorMessage,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
@@ -1002,6 +1056,9 @@ function QuestionInput({
   onNext?: () => void;
   onBlur?: () => void;
   onAnswerFor?: (questionId: string, val: unknown) => void;
+  saveBlob?: (blob: Blob, questionId: string) => Promise<string>;
+  onDiscard?: (questionId: string) => void;
+  storageErrorMessage?: string;
 }) {
   const displayAnswer = answer === "__IDK__" ? "" : answer;
 
@@ -1028,6 +1085,9 @@ function QuestionInput({
       onNext={onNext}
       onBlur={onBlur}
       onAnswerFor={onAnswerFor}
+      saveBlob={saveBlob}
+      onDiscard={onDiscard}
+      storageErrorMessage={storageErrorMessage}
     />
   );
 }
@@ -1040,6 +1100,9 @@ function QuestionInputInner({
   onNext,
   onBlur,
   onAnswerFor,
+  saveBlob,
+  onDiscard,
+  storageErrorMessage,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
@@ -1048,6 +1111,9 @@ function QuestionInputInner({
   onNext?: () => void;
   onBlur?: () => void;
   onAnswerFor?: (questionId: string, val: unknown) => void;
+  saveBlob?: (blob: Blob, questionId: string) => Promise<string>;
+  onDiscard?: (questionId: string) => void;
+  storageErrorMessage?: string;
 }) {
   switch (question.question_type) {
     case "speaking_record":
@@ -1059,6 +1125,9 @@ function QuestionInputInner({
           // finishes after navigation still lands on the right question.
           onAnswer={(url, qId) => (onAnswerFor && qId ? onAnswerFor(qId, url) : onAnswer(url))}
           questionId={question.id}
+          saveBlob={saveBlob}
+          onDiscard={onDiscard}
+          storageErrorMessage={storageErrorMessage}
         />
       );
 

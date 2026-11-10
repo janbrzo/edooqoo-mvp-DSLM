@@ -22,13 +22,16 @@ function mount(element: React.ReactElement) {
 }
 
 describe('public preview safety', () => {
-  it('makes student setup the primary placement action and keeps the sample secondary', () => {
+  it('keeps student setup primary and opens the full placement test in a new tab', () => {
     const onOpenChange = vi.fn();
     const view = mount(<PlacementTestPreviewDialog open onOpenChange={onOpenChange} />);
     const sendLink = view.root.findAllByType('a').find((link) => link.props.href === '/dashboard?action=add-student');
     if (!sendLink) throw new Error('Send Placement action missing');
     expect(sendLink.children).toContain('Send Placement to Student');
-    expect(view.root.findAllByType('button').some((button) => button.children.includes('Try Placement Test as Student'))).toBe(true);
+    const tryLink = view.root.findAllByType('a').find((link) => link.props.href === '/welcome-test/demo');
+    expect(tryLink?.props.target).toBe('_blank');
+    expect(tryLink?.props.rel).toBe('noreferrer');
+    expect(tryLink?.children).toContain('Try Placement Test as Student');
     expect(view.root.findAllByType('a').some((link) => link.props.href === '/signup')).toBe(false);
     act(() => sendLink.props.onClick());
     expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -44,24 +47,11 @@ describe('public preview safety', () => {
     expect(iframe.props.referrerPolicy).toBe('no-referrer');
   });
 
-  it('keeps sample answers local and discards them on close', () => {
-    const onOpenChange = vi.fn();
-    const view = mount(<PlacementTestPreviewDialog open onOpenChange={onOpenChange} />);
-    const tryButton = () => view.root.findAllByType('button').find((button) => button.children.includes('Try Placement Test as Student'));
-    const start = tryButton();
-    if (!start) throw new Error('Sample action missing');
-    act(() => start.props.onClick());
-    const option = view.root.findAllByType('button').find((button) => button.props['aria-pressed'] === false);
-    if (!option) throw new Error('Sample options missing');
-    act(() => option.props.onClick());
-    expect(view.root.findAllByType('button').filter((button) => button.props['aria-pressed'] === true)).toHaveLength(1);
-    const dialog = view.root.findAll((node) => node.type !== PlacementTestPreviewDialog && typeof node.props.onOpenChange === 'function')[0];
-    if (!dialog) throw new Error('Dialog boundary missing');
-    act(() => dialog.props.onOpenChange(false));
-    expect(onOpenChange).toHaveBeenCalledWith(false);
-    const restart = tryButton();
-    if (!restart) throw new Error('Sample overview not restored');
-    act(() => restart.props.onClick());
-    expect(view.root.findAllByType('button').filter((button) => button.props['aria-pressed'] === true)).toHaveLength(0);
+  it('describes local 48-hour retention instead of presenting a four-question sample', () => {
+    const view = mount(<PlacementTestPreviewDialog open onOpenChange={() => {}} />);
+    const text = JSON.stringify(view.toJSON());
+    expect(text).toContain('answers and recordings stay on that device for 48 hours');
+    expect(text).not.toContain('Student sample');
+    expect(view.root.findAllByType('textarea')).toHaveLength(0);
   });
 });

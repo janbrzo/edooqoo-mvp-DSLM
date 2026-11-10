@@ -19,6 +19,25 @@ import { checkWelcomeTestKeyedAnswer } from '@/lib/welcomeTest/keyedAnswer';
 import { createAnswerSaveQueue, type AnswerSaveQueue, type SaveSnapshot, type SaveState } from '@/lib/welcomeTest/answerSaveQueue';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { flushSpeaking } from '@/lib/welcomeTest/speakingFlush';
+import { CURRENT_WELCOME_BANK } from '@/lib/welcomeTest/seed';
+import {
+  buildPublicPlacementResult,
+  clearPublicPlacementSession,
+  loadPublicPlacementSession,
+  PUBLIC_PLACEMENT_TEST_PATH,
+  PUBLIC_PLACEMENT_TEST_TOKEN,
+  PUBLIC_PLACEMENT_TTL_MS,
+  readSharedPublicPlacementResult,
+  savePublicPlacementSession,
+  type PublicPlacementResult,
+  type SharedPublicPlacementResult,
+} from '@/lib/welcomeTest/publicPlacementTest';
+import {
+  clearPublicPlacementRecordings,
+  deletePublicPlacementRecording,
+  loadPublicPlacementRecordings,
+  savePublicPlacementRecording,
+} from '@/lib/welcomeTest/publicPlacementRecordings';
 
 interface UseWelcomeTestProps {
   shareToken: string | null;
@@ -43,6 +62,7 @@ interface WelcomeTestState {
   /** Question bank and form the test was seeded with (decides definitions, keys and sections). */
   bank: number;
   form: WelcomeTestForm;
+  completedAt: string | null;
 }
 
 interface SavePayload {
@@ -75,9 +95,16 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     persistedAnsweredCount: null,
     isTeacherMode: false,
     studentNativeLanguage: null,
-    bank: 1,
+    bank: CURRENT_WELCOME_BANK,
     form: 'A',
+    completedAt: null,
   });
+  const isPublicPreview = shareToken === PUBLIC_PLACEMENT_TEST_TOKEN;
+  const publicPreviewRef = useRef(isPublicPreview);
+  publicPreviewRef.current = isPublicPreview;
+  const [publicResult, setPublicResult] = useState<PublicPlacementResult | null>(null);
+  const [publicShareStatus, setPublicShareStatus] = useState<SharedPublicPlacementResult['status']>('none');
+  const [publicStorageError, setPublicStorageError] = useState<string | null>(null);
 
   // Latest values for callbacks that outlive a render (debounced saves, page-hide
   // handlers, speaking uploads) so they never act on a stale closure.
@@ -137,8 +164,90 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     return () => document.removeEventListener('visibilitychange', handler);
   }, []);
 
-  // Load test by share token
+  // Load test by share token. The public interactive test has an isolated local
+  // session and never calls the token RPCs or the AI grading endpoint.
   useEffect(() => {
+    if (isPublicPreview) {
+      let cancelled = false;
+      const shared = readSharedPublicPlacementResult(window.location.hash);
+      setPublicResult(shared.result);
+      setPublicShareStatus(shared.status);
+      setPublicStorageError(null);
+      if (shared.status !== 'none') {
+        answersRef.current = {};
+        setState(prev => ({
+          ...prev,
+          testId: null,
+          studentId: null,
+          teacherId: null,
+          title: 'Placement Test · Shared Preview',
+          loading: false,
+          error: null,
+          answers: {},
+          currentSectionIndex: 0,
+          currentQuestionIndex: 0,
+          completed: true,
+          submitting: false,
+          paused: false,
+          isTeacherMode: false,
+          bank: CURRENT_WELCOME_BANK,
+          form: 'A',
+          completedAt: shared.result?.completedAt ?? null,
+        }));
+        return () => { cancelled = true; };
+      }
+
+      const session = loadPublicPlacementSession();
+      const restoredSections = sectionsFor(CURRENT_WELCOME_BANK, 'A', session?.answers ?? {});
+      const sectionIndex = Math.min(session?.currentSectionIndex ?? 0, Math.max(0, restoredSections.length - 1));
+      const questionIndex = Math.min(
+        session?.currentQuestionIndex ?? 0,
+        Math.max(0, (restoredSections[sectionIndex]?.questions.length ?? 1) - 1),
+      );
+      const initialAnswers = session?.answers ?? {};
+      answersRef.current = initialAnswers;
+      setPublicResult(session?.result ?? null);
+      setState(prev => ({
+        ...prev,
+        testId: null,
+        studentId: null,
+        teacherId: null,
+        title: 'Placement Test · Interactive Preview',
+        loading: false,
+        error: null,
+        answers: initialAnswers,
+        currentSectionIndex: sectionIndex,
+        currentQuestionIndex: questionIndex,
+        completed: Boolean(session?.completedAt && session.result),
+        submitting: false,
+        paused: false,
+        persistedAnsweredCount: null,
+        isTeacherMode: false,
+        studentNativeLanguage: null,
+        bank: CURRENT_WELCOME_BANK,
+        form: 'A',
+        completedAt: session?.completedAt ?? null,
+      }));
+
+      void loadPublicPlacementRecordings().then((recordings) => {
+        if (cancelled) return;
+        const restored = { ...initialAnswers };
+        for (const [questionId, url] of Object.entries(recordings)) {
+          if (restored[questionId] === `local-recording:${questionId}`) restored[questionId] = url;
+        }
+        answersRef.current = restored;
+        setState(prev => ({ ...prev, answers: restored }));
+      }).catch((error) => {
+        if (!cancelled) {
+          devWarn('[useWelcomeTest] local recordings unavailable:', error);
+          setPublicStorageError('Recordings could not be restored. Your written answers are still available.');
+        }
+      });
+      return () => { cancelled = true; };
+    }
+
+    setPublicResult(null);
+    setPublicShareStatus('none');
     if (!shareToken) {
       setState(prev => ({ ...prev, loading: false, error: 'No test token provided' }));
       return;
@@ -302,8 +411,10 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     });
   }, [sections]);
   useEffect(() => {
-    if (currentQuestion) anchorIdRef.current = currentQuestion.id;
-  }, [currentQuestion?.id]);
+    // Do not anchor the placeholder first question while a saved session loads.
+    // Otherwise the adaptive-section effect pulls a restored position back to q1.
+    if (!state.loading && currentQuestion) anchorIdRef.current = currentQuestion.id;
+  }, [currentQuestion?.id, state.loading]);
 
   // Start timer for current question
   useEffect(() => {
@@ -314,13 +425,36 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
   // Persist position on navigation (localStorage only - fast)
   useEffect(() => {
-    if (shareToken && !state.completed) {
+    if (shareToken && !state.completed && !isPublicPreview) {
       localStorage.setItem(`wt_position_${shareToken}`, JSON.stringify({
         sectionIndex: state.currentSectionIndex,
         questionIndex: state.currentQuestionIndex,
       }));
     }
-  }, [state.currentSectionIndex, state.currentQuestionIndex, shareToken, state.completed]);
+  }, [state.currentSectionIndex, state.currentQuestionIndex, shareToken, state.completed, isPublicPreview]);
+
+  // Public answers, position and the deterministic result live together under one
+  // 48-hour key. A shared-result URL is read-only and never overwrites this session.
+  useEffect(() => {
+    if (!isPublicPreview || state.loading || publicShareStatus !== 'none') return;
+    const saved = savePublicPlacementSession({
+      answers: state.answers,
+      currentSectionIndex: state.currentSectionIndex,
+      currentQuestionIndex: state.currentQuestionIndex,
+      completedAt: state.completedAt,
+      result: publicResult,
+    });
+    setPublicStorageError(saved ? null : 'This browser could not save your progress. Keep this tab open or allow local storage.');
+  }, [
+    isPublicPreview,
+    state.loading,
+    state.answers,
+    state.currentSectionIndex,
+    state.currentQuestionIndex,
+    state.completedAt,
+    publicResult,
+    publicShareStatus,
+  ]);
 
   // Commit answer to DB + log event. Text answers arrive here from the debounce,
   // blur, navigation or page-hide flush; radio/checkbox/matrix commit immediately.
@@ -333,6 +467,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     answer: unknown,
     opts: { isIdk?: boolean } = {},
   ): Promise<boolean> => {
+    if (publicPreviewRef.current) return true;
     const ctx = ctxRef.current;
     if (!ctx.testId || ctx.isTeacherMode) return true;
 
@@ -461,6 +596,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   // Retry every failed save (manual button or the browser coming back online).
   const retrySaves = useCallback(async () => {
     await pendingSaves.current.flush();
+    if (publicPreviewRef.current) return true;
     return queueRef.current!.retryFailed();
   }, []);
 
@@ -570,13 +706,58 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     setState(prev => ({ ...prev, paused: false }));
   }, []);
 
+  const saveLocalRecording = useCallback(async (questionId: string, blob: Blob) => {
+    if (!publicPreviewRef.current) throw new Error('Local recording storage is only available in the public placement test.');
+    return savePublicPlacementRecording(questionId, blob, Date.now() + PUBLIC_PLACEMENT_TTL_MS);
+  }, []);
+
+  const discardLocalRecording = useCallback(async (questionId: string) => {
+    if (publicPreviewRef.current) await deletePublicPlacementRecording(questionId);
+  }, []);
+
+  const resetPublicTest = useCallback(async () => {
+    if (!publicPreviewRef.current) return;
+    clearPublicPlacementSession();
+    try { localStorage.removeItem(`wt_instructions_seen_${PUBLIC_PLACEMENT_TEST_TOKEN}`); } catch { /* Storage unavailable. */ }
+    try { localStorage.removeItem(`wt_position_${PUBLIC_PLACEMENT_TEST_TOKEN}`); } catch { /* Storage unavailable. */ }
+    try {
+      await clearPublicPlacementRecordings();
+    } catch (error) {
+      devWarn('[useWelcomeTest] could not clear local recordings:', error);
+      setPublicStorageError('Your answers were cleared, but old local recordings could not be removed in this browser.');
+    }
+    answersRef.current = {};
+    setPublicResult(null);
+    setPublicShareStatus('none');
+    setCompleteError(null);
+    setState(prev => ({
+      ...prev,
+      testId: null,
+      title: 'Placement Test · Interactive Preview',
+      loading: false,
+      error: null,
+      answers: {},
+      currentSectionIndex: 0,
+      currentQuestionIndex: 0,
+      completed: false,
+      completedAt: null,
+      submitting: false,
+      paused: false,
+      persistedAnsweredCount: null,
+      isTeacherMode: false,
+      bank: CURRENT_WELCOME_BANK,
+      form: 'A',
+    }));
+    window.history.replaceState(null, '', PUBLIC_PLACEMENT_TEST_PATH);
+  }, []);
+
   // Complete test. Shows the completed screen only after every answer is
   // confirmed saved and the server accepted the submission; otherwise an error
   // with retry is shown. The server re-grades from the DB and calculates the
   // results itself, so the student client never calls calculate_test_results.
   const completeTest = useCallback(async () => {
     const testId = ctxRef.current.testId;
-    if (!testId || completingRef.current) return false;
+    if ((!testId && !isPublicPreview) || completingRef.current) return false;
     completingRef.current = true;
     setCompleteError(null);
     setState(prev => ({ ...prev, submitting: true }));
@@ -593,6 +774,23 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       const speakingOk = await flushSpeakingIfNeeded();
       if (!speakingOk) return fail('Your recording is not saved yet. Save or re-record it, then try again.');
       await flushPendingAnswer();
+
+      if (isPublicPreview) {
+        const completedAt = new Date();
+        const result = buildPublicPlacementResult(allVisibleQuestions, answersRef.current, completedAt);
+        setPublicResult(result);
+        setPublicShareStatus('none');
+        setState(prev => ({
+          ...prev,
+          completed: true,
+          completedAt: completedAt.toISOString(),
+          submitting: false,
+          persistedAnsweredCount: result.answeredCount,
+        }));
+        toast.success('Your placement preview is ready. It stays on this device for 48 hours.');
+        return true;
+      }
+
       const allSaved = await queueRef.current!.flush();
       if (!allSaved) {
         return fail('Some answers are not saved yet. Check your connection and tap "Retry saving".');
@@ -637,7 +835,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     } finally {
       completingRef.current = false;
     }
-  }, [flushPendingAnswer, flushSpeakingIfNeeded, allVisibleQuestions]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded, allVisibleQuestions, isPublicPreview]);
 
   // Progress calculation
   const totalQuestions = allVisibleQuestions.length;
@@ -666,6 +864,13 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
   return {
     ...state,
+    isPublicPreview,
+    publicResult,
+    publicShareStatus,
+    publicStorageError,
+    resetPublicTest,
+    saveLocalRecording,
+    discardLocalRecording,
     sections,
     currentSection,
     currentQuestion,
