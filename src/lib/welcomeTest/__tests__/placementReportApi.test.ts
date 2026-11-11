@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 import { PENDING_PLACEMENT_CLAIM_KEY, rememberPendingClaim, takePendingClaim } from '../placementReportApi';
 
