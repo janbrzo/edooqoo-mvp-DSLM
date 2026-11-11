@@ -61,6 +61,7 @@ import { useWelcomeTestIntegrity } from "@/hooks/useWelcomeTestIntegrity";
 import { Helmet } from "react-helmet-async";
 import { PublicPlacementResult } from "@/components/welcome-test/PublicPlacementResult";
 import { resolvePlacementInviteToken } from "@/lib/welcomeTest/placementReportApi";
+import { PUBLIC_PLACEMENT_TEST_TOKEN } from "@/lib/welcomeTest/publicPlacementTest";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   User: <User className="h-4 w-4" />,
