@@ -41,6 +41,7 @@ function mount(overrides: Partial<React.ComponentProps<typeof OneMinutePrepHeroP
   const props = {
     onGenerateWorksheet: vi.fn(),
     onPreviewPlacementTest: vi.fn(),
+    onSendPlacement: vi.fn(),
     ...overrides,
   };
   act(() => { renderer = create(<OneMinutePrepHeroProofSwitcher {...props} />); });
@@ -72,8 +73,9 @@ describe('landing product proof actions', () => {
   it('connects placement actions to student setup and the local preview', () => {
     const { view, props } = mount();
     clickButton(view, 'Placement Test');
-    const sendLink = view.root.findAllByType('a').find((link) => link.props.href === '/dashboard?action=add-student');
-    expect(sendLink).toBeDefined();
+    expect(view.root.findAllByType('a').some((link) => link.props.href === '/dashboard?action=add-student')).toBe(false);
+    clickButton(view, 'Send Placement to Student');
+    expect(props.onSendPlacement).toHaveBeenCalledTimes(1);
     clickButton(view, 'Preview Placement Test');
     expect(props.onPreviewPlacementTest).toHaveBeenCalledTimes(1);
   });
