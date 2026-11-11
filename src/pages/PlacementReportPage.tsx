@@ -15,6 +15,7 @@ import {
   getPlacementReport,
   PLACEMENT_REPORT_TOKEN_PATTERN,
   rememberPendingClaim,
+  takePendingClaim,
   type PlacementReport,
 } from '@/lib/welcomeTest/placementReportApi';
 
@@ -46,6 +47,7 @@ export default function PlacementReportPage() {
     setClaiming(true);
     try {
       const { studentId } = await claimPlacementReport(token);
+      takePendingClaim();
       toast.success('Student added with their placement profile.');
       navigate(studentTabPath(studentId, 'model', { view: 'profile' }));
     } catch (error) {
