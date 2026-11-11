@@ -25,6 +25,7 @@ import GlobalGeneratingModal from "./components/generation/GlobalGeneratingModal
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const StudentPage = lazy(() => import("./pages/StudentPage"));
+const PlacementReportPage = lazy(() => import("./pages/PlacementReportPage"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
@@ -169,6 +170,7 @@ const App = () => (
               <Route path="/my-flashcards/:studentEmail" element={<StudentPortal />} />
               <Route path="/test/:token" element={<StudentTestPage />} />
               <Route path="/welcome-test/:token" element={<WelcomeTestPage />} />
+              <Route path="/placement-report/:token" element={<PlacementReportPage />} />
               <Route path="/success" element={<PaymentSuccess />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/shared/:token" element={<SharedWorksheet />} />
