@@ -6,7 +6,7 @@
  * teacher blocking (Issue 9), mobile-first (Issue 11), blur fix (Issue 12)
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Confetti from "react-confetti";
 import {
@@ -176,7 +176,7 @@ export default function WelcomeTestPage() {
   });
 
   // Track previous section for celebration
-  const prevSectionRef = useState<number>(0);
+  const prevSectionRef = useRef<number>(currentSectionIndex);
 
   // Window size for confetti
   useEffect(() => {
@@ -256,8 +256,12 @@ export default function WelcomeTestPage() {
 
   // Section celebration detection
   useEffect(() => {
-    if (currentSectionIndex > prevSectionRef[0] && currentSectionIndex > 0 && !completed) {
-      const prevSection = sections[prevSectionRef[0]];
+    const prevIndex = prevSectionRef.current;
+    // Celebrate only a real forward step across a section boundary; a jump from 0
+    // to a later section is a restored session, not a completed section.
+    const isRestoreJump = prevIndex === 0 && currentSectionIndex > 1;
+    if (currentSectionIndex > prevIndex && !isRestoreJump && !completed) {
+      const prevSection = sections[currentSectionIndex - 1];
       const nextSection = sections[currentSectionIndex];
       if (prevSection && nextSection) {
         setSectionCelebration({
@@ -267,7 +271,7 @@ export default function WelcomeTestPage() {
         setTimeout(() => setSectionCelebration(null), 3000);
       }
     }
-    prevSectionRef[0] = currentSectionIndex;
+    prevSectionRef.current = currentSectionIndex;
   }, [currentSectionIndex, sections, completed]);
 
   const handleVerifyEmail = async () => {
