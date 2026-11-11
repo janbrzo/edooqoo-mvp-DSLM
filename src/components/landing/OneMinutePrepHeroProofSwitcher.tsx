@@ -30,6 +30,7 @@ const previewCtaClass = 'mt-auto h-auto min-h-11 w-full whitespace-normal rounde
 interface OneMinutePrepHeroProofSwitcherProps {
   onGenerateWorksheet: (topic: string) => void;
   onPreviewPlacementTest: () => void;
+  onSendPlacement?: () => void;
 }
 
 const WorksheetPreview = ({ onGenerateWorksheet }: { onGenerateWorksheet: (topic: string) => void }) => (
@@ -89,7 +90,7 @@ const SkillBar = ({ label, level, value, attention = false }: { label: string; l
   </div>
 );
 
-const WelcomeTestPreview = ({ onPreviewPlacementTest }: { onPreviewPlacementTest: () => void }) => (
+const WelcomeTestPreview = ({ onPreviewPlacementTest, onSendPlacement }: { onPreviewPlacementTest: () => void; onSendPlacement: () => void }) => (
   <div className={previewBodyClass}>
     <div className="border-b border-border pb-4">
       <p className="text-xs font-semibold uppercase text-primary">Example placement report</p>
@@ -114,8 +115,8 @@ const WelcomeTestPreview = ({ onPreviewPlacementTest }: { onPreviewPlacementTest
       </ul>
     </div>
     <div className="mt-auto grid gap-2">
-      <Button asChild className={`${previewCtaClass} mt-0`}>
-        <Link to="/dashboard?action=add-student">Send Placement to Student<Send className="h-4 w-4" /></Link>
+      <Button className={`${previewCtaClass} mt-0`} onClick={onSendPlacement}>
+        Send Placement to Student<Send className="h-4 w-4" />
       </Button>
       <Button variant="outline" className="h-auto min-h-11 w-full whitespace-normal rounded-full px-4 py-2.5" onClick={onPreviewPlacementTest}>
         Preview Placement Test<ArrowRight className="h-4 w-4" />
