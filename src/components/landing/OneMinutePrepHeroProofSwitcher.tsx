@@ -222,7 +222,7 @@ const ecosystem = [
   { icon: Play, label: 'Next prep' },
 ];
 
-const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherProps> = ({ onGenerateWorksheet, onPreviewPlacementTest }) => (
+const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherProps> = ({ onGenerateWorksheet, onPreviewPlacementTest, onSendPlacement = onPreviewPlacementTest }) => (
   <div className="w-full min-w-0">
     <Tabs defaultValue="worksheet" activationMode="manual">
       <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-full border border-border bg-card/80 p-1.5 shadow-sm sm:grid-cols-5" aria-label="Edooqoo product preview">
@@ -244,7 +244,7 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
       </TabsList>
       <div className="mt-3 min-h-[800px] rounded-3xl border border-border bg-card/90 p-5 shadow-lg sm:min-h-[660px] sm:p-6">
         <TabsContent value="worksheet" className="mt-0"><WorksheetPreview onGenerateWorksheet={onGenerateWorksheet} /></TabsContent>
-        <TabsContent value="test" className="mt-0"><WelcomeTestPreview onPreviewPlacementTest={onPreviewPlacementTest} /></TabsContent>
+        <TabsContent value="test" className="mt-0"><WelcomeTestPreview onPreviewPlacementTest={onPreviewPlacementTest} onSendPlacement={onSendPlacement} /></TabsContent>
         <TabsContent value="homework" className="mt-0"><HomeworkPreview /></TabsContent>
         <TabsContent value="flashcards" className="mt-0"><FlashcardsPreview /></TabsContent>
         <TabsContent value="film" className="mt-0"><FilmPreview /></TabsContent>

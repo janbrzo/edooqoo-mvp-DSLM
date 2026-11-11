@@ -486,7 +486,7 @@ const Index = () => {
       
       {!bothWorksheetsReady ? (
         <>
-          <HeroHeadline onTryWorksheetGenerator={handleHeroWorksheetCta} onPreviewPlacementTest={() => setShowPlacementPreview(true)} />
+          <HeroHeadline onTryWorksheetGenerator={handleHeroWorksheetCta} onPreviewPlacementTest={() => { setPlacementMode('preview'); setShowPlacementPreview(true); }} onSendPlacement={() => { setPlacementMode('send'); setShowPlacementPreview(true); }} />
           <div id="worksheet-form" className="scroll-mt-16 pb-10">
             <FormView 
               onSubmit={handleGenerateWorksheet} 
@@ -562,7 +562,7 @@ const Index = () => {
         onTryWorksheetGenerator={scrollToWorksheetForm}
       />
 
-      <PlacementTestPreviewDialog open={showPlacementPreview} onOpenChange={setShowPlacementPreview} />
+      <PlacementTestPreviewDialog open={showPlacementPreview} onOpenChange={setShowPlacementPreview} initialMode={placementMode} />
 
       {/* v6.9.33: first-time Add Student dialog after signup. */}
       <AddStudentDialog

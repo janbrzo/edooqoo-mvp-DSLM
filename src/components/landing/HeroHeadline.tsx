@@ -16,9 +16,10 @@ const canonicalCitationLinks = [
 interface HeroHeadlineProps {
   onTryWorksheetGenerator: (topic?: string) => void;
   onPreviewPlacementTest: () => void;
+  onSendPlacement?: () => void;
 }
 
-const HeroHeadline: React.FC<HeroHeadlineProps> = ({ onTryWorksheetGenerator, onPreviewPlacementTest }) => {
+const HeroHeadline: React.FC<HeroHeadlineProps> = ({ onTryWorksheetGenerator, onPreviewPlacementTest, onSendPlacement }) => {
   const { trackEvent } = useEventTracking();
   const [lessonTopic, setLessonTopic] = useState('');
 
@@ -65,6 +66,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({ onTryWorksheetGenerator, on
           <OneMinutePrepHeroProofSwitcher
             onGenerateWorksheet={onTryWorksheetGenerator}
             onPreviewPlacementTest={onPreviewPlacementTest}
+            onSendPlacement={onSendPlacement}
           />
         </div>
       </div>
