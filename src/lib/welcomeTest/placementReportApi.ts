@@ -35,8 +35,9 @@ export function submitPlacementReport(input: {
   studentName: string;
   studentEmail: string;
   teacherEmail: string;
+  inviteToken?: string | null;
 }) {
-  return call<{ success: true; token: string; studentUrl: string; studentSent: boolean }>({ action: 'submit', ...input });
+  return call<{ success: true; token: string; studentUrl: string; studentSent: boolean; sentToInvitingTeacher: boolean }>({ action: 'submit', ...input, inviteToken: input.inviteToken ?? undefined });
 }
 
 export const getPlacementReport = (token: string) => call<PlacementReport>({ action: 'get', token });
@@ -52,4 +53,30 @@ export function takePendingClaim(): string | null {
     localStorage.removeItem(PENDING_PLACEMENT_CLAIM_KEY);
     return token && PLACEMENT_REPORT_TOKEN_PATTERN.test(token) ? token : null;
   } catch { return null; }
+}
+
+export const PLACEMENT_INVITE_STORAGE_KEY = 'edooqoo_public_placement_invite';
+
+export function sendPlacementInvite(input: { studentName: string; studentEmail: string; teacherEmail: string }) {
+  return call<{ success: true; testUrl: string; studentSent: boolean }>({ action: 'invite', ...input });
+}
+
+export const getPlacementInvite = (token: string) =>
+  call<{ studentName: string; completed: boolean }>({ action: 'invite_get', token });
+
+/** Reads the invite token from the URL (and remembers it), falling back to the remembered one. */
+export function resolvePlacementInviteToken(search: string): string | null {
+  try {
+    const fromUrl = new URLSearchParams(search).get('invite');
+    if (fromUrl && PLACEMENT_REPORT_TOKEN_PATTERN.test(fromUrl)) {
+      localStorage.setItem(PLACEMENT_INVITE_STORAGE_KEY, fromUrl);
+      return fromUrl;
+    }
+    const stored = localStorage.getItem(PLACEMENT_INVITE_STORAGE_KEY);
+    return stored && PLACEMENT_REPORT_TOKEN_PATTERN.test(stored) ? stored : null;
+  } catch { return null; }
+}
+
+export function clearPlacementInviteToken(): void {
+  try { localStorage.removeItem(PLACEMENT_INVITE_STORAGE_KEY); } catch { /* storage unavailable */ }
 }
