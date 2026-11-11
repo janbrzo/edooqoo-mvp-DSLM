@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
+import { usePendingPlacementClaim } from '@/hooks/usePendingPlacementClaim';
 import { useTokenSystem } from "@/hooks/useTokenSystem";
 import { useStudents } from "@/hooks/useStudents";
 import { useWorksheetHistory } from "@/hooks/useWorksheetHistory";
@@ -87,6 +88,7 @@ const Dashboard = () => {
   }, [loading, studentsLoading, historyLoading, hasEverLoaded]);
 
   useTeacherAuthRedirect(loading, !!isRegisteredUser);
+  usePendingPlacementClaim(!loading && !!isRegisteredUser, isDemoMode);
 
   if (!hasEverLoaded && (loading || studentsLoading || historyLoading)) {
     return (
