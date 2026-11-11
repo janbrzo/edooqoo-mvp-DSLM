@@ -60,6 +60,8 @@ import { useNoTranslatePage } from "@/hooks/useNoTranslatePage";
 import { useWelcomeTestIntegrity } from "@/hooks/useWelcomeTestIntegrity";
 import { Helmet } from "react-helmet-async";
 import { PublicPlacementResult } from "@/components/welcome-test/PublicPlacementResult";
+import { resolvePlacementInviteToken } from "@/lib/welcomeTest/placementReportApi";
+import { PUBLIC_PLACEMENT_TEST_TOKEN } from "@/lib/welcomeTest/publicPlacementTest";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   User: <User className="h-4 w-4" />,
@@ -91,6 +93,7 @@ export default function WelcomeTestPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isPreviewParam = searchParams.get("preview") === "1";
+  const publicInviteToken = useMemo(() => (token === PUBLIC_PLACEMENT_TEST_TOKEN ? resolvePlacementInviteToken(window.location.search) : null), [token]);
   const {
     loading,
     error,
@@ -550,6 +553,7 @@ export default function WelcomeTestPage() {
           shareStatus={publicShareStatus}
           storageError={publicStorageError}
           onReset={resetPublicTest}
+          inviteToken={publicInviteToken}
         />
       </>
     );

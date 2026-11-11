@@ -5,6 +5,8 @@
  *            optionally, the student (student-facing link). No auth, 48 h expiry.
  *  - get:    returns a report by token (never returns email addresses).
  *  - claim:  signed-in teacher creates a student + learning profile from the report, once.
+ *  - invite: teacher without an account sends the student a test link (7-day invite).
+ *  - invite_get: returns the invited student's name only (teacher email stays server-side).
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -12,6 +14,9 @@ import { z } from "npm:zod@3";
 
 const TTL_MS = 48 * 60 * 60 * 1000;
 const MAX_PER_TEACHER_EMAIL_PER_HOUR = 5;
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const MAX_INVITES_PER_TEACHER_EMAIL_PER_HOUR = 10;
+const tokenSchema = z.string().regex(/^[A-Za-z0-9_-]{20,64}$/);
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
 const skill = z.object({
@@ -42,8 +47,16 @@ const bodySchema = z.discriminatedUnion("action", [
     result: resultSchema,
     studentName: z.string().trim().min(1).max(80),
     studentEmail: z.string().trim().email().max(254).optional().or(z.literal("")),
+    teacherEmail: z.string().trim().email().max(254).optional().or(z.literal("")),
+    inviteToken: tokenSchema.optional(),
+  }),
+  z.object({
+    action: z.literal("invite"),
+    studentName: z.string().trim().min(1).max(80),
+    studentEmail: z.string().trim().email().max(254).optional().or(z.literal("")),
     teacherEmail: z.string().trim().email().max(254),
   }),
+  z.object({ action: z.literal("invite_get"), token: tokenSchema }),
   z.object({ action: z.literal("get"), token: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/) }),
   z.object({ action: z.literal("claim"), token: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/) }),
 ]);
@@ -87,6 +100,15 @@ function teacherEmailHtml(name: string, level: string | null, reportUrl: string)
   <p style="color:#6b7280;font-size:12px;">The link expires 48 hours after the test. ${reportUrl}</p></div>`;
 }
 
+function inviteEmailHtml(name: string, testUrl: string): string {
+  return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1f2937;">
+  <h2 style="color:#7c3aed;">Hi ${escapeHtml(name)}, your English placement test is ready</h2>
+  <p>Your teacher would like to understand your English and your goals before your first lesson.</p>
+  <ul style="color:#4b5563;"><li>About 20 to 25 minutes on your phone or laptop</li><li>Grammar, vocabulary, reading, listening, writing and speaking</li><li>No grades: it helps your teacher plan lessons around you</li></ul>
+  ${button(testUrl, "Start the placement test")}
+  <p style="color:#6b7280;font-size:12px;">The link is valid for 7 days. ${testUrl}</p></div>`;
+}
+
 function studentEmailHtml(name: string, studentUrl: string): string {
   return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1f2937;">
   <h2 style="color:#7c3aed;">Your placement results, ${escapeHtml(name)}</h2>
@@ -110,24 +132,70 @@ Deno.serve(async (req) => {
   const now = Date.now();
 
   try {
+    if (body.action === "invite") {
+      const teacherEmail = body.teacherEmail.toLowerCase();
+      const { count } = await admin.from("public_placement_invites").select("id", { count: "exact", head: true })
+        .eq("teacher_email", teacherEmail).gte("created_at", new Date(now - 3600_000).toISOString());
+      if ((count ?? 0) >= MAX_INVITES_PER_TEACHER_EMAIL_PER_HOUR) return json({ error: "Too many invites from this email. Try again later." }, 429);
+      const token = newToken();
+      const studentEmail = body.studentEmail ? body.studentEmail.toLowerCase() : null;
+      const { error } = await admin.from("public_placement_invites").insert({
+        invite_token: token, student_name: body.studentName, student_email: studentEmail,
+        teacher_email: teacherEmail, expires_at: new Date(now + INVITE_TTL_MS).toISOString(),
+      });
+      if (error) throw error;
+      const testUrl = `${appBase}/welcome-test/demo?invite=${token}`;
+      let studentSent = false;
+      if (studentEmail) {
+        try { await sendEmail(studentEmail, "Your English placement test", inviteEmailHtml(body.studentName, testUrl)); studentSent = true; }
+        catch (e) { console.error("[public-placement-report] invite email failed", e); }
+      }
+      return json({ success: true, testUrl, studentSent });
+    }
+
+    if (body.action === "invite_get") {
+      const { data: invite, error } = await admin.from("public_placement_invites")
+        .select("student_name, expires_at, completed_at").eq("invite_token", body.token).maybeSingle();
+      if (error) throw error;
+      if (!invite || Date.parse(invite.expires_at) <= now) return json({ error: "Invite not available" }, 404);
+      return json({ studentName: invite.student_name, completed: !!invite.completed_at });
+    }
+
     if (body.action === "submit") {
+      let invite: { id: string; teacher_email: string; student_name: string; student_email: string | null } | null = null;
+      if (body.inviteToken) {
+        const { data, error } = await admin.from("public_placement_invites")
+          .select("id, teacher_email, student_name, student_email, expires_at, completed_at")
+          .eq("invite_token", body.inviteToken).maybeSingle();
+        if (error) throw error;
+        if (!data || Date.parse(data.expires_at) <= now) return json({ error: "This test invitation has expired." }, 410);
+        if (data.completed_at) return json({ error: "Results for this invitation were already sent." }, 409);
+        invite = data;
+      }
+      const resolvedTeacherEmail = invite?.teacher_email ?? (body.teacherEmail || "");
+      if (!resolvedTeacherEmail) return json({ error: "Teacher email is required" }, 400);
       const completed = Date.parse(body.result.completedAt);
       const expires = Date.parse(body.result.expiresAt);
       if (!Number.isFinite(completed) || expires !== completed + TTL_MS || expires <= now || completed > now + 60_000) {
         return json({ error: "This result has expired or is invalid. Please retake the test." }, 400);
       }
-      const teacherEmail = body.teacherEmail.toLowerCase();
+      const teacherEmail = resolvedTeacherEmail.toLowerCase();
       const { count } = await admin.from("public_placement_reports").select("id", { count: "exact", head: true })
         .eq("teacher_email", teacherEmail).gte("created_at", new Date(now - 3600_000).toISOString());
       if ((count ?? 0) >= MAX_PER_TEACHER_EMAIL_PER_HOUR) return json({ error: "Too many reports for this teacher email. Try again later." }, 429);
 
       const token = newToken();
-      const studentEmail = body.studentEmail ? body.studentEmail.toLowerCase() : null;
-      const { error } = await admin.from("public_placement_reports").insert({
+      const studentEmail = body.studentEmail ? body.studentEmail.toLowerCase() : invite?.student_email ?? null;
+      const { data: inserted, error } = await admin.from("public_placement_reports").insert({
         report_token: token, result: body.result, student_name: body.studentName,
         student_email: studentEmail, teacher_email: teacherEmail, expires_at: new Date(expires).toISOString(),
-      });
+        invite_id: invite?.id ?? null,
+      }).select("id").single();
       if (error) throw error;
+      if (invite) {
+        await admin.from("public_placement_invites").update({ completed_at: new Date().toISOString(), completed_report_id: inserted.id })
+          .eq("id", invite.id).is("completed_at", null);
+      }
 
       const reportUrl = `${appBase}/placement-report/${token}`;
       const studentUrl = `${appBase}/placement-report/${token}?view=student`;
@@ -137,9 +205,10 @@ Deno.serve(async (req) => {
         try { await sendEmail(studentEmail, "Your placement test results", studentEmailHtml(body.studentName, studentUrl)); studentSent = true; }
         catch (e) { console.error("[public-placement-report] student email failed", e); }
       }
-      return json({ success: true, token, studentUrl, studentSent });
+      return json({ success: true, token, studentUrl, studentSent, sentToInvitingTeacher: !!invite });
     }
 
+    if (body.action !== "get" && body.action !== "claim") return json({ error: "Unknown action" }, 400);
     const { data: report, error } = await admin.from("public_placement_reports")
       .select("id, result, student_name, student_email, expires_at, claimed_by, claimed_student_id")
       .eq("report_token", body.token).maybeSingle();

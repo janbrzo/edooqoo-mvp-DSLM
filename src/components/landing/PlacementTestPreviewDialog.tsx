@@ -1,13 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { ArrowRight, Brain, CheckCircle2, ClipboardCheck, Compass, ExternalLink, Headphones, Mic, Minus, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PUBLIC_PLACEMENT_TEST_PATH } from '@/lib/welcomeTest/publicPlacementTest';
+import { QuickSendPlacementForm } from '@/components/landing/QuickSendPlacementForm';
 
 interface PlacementTestPreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialMode?: 'preview' | 'send';
 }
 
 const skillAreas = [
@@ -28,7 +29,9 @@ const flowSteps = [
   { title: 'Receive the teaching profile', detail: 'Skill profile, real needs and suggested goals arrive before lesson one. You decide what to teach.' },
 ];
 
-const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({ open, onOpenChange }) => {
+const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({ open, onOpenChange, initialMode = 'preview' }) => {
+  const [mode, setMode] = React.useState<'preview' | 'send'>(initialMode);
+  React.useEffect(() => { if (open) setMode(initialMode); }, [open, initialMode]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-3xl p-5 sm:p-6">
@@ -42,6 +45,10 @@ const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
+        {mode === 'send' ? (
+          <QuickSendPlacementForm onBack={() => setMode('preview')} />
+        ) : (
+          <>
         <section className="rounded-2xl border border-border bg-muted/30 p-4" aria-labelledby="placement-flow-title">
           <h3 id="placement-flow-title" className="text-sm font-semibold text-foreground">From first contact to a useful teaching profile</h3>
           <ol className="mt-4 space-y-3">
@@ -85,9 +92,9 @@ const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({
 
         <div className="grid gap-2 sm:grid-cols-2">
           <Button asChild size="lg" className="h-auto min-h-11 w-full whitespace-normal rounded-full px-5">
-            <Link to="/dashboard?action=add-student" onClick={() => onOpenChange(false)}>
+            <button type="button" onClick={() => setMode('send')}>
               Send Placement to Student<Send className="h-4 w-4" />
-            </Link>
+            </button>
           </Button>
           <Button asChild variant="outline" size="lg" className="h-auto min-h-11 w-full whitespace-normal rounded-full px-5">
             <a href={PUBLIC_PLACEMENT_TEST_PATH} target="_blank" rel="noreferrer" onClick={() => onOpenChange(false)}>
@@ -96,6 +103,8 @@ const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({
           </Button>
         </div>
         <p className="text-center text-xs leading-5 text-muted-foreground">The full test opens in a new tab. Its answers and recordings stay on that device for 48 hours.</p>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

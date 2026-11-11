@@ -30,6 +30,7 @@ const previewCtaClass = 'mt-auto h-auto min-h-11 w-full whitespace-normal rounde
 interface OneMinutePrepHeroProofSwitcherProps {
   onGenerateWorksheet: (topic: string) => void;
   onPreviewPlacementTest: () => void;
+  onSendPlacement?: () => void;
 }
 
 const WorksheetPreview = ({ onGenerateWorksheet }: { onGenerateWorksheet: (topic: string) => void }) => (
@@ -89,7 +90,7 @@ const SkillBar = ({ label, level, value, attention = false }: { label: string; l
   </div>
 );
 
-const WelcomeTestPreview = ({ onPreviewPlacementTest }: { onPreviewPlacementTest: () => void }) => (
+const WelcomeTestPreview = ({ onPreviewPlacementTest, onSendPlacement }: { onPreviewPlacementTest: () => void; onSendPlacement: () => void }) => (
   <div className={previewBodyClass}>
     <div className="border-b border-border pb-4">
       <p className="text-xs font-semibold uppercase text-primary">Example placement report</p>
@@ -114,8 +115,8 @@ const WelcomeTestPreview = ({ onPreviewPlacementTest }: { onPreviewPlacementTest
       </ul>
     </div>
     <div className="mt-auto grid gap-2">
-      <Button asChild className={`${previewCtaClass} mt-0`}>
-        <Link to="/dashboard?action=add-student">Send Placement to Student<Send className="h-4 w-4" /></Link>
+      <Button className={`${previewCtaClass} mt-0`} onClick={onSendPlacement}>
+        Send Placement to Student<Send className="h-4 w-4" />
       </Button>
       <Button variant="outline" className="h-auto min-h-11 w-full whitespace-normal rounded-full px-4 py-2.5" onClick={onPreviewPlacementTest}>
         Preview Placement Test<ArrowRight className="h-4 w-4" />
@@ -221,7 +222,7 @@ const ecosystem = [
   { icon: Play, label: 'Next prep' },
 ];
 
-const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherProps> = ({ onGenerateWorksheet, onPreviewPlacementTest }) => (
+const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherProps> = ({ onGenerateWorksheet, onPreviewPlacementTest, onSendPlacement = onPreviewPlacementTest }) => (
   <div className="w-full min-w-0">
     <Tabs defaultValue="worksheet" activationMode="manual">
       <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-full border border-border bg-card/80 p-1.5 shadow-sm sm:grid-cols-5" aria-label="Edooqoo product preview">
@@ -243,7 +244,7 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
       </TabsList>
       <div className="mt-3 min-h-[800px] rounded-3xl border border-border bg-card/90 p-5 shadow-lg sm:min-h-[660px] sm:p-6">
         <TabsContent value="worksheet" className="mt-0"><WorksheetPreview onGenerateWorksheet={onGenerateWorksheet} /></TabsContent>
-        <TabsContent value="test" className="mt-0"><WelcomeTestPreview onPreviewPlacementTest={onPreviewPlacementTest} /></TabsContent>
+        <TabsContent value="test" className="mt-0"><WelcomeTestPreview onPreviewPlacementTest={onPreviewPlacementTest} onSendPlacement={onSendPlacement} /></TabsContent>
         <TabsContent value="homework" className="mt-0"><HomeworkPreview /></TabsContent>
         <TabsContent value="flashcards" className="mt-0"><FlashcardsPreview /></TabsContent>
         <TabsContent value="film" className="mt-0"><FilmPreview /></TabsContent>

@@ -7,6 +7,7 @@ import PlacementTestPreviewDialog from '../PlacementTestPreviewDialog';
 vi.mock('react-router-dom', () => ({
   Link: ({ children, to, ...props }: React.PropsWithChildren<{ to: string }>) => <a href={to} {...props}>{children}</a>,
 }));
+vi.mock('@/components/landing/QuickSendPlacementForm', () => ({ QuickSendPlacementForm: () => <form aria-label="quick-send" /> }));
 vi.mock('@/components/ui/dialog', () => {
   const Container = ({ children }: React.PropsWithChildren) => <div>{children}</div>;
   return { Dialog: Container, DialogContent: Container, DialogDescription: Container, DialogHeader: Container, DialogTitle: Container };
@@ -25,16 +26,17 @@ describe('public preview safety', () => {
   it('keeps student setup primary and opens the full placement test in a new tab', () => {
     const onOpenChange = vi.fn();
     const view = mount(<PlacementTestPreviewDialog open onOpenChange={onOpenChange} />);
-    const sendLink = view.root.findAllByType('a').find((link) => link.props.href === '/dashboard?action=add-student');
-    if (!sendLink) throw new Error('Send Placement action missing');
-    expect(sendLink.children).toContain('Send Placement to Student');
+    expect(view.root.findAllByType('a').some((link) => link.props.href === '/dashboard?action=add-student')).toBe(false);
+    const sendButton = view.root.findAllByType('button').find((button) => button.props.children?.[0] === 'Send Placement to Student');
+    if (!sendButton) throw new Error('Send Placement action missing');
     const tryLink = view.root.findAllByType('a').find((link) => link.props.href === '/welcome-test/demo');
     expect(tryLink?.props.target).toBe('_blank');
     expect(tryLink?.props.rel).toBe('noreferrer');
     expect(tryLink?.children).toContain('Try Placement Test as Student');
     expect(view.root.findAllByType('a').some((link) => link.props.href === '/signup')).toBe(false);
-    act(() => sendLink.props.onClick());
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    act(() => sendButton.props.onClick());
+    expect(view.root.findAllByProps({ 'aria-label': 'quick-send' }).length).toBe(1);
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 
   it('loads no film until explicit Play and then restricts the iframe to scripts only', () => {
