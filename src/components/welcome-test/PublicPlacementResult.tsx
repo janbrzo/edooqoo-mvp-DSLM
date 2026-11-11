@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clipboard, Loader2, RotateCcw, Send, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { PlacementReportBody } from '@/components/welcome-test/PlacementReportBody';
-import { submitPlacementReport } from '@/lib/welcomeTest/placementReportApi';
+import { clearPlacementInviteToken, getPlacementInvite, submitPlacementReport } from '@/lib/welcomeTest/placementReportApi';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,7 @@ interface PublicPlacementResultProps {
   shareStatus: SharedPublicPlacementResult['status'];
   storageError: string | null;
   onReset: () => Promise<void>;
+  inviteToken?: string | null;
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -37,7 +38,17 @@ async function copyText(value: string): Promise<void> {
   if (!copied) throw new Error('Copy was not available');
 }
 
-export function PublicPlacementResult({ result, shareStatus, storageError, onReset }: PublicPlacementResultProps) {
+export function PublicPlacementResult({ result, shareStatus, storageError, onReset, inviteToken = null }: PublicPlacementResultProps) {
+  const [invite, setInvite] = useState<{ studentName: string; completed: boolean } | null>(null);
+  useEffect(() => {
+    if (!inviteToken) return;
+    let cancelled = false;
+    getPlacementInvite(inviteToken)
+      .then((data) => { if (!cancelled) { setInvite(data); setStudentName((name) => name || data.studentName); } })
+      .catch(() => { if (!cancelled) setInvite(null); });
+    return () => { cancelled = true; };
+  }, [inviteToken]);
+  const invited = !!invite && !invite.completed;
   const [studentName, setStudentName] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [sending, setSending] = useState(false);
@@ -64,11 +75,12 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
   const sendReport = async () => {
     if (!result) return;
     if (!studentName.trim()) { toast.error('Enter your first name.'); return; }
-    if (!emailPattern.test(teacherEmail.trim())) { toast.error("Enter your teacher's email."); return; }
+    if (!invited && !emailPattern.test(teacherEmail.trim())) { toast.error("Enter your teacher's email."); return; }
     if (studentEmail.trim() && !emailPattern.test(studentEmail.trim())) { toast.error('Check your email address or leave it empty.'); return; }
     setSending(true);
     try {
-      const response = await submitPlacementReport({ result, studentName: studentName.trim(), studentEmail: studentEmail.trim(), teacherEmail: teacherEmail.trim() });
+      const response = await submitPlacementReport({ result, studentName: studentName.trim(), studentEmail: studentEmail.trim(), teacherEmail: invited ? '' : teacherEmail.trim(), inviteToken: invited ? inviteToken : null });
+      if (invited) clearPlacementInviteToken();
       setSent({ studentUrl: response.studentUrl, studentSent: response.studentSent });
       toast.success('Report sent to your teacher.');
     } catch (error) {
@@ -123,7 +135,7 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
         {!isShared && (
           <Card className="rounded-3xl border-primary/30">
             <CardHeader>
-              <CardTitle className="text-lg">Learning with a private teacher? Send them this report</CardTitle>
+              <CardTitle className="text-lg">{invited ? 'Send your results to your teacher' : 'Learning with a private teacher? Send them this report'}</CardTitle>
               <p className="text-sm leading-6 text-muted-foreground">
                 Your teacher gets the full analysis by email and will know exactly what to work on from your first lesson. With Edooqoo they can prepare your materials in about a minute.
               </p>
@@ -131,13 +143,13 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
             <CardContent className="space-y-4">
               {sent ? (
                 <div role="status" className="rounded-2xl bg-success/10 border border-success/30 p-4 space-y-3">
-                  <p className="text-sm font-medium">Report sent to {teacherEmail.trim()}.{sent.studentSent ? ' A copy of your results is in your inbox.' : ''}</p>
+                  <p className="text-sm font-medium">Report sent to {invited || !teacherEmail.trim() ? 'your teacher' : teacherEmail.trim()}.{sent.studentSent ? ' A copy of your results is in your inbox.' : ''}</p>
                   <p className="text-xs leading-5 text-muted-foreground">Want to message your teacher too? Copy your results link for WhatsApp or Messenger.</p>
                   <Button variant="outline" className="rounded-full" onClick={() => { void copyLink(sent.studentUrl); }}><Clipboard className="h-4 w-4" />Copy results link</Button>
                 </div>
               ) : (
                 <>
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className={`grid gap-3 ${invited ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
                     <div className="space-y-1.5">
                       <Label htmlFor="public-student-name">Your first name</Label>
                       <Input id="public-student-name" autoComplete="given-name" maxLength={80} value={studentName} onChange={(event) => setStudentName(event.target.value)} placeholder="Marta" />
@@ -146,10 +158,12 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
                       <Label htmlFor="public-student-email">Your email (optional)</Label>
                       <Input id="public-student-email" type="email" autoComplete="email" value={studentEmail} onChange={(event) => setStudentEmail(event.target.value)} placeholder="you@example.com" />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="public-teacher-email">Teacher's email</Label>
-                      <Input id="public-teacher-email" type="email" value={teacherEmail} onChange={(event) => setTeacherEmail(event.target.value)} placeholder="teacher@example.com" />
-                    </div>
+                    {!invited && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="public-teacher-email">Teacher's email</Label>
+                        <Input id="public-teacher-email" type="email" value={teacherEmail} onChange={(event) => setTeacherEmail(event.target.value)} placeholder="teacher@example.com" />
+                      </div>
+                    )}
                   </div>
                   <Button className="w-full rounded-full" onClick={() => { void sendReport(); }} disabled={sending}>
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Send report to my teacher

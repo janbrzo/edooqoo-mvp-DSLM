@@ -96,6 +96,7 @@ const Index = () => {
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
   const [showPlacementPreview, setShowPlacementPreview] = useState(false);
+  const [placementMode, setPlacementMode] = useState<'preview' | 'send'>('preview');
   // v6.9.33: open Add Student modal on `?action=add-student` (sent by Signup
   // page right after first-time login, and by other deep links).
   const [addStudentOpen, setAddStudentOpen] = useState(false);
