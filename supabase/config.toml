@@ -45,3 +45,6 @@ verify_jwt = false
 
 [functions.homework-mistake-flashcards]
 verify_jwt = false
+
+[functions.public-placement-report]
+verify_jwt = false
