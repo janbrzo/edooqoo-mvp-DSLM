@@ -2618,6 +2618,48 @@ export type Database = {
         }
         Relationships: []
       }
+      public_placement_reports: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          claimed_student_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          report_token: string
+          result: Json
+          student_email: string | null
+          student_name: string
+          teacher_email: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          claimed_student_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          report_token: string
+          result: Json
+          student_email?: string | null
+          student_name: string
+          teacher_email: string
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          claimed_student_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          report_token?: string
+          result?: Json
+          student_email?: string | null
+          student_name?: string
+          teacher_email?: string
+        }
+        Relationships: []
+      }
       schema_migrations_historical_backup_20261028: {
         Row: {
           backed_up_at: string
