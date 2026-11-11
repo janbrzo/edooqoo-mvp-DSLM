@@ -2618,6 +2618,42 @@ export type Database = {
         }
         Relationships: []
       }
+      public_placement_invites: {
+        Row: {
+          completed_at: string | null
+          completed_report_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          invite_token: string
+          student_email: string | null
+          student_name: string
+          teacher_email: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_report_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          invite_token: string
+          student_email?: string | null
+          student_name: string
+          teacher_email: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_report_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invite_token?: string
+          student_email?: string | null
+          student_name?: string
+          teacher_email?: string
+        }
+        Relationships: []
+      }
       public_placement_reports: {
         Row: {
           claimed_at: string | null
@@ -2626,6 +2662,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
+          invite_id: string | null
           report_token: string
           result: Json
           student_email: string | null
@@ -2639,6 +2676,7 @@ export type Database = {
           created_at?: string
           expires_at: string
           id?: string
+          invite_id?: string | null
           report_token: string
           result: Json
           student_email?: string | null
@@ -2652,6 +2690,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          invite_id?: string | null
           report_token?: string
           result?: Json
           student_email?: string | null
