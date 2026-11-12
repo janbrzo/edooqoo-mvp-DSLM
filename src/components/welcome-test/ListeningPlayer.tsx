@@ -3,7 +3,7 @@
  * Shows audio player + optional transcript toggle + answer input
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, Eye, EyeOff, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -21,6 +21,21 @@ export function ListeningPlayer({ audioUrl, transcript }: ListeningPlayerProps) 
   const [playCount, setPlayCount] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Reset playback state when the question's audio changes so a stale
+  // Audio instance never keeps playing the previous question's file.
+  useEffect(() => {
+    audioRef.current?.pause();
+    audioRef.current = null;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setIsPlaying(false);
+    setProgress(0);
+    setPlayCount(0);
+    setShowTranscript(!hasAudio);
+  }, [audioUrl, hasAudio]);
 
   const togglePlay = () => {
     if (!hasAudio) return;

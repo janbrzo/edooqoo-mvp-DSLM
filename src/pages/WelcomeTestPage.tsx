@@ -1143,7 +1143,7 @@ function QuestionInputInner({
       return (
         <div className="space-y-2">
           {(question.audio_url !== undefined || question.audio_transcript) && (
-            <ListeningPlayer audioUrl={question.audio_url || ""} transcript={question.audio_transcript} />
+            <ListeningPlayer key={question.id} audioUrl={question.audio_url || ""} transcript={question.audio_transcript} />
           )}
           {question.options && (
             <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }} className="space-y-1">
