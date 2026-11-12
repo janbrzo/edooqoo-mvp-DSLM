@@ -26,7 +26,7 @@ beforeEach(() => { vi.stubGlobal('localStorage', new MemoryStorage()); });
 afterEach(() => { vi.unstubAllGlobals(); });
 
 describe('public placement local session', () => {
-  it('expires saved answers and the result exactly 48 hours after the last save', () => {
+  it('expires saved answers and the result exactly 7 days after the last save', () => {
     const saved = savePublicPlacementSession({
       answers: { wt_q1: 'A real answer', wt_q16s: 'blob:local-audio' },
       currentSectionIndex: 2,
@@ -80,7 +80,7 @@ describe('public placement deterministic result', () => {
     expect(result.selfAwarenessScore).toBe(100);
   });
 
-  it('shares a bounded summary without open text or audio and rejects it after 48 hours', () => {
+  it('shares a bounded summary without open text or audio and rejects it after 7 days', () => {
     const questions = questionDefsFor(2, 'A');
     const answers = { wt_q41: 'PRIVATE OPEN ANSWER', wt_q16s: 'blob:PRIVATE_AUDIO' };
     const result = buildPublicPlacementResult(questions, answers, NOW);

@@ -49,10 +49,10 @@ describe('public preview safety', () => {
     expect(iframe.props.referrerPolicy).toBe('no-referrer');
   });
 
-  it('describes local 48-hour retention instead of presenting a four-question sample', () => {
+  it('describes local 7-day retention instead of presenting a four-question sample', () => {
     const view = mount(<PlacementTestPreviewDialog open onOpenChange={() => {}} />);
     const text = JSON.stringify(view.toJSON());
-    expect(text).toContain('answers and recordings stay on that device for 48 hours');
+    expect(text).toContain('answers and recordings stay on that device for 7 days');
     expect(text).not.toContain('Student sample');
     expect(view.root.findAllByType('textarea')).toHaveLength(0);
   });

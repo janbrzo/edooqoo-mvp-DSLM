@@ -2667,6 +2667,7 @@ export type Database = {
           result: Json
           student_email: string | null
           student_name: string
+          student_report_token: string | null
           teacher_email: string
         }
         Insert: {
@@ -2681,6 +2682,7 @@ export type Database = {
           result: Json
           student_email?: string | null
           student_name: string
+          student_report_token?: string | null
           teacher_email: string
         }
         Update: {
@@ -2695,6 +2697,7 @@ export type Database = {
           result?: Json
           student_email?: string | null
           student_name?: string
+          student_report_token?: string | null
           teacher_email?: string
         }
         Relationships: []

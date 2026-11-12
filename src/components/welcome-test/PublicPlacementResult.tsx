@@ -66,7 +66,7 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
   const copyLink = async (url: string) => {
     try {
       await copyText(url);
-      toast.success('Results link copied. It expires 48 hours after completion.');
+      toast.success('Results link copied. It is valid for 7 days after completion.');
     } catch {
       toast.error('Could not copy automatically. Please try again.');
     }
@@ -100,7 +100,7 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
             <h1 className="text-xl font-semibold">{expired ? 'This results link has expired' : 'This results link is not available'}</h1>
             <p className="text-sm leading-6 text-muted-foreground">
               {expired
-                ? 'Placement preview links are available for 48 hours. Take the interactive test to create a fresh local result.'
+                ? 'Placement preview links are available for 7 days. Take the interactive test to create a fresh local result.'
                 : 'The summary is incomplete or invalid. You can still take the full interactive placement test.'}
             </p>
             <Button className="rounded-full" onClick={() => { void reset(); }} disabled={resetting}>
@@ -168,7 +168,7 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
                   <Button className="w-full rounded-full" onClick={() => { void sendReport(); }} disabled={sending}>
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Send report to my teacher
                   </Button>
-                  <p className="text-xs leading-5 text-muted-foreground">The report contains this summary only, never your written answers or recordings. It expires 48 hours after the test.</p>
+                  <p className="text-xs leading-5 text-muted-foreground">The report contains this summary only, never your written answers or recordings. It is valid for 7 days after the test.</p>
                 </>
               )}
             </CardContent>
@@ -178,7 +178,7 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
         <div className="rounded-2xl bg-muted/40 p-4 flex items-start gap-3">
           <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <p className="text-xs leading-5 text-muted-foreground">
-            {isShared ? 'This read-only summary' : 'Your answers and result on this device'} expire after 48 hours. This summary is available until {expiry}. Anyone with the link can view the summary until then.
+            {isShared ? 'This read-only summary' : 'Your answers and result on this device'} expire after 7 days. This summary is available until {expiry}. Anyone with the link can view the summary until then.
           </p>
         </div>
 

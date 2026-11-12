@@ -6,6 +6,8 @@ export const PENDING_PLACEMENT_CLAIM_KEY = 'edooqoo_pending_placement_claim';
 export const PLACEMENT_REPORT_TOKEN_PATTERN = /^[A-Za-z0-9_-]{20,64}$/;
 
 export interface PlacementReport {
+  /** Decided by the server from the token, never by the URL. */
+  role: 'teacher' | 'student';
   studentName: string;
   result: PublicPlacementResult;
   expiresAt: string;
@@ -37,7 +39,7 @@ export function submitPlacementReport(input: {
   teacherEmail: string;
   inviteToken?: string | null;
 }) {
-  return call<{ success: true; token: string; studentUrl: string; studentSent: boolean; sentToInvitingTeacher: boolean }>({ action: 'submit', ...input, inviteToken: input.inviteToken ?? undefined });
+  return call<{ success: true; studentUrl: string; studentSent: boolean; sentToInvitingTeacher: boolean }>({ action: 'submit', ...input, inviteToken: input.inviteToken ?? undefined });
 }
 
 export const getPlacementReport = (token: string) => call<PlacementReport>({ action: 'get', token });
@@ -57,8 +59,8 @@ export function takePendingClaim(): string | null {
 
 export const PLACEMENT_INVITE_STORAGE_KEY = 'edooqoo_public_placement_invite';
 
-export function sendPlacementInvite(input: { studentName: string; studentEmail: string; teacherEmail: string }) {
-  return call<{ success: true; testUrl: string; studentSent: boolean }>({ action: 'invite', ...input });
+export function sendPlacementInvite(input: { studentName: string; studentEmail: string; teacherEmail: string; teacherName?: string }) {
+  return call<{ success: true; testUrl: string; studentSent: boolean; teacherConfirmed: boolean }>({ action: 'invite', ...input });
 }
 
 export const getPlacementInvite = (token: string) =>

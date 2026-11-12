@@ -24,7 +24,6 @@ type LoadState = { status: 'loading' } | { status: 'error'; expired: boolean } |
 export default function PlacementReportPage() {
   const { token = '' } = useParams();
   const [searchParams] = useSearchParams();
-  const isStudentView = searchParams.get('view') === 'student';
   const wantsClaim = searchParams.get('claim') === '1';
   const navigate = useNavigate();
   const { loading: authLoading, isRegisteredUser } = useAuthFlow();
@@ -80,7 +79,7 @@ export default function PlacementReportPage() {
           <CardContent className="py-8 text-center space-y-4">
             <TriangleAlert className="h-10 w-10 text-muted-foreground mx-auto" />
             <h1 className="text-xl font-semibold">{state.expired ? 'This report has expired' : 'This report is not available'}</h1>
-            <p className="text-sm leading-6 text-muted-foreground">Placement reports are available for 48 hours after the test.</p>
+            <p className="text-sm leading-6 text-muted-foreground">Placement reports are available for 7 days after the test.</p>
             <Button asChild className="rounded-full"><Link to={PUBLIC_PLACEMENT_TEST_PATH}>Take the placement test<ArrowRight className="h-4 w-4" /></Link></Button>
           </CardContent>
         </Card>
@@ -89,6 +88,7 @@ export default function PlacementReportPage() {
   }
 
   const { report } = state;
+  const isStudentView = report.role === 'student';
   const name = report.studentName;
 
   return (

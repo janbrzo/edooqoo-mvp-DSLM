@@ -18,7 +18,7 @@ import {
 
 export const PUBLIC_PLACEMENT_TEST_PATH = '/welcome-test/demo';
 export const PUBLIC_PLACEMENT_TEST_TOKEN = 'demo';
-export const PUBLIC_PLACEMENT_TTL_MS = 48 * 60 * 60 * 1000;
+export const PUBLIC_PLACEMENT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 export const PUBLIC_PLACEMENT_STORAGE_KEY = 'edooqoo_public_placement_test_v1';
 export const PUBLIC_PLACEMENT_RESULT_HASH = 'placement-result';
 

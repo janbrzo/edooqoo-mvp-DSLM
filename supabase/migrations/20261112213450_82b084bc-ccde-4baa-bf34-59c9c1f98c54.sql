@@ -1,0 +1,3 @@
+ALTER TABLE public.public_placement_reports ADD COLUMN IF NOT EXISTS student_report_token text;
+UPDATE public.public_placement_reports SET student_report_token = replace(replace(encode(gen_random_bytes(24), 'base64'), '+', '-'), '/', '_') WHERE student_report_token IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS public_placement_reports_student_token_idx ON public.public_placement_reports (student_report_token);

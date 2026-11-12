@@ -604,7 +604,7 @@ export default function WelcomeTestPage() {
               <h2 className="text-xl font-semibold">Test Paused</h2>
               <p className="text-sm text-muted-foreground">
                 Your progress is saved ({answeredCount}/{totalQuestions} answered). {isPublicPreview
-                  ? "It stays on this device for 48 hours after your latest activity."
+                  ? "It stays on this device for 7 days after your latest activity."
                   : "You can close this page and come back anytime."}
               </p>
               <Button onClick={resumeTest} size="lg" className="min-h-[48px]">
@@ -663,7 +663,7 @@ export default function WelcomeTestPage() {
         {isPublicPreview && (
           <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 mb-3 px-3 sm:px-4 py-2 bg-card text-card-foreground border border-border shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm font-medium text-center rounded-b-2xl">
             <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-            <span>Interactive preview: answers and recordings stay on this device for 48 hours.</span>
+            <span>Interactive preview: answers and recordings stay on this device for 7 days.</span>
           </div>
         )}
         {/* Teacher Preview Mode, sticky banner. Shown when ?preview=1 or after

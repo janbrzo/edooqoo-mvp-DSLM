@@ -102,7 +102,7 @@ const PlacementTestPreviewDialog: React.FC<PlacementTestPreviewDialogProps> = ({
             </a>
           </Button>
         </div>
-        <p className="text-center text-xs leading-5 text-muted-foreground">The full test opens in a new tab. Its answers and recordings stay on that device for 48 hours.</p>
+        <p className="text-center text-xs leading-5 text-muted-foreground">The full test opens in a new tab. Its answers and recordings stay on that device for 7 days.</p>
           </>
         )}
       </DialogContent>

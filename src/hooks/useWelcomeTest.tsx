@@ -434,7 +434,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   }, [state.currentSectionIndex, state.currentQuestionIndex, shareToken, state.completed, isPublicPreview]);
 
   // Public answers, position and the deterministic result live together under one
-  // 48-hour key. A shared-result URL is read-only and never overwrites this session.
+  // 7-day key. A shared-result URL is read-only and never overwrites this session.
   useEffect(() => {
     if (!isPublicPreview || state.loading || publicShareStatus !== 'none') return;
     const saved = savePublicPlacementSession({
@@ -787,7 +787,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           submitting: false,
           persistedAnsweredCount: result.answeredCount,
         }));
-        toast.success('Your placement preview is ready. It stays on this device for 48 hours.');
+        toast.success('Your placement preview is ready. It stays on this device for 7 days.');
         return true;
       }
 

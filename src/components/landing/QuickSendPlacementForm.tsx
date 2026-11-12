@@ -17,8 +17,9 @@ export function QuickSendPlacementForm({ onBack }: { onBack: () => void }) {
   const [studentName, setStudentName] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [teacherEmail, setTeacherEmail] = useState('');
+  const [teacherName, setTeacherName] = useState('');
   const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState<{ testUrl: string; studentSent: boolean } | null>(null);
+  const [sent, setSent] = useState<{ testUrl: string; studentSent: boolean; teacherConfirmed: boolean } | null>(null);
 
   const submit = async () => {
     if (!studentName.trim()) { toast.error("Enter your student's first name."); return; }
@@ -26,7 +27,7 @@ export function QuickSendPlacementForm({ onBack }: { onBack: () => void }) {
     if (!emailPattern.test(teacherEmail.trim())) { toast.error('Enter your email so the results reach you.'); return; }
     setSending(true);
     try {
-      const response = await sendPlacementInvite({ studentName: studentName.trim(), studentEmail: studentEmail.trim(), teacherEmail: teacherEmail.trim() });
+      const response = await sendPlacementInvite({ studentName: studentName.trim(), studentEmail: studentEmail.trim(), teacherEmail: teacherEmail.trim(), teacherName: teacherName.trim() });
       setSent(response);
       try { await copy(response.testUrl); toast.success('Test link copied.'); } catch { /* user can copy manually */ }
     } catch (error) {
@@ -44,7 +45,7 @@ export function QuickSendPlacementForm({ onBack }: { onBack: () => void }) {
           <div className="space-y-1">
             <p className="font-semibold">{sent.studentSent ? `Test sent to ${studentName.trim()}.` : `Test link for ${studentName.trim()} is ready.`}</p>
             <p className="text-sm leading-6 text-muted-foreground">
-              Share the link by WhatsApp or Messenger too. When {studentName.trim()} finishes, the full teaching profile arrives at {teacherEmail.trim()}.
+              Share the link by WhatsApp or Messenger too. When {studentName.trim()} finishes, the full teaching profile arrives at {teacherEmail.trim()}.{sent.teacherConfirmed ? ' A confirmation with this link is in your inbox.' : ''}
             </p>
           </div>
         </div>
@@ -71,9 +72,15 @@ export function QuickSendPlacementForm({ onBack }: { onBack: () => void }) {
           <Input id="quick-send-student-email" type="email" value={studentEmail} onChange={(event) => setStudentEmail(event.target.value)} placeholder="student@example.com" />
         </div>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="quick-send-teacher-email">Your email (results arrive here)</Label>
-        <Input id="quick-send-teacher-email" type="email" autoComplete="email" value={teacherEmail} onChange={(event) => setTeacherEmail(event.target.value)} placeholder="you@example.com" />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="quick-send-teacher-name">Your name (shown to the student)</Label>
+          <Input id="quick-send-teacher-name" maxLength={80} autoComplete="name" value={teacherName} onChange={(event) => setTeacherName(event.target.value)} placeholder="Anna" />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="quick-send-teacher-email">Your email (results arrive here)</Label>
+          <Input id="quick-send-teacher-email" type="email" autoComplete="email" value={teacherEmail} onChange={(event) => setTeacherEmail(event.target.value)} placeholder="you@example.com" />
+        </div>
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
         <Button size="lg" className="h-auto min-h-11 rounded-full" onClick={() => { void submit(); }} disabled={sending}>
