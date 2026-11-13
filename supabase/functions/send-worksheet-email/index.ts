@@ -73,12 +73,10 @@ serve(async (req: Request) => {
     console.log("[send-worksheet-email] User authenticated:", !!user);
     
     if (authError) {
-      console.error("[send-worksheet-email] Auth error:", authError);
-      throw new Error(`Authentication failed: ${authError.message}`);
+      throw new Error("Unauthorized");
     }
     
-    if (!user) {
-      console.error("[send-worksheet-email] No user found");
+    if (!user || user.is_anonymous) {
       throw new Error("Unauthorized: No valid user session");
     }
 
@@ -86,7 +84,6 @@ serve(async (req: Request) => {
     const { worksheetId, studentEmail, updateShareRecipientEmail, force } =
       (await req.json()) as SendWorksheetEmailRequest;
 
-    console.log(`[send-worksheet-email] Sending worksheet email for ${worksheetId} to ${studentEmail}`);
 
     // Fetch worksheet details
     const { data: worksheet, error: worksheetError } = await supabase
@@ -103,14 +100,17 @@ serve(async (req: Request) => {
 
     // Fetch student info if worksheet has student_id
     let studentName = "Student";
+    let assignedEmail: string | null = null;
     if (worksheet.student_id) {
       const { data: student } = await supabase
         .from("students")
-        .select("name")
+        .select("name, student_email")
         .eq("id", worksheet.student_id)
+        .eq("teacher_id", user.id)
         .single();
       if (student) {
         studentName = student.name;
+        assignedEmail = student.student_email?.trim().toLowerCase() || null;
       }
     }
 
@@ -123,8 +123,12 @@ serve(async (req: Request) => {
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(studentEmail)) {
+    if (typeof studentEmail !== "string" || studentEmail.length > 254 || !emailRegex.test(studentEmail)) {
       throw new Error("Invalid email format");
+    }
+    // A worksheet assigned to a student with a known email can only be sent to that student.
+    if (assignedEmail && assignedEmail !== studentEmail.trim().toLowerCase()) {
+      throw new Error("Recipient must be the assigned student's email");
     }
 
     // P2.3: duplicate send guard: same recipient within the dedupe window
@@ -157,8 +161,6 @@ serve(async (req: Request) => {
 
       if (updateError) {
         console.error("[send-worksheet-email] Failed to update share_recipient_email:", updateError);
-      } else {
-        console.log(`[send-worksheet-email] Updated share_recipient_email to ${studentEmail}`);
       }
     }
 
@@ -189,11 +191,9 @@ serve(async (req: Request) => {
     });
 
     if (emailError) {
-      console.error("[send-worksheet-email] Resend error:", emailError);
-      throw new Error(`Failed to send email: ${emailError.message}`);
+      console.error("[send-worksheet-email] Resend error");
+      throw new Error("Failed to send email");
     }
-
-    console.log("[send-worksheet-email] Email sent successfully:", emailData);
 
     // P2.3: record delivery timestamp for the duplicate send guard
     const { error: stampError } = await supabase
@@ -219,14 +219,16 @@ serve(async (req: Request) => {
       },
     );
   } catch (error: any) {
-    console.error("[send-worksheet-email] Error:", error);
+    const safe = ["Unauthorized", "Unauthorized: No valid user session", "Worksheet not found or unauthorized", "Invalid email format", "Recipient must be the assigned student's email", "Failed to send email"];
+    const message = safe.includes(error?.message) ? error.message : "Internal server error";
+    console.error("[send-worksheet-email] Error:", message);
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || "Internal server error",
+        error: message,
       }),
       {
-        status: error.message === "Unauthorized" ? 401 : 500,
+        status: message.startsWith("Unauthorized") ? 401 : message === "Internal server error" || message === "Failed to send email" ? 500 : 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );

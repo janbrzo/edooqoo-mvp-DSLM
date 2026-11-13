@@ -118,7 +118,7 @@ serve(async (req) => {
     const customerEmail = session.customer_details?.email || session.customer_email;
     
     if (customerEmail && !isValidEmail(customerEmail)) {
-      console.warn('Invalid email format received from Stripe:', customerEmail);
+      console.warn('Invalid email format received from Stripe');
     }
 
     // Update payment status in database
@@ -222,7 +222,6 @@ try {
         expiresAt: downloadSession.expires_at
       };
 
-      console.log('📤 RETURNING RESPONSE DATA:', responseData);
 
       return new Response(
         JSON.stringify(responseData),
@@ -239,7 +238,6 @@ try {
       amount: paymentData.amount
     };
 
-    console.log('📤 RETURNING NON-PAID RESPONSE DATA:', responseData);
 
     return new Response(
       JSON.stringify(responseData),

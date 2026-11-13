@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@12.18.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { findPlan, findOwnedStripeCustomerId } from "../_shared/planCatalog.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,14 +47,16 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseAnon.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!user?.email || user.is_anonymous) throw new Error("User not authenticated or email not available");
+    logStep("User authenticated", { userId: user.id });
 
-    const { planType, monthlyLimit, price, planName } = await req.json();
-    if (!planType || !monthlyLimit || !price || !planName) {
-      throw new Error("Missing required parameters: planType, monthlyLimit, price, planName");
-    }
-    logStep("Request parameters", { planType, monthlyLimit, price, planName });
+    // Only the plan choice comes from the client; price and allowance from the catalog.
+    const requested = await req.json();
+    const catalogPlan = findPlan(requested?.planType, requested?.monthlyLimit);
+    if (!catalogPlan) throw new Error("Unknown plan");
+    const { planType, monthlyLimit, price } = catalogPlan;
+    const planName = catalogPlan.name;
+    logStep("Request parameters", { planType, monthlyLimit, price });
 
     // Get current profile
     const { data: profile, error: profileError } = await supabaseServiceRole
@@ -69,14 +72,10 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
     // Find or create Stripe customer
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId: string;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Found existing customer", { customerId });
-    } else {
-      throw new Error("No Stripe customer found for this user");
-    }
+    const ownedCustomerId = await findOwnedStripeCustomerId(stripe, supabaseServiceRole, user);
+    if (!ownedCustomerId) throw new Error("No Stripe customer found for this user");
+    const customerId: string = ownedCustomerId;
+    logStep("Found existing customer", { customerId });
 
     // Get current subscription
     const subscriptions = await stripe.subscriptions.list({

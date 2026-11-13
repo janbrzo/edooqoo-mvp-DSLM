@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { validateSubmitFeedbackRequest, isValidUUID } from './validation.ts';
 import { rateLimiter } from './rateLimiter.ts';
+import { resolveCaller } from '../_shared/auth.ts';
 import { submitFeedbackToDatabase, checkExistingFeedback, updateExistingFeedback } from './database.ts';
 
 const corsHeaders = {
@@ -24,8 +25,18 @@ serve(async (req) => {
   }
 
   try {
+    // Feedback is always written for the caller's own session (anonymous
+    // sessions included); a body userId is ignored.
+    const caller = await resolveCaller(req);
+    if (caller.kind !== 'user') {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     // Parse request body
     const requestData = await req.json();
+    requestData.userId = caller.user.id;
     console.log('Received feedback submission request');
 
     // Validate input
@@ -89,7 +100,7 @@ serve(async (req) => {
     if (!result.success) {
       console.error('Database operation failed:', result.error);
       return new Response(
-        JSON.stringify({ error: result.error || 'Failed to process feedback' }),
+        JSON.stringify({ error: 'Failed to process feedback' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -111,10 +122,8 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error in submitFeedback function:', error);
     
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-    
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'An unexpected error occurred' }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

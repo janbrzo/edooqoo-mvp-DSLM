@@ -1348,7 +1348,7 @@ serve(async (req) => {
             }),
           });
 
-          console.log('[process-welcome-test] Teacher notification email sent to:', teacherData.email);
+          console.log('[process-welcome-test] Teacher notification email sent');
         }
       } catch (emailError) {
         console.error('Error sending teacher email:', emailError);

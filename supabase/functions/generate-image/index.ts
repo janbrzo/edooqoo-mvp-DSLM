@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 import { getVertexAccessToken } from "../_shared/vertexAuth.ts";
+import { resolveCaller } from "../_shared/auth.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const GEMINI_VERTEX_API_KEY = Deno.env.get("GEMINI_VERTEX_API_KEY");
@@ -18,24 +19,13 @@ serve(async (req) => {
   }
 
   try {
-    // ── AUTH CHECK (optional) ──
-    // Match generate-audio behavior: allow anonymous users to pre-generate media.
-    // Token consumption is enforced separately on the worksheet generation step.
-    const authHeader = req.headers.get('Authorization');
-    let userId = 'anonymous';
-    if (authHeader?.startsWith('Bearer ')) {
-      try {
-        const supabase = createClient(
-          Deno.env.get('SUPABASE_URL')!,
-          Deno.env.get('SUPABASE_ANON_KEY')!,
-          { global: { headers: { Authorization: authHeader } } }
-        );
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) userId = user.id;
-      } catch (e) {
-        console.warn('[GENERATE-IMAGE] Auth resolve failed, continuing anonymously:', (e as Error)?.message ?? e);
-      }
+    // ── AUTH CHECK ──
+    // Paid image generation: signed-in users (anonymous sessions included) or the service role only.
+    const caller = await resolveCaller(req);
+    if (caller.kind === 'public') {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    const userId = caller.kind === 'user' ? caller.user.id : 'service';
     // ── END AUTH CHECK ──
 
     const { topic, englishLevel = "B1/B2" } = await req.json();

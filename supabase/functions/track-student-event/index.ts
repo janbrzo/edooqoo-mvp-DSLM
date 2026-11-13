@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     if (insertError) {
       console.error('Insert event error:', insertError);
       return new Response(
-        JSON.stringify({ error: 'Failed to insert event', details: insertError.message }),
+        JSON.stringify({ error: 'Failed to insert event' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: (error as Error)?.message ?? String(error) }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

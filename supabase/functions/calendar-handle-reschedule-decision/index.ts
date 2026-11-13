@@ -53,7 +53,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    const oldSlotId = newSlot.reschedule_request_from_slot_id;
+    // The referenced source slot is only trusted when it belongs to this teacher.
+    let oldSlotId: string | null = null;
+    if (newSlot.reschedule_request_from_slot_id) {
+      const { data: ownOld } = await supabase.from('calendar_slots').select('id')
+        .eq('id', newSlot.reschedule_request_from_slot_id).eq('teacher_id', user.id).maybeSingle();
+      oldSlotId = ownOld?.id ?? null;
+    }
 
     // Helper: resolve notifications
     const resolveNotifications = async (slotIds: string[], types: string[]) => {
@@ -145,7 +151,8 @@ Deno.serve(async (req) => {
             cancelled_at: new Date().toISOString(), cancelled_by: 'system',
             cancellation_reason: `Rescheduled to ${newSlot.slot_date} ${newSlot.start_time.slice(0, 5)}`,
           })
-          .eq('id', oldSlotId);
+          .eq('id', oldSlotId)
+          .eq('teacher_id', user.id);
 
         await logAction(oldSlotId, 'freed_by_reschedule', {
           new_slot_id: newSlotId, student_name: studentName,
@@ -246,7 +253,8 @@ Deno.serve(async (req) => {
         await supabase
           .from('calendar_slots')
           .update({ reschedule_request_to_slot_id: null })
-          .eq('id', oldSlotId);
+          .eq('id', oldSlotId)
+          .eq('teacher_id', user.id);
       }
 
       // Resolve notifications

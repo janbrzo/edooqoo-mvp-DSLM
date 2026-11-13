@@ -4,6 +4,8 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { escapeHtml, resolveCaller, teacherIdOf } from "../_shared/auth.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -18,22 +20,41 @@ serve(async (req) => {
   }
 
   try {
-    const { shareToken, recipientEmail, testTitle, teacherName, testType, reminder, retakeNumber } = await req.json();
+    // Only the teacher who owns the test may email its link.
+    const caller = await resolveCaller(req);
+    const teacherId = teacherIdOf(caller);
+    if (!teacherId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const body = await req.json();
+    const { shareToken, reminder, retakeNumber } = body;
+    const recipientEmail = typeof body.recipientEmail === "string" ? body.recipientEmail.trim().toLowerCase() : "";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail) || recipientEmail.length > 254 || typeof shareToken !== "string") {
+      return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: testRow } = await admin.from("student_tests")
+      .select("id, title, test_type, student_id, teacher_id")
+      .eq("share_token", shareToken).eq("teacher_id", teacherId).is("deleted_at", null).maybeSingle();
+    if (!testRow) {
+      return new Response(JSON.stringify({ error: "Test not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const { data: studentRow } = await admin.from("students").select("student_email").eq("id", testRow.student_id).eq("teacher_id", teacherId).maybeSingle();
+    const knownEmail = studentRow?.student_email?.trim().toLowerCase();
+    if (knownEmail && knownEmail !== recipientEmail) {
+      return new Response(JSON.stringify({ error: "Recipient must be the student's email" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const teacherName = typeof body.teacherName === "string" ? escapeHtml(body.teacherName.slice(0, 120)) : "";
+    const testTitle = escapeHtml(testRow.title || body.testTitle || "Test");
+    const testType = body.testType === "welcome" || testRow.test_type === "welcome" ? "welcome" : "regular";
     const retakeN = Number.isFinite(retakeNumber) && retakeNumber > 0 ? Number(retakeNumber) : 0;
     const isRetake = retakeN > 0;
 
-    if (!shareToken || !recipientEmail) {
-      return new Response(JSON.stringify({ error: "Missing shareToken or recipientEmail" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
-    const origin = req.headers.get("origin") || Deno.env.get('APP_BASE_URL') || "https://edooqoo.com";
+    const origin = (Deno.env.get('APP_BASE_URL') || "https://edooqoo.com").replace(/\/+$/, "");
     const isWelcomeTest = testType === "welcome";
     const shareUrl = isWelcomeTest ? `${origin}/welcome-test/${shareToken}` : `${origin}/test/${shareToken}`;
 
-    console.log("[send-test-email] Sending to:", recipientEmail, "type:", testType || "regular");
 
     const reminderBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -130,8 +151,8 @@ serve(async (req) => {
     const emailData = await emailResponse.json();
 
     if (!emailResponse.ok) {
-      console.error("[send-test-email] Resend error:", emailData);
-      throw new Error(emailData.message || "Failed to send email");
+      console.error("[send-test-email] Resend error status:", emailResponse.status);
+      throw new Error("Failed to send email");
     }
 
     console.log("[send-test-email] Email sent successfully:", emailData.id);
@@ -140,8 +161,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error("[send-test-email] Error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Unknown error" }), {
+    console.error("[send-test-email] Error:", error?.message);
+    return new Response(JSON.stringify({ error: "Failed to send email" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

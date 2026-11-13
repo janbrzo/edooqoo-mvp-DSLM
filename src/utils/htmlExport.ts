@@ -1,4 +1,6 @@
 import { devLog, devWarn } from '@/utils/logger';
+const escapeHtmlText = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+
 
 /**
  * Fetches CSS content from a URL
@@ -569,7 +571,7 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
     versionHeader.style.color = '#3d348b';
     versionHeader.style.fontSize = '18px';
     versionHeader.style.fontWeight = 'bold';
-    versionHeader.innerHTML = `${title} - ${exportViewMode === 'teacher' ? 'Teacher' : 'Student'} Version`;
+    versionHeader.textContent = `${title} - ${exportViewMode === 'teacher' ? 'Teacher' : 'Student'} Version`;
 
     // Create print button with new text
     const printButton = docClone.createElement('button');
@@ -644,7 +646,7 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
           
           const item = document.createElement('div');
           item.className = 'nav-exercise-item';
-          item.innerHTML = '📝 ' + title;
+          item.textContent = '📝 ' + title;
           item.addEventListener('click', function() {
             scrollToExercise(index);
             updateActiveButton(index);
@@ -721,7 +723,7 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title} - ${exportViewMode === 'teacher' ? 'Teacher' : 'Student'} Version</title>
+    <title>${escapeHtmlText(title)} - ${exportViewMode === 'teacher' ? 'Teacher' : 'Student'} Version</title>
     <style>
 ${finalCSS}
     </style>

@@ -4,6 +4,7 @@ import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resolveCaller } from "../_shared/auth.ts";
+import { resolveEnglishLevel } from "../_shared/englishLevel.ts";
 import { homeworkIdForStudentAccess } from "../_shared/evaluationAccess.ts";
 import { isNonAnswerText, parseModelScore } from "./answerSignals.ts";
 import { itemId, pairEvaluationsWithAnswers, callModelWithRetry } from "./evaluationMapping.ts";
@@ -440,7 +441,7 @@ serve(async (req) => {
       ...chunkAnswers(answers.filter(isClosedItem)).filter((c) => c.length > 0),
     ];
     console.log("[verify-open-answers] Evaluating in", chunks.length, "chunk(s)");
-    const results = await Promise.all(chunks.map((c) => evaluateChunk(c, english_level, context)));
+    const results = await Promise.all(chunks.map((c) => evaluateChunk(c, resolveEnglishLevel(english_level), context)));
     const failedChunks = results.filter((r) => !r.ok);
     // Only when every chunk failed is the whole request an error; otherwise the
     // successful chunks are returned and the rest stay unevaluated.

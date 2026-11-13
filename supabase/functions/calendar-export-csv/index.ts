@@ -81,9 +81,12 @@ Deno.serve(async (req) => {
     }
 
     // Escape CSV field for semicolon-separated
-    const esc = (val: string) => {
-      if (!val) return '';
-      if (val.includes(';') || val.includes('"') || val.includes('\n')) {
+    const esc = (raw: string) => {
+      if (!raw) return '';
+      let val = String(raw);
+      // Neutralise spreadsheet formulas (=, +, -, @, tab, CR) in text cells.
+      if (/^[=+\-@\t\r]/.test(val) && !/^-?\d+([.,]\d+)?$/.test(val)) val = `'${val}`;
+      if (val.includes('\r') || val.includes(';') || val.includes('"') || val.includes('\n')) {
         return `"${val.replace(/"/g, '""')}"`;
       }
       return val;

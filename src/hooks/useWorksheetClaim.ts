@@ -12,6 +12,8 @@ interface ClaimStorage {
    * the edge function to match `teacher_id = anonUserId` (in addition to
    * `teacher_id IS NULL`). */
   anonUserId?: string;
+  /** Server-signed proof that this browser owned the anonymous account. */
+  claimTicket?: string;
 }
 
 function readStorage(): ClaimStorage | null {
@@ -48,11 +50,24 @@ export function markWorksheetForClaim(worksheetId: string, anonUserId?: string) 
   const existing = readStorage();
   const ids = new Set<string>(existing?.worksheetIds ?? []);
   ids.add(worksheetId);
+  const ownerId = anonUserId || existing?.anonUserId;
   writeStorage({
     worksheetIds: Array.from(ids),
     timestamp: Date.now(),
-    anonUserId: anonUserId || existing?.anonUserId,
+    anonUserId: ownerId,
+    claimTicket: existing?.anonUserId === ownerId ? existing?.claimTicket : undefined,
   });
+  if (anonUserId && !(existing?.anonUserId === anonUserId && existing?.claimTicket)) {
+    void supabase.functions
+      .invoke('claim-anonymous-worksheets', { body: { action: 'ticket' } })
+      .then(({ data }) => {
+        const current = readStorage();
+        if (data?.ticket && current && current.anonUserId === anonUserId) {
+          writeStorage({ ...current, claimTicket: data.ticket });
+        }
+      })
+      .catch((e) => devWarn('[useWorksheetClaim] claim ticket failed', e));
+  }
 }
 
 export function getPendingClaimIds(): string[] {
@@ -97,11 +112,12 @@ export function claimPendingWorksheets(): Promise<string[]> {
 async function runClaim(): Promise<string[]> {
   const pending = getPendingClaimIds();
   const anonUserId = getPendingAnonUserId();
+  const claimTicket = readStorage()?.claimTicket;
   if (pending.length === 0) return [];
 
   try {
     const { data, error } = await supabase.functions.invoke('claim-anonymous-worksheets', {
-      body: { worksheetIds: pending, anonUserId },
+      body: { worksheetIds: pending, anonUserId, claimTicket },
     });
     if (error) {
       devWarn('[useWorksheetClaim] claim invoke error', error);

@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { resolveCaller } from '../_shared/auth.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,46 +18,31 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Get the authorization header
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    // Granting tokens is a server-to-server operation only (service role).
+    // Signed-in users can never credit their own balance.
+    const caller = await resolveCaller(req)
+    if (caller.kind !== 'service') {
       return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Forbidden' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Get the user from the auth header
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
-
-    if (authError || !user) {
+    const { amount, description, reference_id, teacher_id } = await req.json()
+    if (typeof teacher_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(teacher_id)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Invalid teacher' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    const user = { id: teacher_id }
 
-    const { amount, description, reference_id } = await req.json()
-
-    if (!amount || amount <= 0) {
+    if (!Number.isInteger(amount) || amount <= 0 || amount > 1000) {
       return new Response(
         JSON.stringify({ error: 'Invalid amount' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    console.log(`Adding ${amount} tokens for user ${user.id}`)
-
-    // Get user email from profile or auth user
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', user.id)
-      .single()
-
-    const userEmail = profile?.email || user.email
 
     // Call the add_tokens function which now includes teacher_email
     const { error: addTokensError } = await supabase.rpc('add_tokens', {
@@ -74,7 +60,6 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Successfully added ${amount} tokens for user ${user.id} (${userEmail})`)
 
     return new Response(
       JSON.stringify({ 

@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
   })
 
   if (status === 'failed') {
-    console.error('Welcome email failed', { email, errorMessage })
+    console.error('Welcome email failed', { errorMessage })
     return new Response(JSON.stringify({ ok: false, error: errorMessage }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 

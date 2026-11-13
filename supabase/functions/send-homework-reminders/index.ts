@@ -112,7 +112,6 @@ Deno.serve(async (req) => {
     homeworkToRemind.forEach((hw, idx) => {
       const student = Array.isArray(hw.students) ? hw.students[0] : hw.students;
       console.log(`  [${idx + 1}] ID: ${hw.id}, Title: "${hw.title}"`);
-      console.log(`      Student: ${student?.name || 'N/A'}, Email: ${student?.student_email || 'NONE'}`);
       console.log(`      Deadline: ${hw.deadline}, Completed: ${hw.completed_at ? 'YES' : 'NO'}`);
       console.log(`      Reminder hours: ${hw.reminder_hours || 24}, Last sent: ${hw.reminder_sent_at || 'NEVER'}`);
       console.log(`      Created: ${hw.created_at}`);
@@ -232,7 +231,7 @@ Deno.serve(async (req) => {
         const appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com';
         const homeworkUrl = `${appBaseUrl}/homework/${homework.share_token}`;
 
-        console.log(`[HOMEWORK-REMINDERS] Sending reminder for homework "${homework.title}" to ${studentEmail}`);
+        console.log(`[HOMEWORK-REMINDERS] Sending reminder for homework ${homework.id}`);
 
         // Render email template
         const html = await renderAsync(
@@ -267,7 +266,7 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        console.log(`[HOMEWORK-REMINDERS] Email sent successfully for homework ${homework.id}:`, emailData);
+        console.log(`[HOMEWORK-REMINDERS] Email sent successfully for homework ${homework.id}`);
 
         // Mark reminder as sent
         const { error: updateError } = await supabase

@@ -4,10 +4,11 @@
 // NEVER auto-upgrade Stripe subscriptions.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { isTrustedServerRequest } from '../_shared/cronAuth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
 };
 
 const LOOP_ID = 'token-economy-health';
@@ -24,6 +25,10 @@ function formatErr(err: unknown): string {
 
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  if (!isTrustedServerRequest(req)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,

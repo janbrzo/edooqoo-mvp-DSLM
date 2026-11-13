@@ -3,8 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { devLog } from '@/utils/logger';
 
-// URL for the Edge Function
-const SUBMIT_FEEDBACK_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/submitFeedback';
 
 /**
  * Submits feedback for a worksheet
@@ -20,29 +18,22 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
     
     // Try using the edge function first
     try {
-      const response = await fetch(SUBMIT_FEEDBACK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data: result, error: invokeError } = await supabase.functions.invoke('submitFeedback', {
+        body: {
           worksheetId,
           rating,
           comment,
-          userId,
           status: 'submitted' // Ensure status is set to 'submitted'
-        })
+        }
       });
 
-      if (response.ok) {
-        const result = await response.json();
+      if (!invokeError && result) {
         devLog('Feedback submission successful via API:', result);
         toast.success('Thank you for your feedback!');
         return result.data;
       }
       
-      const errorText = await response.text();
-      console.error('Error submitting feedback via API:', errorText);
+      console.error('Error submitting feedback via API:', invokeError);
     } catch (apiError) {
       console.error('API feedback submission error:', apiError);
     }

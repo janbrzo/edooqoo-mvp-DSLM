@@ -135,14 +135,31 @@ serve(async (req) => {
     }
     // ── END AUTH CHECK ──
 
-    const { base64Image, base64Data, filename, contentType = "image/png" } = await req.json();
+    const { base64Image, base64Data, filename: requestedName, contentType = "image/png" } = await req.json();
 
-    if ((!base64Image && !base64Data) || !filename) {
+    if ((!base64Image && !base64Data) || !requestedName || typeof requestedName !== "string") {
       return new Response(
         JSON.stringify({ error: "Missing base64Image or filename" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Non-service callers may upload only audio/image media, capped in size, and
+    // never choose the storage key: each upload gets a fresh random key so no
+    // caller can overwrite an existing object.
+    const ALLOWED_TYPES = /^(audio\/(webm|ogg|mpeg|mp4|wav|x-wav|aac)|image\/(png|jpeg|webp|gif))(;.*)?$/i;
+    if (!isServiceRole && (typeof contentType !== "string" || !ALLOWED_TYPES.test(contentType))) {
+      return new Response(JSON.stringify({ error: "Unsupported file type" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const MAX_BYTES = isServiceRole ? 30 * 1024 * 1024 : 15 * 1024 * 1024;
+    const rawLength = String(base64Image || base64Data || "").length;
+    if (rawLength * 0.75 > MAX_BYTES) {
+      return new Response(JSON.stringify({ error: "File too large" }), { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const safeBase = requestedName.split("/").pop()!.replace(/[^A-Za-z0-9._-]/g, "_").slice(-80) || "file";
+    const filename = isServiceRole
+      ? requestedName.replace(/\.\.+/g, ".").replace(/^\/+/, "")
+      : `uploads/${crypto.randomUUID()}-${safeBase}`;
 
     // Get R2 credentials from environment
     const R2_ACCESS_KEY_ID = Deno.env.get("R2_ACCESS_KEY_ID");
@@ -204,7 +221,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`[UPLOAD-TO-R2] Upload failed: ${response.status}`, errorText);
+      console.error(`[UPLOAD-TO-R2] Upload failed: ${response.status}`, errorText.slice(0, 200));
       throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
     }
 
@@ -241,10 +258,7 @@ serve(async (req) => {
       });
     }
     return new Response(
-      JSON.stringify({
-        error: (error as Error)?.message || "Upload failed",
-        details: "Failed to upload file to R2",
-      }),
+      JSON.stringify({ error: "Upload failed" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

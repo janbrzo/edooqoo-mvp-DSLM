@@ -1,6 +1,8 @@
 import html2pdf from 'html2pdf.js';
 import { devLog, devWarn } from '@/utils/logger';
 import { applyPdfExportHygiene } from '@/lib/worksheet/exportHygiene';
+const escapeHtmlText = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+
 
 
 export const generatePDF = async (elementId: string, filename: string, isTeacherView = false, title = 'English Worksheet') => {
@@ -57,7 +59,7 @@ export const generatePDF = async (elementId: string, filename: string, isTeacher
     header.style.borderBottom = '1px solid #ddd';
     header.style.color = '#3d348b';
     header.style.fontSize = '12.6px'; // Reduced by 10% from 14px
-    header.innerHTML = `${title} - ${isTeacherView ? 'Teacher' : 'Student'} Version`;
+    header.textContent = `${title} - ${isTeacherView ? 'Teacher' : 'Student'} Version`;
     container.prepend(header);
     
     // Add a footer with page numbers
@@ -452,7 +454,7 @@ export async function exportAsHTML(elementId: string, filename: string, viewMode
     versionHeader.style.color = '#3d348b';
     versionHeader.style.fontSize = '18px';
     versionHeader.style.fontWeight = 'bold';
-    versionHeader.innerHTML = `${title} - ${viewMode === 'teacher' ? 'Teacher' : 'Student'} Version`;
+    versionHeader.textContent = `${title} - ${viewMode === 'teacher' ? 'Teacher' : 'Student'} Version`;
 
     // Create print button
     const printButton = docClone.createElement('button');
@@ -474,7 +476,7 @@ export async function exportAsHTML(elementId: string, filename: string, viewMode
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title} - ${viewMode === 'teacher' ? 'Teacher' : 'Student'} Version</title>
+    <title>${escapeHtmlText(title)} - ${viewMode === 'teacher' ? 'Teacher' : 'Student'} Version</title>
     <style>
 ${finalCSS}
     </style>

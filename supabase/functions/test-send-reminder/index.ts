@@ -111,8 +111,6 @@ Deno.serve(async (req) => {
 
     console.log("[TEST-SEND-REMINDER] Homework details:");
     console.log(`  Title: ${homework.title}`);
-    console.log(`  Student: ${student?.name}, Email: ${student?.student_email}`);
-    console.log(`  Teacher: ${teacher?.first_name} ${teacher?.last_name}, Email: ${teacher?.email}`);
     console.log(`  Deadline: ${homework.deadline}`);
     console.log(`  Last reminder sent: ${homework.reminder_sent_at || 'NEVER'}`);
 
@@ -153,7 +151,7 @@ Deno.serve(async (req) => {
       })
     );
 
-    console.log(`[TEST-SEND-REMINDER] Sending email to: ${student.student_email}`);
+    console.log(`[TEST-SEND-REMINDER] Sending reminder email`);
 
     // Send email
     const { data: emailData, error: emailError } = await resend.emails.send({
@@ -182,7 +180,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[TEST-SEND-REMINDER] Email sent successfully:`, emailData);
+    console.log(`[TEST-SEND-REMINDER] Email sent successfully:`, emailData?.id);
 
     // Update reminder_sent_at
     const { error: updateError } = await supabase
@@ -215,11 +213,10 @@ Deno.serve(async (req) => {
     );
 
   } catch (error: any) {
-    console.error("[TEST-SEND-REMINDER] Error:", error);
+    console.error("[TEST-SEND-REMINDER] Error:", error?.message);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        stack: error.stack
+        error: "Could not send the test reminder"
       }),
       { 
         status: 500,

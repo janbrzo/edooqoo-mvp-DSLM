@@ -96,8 +96,7 @@ serve(async (req)=>{
       });
     }
     logStep("User authenticated successfully", {
-      userId: user.id,
-      email: user.email
+      userId: user.id
     });
     // Initialize Stripe
     const stripe = new Stripe(stripeKey, {
@@ -120,6 +119,18 @@ serve(async (req)=>{
         status: session.payment_status
       }), {
         status: 400,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    // The paid session must have been created for this exact account.
+    if (session.metadata?.supabase_user_id !== user.id) {
+      return new Response(JSON.stringify({
+        error: 'Payment session not valid for this account'
+      }), {
+        status: 403,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'

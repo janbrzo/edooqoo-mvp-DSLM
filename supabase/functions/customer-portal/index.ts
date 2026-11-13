@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@12.18.0'
+import { findOwnedStripeCustomerId } from '../_shared/planCatalog.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,12 +38,12 @@ serve(async (req) => {
     }
 
     const user = userData.user;
-    if (!user?.email) {
+    if (!user?.email || user.is_anonymous || !user.email_confirmed_at) {
       console.error('[CUSTOMER-PORTAL] User not authenticated');
       throw new Error('User not authenticated');
     }
 
-    console.log('[CUSTOMER-PORTAL] User authenticated:', user.email);
+
 
     // Initialize Stripe
     const stripeKey = Deno.env.get('Stripe_Secret_Key');
@@ -54,18 +55,17 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
 
     // Find customer
-    console.log('[CUSTOMER-PORTAL] Looking for customer:', user.email);
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) {
-      console.error('[CUSTOMER-PORTAL] No Stripe customer found for:', user.email);
+    const admin = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '', { auth: { persistSession: false } });
+    const ownedCustomerId = await findOwnedStripeCustomerId(stripe, admin, user);
+    if (!ownedCustomerId) {
       throw new Error('No Stripe customer found. Please contact support.');
     }
 
-    const customerId = customers.data[0].id;
+    const customerId = ownedCustomerId;
     console.log('[CUSTOMER-PORTAL] Found customer:', customerId);
 
     // Create portal session with configuration
-    const origin = req.headers.get('origin') || 'https://bvfrkzdlklyvnhlpleck.supabase.co';
+    const origin = (Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com').replace(/\/+$/, '');
     
     try {
       const portalSession = await stripe.billingPortal.sessions.create({
@@ -93,7 +93,7 @@ serve(async (req) => {
     }
 
   } catch (error: any) {
-    console.error('[CUSTOMER-PORTAL] Error:', error);
+    console.error('[CUSTOMER-PORTAL] Error:', error?.message);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

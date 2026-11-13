@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { findOwnedStripeCustomerId } from '../_shared/planCatalog.ts';
 import Stripe from 'https://esm.sh/stripe@12.18.0'
 
 const corsHeaders = {
@@ -68,7 +69,6 @@ serve(async (req) => {
       );
     }
 
-    console.log('[CHECK-SUBSCRIPTION] User:', user.email);
 
     // Initialize Stripe
     const stripeKey = Deno.env.get('Stripe_Secret_Key');
@@ -95,8 +95,8 @@ serve(async (req) => {
     console.log('[CHECK-SUBSCRIPTION] User has subscription history:', userHasSubscriptionHistory);
 
     // Find customer in Stripe
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) {
+    const ownedCustomerId = await findOwnedStripeCustomerId(stripe, supabaseService, user);
+    if (!ownedCustomerId) {
       console.log('[CHECK-SUBSCRIPTION] No Stripe customer found');
       
       // FIXED: For users without Stripe customer, set appropriate status based on subscription history
@@ -127,7 +127,7 @@ serve(async (req) => {
       );
     }
 
-    const customerId = customers.data[0].id;
+    const customerId = ownedCustomerId;
     console.log('[CHECK-SUBSCRIPTION] Found customer:', customerId);
 
     // Get stored subscription record to find stripe_subscription_id

@@ -43,9 +43,21 @@ Deno.serve(async (req) => {
     const tokens = await tokenRes.json();
 
     if (tokens.error) {
-      console.error('Google token error:', tokens);
-      return new Response(JSON.stringify({ error: tokens.error_description || tokens.error }), {
+      console.error('Google token error:', tokens.error);
+      return new Response(JSON.stringify({ error: 'Google authorization failed' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // The Google account that granted access must be the student's own email.
+    const infoRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    });
+    const info = infoRes.ok ? await infoRes.json() : null;
+    if (!info?.email || info.email_verified === false
+      || String(info.email).toLowerCase().trim() !== String(email).toLowerCase().trim()) {
+      return new Response(JSON.stringify({ error: 'Please sign in with the Google account of the email you booked with.' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 

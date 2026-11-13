@@ -75,6 +75,15 @@ Deno.serve(async (req) => {
       if (!publicUpsert || action !== 'upsert' || !slotId) {
         return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
       }
+      // Public callers may only trigger the first sync of a booking made in
+      // the last 15 minutes; they can never update or move existing events.
+      const { data: freshSlot } = await supabase.from('calendar_slots')
+        .select('id, status, booked_at, gcal_event_id')
+        .eq('id', slotId).eq('teacher_id', teacherId).maybeSingle();
+      const bookedAt = freshSlot?.booked_at ? new Date(freshSlot.booked_at).getTime() : 0;
+      if (!freshSlot || freshSlot.gcal_event_id || freshSlot.status !== 'booked' || Date.now() - bookedAt > 15 * 60 * 1000) {
+        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
+      }
     }
     if (studentId) {
       const { data: ownStudent } = await supabase.from('students')

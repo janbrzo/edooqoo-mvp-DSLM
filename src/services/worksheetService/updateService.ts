@@ -206,7 +206,7 @@ function generateWorksheetHTML(worksheet: any): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${worksheet.title || 'English Worksheet'}</title>
+    <title>${String(worksheet.title || 'English Worksheet').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)}</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }

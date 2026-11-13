@@ -125,7 +125,7 @@ serve(async (req) => {
         context: { userId, title },
         user_id: userId,
       });
-      return new Response(JSON.stringify({ error: f.message }), {
+      return new Response(JSON.stringify({ error: "Could not save the bug report. Please try again." }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -258,7 +258,7 @@ serve(async (req) => {
       error_code: f.code,
       stack: f.stack,
     });
-    return new Response(JSON.stringify({ error: f.message }), {
+    return new Response(JSON.stringify({ error: "Could not save the bug report. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

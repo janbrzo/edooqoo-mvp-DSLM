@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { signPayload, verifyPayload } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -48,12 +49,20 @@ serve(async (req) => {
     }
 
     if (user.is_anonymous) {
+      // An anonymous session may only ask for a ticket proving it owns its id.
+      const peek = await req.clone().json().catch(() => ({}));
+      if (peek?.action === 'ticket') {
+        const ticket = await signPayload({ kind: 'anon-claim', anonUserId: user.id }, 7 * 24 * 60 * 60 * 1000);
+        return new Response(JSON.stringify({ ticket }), {
+          status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       return new Response(JSON.stringify({ error: 'Anonymous users cannot claim worksheets' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { worksheetIds, anonUserId } = await req.json();
+    const { worksheetIds, anonUserId, claimTicket } = await req.json();
     if (!Array.isArray(worksheetIds) || worksheetIds.length === 0) {
       return new Response(JSON.stringify({ claimedCount: 0, claimedIds: [] }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -89,10 +98,12 @@ serve(async (req) => {
     // anonUserId comes from the client, so confirm it really is an anonymous
     // account: otherwise a teacher could pass another teacher's id and take
     // over that teacher's recent worksheets.
+    // Knowing an id is not proof: the caller must present a ticket that was
+    // signed for the anonymous account while that account was signed in.
     let isAnonymousOwner = false;
     if (isUuid && anonUserId !== user.id) {
-      const { data: owner } = await adminClient.auth.admin.getUserById(anonUserId);
-      isAnonymousOwner = owner?.user?.is_anonymous === true;
+      const ticket = await verifyPayload<{ anonUserId?: string; kind?: string }>(claimTicket);
+      isAnonymousOwner = ticket?.kind === 'anon-claim' && ticket.anonUserId === anonUserId;
     }
 
     let query = adminClient
@@ -111,7 +122,7 @@ serve(async (req) => {
 
     if (updateErr) {
       console.error('[claim-anonymous-worksheets] update error:', updateErr);
-      return new Response(JSON.stringify({ error: updateErr.message }), {
+      return new Response(JSON.stringify({ error: 'Could not claim worksheets' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -125,7 +136,7 @@ serve(async (req) => {
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Unknown error';
     console.error('[claim-anonymous-worksheets] Error:', msg);
-    return new Response(JSON.stringify({ error: msg }), {
+    return new Response(JSON.stringify({ error: 'Could not claim worksheets' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

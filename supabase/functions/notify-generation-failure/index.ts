@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { logError } from "../_shared/logError.ts";
+import { escapeHtml, resolveCaller } from "../_shared/auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -54,10 +55,22 @@ serve(async (req) => {
   }
 
   try {
-    const {
-      errorMessage, errorType, userId, teacherEmail, promptPreview, model, timestamp,
-      clientGenerationId,
-    } = await req.json();
+    const raw = await req.json();
+    // Identity comes from the caller, never from the body: browsers report for
+    // their own session; only server functions may name the affected user.
+    const caller = await resolveCaller(req);
+    const userId: string | null = caller.kind === 'service'
+      ? (typeof raw.userId === 'string' ? raw.userId : null)
+      : caller.kind === 'user' ? caller.user.id : null;
+    const teacherEmail: string | null = caller.kind === 'service'
+      ? (typeof raw.teacherEmail === 'string' ? raw.teacherEmail : null)
+      : caller.kind === 'user' ? (caller.user.email ?? null) : null;
+    const errorType = String(raw.errorType ?? 'unknown').slice(0, 80);
+    const errorMessage = typeof raw.errorMessage === 'string' ? raw.errorMessage.slice(0, 2000) : '';
+    const promptPreview = typeof raw.promptPreview === 'string' ? raw.promptPreview.slice(0, 300) : null;
+    const model = typeof raw.model === 'string' ? raw.model.slice(0, 100) : null;
+    const timestamp = typeof raw.timestamp === 'string' ? raw.timestamp.slice(0, 40) : null;
+    const clientGenerationId = typeof raw.clientGenerationId === 'string' ? raw.clientGenerationId.slice(0, 100) : null;
 
     const isInfo = INFO_TYPES.has(errorType);
     if (CLIENT_INPUT_TYPES.has(errorType)) {
@@ -151,29 +164,29 @@ serve(async (req) => {
         <table style="width:100%; border-collapse:collapse; margin:0 0 20px 0;">
           <tr style="border-bottom:1px solid #f3f4f6;">
             <td style="padding:10px 12px; font-weight:600; color:#6b7280; width:120px; vertical-align:top;">Time</td>
-            <td style="padding:10px 12px; color:#111827;">${ts}</td>
+            <td style="padding:10px 12px; color:#111827;">${escapeHtml(ts)}</td>
           </tr>
           <tr style="border-bottom:1px solid #f3f4f6;">
             <td style="padding:10px 12px; font-weight:600; color:#6b7280; vertical-align:top;">Teacher</td>
-            <td style="padding:10px 12px; color:#111827;">${teacherEmail || 'anonymous'}</td>
+            <td style="padding:10px 12px; color:#111827;">${escapeHtml(teacherEmail || 'anonymous')}</td>
           </tr>
           <tr style="border-bottom:1px solid #f3f4f6;">
             <td style="padding:10px 12px; font-weight:600; color:#6b7280; vertical-align:top;">User ID</td>
-            <td style="padding:10px 12px; color:#111827; font-family:monospace; font-size:13px;">${userId || 'N/A'}</td>
+            <td style="padding:10px 12px; color:#111827; font-family:monospace; font-size:13px;">${escapeHtml(userId || 'N/A')}</td>
           </tr>
           <tr style="border-bottom:1px solid #f3f4f6;">
             <td style="padding:10px 12px; font-weight:600; color:#6b7280; vertical-align:top;">Model</td>
-            <td style="padding:10px 12px; color:#111827;">${model || 'unknown'}</td>
+            <td style="padding:10px 12px; color:#111827;">${escapeHtml(model || 'unknown')}</td>
           </tr>
           <tr style="border-bottom:1px solid #f3f4f6;">
             <td style="padding:10px 12px; font-weight:600; color:#6b7280; vertical-align:top;">Error Type</td>
             <td style="padding:10px 12px;">
-              <span style="background:${badgeBg}; color:${badgeColor}; padding:4px 10px; border-radius:6px; font-weight:700; font-size:13px;">${errorType}</span>
+              <span style="background:${badgeBg}; color:${badgeColor}; padding:4px 10px; border-radius:6px; font-weight:700; font-size:13px;">${escapeHtml(errorType)}</span>
             </td>
           </tr>
           <tr>
             <td style="padding:10px 12px; font-weight:600; color:#6b7280; vertical-align:top;">Error</td>
-            <td style="padding:10px 12px; color:#111827;">${errorMessage || 'No error message'}</td>
+            <td style="padding:10px 12px; color:#111827;">${escapeHtml(errorMessage || 'No error message')}</td>
           </tr>
         </table>
 
@@ -185,7 +198,7 @@ serve(async (req) => {
         ${promptPreview ? `
         <div style="margin:0 0 20px 0;">
           <div style="font-weight:600; color:#6b7280; margin-bottom:6px; font-size:13px;">📝 Prompt Preview (first 300 chars):</div>
-          <pre style="background:#f5f5f5; padding:12px; font-size:11px; overflow:auto; border-radius:8px; border:1px solid #e5e7eb; white-space:pre-wrap; word-break:break-all; max-height:200px;">${promptPreview.substring(0, 300)}</pre>
+          <pre style="background:#f5f5f5; padding:12px; font-size:11px; overflow:auto; border-radius:8px; border:1px solid #e5e7eb; white-space:pre-wrap; word-break:break-all; max-height:200px;">${escapeHtml(promptPreview.substring(0, 300))}</pre>
         </div>
         ` : ''}
 
@@ -208,7 +221,7 @@ serve(async (req) => {
 </body>
 </html>`;
 
-    console.log(`📧 Sending failure alert email: type=${errorType}, teacher=${teacherEmail || 'anonymous'}`);
+    console.log(`📧 Sending failure alert email: type=${errorType}`);
 
     const emailRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -224,12 +237,12 @@ serve(async (req) => {
       }),
     });
 
-    const emailResult = await emailRes.text();
-    console.log(`📧 Resend response: ${emailRes.status}`, emailResult);
+    await emailRes.text();
+    console.log(`📧 Resend response: ${emailRes.status}`);
 
     if (!emailRes.ok) {
-      console.error('❌ Failed to send alert email:', emailResult);
-      return new Response(JSON.stringify({ sent: false, error: emailResult }), {
+      console.error('❌ Failed to send alert email:', emailRes.status);
+      return new Response(JSON.stringify({ sent: false, error: 'Alert email failed' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -240,7 +253,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('❌ notify-generation-failure error:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
+    return new Response(JSON.stringify({ error: 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

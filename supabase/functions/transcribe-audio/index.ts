@@ -43,7 +43,7 @@ serve(async (req) => {
     // student proving access to one homework (share token + assigned email).
     const caller = await resolveCaller(req);
     let callerInfo: string = caller.kind === 'user' ? `user:${caller.user.id}` : caller.kind;
-    let authorised = caller.kind === 'service' || caller.kind === 'user';
+    let authorised = caller.kind === 'service' || (caller.kind === 'user' && !caller.isAnonymous);
     if (!authorised) {
       const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
       const homeworkId = await homeworkIdForStudentAccess(admin, body?.access);

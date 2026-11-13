@@ -107,7 +107,7 @@ serve(async (req) => {
       },
     });
 
-    console.log(`[admin-impersonate] Admin ${callerUser.id} impersonating ${target_teacher_id} (${profile.email})`);
+    console.log(`[admin-impersonate] Admin ${callerUser.id} impersonating ${target_teacher_id} `);
 
     return new Response(JSON.stringify({
       success: true,

@@ -162,27 +162,6 @@ const Auth = () => {
           throw error;
         }
       } else {
-        // Add tokens for demo users after successful registration
-        if (selectedPlan === 'demo') {
-          setTimeout(async () => {
-            try {
-              const { error } = await supabase.functions.invoke('add-tokens', {
-                body: { amount: 2, description: 'Welcome bonus for Free Demo account' }
-              });
-              if (error) {
-                console.error('Error adding welcome tokens:', error);
-              } else {
-                toast({
-                  title: "Welcome!",
-                  description: "Your account has been created and you've received 2 free tokens to get started.",
-                });
-              }
-            } catch (error) {
-              console.error('Error adding welcome tokens:', error);
-            }
-          }, 1000);
-        }
-        
         toast({
           title: "Registration successful!",
           description: "Please check your email to confirm your account.",

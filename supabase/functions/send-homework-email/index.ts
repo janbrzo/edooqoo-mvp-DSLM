@@ -76,7 +76,7 @@ serve(async (req: Request) => {
     console.log("[send-homework-email] User ID:", user?.id);
     
     if (authError) {
-      console.error("[send-homework-email] Auth error:", authError);
+      console.error("[send-homework-email] Auth error");
       throw new Error(`Authentication failed: ${authError.message}`);
     }
     
@@ -90,7 +90,7 @@ serve(async (req: Request) => {
 
     const { homeworkId, studentEmail, updateStudentEmail, isReminder, isSubmissionNotification, answeredExercisesCount } = (await req.json()) as SendHomeworkEmailRequest;
 
-    console.log(`Sending homework email for homework ${homeworkId} to ${studentEmail}, isReminder: ${isReminder || false}, isSubmissionNotification: ${isSubmissionNotification || false}`);
+    console.log(`Sending homework email for homework ${homeworkId}, isReminder: ${isReminder || false}, isSubmissionNotification: ${isSubmissionNotification || false}`);
 
     // Fetch homework details (simplified - no JOINs to avoid RLS issues with Service Role)
     console.log(`[send-homework-email] Fetching homework with id: ${homeworkId} for teacher: ${user.id}`);
@@ -104,7 +104,6 @@ serve(async (req: Request) => {
 
     console.log('[send-homework-email] Homework query result:', { 
       found: !!homework, 
-      error: homeworkError,
       homeworkId: homework?.id,
       teacherId: homework?.teacher_id,
       studentId: homework?.student_id
@@ -126,7 +125,6 @@ serve(async (req: Request) => {
         .eq("id", homework.student_id)
         .single();
       student = studentData;
-      console.log('[send-homework-email] Fetched student:', student);
     }
 
     const { data: profileData } = await supabase
@@ -135,7 +133,6 @@ serve(async (req: Request) => {
       .eq("id", homework.teacher_id)
       .single();
     teacherProfile = profileData;
-    console.log('[send-homework-email] Fetched teacher profile:', teacherProfile);
 
     // Build homework object with related data (matching old structure)
     const homeworkWithRelations = {
@@ -162,7 +159,7 @@ serve(async (req: Request) => {
         console.error("Failed to update student email:", updateError);
         // Continue anyway - email sending is more important
       } else {
-        console.log(`Updated student ${homeworkWithRelations.students.id} email to ${studentEmail}`);
+        console.log(`Updated student ${homeworkWithRelations.students.id} email`);
       }
     }
 
@@ -249,11 +246,11 @@ serve(async (req: Request) => {
     });
 
     if (emailError) {
-      console.error("Resend error:", emailError);
+      console.error("Resend error:", emailError?.name);
       throw new Error(`Failed to send email: ${emailError.message}`);
     }
 
-    console.log("Email sent successfully:", emailData);
+    console.log("Email sent successfully:", emailData?.id);
     
     // Update reminder_sent_at timestamp after successful email
     const nowIso = new Date().toISOString();
@@ -281,7 +278,7 @@ serve(async (req: Request) => {
       },
     );
   } catch (error: any) {
-    console.error("Error in send-homework-email:", error);
+    console.error("Error in send-homework-email:", error?.message);
     return new Response(
       JSON.stringify({
         success: false,

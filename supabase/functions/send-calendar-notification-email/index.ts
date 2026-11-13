@@ -488,7 +488,7 @@ Deno.serve(async (req) => {
     });
 
     const result = await res.json();
-    console.log('Email sent:', type, to, result);
+    console.log('Email sent:', type, result?.id);
 
     return new Response(JSON.stringify({ success: true, result }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

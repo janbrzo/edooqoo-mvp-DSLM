@@ -60,7 +60,7 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
-    logStep('User authenticated', { email: user.email });
+    logStep('User authenticated', { userId: user.id });
 
     // Parse request body
     const body = await req.json();
@@ -120,7 +120,15 @@ serve(async (req) => {
 
     // Get checkout session details
     const session = await stripe.checkout.sessions.retrieve(session_id);
-    logStep('Retrieved checkout session', { sessionId: session.id, metadata: session.metadata });
+    logStep('Retrieved checkout session', { sessionId: session.id });
+
+    // The session must be paid and created for this exact account.
+    if (session.metadata?.supabase_user_id !== user.id || session.payment_status !== 'paid' || session.status !== 'complete') {
+      logStep('Session not owned by caller or not paid', { sessionId: session.id });
+      return new Response(JSON.stringify({ error: 'Payment session not valid for this account' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Extract session metadata parameters first
     const targetPlanType = session.metadata?.target_plan_type || session.metadata?.plan_type;

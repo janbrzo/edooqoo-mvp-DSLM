@@ -4,6 +4,7 @@
 // Fire-and-forget: called from useStudentKnowledge after a Quick Add.
 // Returns a category + structured metadata + confidence; client patches the row.
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { resolveCaller, teacherIdOf } from '../_shared/auth.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,9 +34,14 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'method_not_allowed' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
+  // Teacher-only AI classification (or another server function).
+  const caller = await resolveCaller(req)
+  if (caller.kind !== 'service' && !teacherIdOf(caller)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
   const hasDirectAiProvider = Boolean(Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY'))
   if (!hasDirectAiProvider) {
-    return new Response(JSON.stringify({ error: 'ai_key_missing', detail: 'GEMINI_API_KEY or OPENAI_API_KEY required' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify({ error: 'ai_key_missing', }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
   let body: any

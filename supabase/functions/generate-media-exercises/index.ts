@@ -1,7 +1,8 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { executeAiCall } from "../_shared/aiGateway.ts";
-import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
+import { authorizedTeacherId, jsonResponse, resolveCaller, safeUrl } from "../_shared/auth.ts";
+import { resolveEnglishLevel } from "../_shared/englishLevel.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { loadWorksheetJson } from "../_shared/worksheetContent.ts";
 
@@ -118,10 +119,30 @@ serve(async (req) => {
     const {
       worksheetId,
       exerciseIndex,
-      imageData,
-      originalFormData,
+      imageData: rawImageData,
+      originalFormData: rawFormData,
       userId
     } = await req.json();
+
+    // Caller values enter the model instructions only as short, single-line
+    // plain text; image URLs must be https (prompt wording is unchanged).
+    const clean = (v: unknown, max: number) =>
+      typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/[`{}<>]/g, '').trim().slice(0, max) : '';
+    const imageUrl = safeUrl(rawImageData?.url);
+    if (!imageUrl) return jsonResponse({ error: 'Invalid image' }, 400, corsHeaders);
+    const imageData = {
+      url: imageUrl,
+      description: clean(rawImageData?.description, 300),
+      photographer: clean(rawImageData?.photographer, 100),
+      photographerUrl: safeUrl(rawImageData?.photographerUrl) ?? '',
+    };
+    const originalFormData = {
+      lessonTopic: clean(rawFormData?.lessonTopic, 200),
+      lessonGoal: clean(rawFormData?.lessonGoal, 300),
+      englishLevel: resolveEnglishLevel(rawFormData?.englishLevel),
+      grammarFocus: clean(rawFormData?.grammarFocus, 200),
+      additionalInformation: clean(rawFormData?.additionalInformation, 500),
+    };
 
     console.log(`[GENERATE-MEDIA] Starting Phase 2 for worksheet ${worksheetId}, exercise ${exerciseIndex}`);
 

@@ -4,6 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { RateLimiter } from './security.ts'
 import { validatePaymentRequest } from './validation.ts'
 import { createStripeSession } from './stripe-service.ts'
+import { appHosts, resolveCaller, safeUrl } from '../_shared/auth.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,7 +20,26 @@ serve(async (req) => {
   }
 
   try {
-    const { worksheetId, userId, successUrl, cancelUrl } = await req.json();
+    const body = await req.json();
+    const { worksheetId } = body;
+    // The payer is always the caller's own session (anonymous sessions included);
+    // a client-supplied identifier is never trusted.
+    const caller = await resolveCaller(req);
+    if (caller.kind !== 'user') {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const userId = caller.user.id;
+    // Return URLs may only point at the app's own hosts.
+    const allowed = [...appHosts(), 'localhost'];
+    const isAllowedHost = (u: unknown) => {
+      const url = safeUrl(u);
+      if (!url) return null;
+      const host = new URL(url).hostname.toLowerCase();
+      return allowed.includes(host) || host.endsWith('.lovable.app') ? url : null;
+    };
+    const appBase = (Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com').replace(/\/+$/, '');
+    const successUrl = isAllowedHost(body.successUrl) ?? `${appBase}/payment-success`;
+    const cancelUrl = isAllowedHost(body.cancelUrl) ?? appBase;
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown';
 
     console.log('Payment request received:', { worksheetId: worksheetId?.substring(0, 8) + '...', userId: userId?.substring(0, 8) + '...', ip });
@@ -70,8 +90,8 @@ serve(async (req) => {
     const session = await createStripeSession({
       worksheetId,
       userId,
-      successUrl: successUrl || `${req.headers.get('origin') || 'https://localhost:3000'}/payment-success`,
-      cancelUrl: cancelUrl || req.headers.get('origin') || 'https://localhost:3000'
+      successUrl,
+      cancelUrl
     });
 
     console.log('Stripe session created successfully:', session.id);

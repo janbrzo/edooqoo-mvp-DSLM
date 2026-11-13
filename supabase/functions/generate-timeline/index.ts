@@ -89,13 +89,13 @@ serve(async (req) => {
       supabase.from('worksheets').select(WORKSHEET_HISTORY_COLUMNS).eq('student_id', studentId).eq('teacher_id', teacherId)
         .is('deleted_at', null).order('created_at', { ascending: false }).limit(10),
       finalMode === 'phase_steps' && phaseId
-        ? supabase.from('dslm_curriculum_phases').select('id, title, description, focus_areas').eq('id', phaseId).single()
+        ? supabase.from('dslm_curriculum_phases').select('id, title, description, focus_areas').eq('id', phaseId).eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null).single()
         // next_steps: read the current in_progress phase so near-term steps stay inside it (D14).
         : supabase.from('dslm_curriculum_phases').select('id, title, description, focus_areas, generation_context')
           .eq('student_id', studentId).eq('teacher_id', teacherId).eq('status', 'in_progress').is('deleted_at', null)
           .order('sequence_number', { ascending: true }).limit(3),
       excludeIds.length > 0
-        ? supabase.from('future_worksheet_suggestions').select('suggested_topic').in('id', excludeIds)
+        ? supabase.from('future_worksheet_suggestions').select('suggested_topic').in('id', excludeIds).eq('teacher_id', teacherId)
         : Promise.resolve({ data: [] }),
       // v6.9.49: join curriculum phases so prompt can label each pending step
       // with `[Phase #N "title"]`. Helps the AI complement across phases
