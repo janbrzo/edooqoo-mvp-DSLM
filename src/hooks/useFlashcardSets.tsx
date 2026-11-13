@@ -1,3 +1,4 @@
+import type { Database } from '@/integrations/supabase/types';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -155,10 +156,16 @@ export const useFlashcardSets = (teacherId?: string, studentId?: string) => {
   const updateSet = async (setId: string, updates: Partial<FlashcardSet>) => {
     if (isDemoMode) return;
     try {
+      // Drop computed view fields that are not columns of flashcard_sets.
+      const {
+        cards_count: _cc, last_studied_at: _ls, mastered_count: _mc, student_email: _se,
+        student_name: _sn, student_native_language: _snl, study_sessions_count: _ssc, teacher_name: _tn,
+        ...columnUpdates
+      } = updates as Partial<FlashcardSet> & Record<string, unknown>;
       const { error } = await supabase
         .from('flashcard_sets')
         .update({
-          ...updates,
+          ...(columnUpdates as Database['public']['Tables']['flashcard_sets']['Update']),
           updated_at: new Date().toISOString(),
         })
         .eq('id', setId)

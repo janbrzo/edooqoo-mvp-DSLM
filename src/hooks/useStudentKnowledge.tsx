@@ -1,3 +1,4 @@
+import type { Database } from '@/integrations/supabase/types';
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -183,7 +184,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
       if (updates.metadata) updateData.metadata = updates.metadata as Record<string, unknown>;
       const { data, error } = await supabase
         .from('student_knowledge_entries')
-        .update(updateData)
+        .update(updateData as Database['public']['Tables']['student_knowledge_entries']['Update'])
         .eq('id', entryId)
         .eq('teacher_id', teacherId)
         .select()

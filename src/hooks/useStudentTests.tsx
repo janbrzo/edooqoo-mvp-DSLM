@@ -1,3 +1,4 @@
+import type { Database } from '@/integrations/supabase/types';
 /**
  * Hook for managing student tests
  * Provides CRUD operations and integration with Progress module
@@ -125,7 +126,7 @@ export function useStudentTests({ studentId, teacherId }: UseStudentTestsProps) 
     try {
       const { error: updateError } = await supabase
         .from('student_tests')
-        .update(updates as Record<string, unknown>)
+        .update(updates as Database['public']['Tables']['student_tests']['Update'])
         .eq('id', testId);
 
       if (updateError) throw updateError;

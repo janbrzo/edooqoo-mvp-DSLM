@@ -1,3 +1,4 @@
+import type { Database } from '@/integrations/supabase/types';
 import React, { useState, useEffect, useRef } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { PageLoadingState } from '@/components/ui/PageLoadingState';
@@ -273,7 +274,7 @@ const Profile = () => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ [field]: value })
+        .update({ [field]: value } as Database['public']['Tables']['profiles']['Update'])
         .eq('id', user.id);
 
       if (error) throw error;
