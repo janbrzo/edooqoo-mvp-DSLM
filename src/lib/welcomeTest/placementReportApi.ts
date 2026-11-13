@@ -43,6 +43,8 @@ export function submitPlacementReport(input: {
 }
 
 export const getPlacementReport = (token: string) => call<PlacementReport>({ action: 'get', token });
+export const forwardPlacementReport = (token: string, teacherEmail: string) =>
+  call<{ success: true }>({ action: 'forward', token, teacherEmail });
 export const claimPlacementReport = (token: string) =>
   call<{ success: true; studentId: string; alreadyClaimed?: boolean }>({ action: 'claim', token });
 

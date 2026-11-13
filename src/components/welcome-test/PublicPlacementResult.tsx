@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clipboard, Loader2, RotateCcw, Send, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { PlacementReportBody } from '@/components/welcome-test/PlacementReportBody';
 import { clearPlacementInviteToken, getPlacementInvite, submitPlacementReport } from '@/lib/welcomeTest/placementReportApi';
@@ -58,6 +58,15 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
   const [resetting, setResetting] = useState(false);
   const isShared = shareStatus === 'valid';
 
+  // Invited tests: the server already knows the teacher, so results go out automatically.
+  const autoSent = useRef(false);
+  useEffect(() => {
+    if (!invited || !result || isShared || sent || autoSent.current) return;
+    autoSent.current = true;
+    void sendReport(invite.studentName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invited, result, isShared]);
+
   const reset = async () => {
     setResetting(true);
     try { await onReset(); } finally { setResetting(false); setConfirmReset(false); }
@@ -72,17 +81,18 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
     }
   };
 
-  const sendReport = async () => {
+  const sendReport = async (nameOverride?: string) => {
     if (!result) return;
-    if (!studentName.trim()) { toast.error('Enter your first name.'); return; }
+    const name = (nameOverride ?? studentName).trim();
+    if (!name) { toast.error('Enter your first name.'); return; }
     if (!invited && !emailPattern.test(teacherEmail.trim())) { toast.error("Enter your teacher's email."); return; }
     if (studentEmail.trim() && !emailPattern.test(studentEmail.trim())) { toast.error('Check your email address or leave it empty.'); return; }
     setSending(true);
     try {
-      const response = await submitPlacementReport({ result, studentName: studentName.trim(), studentEmail: studentEmail.trim(), teacherEmail: invited ? '' : teacherEmail.trim(), inviteToken: invited ? inviteToken : null });
+      const response = await submitPlacementReport({ result, studentName: name, studentEmail: studentEmail.trim(), teacherEmail: invited ? '' : teacherEmail.trim(), inviteToken: invited ? inviteToken : null });
       if (invited) clearPlacementInviteToken();
       setSent({ studentUrl: response.studentUrl, studentSent: response.studentSent });
-      toast.success('Report sent to your teacher.');
+      if (!invited) toast.success('Report sent to your teacher.');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not send the report. Please try again.');
     } finally {
@@ -132,7 +142,32 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
 
         <PlacementReportBody result={result} audience={isShared ? 'student' : 'teaser'} />
 
-        {!isShared && (
+        {!isShared && invite?.completed && !sent && (
+          <div role="status" className="rounded-2xl bg-muted/40 border border-border p-4 text-sm">Results for this invitation were already sent to your teacher.</div>
+        )}
+
+        {!isShared && invited && (
+          <Card className="rounded-3xl border-success/30">
+            <CardContent className="p-5 space-y-3" role="status">
+              {sent ? (
+                <>
+                  <p className="font-semibold flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-success" />Your results have been sent to your teacher</p>
+                  <p className="text-sm leading-6 text-muted-foreground">Nothing else to do. Your teacher now has your full report and will use it to prepare your first lesson.{sent.studentSent ? ' A copy of your results is in your inbox.' : ''}</p>
+                  <Button variant="outline" className="rounded-full" onClick={() => { void copyLink(sent.studentUrl); }}><Clipboard className="h-4 w-4" />Copy my results link</Button>
+                </>
+              ) : sending ? (
+                <p className="text-sm flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Sending your results to your teacher...</p>
+              ) : (
+                <>
+                  <p className="text-sm">We could not send your results automatically.</p>
+                  <Button className="rounded-full" onClick={() => { void sendReport(invite.studentName); }}><Send className="h-4 w-4" />Try again</Button>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {!isShared && !invited && !invite?.completed && (
           <Card className="rounded-3xl border-primary/30">
             <CardHeader>
               <CardTitle className="text-lg">{invited ? 'Send your results to your teacher' : 'Learning with a private teacher? Send them this report'}</CardTitle>

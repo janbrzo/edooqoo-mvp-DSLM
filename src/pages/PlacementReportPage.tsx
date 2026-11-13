@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, Loader2, Sparkles, TriangleAlert, UserPlus } from 'lucide-react';
+import { ArrowRight, Eye, Loader2, Send, Sparkles, Target, TriangleAlert, UserPlus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { buildPlacementAccountPreview } from '@/lib/welcomeTest/placementAccountPreview';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,6 +15,7 @@ import { studentTabPath } from '@/lib/students/workspaceTabs';
 import { PUBLIC_PLACEMENT_TEST_PATH } from '@/lib/welcomeTest/publicPlacementTest';
 import {
   claimPlacementReport,
+  forwardPlacementReport,
   getPlacementReport,
   PLACEMENT_REPORT_TOKEN_PATTERN,
   rememberPendingClaim,
@@ -30,6 +34,17 @@ export default function PlacementReportPage() {
   const { isDemoMode } = useDemoContext();
   const [state, setState] = useState<LoadState>({ status: 'loading' });
   const [claiming, setClaiming] = useState(false);
+  const wantsForward = searchParams.get('forward') === '1';
+  const [forwardEmail, setForwardEmail] = useState('');
+  const [forwarding, setForwarding] = useState(false);
+  const [forwarded, setForwarded] = useState(false);
+  const forward = async () => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(forwardEmail.trim())) { toast.error("Enter your teacher's email."); return; }
+    setForwarding(true);
+    try { await forwardPlacementReport(token, forwardEmail.trim()); setForwarded(true); }
+    catch (error) { toast.error(error instanceof Error ? error.message : 'Could not send the results.'); }
+    finally { setForwarding(false); }
+  };
   const autoClaimed = useRef(false);
 
   useEffect(() => {
@@ -136,6 +151,61 @@ export default function PlacementReportPage() {
         )}
 
         <PlacementReportBody result={report.result} audience={isStudentView ? 'student' : 'teacher'} />
+
+        {isStudentView && !report.claimed && (
+          <Card className="rounded-3xl border-primary/30" id="forward">
+            <CardContent className="p-5 space-y-3">
+              <p className="font-semibold">Send your results to your teacher</p>
+              {forwarded ? (
+                <p role="status" className="text-sm text-muted-foreground">Sent. Your teacher will receive the full report by email.</p>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-2 sm:items-end">
+                  <div className="flex-1 space-y-1.5">
+                    <Label htmlFor="forward-teacher-email">Teacher's email</Label>
+                    <Input id="forward-teacher-email" type="email" autoFocus={wantsForward} value={forwardEmail} onChange={(e) => setForwardEmail(e.target.value)} placeholder="teacher@example.com" />
+                  </div>
+                  <Button className="rounded-full" onClick={() => { void forward(); }} disabled={forwarding}>
+                    {forwarding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Send to my teacher
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {!isStudentView && !report.claimed && (() => {
+          const preview = buildPlacementAccountPreview(report.result);
+          return (
+            <Card className="rounded-3xl border-dashed border-primary/50 bg-primary/5">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-primary" />
+                  <p className="text-xs font-semibold uppercase tracking-wide text-primary">Preview: inside your Edooqoo teacher account</p>
+                </div>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  This is what Edooqoo sets up from {name}'s results when you add {name}. It is not part of the test result above.
+                </p>
+                {preview.goals.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium flex items-center gap-2"><Target className="h-4 w-4 text-primary" />Starter goals for {name}</p>
+                    <ul className="grid gap-2 sm:grid-cols-2">
+                      {preview.goals.map((goal) => <li key={goal} className="rounded-2xl bg-background/70 border border-border p-3 text-sm">{goal}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {preview.firstLesson && (
+                  <div className="rounded-2xl bg-background/70 border border-border p-3 text-sm leading-6">
+                    <span className="font-medium">Suggested first lesson{preview.level ? ` (${preview.level})` : ''}: </span>{preview.firstLesson}, generated in about a minute.
+                  </div>
+                )}
+                <p className="text-xs leading-5 text-muted-foreground">Also in your account: {name}'s profile on the student page, lesson pacing suggestions, homework and flashcards that update the learning model.</p>
+                {!isRegisteredUser && (
+                  <Button className="rounded-full" onClick={goToSignup}>Create free account and add {name}<ArrowRight className="h-4 w-4" /></Button>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {isStudentView && (
           <Card className="rounded-3xl border-primary/30">

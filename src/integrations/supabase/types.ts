@@ -2661,6 +2661,7 @@ export type Database = {
           claimed_student_id: string | null
           created_at: string
           expires_at: string
+          forward_count: number
           id: string
           invite_id: string | null
           report_token: string
@@ -2676,6 +2677,7 @@ export type Database = {
           claimed_student_id?: string | null
           created_at?: string
           expires_at: string
+          forward_count?: number
           id?: string
           invite_id?: string | null
           report_token: string
@@ -2691,6 +2693,7 @@ export type Database = {
           claimed_student_id?: string | null
           created_at?: string
           expires_at?: string
+          forward_count?: number
           id?: string
           invite_id?: string | null
           report_token?: string

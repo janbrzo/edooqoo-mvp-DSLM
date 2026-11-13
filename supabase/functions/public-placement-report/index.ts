@@ -64,7 +64,10 @@ const bodySchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("invite_get"), token: tokenSchema }),
   z.object({ action: z.literal("get"), token: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/) }),
   z.object({ action: z.literal("claim"), token: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/) }),
+  z.object({ action: z.literal("forward"), token: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/), teacherEmail: z.string().trim().email().max(254) }),
 ]);
+
+const MAX_FORWARDS_PER_REPORT = 3;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -133,6 +136,8 @@ function studentEmailHtml(name: string, studentUrl: string): string {
   <h2 style="color:#7c3aed;">Your placement results, ${escapeHtml(name)}</h2>
   <p>Thank you for taking the test. Your results are ready and your teacher has received the full report.</p>
   ${button(studentUrl, "See my results")}
+  <p>Learning with a private teacher? Send them the full report in one click:</p>
+  ${button(`${studentUrl}?forward=1`, "Send my results to my teacher")}
   <p style="color:#6b7280;font-size:12px;">The link is valid for 7 days after the test. ${studentUrl}</p></div>`;
 }
 
@@ -234,6 +239,23 @@ Deno.serve(async (req) => {
         catch (e) { console.error("[public-placement-report] student email failed", e); }
       }
       return json({ success: true, studentUrl, studentSent, sentToInvitingTeacher: !!invite });
+    }
+
+    if (body.action === "forward") {
+      const { data: rep, error } = await admin.from("public_placement_reports")
+        .select("id, report_token, student_name, result, expires_at, claimed_by, forward_count")
+        .eq("student_report_token", body.token).maybeSingle();
+      if (error) throw error;
+      if (!rep || Date.parse(rep.expires_at) <= now) return json({ error: "This results link has expired." }, 410);
+      if (rep.claimed_by) return json({ error: "A teacher has already added you with these results." }, 409);
+      if ((rep.forward_count ?? 0) >= MAX_FORWARDS_PER_REPORT) return json({ error: "These results were already sent several times." }, 429);
+      const { data: bumped } = await admin.from("public_placement_reports").update({ forward_count: (rep.forward_count ?? 0) + 1 })
+        .eq("id", rep.id).eq("forward_count", rep.forward_count ?? 0).select("id").maybeSingle();
+      if (!bumped) return json({ error: "Please try again." }, 409);
+      const reportUrl = `${appBase}/placement-report/${rep.report_token}`;
+      const level = (rep.result as { level?: string | null })?.level ?? null;
+      await sendEmail(body.teacherEmail.toLowerCase(), `${rep.student_name} shared placement test results with you`, teacherEmailHtml(rep.student_name, level, reportUrl, `${reportUrl}?claim=1`));
+      return json({ success: true });
     }
 
     if (body.action !== "get" && body.action !== "claim") return json({ error: "Unknown action" }, 400);
