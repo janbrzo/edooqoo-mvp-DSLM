@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { claimPlacementReport, takePendingClaim } from '@/lib/welcomeTest/placementReportApi';
+import { claimPlacementReport, rememberPendingClaim, takePendingClaim } from '@/lib/welcomeTest/placementReportApi';
 import { studentTabPath } from '@/lib/students/workspaceTabs';
 import { devError } from '@/utils/logger';
 
@@ -20,6 +20,7 @@ export function usePendingPlacementClaim(isRegisteredUser: boolean, isDemo: bool
         navigate(studentTabPath(studentId, 'model', { view: 'profile' }));
       })
       .catch((error) => {
+        rememberPendingClaim(token);
         devError('Pending placement claim failed', error);
         toast.error(error?.message || 'Could not add the student from the placement report.');
       });

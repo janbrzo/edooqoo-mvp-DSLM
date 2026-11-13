@@ -40,12 +40,17 @@ async function copyText(value: string): Promise<void> {
 
 export function PublicPlacementResult({ result, shareStatus, storageError, onReset, inviteToken = null }: PublicPlacementResultProps) {
   const [invite, setInvite] = useState<{ studentName: string; completed: boolean } | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(!!inviteToken);
+  const [inviteError, setInviteError] = useState(false);
   useEffect(() => {
     if (!inviteToken) return;
+    setInviteLoading(true);
+    setInviteError(false);
     let cancelled = false;
     getPlacementInvite(inviteToken)
       .then((data) => { if (!cancelled) { setInvite(data); setStudentName((name) => name || data.studentName); } })
-      .catch(() => { if (!cancelled) setInvite(null); });
+      .catch(() => { if (!cancelled) { setInvite(null); setInviteError(true); } })
+      .finally(() => { if (!cancelled) setInviteLoading(false); });
     return () => { cancelled = true; };
   }, [inviteToken]);
   const invited = !!invite && !invite.completed;
@@ -142,6 +147,9 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
 
         <PlacementReportBody result={result} audience={isShared ? 'student' : 'teaser'} />
 
+        {!isShared && inviteLoading && <p role="status" className="text-sm text-muted-foreground">Checking your teacher's invitation...</p>}
+        {!isShared && inviteError && <p role="alert" className="text-sm text-destructive">Your invitation could not be loaded. Reload this page to try again. Your local results are saved.</p>}
+
         {!isShared && invite?.completed && !sent && (
           <div role="status" className="rounded-2xl bg-muted/40 border border-border p-4 text-sm">Results for this invitation were already sent to your teacher.</div>
         )}
@@ -167,7 +175,7 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
           </Card>
         )}
 
-        {!isShared && !invited && !invite?.completed && (
+        {!isShared && !inviteToken && !invited && !invite?.completed && (
           <Card className="rounded-3xl border-primary/30">
             <CardHeader>
               <CardTitle className="text-lg">{invited ? 'Send your results to your teacher' : 'Learning with a private teacher? Send them this report'}</CardTitle>

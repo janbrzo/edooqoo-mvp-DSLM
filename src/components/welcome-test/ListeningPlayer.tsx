@@ -35,6 +35,17 @@ export function ListeningPlayer({ audioUrl, transcript }: ListeningPlayerProps) 
     setProgress(0);
     setPlayCount(0);
     setShowTranscript(!hasAudio);
+    return () => {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+        audio.onended = null;
+        audio.onplay = null;
+      }
+      audioRef.current = null;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    };
   }, [audioUrl, hasAudio]);
 
   const togglePlay = () => {

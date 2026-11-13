@@ -11,6 +11,8 @@ Subdirectories `src/` and `supabase/` have their own `AGENTS.md`; read them befo
 
 ## Protected Systems
 
+- Placement regression coverage executes the real HTTP adapter with synthetic network boundaries and React runtime tests, while browser checks exercise public completion and token-selected reports; never treat synthetic auth, email-provider acceptance or read-only production checks as proof of inbox delivery or an authenticated claim, because external Supabase sessions are not managed by Lovable.
+
 - The Worksheet Generation Engine (prompt wording, parameters, pipeline in `supabase/functions/generateWorksheet` and `format-worksheet-prompt`) is never modified without the literal instruction "update the Worksheet Generation Engine" — because it is the core product IP.
 
 ## Writing Style

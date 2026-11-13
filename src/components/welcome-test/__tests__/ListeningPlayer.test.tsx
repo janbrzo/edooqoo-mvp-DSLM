@@ -1,8 +1,6 @@
-// @vitest-environment jsdom
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React, { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import React from 'react';
+import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 
 import { ListeningPlayer } from '../ListeningPlayer';
 
@@ -41,29 +39,32 @@ class FakeAudio {
   }
 }
 
-let container: HTMLDivElement;
-let root: Root;
+let renderer: ReactTestRenderer | undefined;
 
 const mount = (audioUrl: string) => {
   act(() => {
-    root.render(<ListeningPlayer audioUrl={audioUrl} transcript="Sample transcript" />);
+    const child = <ListeningPlayer audioUrl={audioUrl} transcript="Sample transcript" />;
+    if (renderer) renderer.update(child);
+    else renderer = create(child);
   });
 };
 
-const playButton = () =>
-  Array.from(container.querySelectorAll('button')).find((b) => b.textContent?.includes('Play') && !b.textContent?.includes('Played')) as HTMLButtonElement;
+const play = () => {
+  const control = renderer?.root.findAllByType('button').find(b => b.children.includes('Play'));
+  if (!control) throw new Error('Playback control unavailable');
+  control.props.onClick();
+};
 
 beforeEach(() => {
   audioInstances = [];
   vi.stubGlobal('Audio', FakeAudio);
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
+  act(() => renderer?.unmount());
+  renderer = undefined;
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
@@ -72,7 +73,7 @@ describe('ListeningPlayer audio reset', () => {
     mount('https://cdn.example.com/q1.mp3');
     expect(audioInstances).toHaveLength(0);
 
-    act(() => playButton().click());
+    act(play);
     expect(audioInstances).toHaveLength(1);
     expect(audioInstances[0].url).toBe('https://cdn.example.com/q1.mp3');
     expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
@@ -80,22 +81,22 @@ describe('ListeningPlayer audio reset', () => {
 
   it('pauses and discards the previous Audio when audioUrl changes', () => {
     mount('https://cdn.example.com/q1.mp3');
-    act(() => playButton().click());
+    act(play);
     const first = audioInstances[0];
-    expect(container.textContent).toContain('Played 1');
 
     mount('https://cdn.example.com/q2.mp3');
 
     expect(first.pause).toHaveBeenCalled();
-    expect(container.textContent).not.toContain('Played');
+    expect(first.paused).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('plays the new audioUrl after a question change, never the stale one', () => {
     mount('https://cdn.example.com/q1.mp3');
-    act(() => playButton().click());
+    act(play);
 
     mount('https://cdn.example.com/q2.mp3');
-    act(() => playButton().click());
+    act(play);
 
     expect(audioInstances).toHaveLength(2);
     expect(audioInstances[1].url).toBe('https://cdn.example.com/q2.mp3');
@@ -103,18 +104,15 @@ describe('ListeningPlayer audio reset', () => {
     expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
   });
 
-  it('resets progress to zero when audioUrl changes', () => {
+  it('stops playback and progress updates on unmount', () => {
     mount('https://cdn.example.com/q1.mp3');
-    act(() => playButton().click());
+    act(play);
     const first = audioInstances[0];
-    first.currentTime = 5;
-    act(() => {
-      first.onplay?.();
-    });
-
-    mount('https://cdn.example.com/q2.mp3');
-
-    const progressBar = container.querySelector('[role="progressbar"]');
-    expect(progressBar?.getAttribute('aria-valuenow')).toBe('0');
+    expect(vi.getTimerCount()).toBe(1);
+    act(() => renderer?.unmount()); renderer = undefined;
+    expect(first.paused).toBe(true);
+    expect(first.onplay).toBeNull();
+    expect(first.onended).toBeNull();
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

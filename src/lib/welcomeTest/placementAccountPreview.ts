@@ -24,10 +24,10 @@ export interface PlacementAccountPreview {
  */
 export function buildPlacementAccountPreview(result: PublicPlacementResult): PlacementAccountPreview {
   const scored = Object.entries(result.skills)
-    .filter(([, s]) => typeof s?.score === 'number')
-    .sort((a, b) => (b[1]!.score as number) - (a[1]!.score as number));
-  const strongest = scored[0]?.[0] ?? null;
-  const weakest = scored.length > 1 ? scored[scored.length - 1][0] : null;
+    .flatMap(([key, value]) => typeof value?.score === 'number' ? [{ key, score: value.score }] : [])
+    .sort((a, b) => b.score - a.score);
+  const strongest = scored[0]?.key ?? null;
+  const weakest = scored.length > 1 ? scored[scored.length - 1].key : null;
   const goals: string[] = [];
   if (weakest) goals.push(`Improve ${SKILL_LABEL[weakest] ?? weakest}`);
   if (strongest && strongest !== weakest) goals.push(`Build confidence from ${SKILL_LABEL[strongest] ?? strongest}`);

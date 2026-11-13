@@ -11,8 +11,13 @@
  */
 import { buildGoalRows, buildWelcomeTestRow, resolveStudentEmail } from "./claimSeed.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 /** Results created before the 7-day change carry a 48 h expiry; still accepted. */
@@ -72,7 +77,7 @@ const MAX_FORWARDS_PER_REPORT = 3;
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-const escapeHtml = (v: string) => v.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+const escapeHtml = (v: string) => v.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] ?? c));
 
 function newToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
@@ -87,11 +92,8 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from: "EDOOQOO <noreply@edooqoo.com>", to: [to], subject, html }),
   });
-  if (!res.ok) {
-    const text = await res.text();
-    console.error(`[public-placement-report] Resend failed [${res.status}]: ${text}`);
-    throw new Error(`Email could not be sent (${res.status})`);
-  }
+  await res.text();
+  if (!res.ok) throw new Error(`Email could not be sent (${res.status})`);
 }
 
 const button = (href: string, label: string) =>
@@ -141,7 +143,7 @@ function studentEmailHtml(name: string, studentUrl: string): string {
   <p style="color:#6b7280;font-size:12px;">The link is valid for 7 days after the test. ${studentUrl}</p></div>`;
 }
 
-Deno.serve(async (req) => {
+export async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
@@ -151,8 +153,13 @@ Deno.serve(async (req) => {
   if (!parsed.success) return json({ error: "Invalid request", details: parsed.error.flatten().fieldErrors }, 400);
   const body = parsed.data;
 
-  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const appBase = (Deno.env.get("APP_BASE_URL") || "https://edooqoo.com").replace(/\/+$/, "");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) return json({ error: "Service unavailable" }, 503);
+  const admin = createClient(supabaseUrl, serviceKey);
+  const configuredBase = Deno.env.get("APP_BASE_URL");
+  if (!configuredBase) return json({ error: "Service unavailable" }, 503);
+  const appBase = configuredBase.replace(/\/+$/, "");
   const now = Date.now();
 
   try {
@@ -162,7 +169,6 @@ Deno.serve(async (req) => {
         .eq("teacher_email", teacherEmail).gte("created_at", new Date(now - 3600_000).toISOString());
       if ((count ?? 0) >= MAX_INVITES_PER_TEACHER_EMAIL_PER_HOUR) return json({ error: "Too many invites from this email. Try again later." }, 429);
       const token = newToken();
-      const studentToken = newToken();
       const studentEmail = body.studentEmail ? body.studentEmail.toLowerCase() : null;
       const teacherName = body.teacherName ? body.teacherName : null;
       const { error } = await admin.from("public_placement_invites").insert({
@@ -174,13 +180,13 @@ Deno.serve(async (req) => {
       let studentSent = false;
       if (studentEmail) {
         try { await sendEmail(studentEmail, "Your English placement test", inviteEmailHtml(body.studentName, testUrl, teacherLabel(teacherName, teacherEmail))); studentSent = true; }
-        catch (e) { console.error("[public-placement-report] invite email failed", e); }
+        catch { console.error("[public-placement-report] invite email failed"); }
       }
       let teacherConfirmed = false;
       try {
         await sendEmail(teacherEmail, `You sent an English placement test to ${body.studentName}`, inviteConfirmationHtml(body.studentName, testUrl, studentSent));
         teacherConfirmed = true;
-      } catch (e) { console.error("[public-placement-report] invite confirmation failed", e); }
+      } catch { console.error("[public-placement-report] invite confirmation failed"); }
       return json({ success: true, testUrl, studentSent, teacherConfirmed });
     }
 
@@ -225,18 +231,23 @@ Deno.serve(async (req) => {
         invite_id: invite?.id ?? null,
       }).select("id").single();
       if (error) throw error;
-      if (invite) {
-        await admin.from("public_placement_invites").update({ completed_at: new Date().toISOString(), completed_report_id: inserted.id })
-          .eq("id", invite.id).is("completed_at", null);
-      }
-
       const reportUrl = `${appBase}/placement-report/${token}`;
       const studentUrl = `${appBase}/placement-report/${studentToken}`;
-      await sendEmail(teacherEmail, `${body.studentName} shared placement test results with you`, teacherEmailHtml(body.studentName, body.result.level, reportUrl, `${reportUrl}?claim=1`));
+      try {
+        await sendEmail(teacherEmail, `${body.studentName} shared placement test results with you`, teacherEmailHtml(body.studentName, body.result.level, reportUrl, `${reportUrl}?claim=1`));
+      } catch (failure) {
+        await admin.from("public_placement_reports").delete().eq("id", inserted.id);
+        throw failure;
+      }
+      if (invite) {
+        const { error: completeError } = await admin.from("public_placement_invites").update({ completed_at: new Date().toISOString(), completed_report_id: inserted.id })
+          .eq("id", invite.id).is("completed_at", null);
+        if (completeError) throw completeError;
+      }
       let studentSent = false;
       if (studentEmail) {
         try { await sendEmail(studentEmail, "Your placement test results", studentEmailHtml(body.studentName, studentUrl)); studentSent = true; }
-        catch (e) { console.error("[public-placement-report] student email failed", e); }
+        catch { console.error("[public-placement-report] student email failed"); }
       }
       return json({ success: true, studentUrl, studentSent, sentToInvitingTeacher: !!invite });
     }
@@ -275,8 +286,14 @@ Deno.serve(async (req) => {
     const expired = Date.parse(report.expires_at) <= now;
 
     if (body.action === "get") {
-      if (expired && !report.claimed_by) return json({ error: "expired" }, 410);
-      return json({ role, studentName: report.student_name, result: report.result, expiresAt: report.expires_at, claimed: !!report.claimed_by });
+      if (expired) return json({ error: "expired" }, 410);
+      const fullResult = report.result as z.infer<typeof resultSchema>;
+      const studentResult = {
+        ...fullResult,
+        traits: Object.fromEntries(Object.entries(fullResult.traits).filter(([key]) => ["motivation_type", "latent_goal", "preferred_input_channel", "homework_commitment", "feedback_preference"].includes(key))),
+        divergences: [], selfAwarenessScore: null, levelConfidence: null,
+      };
+      return json({ role, studentName: report.student_name, result: role === "student" ? studentResult : fullResult, expiresAt: report.expires_at, claimed: !!report.claimed_by });
     }
 
     // claim
@@ -286,7 +303,8 @@ Deno.serve(async (req) => {
     const user = userData?.user;
     if (!user || user.is_anonymous) return json({ error: "Sign in to add this student" }, 401);
     if (report.claimed_by) {
-      if (report.claimed_by === user.id) return json({ success: true, studentId: report.claimed_student_id, alreadyClaimed: true });
+      if (report.claimed_by === user.id && report.claimed_student_id) return json({ success: true, studentId: report.claimed_student_id, alreadyClaimed: true });
+      if (report.claimed_by === user.id) return json({ error: "Student is still being added. Please try again shortly." }, 409);
       return json({ error: "This report was already added by another teacher" }, 409);
     }
     if (expired) return json({ error: "expired" }, 410);
@@ -310,20 +328,24 @@ Deno.serve(async (req) => {
       teacher_email: user.email ?? null, english_level: r.level,
     }).select("id").single();
     if (studentError) {
-      await admin.from("public_placement_reports").update({ claimed_by: null, claimed_at: null }).eq("id", report.id);
+      await admin.from("public_placement_reports").update({ claimed_by: null, claimed_at: null }).eq("id", report.id).eq("claimed_by", user.id);
       throw studentError;
     }
 
+    // Compensate only records created by this request if a required write fails.
+    // Never report success with an incomplete student/test/profile bundle.
+    try {
     const score = (k: string) => r.skills[k as keyof typeof r.skills]?.score ?? null;
     const scored = Object.entries(r.skills).filter(([, s]) => s.score !== null) as [string, { score: number }][];
     scored.sort((a, b) => b[1].score - a[1].score);
     // A reviewed welcome test makes the Prep tab and results views treat the test as done.
     const { data: testRow, error: testError } = await admin.from("student_tests")
       .insert(buildWelcomeTestRow(r, student.id, user.id, report.id)).select("id").single();
-    if (testError) console.error("[public-placement-report] test insert failed", testError);
+    if (testError) throw testError;
+    if (!testRow) throw new Error("Test could not be saved");
 
     const { error: profileError } = await admin.from("student_learning_profiles").insert({
-      student_id: student.id, teacher_id: user.id, welcome_test_id: testRow?.id ?? null,
+      student_id: student.id, teacher_id: user.id, welcome_test_id: testRow.id,
       estimated_level: r.level, level_confidence: r.levelConfidence,
       grammar_score: score("grammar"), vocabulary_score: score("vocabulary"), reading_score: score("reading"),
       self_awareness_score: r.selfAwarenessScore, traits: r.traits, divergences: r.divergences,
@@ -332,13 +354,13 @@ Deno.serve(async (req) => {
       strongest_skill: scored[0]?.[0] ?? null, weakest_skill: scored.length > 1 ? scored[scored.length - 1][0] : null,
       raw_answers: { source: "public_placement_preview", report_id: report.id, answered: r.answeredCount, total: r.totalQuestions },
     });
-    if (profileError) console.error("[public-placement-report] profile insert failed", profileError);
+    if (profileError) throw profileError;
 
     if (testRow?.id) {
       const goals = buildGoalRows(r, student.id, user.id, testRow.id);
       if (goals.length) {
         const { error: goalError } = await admin.from("student_progress_goals").insert(goals);
-        if (goalError) console.error("[public-placement-report] goal insert failed", goalError);
+        if (goalError) throw goalError;
       }
     }
     try {
@@ -346,14 +368,27 @@ Deno.serve(async (req) => {
         body: { studentId: student.id, teacherId: user.id, mode: "proposal", triggerType: "placement_test",
           triggerDetails: { estimatedLevel: r.level, source: "public_placement" } },
       });
-      if (pacingError) console.warn("[public-placement-report] pacing trigger failed", pacingError);
-    } catch (e) { console.warn("[public-placement-report] pacing trigger failed", e); }
+      if (pacingError) console.warn("[public-placement-report] pacing trigger failed");
+    } catch { console.warn("[public-placement-report] pacing trigger failed"); }
 
-    await admin.from("public_placement_reports").update({ claimed_student_id: student.id }).eq("id", report.id);
+    const { error: finishError } = await admin.from("public_placement_reports").update({ claimed_student_id: student.id }).eq("id", report.id).eq("claimed_by", user.id);
+    if (finishError) throw finishError;
     return json({ success: true, studentId: student.id });
+    } catch (failure) {
+      // Explicitly remove dependent rows before removing this request's learner.
+      for (const table of ["student_progress_goals", "student_learning_profiles", "student_tests", "pacing_proposals"]) {
+        const { error: cleanupError } = await admin.from(table).delete().eq("student_id", student.id).eq("teacher_id", user.id);
+        if (cleanupError) throw new Error("Student setup could not be completed. Please try again later.");
+      }
+      const { error: cleanupError } = await admin.from("students").delete().eq("id", student.id).eq("teacher_id", user.id);
+      if (cleanupError) throw new Error("Student setup could not be completed. Please try again later.");
+      await admin.from("public_placement_reports").update({ claimed_by: null, claimed_at: null }).eq("id", report.id).eq("claimed_by", user.id);
+      throw failure;
+    }
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Unknown error";
-    console.error("[public-placement-report] error", e);
-    return json({ error: message }, 500);
+    console.error("[public-placement-report] request failed");
+    return json({ error: "Could not complete this request. Please try again." }, 500);
   }
-});
+}
+
+if (import.meta.main) Deno.serve(handleRequest);

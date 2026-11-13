@@ -48,6 +48,8 @@ export default function PlacementReportPage() {
   const autoClaimed = useRef(false);
 
   useEffect(() => {
+    setState({ status: 'loading' });
+    autoClaimed.current = false;
     if (!PLACEMENT_REPORT_TOKEN_PATTERN.test(token)) { setState({ status: 'error', expired: false }); return; }
     let cancelled = false;
     getPlacementReport(token)
@@ -58,6 +60,7 @@ export default function PlacementReportPage() {
 
   const claim = useCallback(async () => {
     if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
+    if (state.status !== 'ready' || state.report.role !== 'teacher' || state.report.claimed) return;
     setClaiming(true);
     try {
       const { studentId } = await claimPlacementReport(token);
@@ -69,10 +72,10 @@ export default function PlacementReportPage() {
     } finally {
       setClaiming(false);
     }
-  }, [token, navigate, isDemoMode]);
+  }, [token, navigate, isDemoMode, state]);
 
   useEffect(() => {
-    if (!wantsClaim || authLoading || !isRegisteredUser || state.status !== 'ready' || autoClaimed.current) return;
+    if (!wantsClaim || authLoading || !isRegisteredUser || state.status !== 'ready' || state.report.role !== 'teacher' || state.report.claimed || autoClaimed.current) return;
     autoClaimed.current = true;
     void claim();
   }, [wantsClaim, authLoading, isRegisteredUser, state.status, claim]);
@@ -136,12 +139,12 @@ export default function PlacementReportPage() {
               </div>
               {!report.claimed && (
                 isRegisteredUser ? (
-                  <Button className="rounded-full w-full sm:w-auto" onClick={() => { void claim(); }} disabled={claiming}>
+                  <Button className="rounded-full w-full sm:w-auto h-auto min-h-10 whitespace-normal" onClick={() => { void claim(); }} disabled={claiming}>
                     {claiming ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}Add {name} to my students
                   </Button>
                 ) : (
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <Button className="rounded-full" onClick={goToSignup}>Create free account and add {name}<ArrowRight className="h-4 w-4" /></Button>
+                    <Button className="rounded-full h-auto min-h-10 whitespace-normal" onClick={goToSignup}>Create free account and add {name}<ArrowRight className="h-4 w-4" /></Button>
                     <Button variant="ghost" className="rounded-full" onClick={goToLogin}>I already have an account</Button>
                   </div>
                 )
@@ -200,7 +203,7 @@ export default function PlacementReportPage() {
                 )}
                 <p className="text-xs leading-5 text-muted-foreground">Also in your account: {name}'s profile on the student page, lesson pacing suggestions, homework and flashcards that update the learning model.</p>
                 {!isRegisteredUser && (
-                  <Button className="rounded-full" onClick={goToSignup}>Create free account and add {name}<ArrowRight className="h-4 w-4" /></Button>
+                  <Button className="rounded-full max-w-full h-auto min-h-10 whitespace-normal" onClick={goToSignup}>Create free account and add {name}<ArrowRight className="h-4 w-4" /></Button>
                 )}
               </CardContent>
             </Card>
