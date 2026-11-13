@@ -9,6 +9,7 @@
  *  - invite: teacher without an account sends the student a test link (7-day invite).
  *  - invite_get: returns the invited student's name only (teacher email stays server-side).
  */
+import { buildGoalRows, buildWelcomeTestRow, resolveStudentEmail } from "./claimSeed.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
@@ -211,7 +212,8 @@ Deno.serve(async (req) => {
 
       const token = newToken();
       const studentToken = newToken();
-      const studentEmail = body.studentEmail ? body.studentEmail.toLowerCase() : invite?.student_email ?? null;
+      const typedEmail = body.studentEmail ? body.studentEmail.toLowerCase() : null;
+      const studentEmail = invite ? (invite.student_email ?? null) : (typedEmail && typedEmail !== resolvedTeacherEmail.toLowerCase() ? typedEmail : null);
       const { data: inserted, error } = await admin.from("public_placement_reports").insert({
         report_token: token, student_report_token: studentToken, result: body.result, student_name: body.studentName,
         student_email: studentEmail, teacher_email: teacherEmail, expires_at: new Date(expires).toISOString(),
@@ -235,7 +237,7 @@ Deno.serve(async (req) => {
     }
 
     if (body.action !== "get" && body.action !== "claim") return json({ error: "Unknown action" }, 400);
-    const columns = "id, result, student_name, student_email, expires_at, claimed_by, claimed_student_id";
+    const columns = "id, result, student_name, student_email, teacher_email, invite_id, expires_at, claimed_by, claimed_student_id";
     let role: "teacher" | "student" = "teacher";
     let { data: report, error } = await admin.from("public_placement_reports").select(columns)
       .eq("report_token", body.token).maybeSingle();
@@ -275,8 +277,14 @@ Deno.serve(async (req) => {
     if (!reserved) return json({ error: "This report was already added" }, 409);
 
     const r = report.result as z.infer<typeof resultSchema>;
+    let inviteEmail: string | null = null;
+    if (report.invite_id) {
+      const { data: inv } = await admin.from("public_placement_invites").select("student_email").eq("id", report.invite_id).maybeSingle();
+      inviteEmail = inv?.student_email ?? null;
+    }
+    const studentEmail = resolveStudentEmail(inviteEmail, report.invite_id ? null : report.student_email, [report.teacher_email, user.email]);
     const { data: student, error: studentError } = await admin.from("students").insert({
-      teacher_id: user.id, name: report.student_name, student_email: report.student_email,
+      teacher_id: user.id, name: report.student_name, student_email: studentEmail,
       teacher_email: user.email ?? null, english_level: r.level,
     }).select("id").single();
     if (studentError) {
@@ -287,8 +295,13 @@ Deno.serve(async (req) => {
     const score = (k: string) => r.skills[k as keyof typeof r.skills]?.score ?? null;
     const scored = Object.entries(r.skills).filter(([, s]) => s.score !== null) as [string, { score: number }][];
     scored.sort((a, b) => b[1].score - a[1].score);
+    // A reviewed welcome test makes the Prep tab and results views treat the test as done.
+    const { data: testRow, error: testError } = await admin.from("student_tests")
+      .insert(buildWelcomeTestRow(r, student.id, user.id, report.id)).select("id").single();
+    if (testError) console.error("[public-placement-report] test insert failed", testError);
+
     const { error: profileError } = await admin.from("student_learning_profiles").insert({
-      student_id: student.id, teacher_id: user.id,
+      student_id: student.id, teacher_id: user.id, welcome_test_id: testRow?.id ?? null,
       estimated_level: r.level, level_confidence: r.levelConfidence,
       grammar_score: score("grammar"), vocabulary_score: score("vocabulary"), reading_score: score("reading"),
       self_awareness_score: r.selfAwarenessScore, traits: r.traits, divergences: r.divergences,
@@ -298,6 +311,21 @@ Deno.serve(async (req) => {
       raw_answers: { source: "public_placement_preview", report_id: report.id, answered: r.answeredCount, total: r.totalQuestions },
     });
     if (profileError) console.error("[public-placement-report] profile insert failed", profileError);
+
+    if (testRow?.id) {
+      const goals = buildGoalRows(r, student.id, user.id, testRow.id);
+      if (goals.length) {
+        const { error: goalError } = await admin.from("student_progress_goals").insert(goals);
+        if (goalError) console.error("[public-placement-report] goal insert failed", goalError);
+      }
+    }
+    try {
+      const { error: pacingError } = await admin.functions.invoke("recalculate-pacing", {
+        body: { studentId: student.id, teacherId: user.id, mode: "proposal", triggerType: "placement_test",
+          triggerDetails: { estimatedLevel: r.level, source: "public_placement" } },
+      });
+      if (pacingError) console.warn("[public-placement-report] pacing trigger failed", pacingError);
+    } catch (e) { console.warn("[public-placement-report] pacing trigger failed", e); }
 
     await admin.from("public_placement_reports").update({ claimed_student_id: student.id }).eq("id", report.id);
     return json({ success: true, studentId: student.id });
