@@ -6,9 +6,11 @@ import { canTranslate, readTranslationResult, TRANSLATION_UNAVAILABLE_MESSAGE } 
 interface UseFlashcardTranslationProps {
   targetLanguage: string;
   enabled: boolean;
+  /** Student Hub callers (no teacher session) prove access with their shared set. */
+  studentContext?: { setId: string; studentEmail: string };
 }
 
-export const useFlashcardTranslation = ({ targetLanguage, enabled }: UseFlashcardTranslationProps) => {
+export const useFlashcardTranslation = ({ targetLanguage, enabled, studentContext }: UseFlashcardTranslationProps) => {
   const [translation, setTranslation] = useState('');
   const [cefrLevel, setCefrLevel] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -45,6 +47,7 @@ export const useFlashcardTranslation = ({ targetLanguage, enabled }: UseFlashcar
             body: {
               text: englishText,
               target_language: targetLanguage,
+              ...(studentContext ? { student_set_id: studentContext.setId, student_email: studentContext.studentEmail } : {}),
             },
           });
 

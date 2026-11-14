@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { STUDENT_TEXT_RULE, wrapStudentText } from "../_shared/promptSafety.ts";
@@ -68,6 +69,31 @@ serve(async (req) => {
       body = await req.json();
     } catch {
       return jsonResponse({ error: 'Request body must be valid JSON' }, 400, corsHeaders);
+    }
+
+    // Callers without a teacher session must prove Student Hub access: a
+    // currently shared flashcard set whose assigned student has this email.
+    if (caller.kind === 'public') {
+      const b = (body && typeof body === 'object') ? body as Record<string, unknown> : {};
+      const setId = typeof b.student_set_id === 'string' ? b.student_set_id : '';
+      const email = typeof b.student_email === 'string' ? b.student_email.trim().toLowerCase() : '';
+      if (!/^[0-9a-f-]{36}$/i.test(setId) || !email || email.length > 254) {
+        return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
+      }
+      const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data: set } = await admin
+        .from('flashcard_sets')
+        .select('share_token, share_expires_at, students:student_id(student_email, deleted_at)')
+        .eq('id', setId)
+        .is('deleted_at', null)
+        .maybeSingle();
+      const student = (set as { students?: { student_email?: string | null; deleted_at?: string | null } | null } | null)?.students;
+      const shared = !!set?.share_token && (!set.share_expires_at || new Date(set.share_expires_at).getTime() > Date.now());
+      if (!shared || !student || student.deleted_at || (student.student_email || '').trim().toLowerCase() !== email) {
+        return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
+      }
     }
     const parsedRequest = validateRequest(body);
     if (!parsedRequest.ok) {

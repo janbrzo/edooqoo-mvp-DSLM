@@ -11,9 +11,6 @@ import { defineMcp } from "@lovable.dev/mcp-js";
 import echoTool from "./tools/echo";
 import listExerciseTypesTool from "./tools/list_exercise_types";
 import listTopicsTool from "./tools/list_topics";
-import listStudentsTool from "./tools/list_students";
-import getStudentSummaryTool from "./tools/get_student_summary";
-import listRecentWorksheetsTool from "./tools/list_recent_worksheets";
 
 export default defineMcp({
   name: "edooqoo-mcp",
@@ -25,8 +22,5 @@ export default defineMcp({
     echoTool,
     listExerciseTypesTool,
     listTopicsTool,
-    listStudentsTool,
-    getStudentSummaryTool,
-    listRecentWorksheetsTool,
   ],
 });

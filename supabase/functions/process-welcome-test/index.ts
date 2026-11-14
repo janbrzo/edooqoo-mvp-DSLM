@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
-import { resolveCaller, authorizedTeacherId } from "../_shared/auth.ts";
+import { resolveCaller, authorizedTeacherId, escapeHtml } from "../_shared/auth.ts";
 import { WELCOME_TEST_QUESTION_IDS, answersFromQuestionRows, reconstructTraits } from "../_shared/welcomeTestTraits.ts";
 import { computeLearningPathScore } from "../_shared/learningPathScore.ts";
 import { STUDENT_TEXT_RULE, wrapStudentText } from "../_shared/promptSafety.ts";
@@ -1297,17 +1297,18 @@ serve(async (req) => {
 
         if (teacherData?.email) {
           const studentName = studentData?.name || 'Student';
-          const teacherFirstName = teacherData.first_name || 'Teacher';
+          const teacherFirstName = escapeHtml(teacherData.first_name || 'Teacher');
+          const safeStudentName = escapeHtml(studentName);
 
           const emailHtml = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
               <h2 style="color: #7c3aed;">✅ Welcome Test Completed!</h2>
               <p>Hi ${teacherFirstName},</p>
-              <p><strong>${studentName}</strong> has completed the Welcome Test. Here's a quick summary:</p>
+              <p><strong>${safeStudentName}</strong> has completed the Welcome Test. Here's a quick summary:</p>
               <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                   <div style="text-align: center; flex: 1; min-width: 100px;">
-                    <div style="font-size: 24px; font-weight: bold; color: #7c3aed;">${estimatedLevel ?? '-'}</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #7c3aed;">${escapeHtml(estimatedLevel ?? '-')}</div>
                     <div style="font-size: 12px; color: #6b7280;">Estimated Level</div>
                   </div>
                   ${grammarScore !== null ? `<div style="text-align: center; flex: 1; min-width: 100px;">
@@ -1320,10 +1321,10 @@ serve(async (req) => {
                   </div>` : ''}
                 </div>
                 ${strongest ? `<p style="margin-top: 12px; font-size: 14px; color: #374151;">
-                  <strong>Strongest:</strong> ${strongest} | <strong>Weakest:</strong> ${weakest || '-'}
+                  <strong>Strongest:</strong> ${escapeHtml(strongest)} | <strong>Weakest:</strong> ${escapeHtml(weakest || '-')}
                 </p>` : ''}
                 ${selfAssessedLevel ? `<p style="font-size: 14px; color: #374151;">
-                  <strong>Self-assessed:</strong> ${selfAssessedLevel}${levelConfidence ? ` (${levelConfidence})` : ''}
+                  <strong>Self-assessed:</strong> ${escapeHtml(selfAssessedLevel)}${levelConfidence ? ` (${escapeHtml(levelConfidence)})` : ''}
                 </p>` : ''}
               </div>
               <p>View the full learning profile in the student's profile page:</p>

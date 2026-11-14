@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
     let url: string;
     let setTitle = '';
     let auditId = '';
+    let boundStudentEmail = '';
 
     if (isAllSets) {
       // studentId is optional: the hub link is teacher level, so older clients that
@@ -77,7 +78,7 @@ Deno.serve(async (req) => {
       if (studentId) {
         const { data: student, error: studentError } = await admin
           .from('students')
-          .select('id, name, teacher_id')
+          .select('id, name, teacher_id, student_email')
           .eq('id', studentId)
           .is('deleted_at', null)
           .maybeSingle();
@@ -90,6 +91,7 @@ Deno.serve(async (req) => {
         }
         hubTeacherId = student.teacher_id;
         studentName = cleanText(student.name);
+        boundStudentEmail = (student.student_email || '').trim().toLowerCase();
         auditId = `student:${student.id}`;
       } else {
         if (!hubTeacherId) {
@@ -117,7 +119,7 @@ Deno.serve(async (req) => {
       }
       let query = admin
         .from('flashcard_sets')
-        .select('id, title, teacher_id')
+        .select('id, title, teacher_id, student_id')
         .eq('share_token', shareToken)
         .is('deleted_at', null);
       if (callerTeacherId) query = query.eq('teacher_id', callerTeacherId);
@@ -130,9 +132,20 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: 'Flashcard set not found' }, 404, corsHeaders);
       }
       ownerTeacherId = set.teacher_id;
+      if (set.student_id) {
+        const { data: setStudent } = await admin
+          .from('students').select('student_email')
+          .eq('id', set.student_id).is('deleted_at', null).maybeSingle();
+        boundStudentEmail = (setStudent?.student_email || '').trim().toLowerCase();
+      }
       url = buildSetUrl(baseUrl, shareToken);
       setTitle = cleanText(set.title);
       auditId = `set:${set.id}`;
+    }
+
+    // A teacher caller may only email the student's saved address when one exists.
+    if (caller.kind !== 'service' && boundStudentEmail && boundStudentEmail !== recipient.toLowerCase()) {
+      return jsonResponse({ error: "Recipient must be the student's saved email" }, 403, corsHeaders);
     }
 
     // Defence in depth: the link must point at one of our own hosts.

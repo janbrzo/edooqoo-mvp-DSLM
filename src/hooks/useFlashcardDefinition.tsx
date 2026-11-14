@@ -5,9 +5,11 @@ import { canTranslate, readTranslationResult, TRANSLATION_UNAVAILABLE_MESSAGE } 
 
 interface UseFlashcardDefinitionProps {
   enabled: boolean;
+  /** Student Hub callers (no teacher session) prove access with their shared set. */
+  studentContext?: { setId: string; studentEmail: string };
 }
 
-export const useFlashcardDefinition = ({ enabled }: UseFlashcardDefinitionProps) => {
+export const useFlashcardDefinition = ({ enabled, studentContext }: UseFlashcardDefinitionProps) => {
   const [definition, setDefinition] = useState('');
   const [cefrLevel, setCefrLevel] = useState<string | null>(null);
   const [isLoadingDefinition, setIsLoadingDefinition] = useState(false);
@@ -44,7 +46,8 @@ export const useFlashcardDefinition = ({ enabled }: UseFlashcardDefinitionProps)
             body: {
               text: englishTerm,
               target_language: 'English',
-              mode: 'definition'
+              mode: 'definition',
+              ...(studentContext ? { student_set_id: studentContext.setId, student_email: studentContext.studentEmail } : {}),
             },
           });
 

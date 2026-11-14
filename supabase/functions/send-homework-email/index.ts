@@ -121,7 +121,7 @@ serve(async (req: Request) => {
     if (homework.student_id) {
       const { data: studentData } = await supabase
         .from("students")
-        .select("id, name, english_level")
+        .select("id, name, english_level, student_email")
         .eq("id", homework.student_id)
         .single();
       student = studentData;
@@ -145,6 +145,21 @@ serve(async (req: Request) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(studentEmail)) {
       throw new Error("Invalid email format");
+    }
+
+    // Recipient binding: a student email the teacher already saved for this
+    // student is authoritative. A different address is only accepted when the
+    // teacher explicitly updates the student's saved email in the same request.
+    const savedStudentEmail = (student?.student_email || '').trim().toLowerCase();
+    if (!isSubmissionNotification) {
+      if (!homework.student_id) {
+        throw new Error("Homework has no assigned student");
+      }
+      if (savedStudentEmail && savedStudentEmail !== String(studentEmail).trim().toLowerCase() && !updateStudentEmail) {
+        return new Response(JSON.stringify({ error: "Recipient must be the student's saved email" }), {
+          status: 403, headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
     }
 
     // Update student email if requested

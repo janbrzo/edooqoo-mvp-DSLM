@@ -50,12 +50,13 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
   } = useFlashcardTranslation({
     targetLanguage: hasNativeLang ? nativeLang : 'Spanish',
     enabled: backType === 'translation' && hasNativeLang,
+    studentContext: { setId, studentEmail },
   });
 
   const {
     definition, cefrLevel: definitionCefr, isLoadingDefinition,
     fetchDefinition, clearDefinition,
-  } = useFlashcardDefinition({ enabled: backType === 'definition' });
+  } = useFlashcardDefinition({ enabled: backType === 'definition', studentContext: { setId, studentEmail } });
 
   const currentCefr = backType === 'translation' ? translationCefr : definitionCefr;
 
