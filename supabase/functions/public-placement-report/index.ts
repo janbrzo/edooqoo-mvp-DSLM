@@ -48,6 +48,13 @@ const resultSchema = z.object({
   divergences: z.array(z.object({ pair: z.string().max(200).optional(), declared: z.string().max(500), observed: z.string().max(500) }).passthrough()).max(20),
   openResponseCount: z.number().int().min(0).max(500),
   recordingCount: z.number().int().min(0).max(500),
+  interestTopics: z.array(z.string().max(100)).max(12).optional(),
+  confidenceMatrix: z.record(z.enum(["speaking", "writing", "listening", "reading", "presenting", "small_talk"]), z.number().int().min(1).max(5)).optional(),
+  selfAssessedLevel: z.string().max(100).nullable().optional(),
+  keyedQuestionCount: z.number().int().min(0).max(500).optional(),
+  keyedCorrectCount: z.number().int().min(0).max(500).optional(),
+  keyedAnsweredCount: z.number().int().min(0).max(500).optional(),
+  profileQuestionCount: z.number().int().min(0).max(500).optional(),
 });
 
 const bodySchema = z.discriminatedUnion("action", [

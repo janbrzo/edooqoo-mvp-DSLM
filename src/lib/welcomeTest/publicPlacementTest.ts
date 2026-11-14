@@ -50,6 +50,43 @@ export interface PublicPlacementResult {
   divergences: Divergence[];
   openResponseCount: number;
   recordingCount: number;
+  /** Added later; optional so results created before the change still validate. */
+  interestTopics?: string[];
+  confidenceMatrix?: Partial<Record<PublicPlacementConfidenceKey, number>>;
+  selfAssessedLevel?: string | null;
+  keyedQuestionCount?: number;
+  keyedCorrectCount?: number;
+  keyedAnsweredCount?: number;
+  profileQuestionCount?: number;
+}
+
+/** Same matrix rows as the teacher account (process-welcome-test). */
+export const PUBLIC_PLACEMENT_CONFIDENCE_ROWS = [
+  { key: 'speaking', label: 'Speaking', situation: 'Speaking with strangers' },
+  { key: 'writing', label: 'Writing', situation: 'Writing formal emails' },
+  { key: 'listening', label: 'Listening', situation: 'Understanding movies without subtitles' },
+  { key: 'reading', label: 'Reading', situation: 'Reading news articles' },
+  { key: 'presenting', label: 'Presenting', situation: 'Giving presentations' },
+  { key: 'small_talk', label: 'Small Talk', situation: 'Small talk at parties' },
+] as const;
+export type PublicPlacementConfidenceKey = (typeof PUBLIC_PLACEMENT_CONFIDENCE_ROWS)[number]['key'];
+const CONFIDENCE_KEYS = new Set<string>(PUBLIC_PLACEMENT_CONFIDENCE_ROWS.map((row) => row.key));
+
+function extractInterestTopics(value: unknown): string[] {
+  const list = Array.isArray(value) ? value : typeof value === 'string' && value !== '__IDK__' ? [value] : [];
+  return list.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    .map((item) => item.trim().slice(0, 100)).slice(0, 12);
+}
+
+function extractConfidence(value: unknown): Partial<Record<PublicPlacementConfidenceKey, number>> {
+  const out: Partial<Record<PublicPlacementConfidenceKey, number>> = {};
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return out;
+  const matrix = value as Record<string, unknown>;
+  for (const row of PUBLIC_PLACEMENT_CONFIDENCE_ROWS) {
+    const raw = Number(matrix[row.situation]);
+    if (Number.isInteger(raw) && raw >= 1 && raw <= 5) out[row.key] = raw;
+  }
+  return out;
 }
 
 export interface PublicPlacementSession {
@@ -234,6 +271,13 @@ export function buildPublicPlacementResult(
     divergences,
     openResponseCount,
     recordingCount,
+    interestTopics: extractInterestTopics(answers.wt_q43),
+    confidenceMatrix: extractConfidence(answers.wt_q44),
+    selfAssessedLevel: traits.self_assessed_level ? String(traits.self_assessed_level).slice(0, 100) : null,
+    keyedQuestionCount: keyed.length,
+    keyedCorrectCount: keyed.filter((question) => isAnswered(answers[question.id]) && checkWelcomeTestKeyedAnswer(question, answers[question.id]) === true).length,
+    keyedAnsweredCount: keyed.filter((question) => isAnswered(answers[question.id])).length,
+    profileQuestionCount: questions.length - keyed.length,
   };
 }
 
@@ -286,6 +330,17 @@ export function validatePublicPlacementResult(value: unknown, now: Date = new Da
     !divergence || typeof divergence !== 'object'
     || typeof divergence.declared !== 'string' || divergence.declared.length > 500
     || typeof divergence.observed !== 'string' || divergence.observed.length > 500)) return null;
+  if (result.interestTopics !== undefined && (!Array.isArray(result.interestTopics) || result.interestTopics.length > 12
+    || result.interestTopics.some((topic) => typeof topic !== 'string' || topic.length > 100))) return null;
+  if (result.confidenceMatrix !== undefined) {
+    const matrix = result.confidenceMatrix;
+    if (!matrix || typeof matrix !== 'object' || Array.isArray(matrix)
+      || Object.entries(matrix).some(([key, n]) => !CONFIDENCE_KEYS.has(key) || !Number.isInteger(n) || (n as number) < 1 || (n as number) > 5)) return null;
+  }
+  if (result.selfAssessedLevel !== undefined && result.selfAssessedLevel !== null
+    && (typeof result.selfAssessedLevel !== 'string' || result.selfAssessedLevel.length > 100)) return null;
+  const counts = [result.keyedQuestionCount, result.keyedCorrectCount, result.keyedAnsweredCount, result.profileQuestionCount];
+  if (counts.some((n) => n !== undefined && (!Number.isInteger(n) || (n as number) < 0 || (n as number) > 500))) return null;
   return result;
 }
 

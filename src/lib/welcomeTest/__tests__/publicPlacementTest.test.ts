@@ -92,3 +92,25 @@ describe('public placement deterministic result', () => {
     expect(readSharedPublicPlacementResult(hash, new Date(NOW.getTime() + PUBLIC_PLACEMENT_TTL_MS)).status).toBe('expired');
   });
 });
+
+describe('public placement result: teacher-view fields', () => {
+  it('extracts interests, confidence matrix and keyed/profile counts', async () => {
+    const { buildPublicPlacementResult, validatePublicPlacementResult } = await import('../publicPlacementTest');
+    const { questionDefsFor } = await import('../flow');
+    const { CURRENT_WELCOME_BANK } = await import('../seed');
+    const questions = questionDefsFor(CURRENT_WELCOME_BANK, 'A');
+    const result = buildPublicPlacementResult(questions, {
+      wt_q43: ['Technology & Innovation'],
+      wt_q44: { 'Speaking with strangers': 3, 'Small talk at parties': 5, 'Giving presentations': 9 },
+    }, new Date());
+    expect(result.interestTopics).toEqual(['Technology & Innovation']);
+    expect(result.confidenceMatrix).toEqual({ speaking: 3, small_talk: 5 });
+    expect((result.keyedQuestionCount ?? 0) + (result.profileQuestionCount ?? 0)).toBe(questions.length);
+    expect(result.keyedCorrectCount).toBe(0);
+    expect(validatePublicPlacementResult(result)).not.toBeNull();
+    expect(validatePublicPlacementResult({ ...result, confidenceMatrix: { speaking: 7 } })).toBeNull();
+    const legacy = { ...result } as Record<string, unknown>;
+    for (const k of ['interestTopics', 'confidenceMatrix', 'selfAssessedLevel', 'keyedQuestionCount', 'keyedCorrectCount', 'keyedAnsweredCount', 'profileQuestionCount']) delete legacy[k];
+    expect(validatePublicPlacementResult(legacy)).not.toBeNull();
+  });
+});
