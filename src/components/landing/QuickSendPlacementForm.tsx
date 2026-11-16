@@ -13,7 +13,7 @@ async function copy(value: string) {
 }
 
 /** Lets a teacher without an account send the placement test; results come back by email. */
-export function QuickSendPlacementForm({ onBack }: { onBack: () => void }) {
+export function QuickSendPlacementForm({ onBack }: { onBack?: () => void }) {
   const [studentName, setStudentName] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [teacherEmail, setTeacherEmail] = useState('');
@@ -82,11 +82,11 @@ export function QuickSendPlacementForm({ onBack }: { onBack: () => void }) {
           <Input id="quick-send-teacher-email" type="email" autoComplete="email" value={teacherEmail} onChange={(event) => setTeacherEmail(event.target.value)} placeholder="you@example.com" />
         </div>
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className={onBack ? 'grid gap-2 sm:grid-cols-2' : 'grid gap-2'}>
         <Button size="lg" className="h-auto min-h-11 rounded-full" onClick={() => { void submit(); }} disabled={sending}>
           {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Send test and copy link
         </Button>
-        <Button size="lg" variant="ghost" className="h-auto min-h-11 rounded-full" onClick={onBack}>Back</Button>
+        {onBack && <Button size="lg" variant="ghost" className="h-auto min-h-11 rounded-full" onClick={onBack}>Back</Button>}
       </div>
       <p className="text-xs leading-5 text-muted-foreground">No account needed. We use your email only to send you the results.</p>
     </div>

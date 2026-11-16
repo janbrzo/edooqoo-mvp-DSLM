@@ -10,7 +10,25 @@ import RelatedFeatures from '@/components/features/RelatedFeatures';
 import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
 import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import FeatureReferenceLink from '@/components/features/FeatureReferenceLink';
-import { ClipboardCheck, Brain, Route, Mic } from 'lucide-react';
+import { QuickSendPlacementForm } from '@/components/landing/QuickSendPlacementForm';
+import { ClipboardCheck, Brain, Route, Mic, Send } from 'lucide-react';
+
+const QuickSendSection = () => (
+  <section id="send-test" aria-labelledby="send-test-heading" className="px-4 py-12 md:py-16">
+    <div className="mx-auto max-w-3xl rounded-3xl border border-primary/20 bg-card p-6 shadow-sm md:p-8">
+      <div className="mb-6 space-y-2">
+        <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+          <Send className="h-3.5 w-3.5" />Free, no account needed
+        </span>
+        <h2 id="send-test-heading" className="text-2xl font-bold text-foreground md:text-3xl">Send the placement test to your student now</h2>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Enter your student's first name and your email. You get a test link to share, and the full CEFR report arrives in your inbox when your student finishes.
+        </p>
+      </div>
+      <QuickSendPlacementForm />
+    </div>
+  </section>
+);
 
 const PlacementTestMockup = () => (
   <div className="p-6 md:p-8 space-y-5">
@@ -66,7 +84,7 @@ const benefits = [
 ];
 
 const steps = [
-  { number: 1, title: 'Send the test link', description: 'Generate a unique test link for your new student. They can take it on any device: phone, tablet, or computer.' },
+  { number: 1, title: 'Send the test link', description: 'Use the form above or your dashboard to create a unique test link for your new student. They can take it on any device: phone, tablet, or computer.' },
   { number: 2, title: 'Student completes about 65 questions', description: '20-30 minutes. Questions cover grammar, vocabulary, reading, listening, and speaking sections across CEFR-oriented difficulty bands.' },
   { number: 3, title: 'AI analyzes results', description: 'AI evaluates answers including open-ended speaking tasks and generates a detailed learning profile for teacher review.' },
   { number: 4, title: 'You review the profile', description: 'See the breakdown: strengths, weaknesses, confidence levels, and starting profile context. Test results become a starting input for DSLM.' },
@@ -111,6 +129,7 @@ const FeaturePlacementTest: React.FC = () => (
       </div>
     </FeatureHero>
 
+    <QuickSendSection />
     <FeatureWorkflowMap activeKey="placement-test" />
     <DSLMBadge feature="Placement Test" description="Test results can initialize the student's DSLM profile and provide baseline context before the first recurring prep cycle." />
     <FeatureBenefits benefits={benefits} />
@@ -121,7 +140,7 @@ const FeaturePlacementTest: React.FC = () => (
       title="Full guide: English placement test for private tutors"
       description="What the Welcome Test measures, how teachers review the results, and how it differs from the public CEFR level test."
     />
-    <FeatureCTA headline="Know your students before you teach them" subheadline="Free placement test with AI analysis. No credit card needed." />
+    <FeatureCTA headline="Know your students before you teach them" subheadline="Free placement test with AI analysis. Send it without an account, then sign up to keep the results in the student's profile." />
     <RelatedFeatures currentPath="/features/placement-test" />
   </FeaturePageLayout>
 );
