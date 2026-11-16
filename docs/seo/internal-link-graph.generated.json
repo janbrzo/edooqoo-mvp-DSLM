@@ -1,8 +1,8 @@
 {
   "generatedBy": "scripts/seo/audit-internal-link-graph.mjs",
   "totals": {
-    "pages": 597,
-    "strategic": 187,
+    "pages": 598,
+    "strategic": 186,
     "orphanStrategic": 0,
     "weakTop40": 0,
     "weakTop120": 0,
@@ -66,7 +66,7 @@
       "route": "/how-it-works",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 124,
+      "incoming": 123,
       "outgoing": 46
     },
     {
@@ -80,8 +80,8 @@
       "route": "/resources",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 143,
-      "outgoing": 86
+      "incoming": 142,
+      "outgoing": 85
     },
     {
       "route": "/teaching-english-pronunciation",

@@ -92,7 +92,6 @@ const Resources = () => {
     { title: "Online English Teaching Tools", description: "Essential tools for online ESL instruction.", href: "/online-english-teaching-tools.html", badge: "Online" },
     { title: "How to Save Time as English Teacher", description: "Time-saving strategies with AI assistance.", href: "/how-to-save-time-as-english-teacher.html", badge: "Productivity" },
     { title: "ESL Student Progress Tracking", description: "Track student skills and mastery over time.", href: "/esl-student-progress-tracking-tool.html", badge: "Tracking" },
-    { title: "ESL Homework Review Tool", description: "AI-assisted homework evaluation with teacher review.", href: "/esl-homework-grading-tool.html", badge: "Review" },
     { title: "AI-Assisted Homework Review Tool", description: "Teacher-reviewed evaluation of open-ended answers.", href: "/ai-grading-tool-for-english-homework.html", badge: "AI" },
     { title: "Spaced Repetition Flashcards", description: "SM-2 algorithm flashcards for vocabulary retention.", href: "/spaced-repetition-flashcards-esl.html", badge: "Flashcards" },
   ];

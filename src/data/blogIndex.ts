@@ -1028,12 +1028,6 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
-    "title": "ESL Homework Review Tool with AI Assistance",
-    "description": "Edooqoo supports ESL/EFL homework workflows: online student submissions, AI-assisted answer evaluation, teacher review, comments, and progress tracking.",
-    "url": "/esl-homework-grading-tool.html",
-    "state": "hold"
-  },
-  {
     "title": "ESL Student Progress Tracking Tool",
     "description": "Track ESL student progress with Edooqoo's nano-skill mastery system: grammar, vocabulary, reading, writing, speaking and listening, with CEFR tags.",
     "url": "/esl-student-progress-tracking-tool.html",

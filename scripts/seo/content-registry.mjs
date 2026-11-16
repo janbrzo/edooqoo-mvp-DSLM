@@ -149,6 +149,14 @@ export const CONTENT_OVERRIDES = {
     cluster: 'One-to-One Lesson Planning',
     reason: 'Martha filter: retire school-track TEFL certification content that does not fit adult 1:1 tutoring; consolidate into the closest adult 1:1 guide.',
   },
+  // Intent consolidation (2026-11): same search intent as the strategic
+  // homework review reference; 735-word hold page with high-risk claims.
+  '/esl-homework-grading-tool.html': {
+    state: 'merge',
+    redirectTo: '/ai-grading-tool-for-english-homework.html',
+    cluster: 'Homework and Retention',
+    reason: 'Intent consolidation: duplicate homework grading intent merged into the canonical AI-assisted homework review reference.',
+  },
   // Add measured keep/improve/merge/retire decisions here after GSC and backlink
   // evidence is recorded. Unknown content remains hold to prevent destructive
   // redirects based only on code inspection.

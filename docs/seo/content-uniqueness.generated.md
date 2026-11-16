@@ -8,7 +8,7 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Metric | Value |
 |---|---:|
-| Indexable static pages analysed | 238 |
+| Indexable static pages analysed | 237 |
 | Canonicalized aliases skipped | 4 |
 | Templated (maxContainment >= 0.5) | 27 (11%) |
 | Near-duplicate (maxContainment >= 0.8) | 0 (0%) |
@@ -19,7 +19,7 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | Section | Indexable pages | Templated >= 0.5 | Near-duplicate >= 0.8 |
 |---|---:|---:|---:|
 | /blog | 107 | 10 (9%) | 0 |
-| / (root pages) | 89 | 2 (2%) | 0 |
+| / (root pages) | 88 | 2 (2%) | 0 |
 | /what-to-teach-next | 12 | 0 (0%) | 0 |
 | /esl-worksheets | 8 | 8 (100%) | 0 |
 | /features | 7 | 0 (0%) | 0 |

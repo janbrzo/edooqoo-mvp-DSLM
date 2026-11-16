@@ -40,7 +40,7 @@ export const LEGACY_LINK_MAP: Record<string, string> = {
 
   // Features
   "/esl-student-progress-tracking-tool.html": "/features/dslm",
-  "/esl-homework-grading-tool.html": "/features/homework",
+  "/esl-homework-grading-tool.html": "/ai-grading-tool-for-english-homework.html",
   "/ai-grading-tool-for-english-homework.html": "/features/homework",
   "/spaced-repetition-flashcards-esl.html": "/features/flashcards",
 

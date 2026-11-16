@@ -1338,15 +1338,6 @@
       "nearest": "/teaching-english-pronunciation"
     },
     {
-      "route": "/esl-homework-grading-tool.html",
-      "section": "/ (root pages)",
-      "words": 685,
-      "inSitemap": true,
-      "maxContainment": 0.319,
-      "uniqueShare": 0.68,
-      "nearest": "/one-to-one-english-lesson-planner.html"
-    },
-    {
       "route": "/esl-student-progress-tracking-tool.html",
       "section": "/ (root pages)",
       "words": 685,
@@ -1397,7 +1388,7 @@
       "words": 875,
       "inSitemap": true,
       "maxContainment": 0.006,
-      "uniqueShare": 0.987,
+      "uniqueShare": 0.988,
       "nearest": "/cefr-assessment"
     },
     {
@@ -1502,10 +1493,10 @@
     {
       "route": "/features/placement-test",
       "section": "/features",
-      "words": 361,
+      "words": 369,
       "inSitemap": true,
-      "maxContainment": 0.105,
-      "uniqueShare": 0.873,
+      "maxContainment": 0.102,
+      "uniqueShare": 0.878,
       "nearest": "/features/live-sessions"
     },
     {
@@ -1601,10 +1592,10 @@
     {
       "route": "/how-it-works",
       "section": "/ (root pages)",
-      "words": 1051,
+      "words": 1054,
       "inSitemap": true,
       "maxContainment": 0.264,
-      "uniqueShare": 0.732,
+      "uniqueShare": 0.733,
       "nearest": "/one-minute-prep"
     },
     {

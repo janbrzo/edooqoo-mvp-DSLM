@@ -10,6 +10,7 @@ import RelatedFeatures from '@/components/features/RelatedFeatures';
 import FeatureComparisonTable from '@/components/features/FeatureComparisonTable';
 import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
 import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
+import FeatureReferenceLink from '@/components/features/FeatureReferenceLink';
 import { Clock, Zap, BarChart3, CheckCircle } from 'lucide-react';
 
 const HomeworkMockup = () => (
@@ -145,6 +146,11 @@ const FeatureHomework: React.FC = () => (
       rows={comparisonRows}
     />
     <FeatureFAQ items={faqItems} />
+    <FeatureReferenceLink
+      href="/ai-grading-tool-for-english-homework.html"
+      title="Full guide: AI-assisted homework review for English tutors"
+      description="How AI evaluation signals work, what the teacher still reviews, and how corrected answers feed the next lesson."
+    />
     <FeatureCTA headline="Review homework faster" subheadline="Use AI-assisted evaluation, teacher review, and student signals for the next prep cycle. Start with 2 free worksheets." />
     <RelatedFeatures currentPath="/features/homework" />
   </FeaturePageLayout>

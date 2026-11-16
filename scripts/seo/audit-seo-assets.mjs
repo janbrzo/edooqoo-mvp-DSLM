@@ -209,7 +209,6 @@ const CLAIM_INTEGRITY_SOURCE_FILES = [
 
 const HIGH_RISK_PUBLIC_CLAIM_PAGES = [
   '/online-english-teaching-tools.html',
-  '/esl-homework-grading-tool.html',
   '/how-to-save-time-as-english-teacher.html',
   '/blog/ai-homework-grading-for-english-teachers.html',
   '/blog/how-to-create-grammar-worksheets-with-ai.html',

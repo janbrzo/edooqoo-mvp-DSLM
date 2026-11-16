@@ -26,13 +26,13 @@
   },
   "counts": {
     "total": 1988,
-    "indexable": 240,
+    "indexable": 239,
     "byState": {
       "keep": 89,
       "improve": 0,
-      "merge": 186,
+      "merge": 187,
       "retire": 0,
-      "hold": 151,
+      "hold": 150,
       "noindex": 1562
     }
   },
@@ -8899,22 +8899,22 @@
     },
     {
       "route": "/esl-homework-grading-tool.html",
-      "canonical": "https://edooqoo.com/esl-homework-grading-tool.html",
+      "canonical": "https://edooqoo.com/ai-grading-tool-for-english-homework.html",
       "type": "static-landing",
-      "state": "hold",
-      "indexable": true,
+      "state": "merge",
+      "indexable": false,
       "cluster": "Homework and Retention",
-      "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "redirectTo": "/ai-grading-tool-for-english-homework.html",
+      "reason": "Intent consolidation: duplicate homework grading intent merged into the canonical AI-assisted homework review reference.",
       "source": "public/esl-homework-grading-tool.html",
       "sourceName": "esl-homework-grading-tool.html",
-      "title": "ESL Homework Review Tool with AI Assistance",
-      "description": "Edooqoo supports ESL/EFL homework workflows: online student submissions, AI-assisted answer evaluation, teacher review, comments, and progress tracking.",
+      "title": "Moved",
+      "description": "",
       "datePublished": "",
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 735,
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -12814,7 +12814,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 1333,
+      "wordCount": 1326,
       "hasEncodingIssue": false
     },
     {

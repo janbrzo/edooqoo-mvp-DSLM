@@ -9,6 +9,7 @@ import DSLMBadge from '@/components/features/DSLMBadge';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
 import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
 import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
+import FeatureReferenceLink from '@/components/features/FeatureReferenceLink';
 import { ClipboardCheck, Brain, Route, Mic } from 'lucide-react';
 
 const PlacementTestMockup = () => (
@@ -115,6 +116,11 @@ const FeaturePlacementTest: React.FC = () => (
     <FeatureBenefits benefits={benefits} />
     <FeatureSteps steps={steps} />
     <FeatureFAQ items={faqItems} />
+    <FeatureReferenceLink
+      href="/english-placement-test-for-private-tutors.html"
+      title="Full guide: English placement test for private tutors"
+      description="What the Welcome Test measures, how teachers review the results, and how it differs from the public CEFR level test."
+    />
     <FeatureCTA headline="Know your students before you teach them" subheadline="Free placement test with AI analysis. No credit card needed." />
     <RelatedFeatures currentPath="/features/placement-test" />
   </FeaturePageLayout>
