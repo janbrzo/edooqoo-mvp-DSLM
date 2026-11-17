@@ -2,6 +2,14 @@
 
 Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
+## SEO/GEO podlanding hubs
+
+- [x] Step 1: safe canonical consolidation and feature-to-reference links.
+- [x] Step 2: anonymous Quick Send on the placement-test feature page.
+- [x] Step 3: cached interactive generator preview with 28 active exercise types, six CEFR workplace contexts and zero AI/token calls; 168 combinations, desktop/mobile browser flow and all SEO/content audits passed.
+- [ ] Step 4: shared Bridge sections and final GEO/SEO synchronization.
+- [ ] SPA snapshot refresh: local prerender timed out on every route; rerun in the normal CI/publication pipeline. The static generator hub is generated and verified independently.
+
 ## Generation modal conversion
 
 - [x] Remove the redundant left workflow block and deliver three concise visual slides per audience, safe new-tab signup/learner-plan links and eight-second hover/focus-paused rotation. Twelve regression cases and full suite (1757 tests) passed; real anonymous generation produced a saved worksheet, signup opened in a new tab, all six slides rendered, mobile/dark/laptop with 25 exercises passed, no browser errors and protected engine/llms hashes unchanged. Signed-in presentation verified with fixtures only; authenticated end-to-end remains unavailable on external unmanaged Supabase. Spec: docs/ux/generation-modal-conversion-spec.md.

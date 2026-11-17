@@ -37,7 +37,7 @@ const About = () => {
             Edooqoo is a 1-Minute Prep system built for 1:1 English teachers. It helps teachers move recurring weekly prep toward one focused minute per student by combining student profile, goals, Welcome Test context, homework, flashcard progress, live lesson signals, calendar rhythm, and DSLM nano-skill evidence.
           </p>
           <p className="text-muted-foreground mb-4 leading-relaxed">
-            The worksheet generator remains a core output layer. After the teacher chooses or confirms the next teaching focus, Edooqoo generates editable worksheets with 29 exercise types across CEFR A1-C2, including audio and picture-capable exercises where applicable.
+            The worksheet generator remains a core output layer. After the teacher chooses or confirms the next teaching focus, Edooqoo generates editable worksheets with 28 exercise types across CEFR A1-C2, including audio and picture-capable exercises where applicable.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             Edooqoo is used by private English tutors, ESL/EFL instructors, Business English coaches, language-school teachers, online English teachers, and corporate language trainers. It works in the browser and keeps teacher review, editing, and lesson decisions in the teacher's hands.
@@ -70,7 +70,7 @@ const About = () => {
           <div className="space-y-8">
             {[
               { icon: Brain, title: '1-Minute Prep + DSLM', desc: 'Build student context once, then use DSLM nano-skill evidence and teacher review to move weekly prep toward one focused minute per recurring student.', bullets: ['Student profile, goals, Welcome Test, and observations', 'Next-step suggestions before worksheet generation', 'Teacher chooses, edits, and approves direction', 'Best with recurring 1:1 adult English students'] },
-              { icon: BookOpen, title: 'Worksheet Generator Output Layer', desc: 'Generate complete, editable worksheets after the teacher chooses or confirms the next focus. Choose from 29 exercise types across basic, audio, and picture categories.', bullets: ['29 exercise types including audio and picture exercises', 'CEFR levels A1 through C2', 'Student context can inform generated material', 'Download as HTML/PDF or share interactive link'] },
+              { icon: BookOpen, title: 'Worksheet Generator Output Layer', desc: 'Generate complete, editable worksheets after the teacher chooses or confirms the next focus. Choose from 28 exercise types across basic, audio, and picture categories.', bullets: ['28 exercise types including audio and picture exercises', 'CEFR levels A1 through C2', 'Student context can inform generated material', 'Download as HTML/PDF or share interactive link'] },
               { icon: ClipboardCheck, title: 'Homework System', desc: 'Assign any worksheet or specific exercises as homework. Students complete exercises interactively online. AI can pre-evaluate supported open-ended answers for teacher review.', bullets: ['AI-assisted review for supported answers', 'Set deadlines with email reminders', 'Teacher review with comments per exercise', 'Homework results can feed the next prep cycle'] },
               { icon: Brain, title: 'Smart Flashcards', desc: 'Create flashcard sets from worksheet vocabulary or manually. Students study using SM-2 scheduling logic, and review activity can become vocabulary context for future prep.', bullets: ['SM-2 spaced repetition scheduling logic', 'Auto-generate from worksheet vocabulary', 'Bidirectional study mode', 'Accessible via Student Hub'] },
               { icon: Calendar, title: 'Lesson Calendar & Booking', desc: 'Teachers set availability, students book via a public booking page. Supports one-time and recurring weekly bookings with Google Calendar two-way sync.', bullets: ['Public booking page with shareable link', 'Google Calendar sync + Google Meet auto-generation', 'Recurring weekly bookings', 'Payment tracking per lesson'] },
@@ -99,12 +99,12 @@ const About = () => {
 
         {/* Exercise Types */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-foreground mb-4">All 29 Exercise Types</h2>
+          <h2 className="text-2xl font-semibold text-foreground mb-4">All 28 Exercise Types</h2>
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">📝 Basic Exercises (20 types)</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">📝 Basic Exercises (19 types)</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Reading Comprehension, Fill in the Blanks, Multiple Choice, True/False Questions, Matching Exercise, Dialogue Practice, Answer Questions, Discussion Questions, Error Correction, Odd One Out, Matching Halves, Word Order, Gap Text (Cloze), Negative Prefixes, Categorization, Complete Word, Paraphrasing, Sentence Transformation, Synonyms Matching, Antonyms Matching.
+                Reading Comprehension, Fill in the Blanks, Multiple Choice, True/False Questions, Matching Exercise, Dialogue Practice, Answer Questions, Discussion Questions, Error Correction, Odd One Out, Matching Halves, Word Order, Gap Text (Cloze), Negative Prefixes, Categorization, Complete Word, Paraphrasing, Synonyms Matching, Antonyms Matching.
               </p>
             </div>
             <div>
@@ -148,7 +148,7 @@ const About = () => {
           <h2 className="text-2xl font-semibold text-foreground mb-4">Pricing Overview</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              { plan: 'Free', price: '$0', features: ['2 free worksheets', 'All 29 exercise types', 'Online preview'] },
+              { plan: 'Free', price: '$0', features: ['2 free worksheets', 'All 28 exercise types', 'Online preview'] },
               { plan: 'Side-Gig', price: '$9/mo', features: ['15 worksheets/month', 'Homework + Flashcards', 'Lesson Calendar', 'Student Hub'] },
               { plan: 'Full-Time', price: 'From $19/mo', features: ['30-90 worksheets/month', 'All features included', 'Priority support', 'Rollover tokens'] },
             ].map(({ plan, price, features }) => (
@@ -200,7 +200,7 @@ const About = () => {
               <tbody className="text-muted-foreground">
                 {[
                   ['AI-generated worksheets', '✅', '❌', '❌', '❌'],
-                  ['29 exercise types', '✅', 'Varies', 'Limited', 'Varies'],
+                  ['28 exercise types', '✅', 'Varies', 'Limited', 'Varies'],
                   ['AI-assisted homework review', '✅', '❌', '❌', '❌'],
                   ['Student progress tracking', '✅', '❌', 'Basic', '❌'],
                   ['Flashcards (SM-2)', '✅', '❌', '❌', '❌'],

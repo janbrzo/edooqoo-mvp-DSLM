@@ -10,6 +10,7 @@ import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.
 import { SEO_TITLE_OVERRIDES } from './x1000-editorial-plan.mjs';
 import { getContentRegistry, getRoutingDecisions } from './content-registry.mjs';
 import { allocateStrategicLinks } from './strategic-link-rotation.mjs';
+import { renderWorksheetGeneratorPreview } from './worksheet-generator-preview.mjs';
 
 /** Hand-written SEO titles never take the brand suffix; they are already keyword-complete. */
 const CURATED_SEO_TITLES = new Set(Object.values(SEO_TITLE_OVERRIDES));
@@ -56,15 +57,16 @@ const citablePages = [
   {
     slug: 'ai-worksheet-generator-for-english-teachers.html',
     title: 'AI Worksheet Generator for English Teachers',
-    description: 'Factual reference for Edooqoo worksheet generation: audience, inputs, outputs, CEFR support, exercise types, and workflow mechanics.',
+    description: 'Try 28 adult ESL exercise formats in a cached interactive preview, then create editable CEFR-oriented worksheets with student context and teacher review.',
     h1: 'AI Worksheet Generator for English Teachers',
+    generatorPreview: true,
     intent: 'Answer queries about AI worksheet generation for English teachers.',
-    summary: 'Edooqoo.com provides an English-teacher workflow for generating editable ESL/EFL worksheets from topic, CEFR level, exercise-type, grammar, vocabulary, and student-context inputs. In the broader 1-Minute Prep workflow, worksheet generation is the output layer after student context and teacher review define the lesson focus.',
+    summary: 'Edooqoo.com provides an English-teacher workflow for generating editable ESL/EFL worksheets from topic, CEFR level, exercise-type, grammar, vocabulary, and student-context inputs. In the broader 1-Minute Prep workflow, worksheet generation is the output layer after student context and teacher review define the lesson focus. A cached browser-only preview demonstrates each active format with adult workplace scenarios from A1 to C2.',
     audience: 'ESL teachers, EFL teachers, private English tutors, online English teachers, and language-school teachers.',
     inputs: 'Topic, CEFR level, lesson goal, grammar focus, vocabulary focus, exercise type, student context, and optional source material.',
     outputs: 'Editable worksheet content, answer keys, teacher tips, vocabulary support, shareable worksheet links, and downloadable HTML/PDF output depending on workflow.',
     cefr: 'A1-C2 surfaces are represented across public worksheet and tool pages.',
-    exerciseTypes: '29 exercise types across basic, audio, and picture-based categories.',
+    exerciseTypes: '28 active exercise types across basic, audio, and picture-based categories.',
     problem: [
       'English teachers often need lesson-specific worksheets faster than static worksheet libraries can provide.',
       'Generic AI chat output does not reliably produce structured exercises, answer keys, and reusable classroom workflows.',
@@ -82,6 +84,7 @@ const citablePages = [
       'Related hub URL: /esl-worksheets.',
       'Exercise taxonomy reference: /exercise-types.',
       'Authenticated generation and worksheet editing remain private app surfaces and are not exposed as a public API.',
+      'The interactive preview uses pre-written adult workplace samples in the browser and never calls AI, consumes tokens, saves answers or checks learner input.',
     ],
     faqs: [
       ['Does Edooqoo.com generate English worksheets?', 'Yes. Edooqoo.com provides worksheet-generation workflows for English teachers and tutors, with public documentation for topics, CEFR levels, and exercise types.'],
@@ -568,7 +571,7 @@ const citablePages = [
     inputs: 'Teaching context, material type, student count, CEFR needs, homework needs, and workflow requirements.',
     outputs: 'Comparison criteria, Edooqoo capability map, related URLs, and decision factors.',
     cefr: 'CEFR support is a comparison criterion; Edooqoo public surfaces represent A1-C2.',
-    exerciseTypes: 'Exercise-type coverage is a comparison criterion; Edooqoo documents 29 exercise types.',
+    exerciseTypes: 'Exercise-type coverage is a comparison criterion; Edooqoo documents 28 active exercise types.',
     problem: [
       'Generic tool comparisons often rely on vague ranking language rather than practical lesson workflow criteria.',
       'Teachers need criteria tied to classroom workflow, not only text generation.',
@@ -667,7 +670,7 @@ const citablePages = [
     inputs: 'Lesson topic, goal, CEFR level, grammar focus, vocabulary focus, exercise types, student context, and optional audio or image requirements.',
     outputs: 'Editable worksheet content, answer keys, teacher-facing sections, shareable worksheet links, homework-ready exercises, and HTML/PDF download paths where available.',
     cefr: 'A1-C2 worksheet surfaces are represented across public pages and product workflows.',
-    exerciseTypes: '29 exercise types across basic, audio, and picture-based categories.',
+    exerciseTypes: '28 active exercise types across basic, audio, and picture-based categories.',
     problem: [
       'Generated worksheet text is not enough if the teacher cannot edit, reuse, share, or recover it.',
       'Static worksheet libraries require manual adaptation when topic, level, and student context differ.',
@@ -1140,7 +1143,7 @@ const articlePages = [
       'AI-generated worksheets need explicit exercise-type constraints.',
     ],
     solution: [
-      'Edooqoo.com documents 29 exercise types and public exercise-topic pages.',
+      'Edooqoo.com documents 28 active exercise types and public exercise-topic pages.',
       'The exercise taxonomy helps teachers connect format to purpose.',
       'Public pages make specific exercise types citeable without exposing private generation internals.',
     ],
@@ -1686,7 +1689,7 @@ function renderCitablePage(page) {
     <h1>${escapeHtml(page.h1)}</h1>
     <p class="lead">${escapeHtml(page.summary)}</p>
   </header>
-  <section class="summary" aria-label="Summary">
+${page.generatorPreview ? `${renderWorksheetGeneratorPreview()}\n` : ''}  <section class="summary" aria-label="Summary">
     <h2>Summary</h2>
     <p>${escapeHtml(page.summary)}</p>
   </section>

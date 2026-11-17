@@ -84,7 +84,7 @@ const ExerciseTopicPage: React.FC = () => {
         { title: 'Interactive + print', body: 'Send as Student Hub homework or export to PDF for in-class use.' },
         { title: 'Review workflow', body: 'Use submitted answers as input for teacher review and follow-up planning.' },
       ]}
-      bodyIntro={`The ${exercise.label} format is one of 29 exercise types Edooqoo generates. Pairing it with the topic ${topic.label} gives tutors a sharp, andragogical drill that adult learners actually finish.`}
+      bodyIntro={`The ${exercise.label} format is one of 28 exercise types Edooqoo generates. Pairing it with the topic ${topic.label} gives tutors a sharp, andragogical drill that adult learners actually finish.`}
       howItWorks={[
         `Open the worksheet form and select "${exercise.label}".`,
         `Set the topic to ${topic.label}.`,
@@ -94,7 +94,7 @@ const ExerciseTopicPage: React.FC = () => {
       ]}
       trustNumbers={[
         { value: 'Workflow', label: 'Teacher-controlled generation' },
-        { value: policy?.exerciseTypes.length ? String(policy.exerciseTypes.length) : '29', label: policy?.exerciseTypes.length ? 'Selected exercise types' : 'Available exercise types' },
+        { value: policy?.exerciseTypes.length ? String(policy.exerciseTypes.length) : '28', label: policy?.exerciseTypes.length ? 'Selected exercise types' : 'Available exercise types' },
         { value: policy ? String(policy.validLevels.length) : 'A1-C2', label: policy ? 'Indexed level fits' : 'Available CEFR levels' },
         { value: 'Public', label: 'Citable workflow pages' },
       ]}
@@ -126,7 +126,7 @@ const ExerciseTopicPage: React.FC = () => {
         },
         {
           question: 'Can I mix exercise types in one worksheet?',
-          answer: 'Yes. Use the standard worksheet form to mix any of the 29 types. The /worksheets/{type}/{topic} landing pages just pre-seed your form.',
+          answer: 'Yes. Use the standard worksheet form to mix any of the 28 types. The /worksheets/{type}/{topic} landing pages just pre-seed your form.',
         },
       ]}
     />

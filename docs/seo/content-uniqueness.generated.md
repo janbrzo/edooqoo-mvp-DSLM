@@ -52,7 +52,7 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /blog/teacher-burnout-prevention-esl.html | 0.518 | 0.48 | 1321 | /blog/lesson-sequencing-scaffolding-curriculum.html |
 | /edooqoo-vs-twee.html | 0.517 | 0.473 | 1099 | /edooqoo-vs-busyteacher.html |
 | /blog/personalized-learning-english-teaching.html | 0.512 | 0.472 | 1310 | /blog/lesson-sequencing-scaffolding-curriculum.html |
-| /blog/task-based-language-teaching-worksheets.html | 0.51 | 0.48 | 1337 | /blog/spaced-repetition-vocabulary-learning.html |
+| /blog/task-based-language-teaching-worksheets.html | 0.51 | 0.478 | 1337 | /blog/spaced-repetition-vocabulary-learning.html |
 | /blog/writing-student-progress-reports-esl.html | 0.51 | 0.485 | 1318 | /blog/materials-design-principles-elt.html |
 | /blog/teaching-business-english-guide.html | 0.509 | 0.476 | 1318 | /blog/personalized-learning-english-teaching.html |
 | /blog/teaching-english-online-complete-guide.html | 0.509 | 0.486 | 1339 | /blog/spaced-repetition-vocabulary-learning.html |
@@ -63,15 +63,15 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /blog/needs-analysis-esl-students.html | 0.496 | 0.5 | 1361 | /blog/materials-design-principles-elt.html |
 | /ai-lesson-planning-for-english-teachers.html | 0.471 | 0.515 | 640 | /online-esl-homework-tool.html |
 | /ai-grading-tool-for-english-homework.html | 0.452 | 0.504 | 620 | /ai-lesson-planning-for-english-teachers.html |
-| /student-hub-for-english-tutors.html | 0.449 | 0.533 | 697 | /private-english-tutor-crm.html |
-| /english-tutor-calendar-booking-software.html | 0.441 | 0.534 | 703 | /student-hub-for-english-tutors.html |
+| /student-hub-for-english-tutors.html | 0.45 | 0.532 | 695 | /private-english-tutor-crm.html |
+| /english-tutor-calendar-booking-software.html | 0.442 | 0.532 | 701 | /student-hub-for-english-tutors.html |
 | /english-worksheets-for-corporate-training.html | 0.437 | 0.559 | 505 | /english-worksheets-for-adults.html |
+| /online-esl-homework-tool.html | 0.434 | 0.563 | 715 | /ai-lesson-planning-for-english-teachers.html |
 | /best-ai-tools-for-esl-teachers.html | 0.433 | 0.559 | 676 | /one-to-one-english-lesson-planner.html |
-| /one-to-one-english-lesson-planner.html | 0.433 | 0.557 | 714 | /private-english-tutor-crm.html |
-| /online-esl-homework-tool.html | 0.432 | 0.565 | 718 | /ai-lesson-planning-for-english-teachers.html |
+| /one-to-one-english-lesson-planner.html | 0.433 | 0.559 | 713 | /private-english-tutor-crm.html |
 | /business-english-worksheet-generator.html | 0.43 | 0.526 | 647 | /adult-business-english-lesson-prep.html |
 | /worksheets/gap-fill/ielts-writing-task-2 | 0.428 | 0.572 | 544 | /worksheets/error-correction/present-perfect |
-| /private-english-tutor-crm.html | 0.42 | 0.571 | 753 | /student-hub-for-english-tutors.html |
+| /private-english-tutor-crm.html | 0.421 | 0.567 | 752 | /student-hub-for-english-tutors.html |
 | /edooqoo-vs-chatgpt.html | 0.417 | 0.569 | 1334 | /edooqoo-vs-busyteacher.html |
 
 ## How to read this

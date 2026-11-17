@@ -66,7 +66,7 @@ const Resources = () => {
   }, []);
 
   const worksheetGenerators: ResourceCard[] = [
-    { title: "AI Worksheet Generator", description: "Create personalized ESL/EFL worksheets with 29 exercise types.", href: "/ai-worksheet-generator-for-english-teachers.html", badge: "Tool" },
+    { title: "AI Worksheet Generator", description: "Preview 28 exercise types and create personalized ESL/EFL worksheets.", href: "/ai-worksheet-generator-for-english-teachers.html", badge: "Tool" },
     { title: "Grammar Worksheet Generator", description: "Generate grammar exercises for any CEFR level.", href: "/grammar-worksheet-generator.html", badge: "Grammar" },
     { title: "Vocabulary Exercise Generator", description: "Create vocabulary activities with context and definitions.", href: "/vocabulary-exercise-generator.html", badge: "Vocabulary" },
     { title: "Fill in the Blanks Generator", description: "Gap-fill exercises for grammar and vocabulary practice.", href: "/fill-in-the-blanks-worksheet-generator.html", badge: "Exercise" },
@@ -118,7 +118,7 @@ const Resources = () => {
     { title: "Teaching Pronunciation Hub", description: "Stress, intonation, minimal pairs, and connected speech for adults.", href: "/teaching-english-pronunciation", badge: "Hub" },
     { title: "ESL Exercise Design Hub", description: "Cloze, gap-fill, word formation, and transformation task design.", href: "/esl-exercise-design", badge: "Hub" },
     { title: "Tutor Operations Hub", description: "Homework, progress reports, and what-to-teach-next decisions.", href: "/tutor-operations", badge: "Hub" },
-    { title: "All 29 Exercise Types", description: "Descriptions, CEFR levels, and use cases.", href: "/exercise-types", badge: "Guide" },
+    { title: "All 28 Exercise Types", description: "Descriptions, CEFR levels, and use cases.", href: "/exercise-types", badge: "Guide" },
     { title: "Prompt Library", description: "50+ ready-to-use prompts for worksheet creation.", href: "/prompts", badge: "Prompts" },
     { title: "ELT Glossary", description: "50+ English teaching terms with definitions.", href: "/glossary", badge: "Reference" },
     { title: "How It Works", description: "8-step guide to using Edooqoo.", href: "/how-it-works", badge: "Guide" },

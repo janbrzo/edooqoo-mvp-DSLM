@@ -30,14 +30,14 @@ const ForEnglishTutors = () => (
     ]}
     solutionHeading="One platform replaces the typical 5-tool stack"
     solutions={[
-      { title: 'AI worksheet generator', body: '29 exercise types, CEFR A1-C2 labels, and worksheet drafts personalized to each student profile.' },
+      { title: 'AI worksheet generator', body: '28 exercise types, CEFR A1-C2 labels, and worksheet drafts personalized to each student profile.' },
       { title: 'AI-assisted homework review', body: 'Objective tasks can be checked automatically. Open-answer homework can receive AI-assisted evaluation for teacher review.' },
       { title: 'Booking + payment + calendar', body: 'Public booking page with Stripe. Google Calendar sync. Vacation blocks. Automated student reminders.' },
     ]}
     listHeading="What Edooqoo replaces in a tutors workflow"
     listIntro="Each line item is a tool or routine that becomes obsolete after switching to Edooqoo."
     list={[
-      { title: 'Google Docs worksheet templates', body: 'Replaced by 29 AI exercise types with editable output.', href: '/exercise-types' },
+      { title: 'Google Docs worksheet templates', body: 'Replaced by 28 AI exercise types with editable output.', href: '/exercise-types' },
       { title: 'Manual homework correction', body: 'Reduced by auto-checking objective tasks and using AI-assisted evaluation for teacher-reviewed open answers.', href: '/features/homework' },
       { title: 'Calendly + Stripe + Zoom links', body: 'Replaced by public booking page with embedded payment and auto-generated Google Meet links.', href: '/features/calendar' },
       { title: 'Notion / Apple Notes for student notes', body: 'Supported by DSLM Student Knowledge and teacher-reviewed context classification.', href: '/features/dslm' },
@@ -51,7 +51,7 @@ const ForEnglishTutors = () => (
         <h2 className="text-xl font-bold text-foreground mt-0">Why independent tutors win in 2026</h2>
         <p>Platforms like Cambly, Preply, and italki take 15-30% commission and dictate pricing. An independent tutor with their own booking page, payment processing, and student management workflow keeps 100% of revenue and sets their own rate. The historical blocker has been the operational complexity, building that stack with 5+ separate tools added 10 hours per week of admin. Edooqoo collapses the stack into one platform, making independent tutoring genuinely more profitable than platform work.</p>
         <h2 className="text-xl font-bold text-foreground">What you get on the Free plan</h2>
-        <p>Unlimited students. All 29 exercise types. 2 worksheet generations to test the engine. AI-assisted homework review on those 2 worksheets. Public booking page. Stripe payment integration. Student Hub portal. Flashcards with spaced repetition. The Free plan is enough to run 1-2 paying students end-to-end before deciding to upgrade.</p>
+        <p>Unlimited students. All 28 exercise types. 2 worksheet generations to test the engine. AI-assisted homework review on those 2 worksheets. Public booking page. Stripe payment integration. Student Hub portal. Flashcards with spaced repetition. The Free plan is enough to run 1-2 paying students end-to-end before deciding to upgrade.</p>
         <h2 className="text-xl font-bold text-foreground">Paid plans for full-time tutors</h2>
         <p>Side-Gig ($9/month): 15 worksheets/month, suitable for 5-10 weekly students. Full-Time (from $19/month): 30-90 worksheets/month for tutors with 15+ weekly students. Every plan includes every feature; the only meter is worksheet generation volume. See <Link to="/pricing" className="text-primary hover:underline">full pricing</Link>.</p>
         <h2 className="text-xl font-bold text-foreground">Built by tutors, for tutors</h2>

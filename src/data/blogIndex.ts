@@ -891,7 +891,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "AI Worksheet Generator for English Teachers",
-    "description": "Factual reference for Edooqoo worksheet generation: audience, inputs, outputs, CEFR support, exercise types, and workflow mechanics.",
+    "description": "Try 28 adult ESL exercise formats in a cached interactive preview, then create editable CEFR-oriented worksheets with student context and teacher review.",
     "url": "/ai-worksheet-generator-for-english-teachers.html",
     "state": "keep"
   },

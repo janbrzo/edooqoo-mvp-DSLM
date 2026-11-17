@@ -48,7 +48,7 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
   h1,
   lead,
   primaryCta = { label: 'Try Edooqoo free', to: '/signup' },
-  secondaryCta = { label: 'See 29 exercise types', to: '/exercise-types' },
+  secondaryCta = { label: 'See 28 exercise types', to: '/exercise-types' },
   problems,
   solutionHeading,
   solutions,

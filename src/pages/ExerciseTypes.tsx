@@ -23,7 +23,6 @@ const exerciseTypes = [
     { name: "Categorization", description: "Sort words or phrases into correct categories. Develops vocabulary organization and semantic networks.", bestFor: "A1-B2", useCase: "Vocabulary organization, topic vocabulary review, concept grouping." },
     { name: "Complete Word", description: "Fill in missing letters to complete words based on definitions or context clues. Tests spelling and vocabulary knowledge.", bestFor: "A1-B2", useCase: "Spelling practice, vocabulary recall, crossword-style exercises." },
     { name: "Paraphrasing", description: "Rewrite sentences keeping the same meaning using different words. AI-assisted review can support feedback on meaning preservation, grammar, and vocabulary range.", bestFor: "B1-C2", useCase: "Writing skills, vocabulary flexibility, Cambridge exam preparation." },
-    { name: "Sentence Transformation", description: "Transform sentences using specific grammar structures (e.g., active→passive, direct→reported speech). AI-assisted review can support accuracy checks.", bestFor: "B1-C2", useCase: "Grammar mastery, Use of English practice, structural flexibility." },
     { name: "Synonyms Matching", description: "Match words with their synonyms from a provided list. Expands productive vocabulary range.", bestFor: "A2-C2", useCase: "Vocabulary expansion, writing improvement, synonym awareness." },
     { name: "Antonyms Matching", description: "Match words with their antonyms from a provided list. Builds understanding of word relationships.", bestFor: "A2-C2", useCase: "Vocabulary building, word relationships, descriptive language." },
   ]},
@@ -53,9 +52,9 @@ const ExerciseTypes = () => {
           <Link to="/" className="text-primary hover:underline text-sm">← Back to Edooqoo</Link>
         </div>
 
-        <h1 className="text-4xl font-bold text-foreground mb-4">29 Exercise Types for English Teachers</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-4">28 Exercise Types for English Teachers</h1>
         <p className="text-lg text-muted-foreground mb-8">
-          Edooqoo offers 29 AI-generated exercise types across 3 categories. All types are available on every plan, including the free demo. Each exercise is automatically calibrated to the student's CEFR level (A1-C2).
+          Edooqoo offers 28 AI-generated exercise types across 3 categories. All types are available on every plan, including the free demo. Each exercise is automatically calibrated to the student's CEFR level (A1-C2).
         </p>
 
         {exerciseTypes.map(category => (
@@ -79,7 +78,7 @@ const ExerciseTypes = () => {
         ))}
 
         <div className="mt-12 p-6 bg-primary/5 rounded-lg text-center">
-          <p className="text-lg font-semibold text-foreground mb-2">Try all 29 exercise types for free</p>
+          <p className="text-lg font-semibold text-foreground mb-2">Try all 28 exercise types for free</p>
           <p className="text-muted-foreground mb-4">Sign up and get 2 free worksheets with access to every exercise type.</p>
           <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
             Try Edooqoo Free

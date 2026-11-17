@@ -60,7 +60,7 @@ const EslGamesForTeachers = () => (
         <p>Pair every game with a follow-up worksheet. The game produces fluency; the worksheet locks in accuracy. After Idiom Charades, assign a 10-minute Idiom Matching exercise from Edooqoo as homework. Objective answers can be checked automatically, and teacher-reviewed results can inform future prep. Three lessons later, the same 8 idioms can reappear in a Reading Comprehension because the teacher uses vocabulary signals in the DSLM layer.</p>
         <h2 className="text-xl font-bold text-foreground">How to time games in a 60-minute lesson</h2>
         <p>Warm-up game (5–7 min). Main input + controlled practice (25 min). Production game (10 min). Worksheet preview + homework assignment (5 min). Closing (3 min). The two games sandwich the lesson, opening to lower the affective filter, closing to apply new language. See our <Link to="/blog/english-games-for-learners" className="text-primary hover:underline">12 games for learners</Link> for a similar list framed for student perspective.</p>
-        <p>Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow, see <Link to="/exercise-types" className="text-primary hover:underline">all 29 exercise types</Link> or jump to the <Link to="/esl-worksheets" className="text-primary hover:underline">ESL worksheets generator</Link>.</p>
+        <p>Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow, see <Link to="/exercise-types" className="text-primary hover:underline">all 28 exercise types</Link> or jump to the <Link to="/esl-worksheets" className="text-primary hover:underline">ESL worksheets generator</Link>.</p>
       </>
     }
     faqs={[

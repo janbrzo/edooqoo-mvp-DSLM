@@ -234,10 +234,10 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
     h1: 'ESL Exercise Design for Adult 1:1 Lessons',
     lead: 'Task design decides whether an exercise measures something or just occupies fifteen minutes. This hub covers cloze, gap-fill, word formation, transformation and task-based work, with the design rules that make each one diagnostic.',
     tool: '/exercise-types',
-    toolCtaLabel: 'Browse the 29 exercise types',
+    toolCtaLabel: 'Browse the 28 exercise types',
     toolHeading: 'The tool this cluster funnels into',
     toolBody:
-      'Every design principle here maps to one of the 29 Edooqoo exercise types. Pick the type that matches the decision you want to test, generate it against the student profile, and edit before sending.',
+      'Every design principle here maps to one of the 28 Edooqoo exercise types. Pick the type that matches the decision you want to test, generate it against the student profile, and edit before sending.',
     definitionHeading: 'What good ESL exercise design means',
     citation:
       'ESL exercise design is the choice of task format that makes a learner\'s specific gap visible. A well-designed task has one defensible answer, enough context to make that answer recoverable, distractors that represent real errors, and a scoring rule the tutor can apply consistently. Format follows diagnosis: cloze measures integrated reading, gap-fill measures a single form.',
@@ -279,7 +279,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
     ],
     solutionHeading: 'How Edooqoo applies these design rules',
     solutions: [
-      { title: '29 typed exercise formats', body: 'Each type has defined instructions, answer key format and CEFR fit, so the format is a deliberate choice rather than an accident.' },
+      { title: '28 typed exercise formats', body: 'Each type has defined instructions, answer key format and CEFR fit, so the format is a deliberate choice rather than an accident.' },
       { title: 'Distractors with intent', body: 'Generated distractors reflect plausible learner errors, which is what makes the result diagnostic.' },
       { title: 'Editable before it ships', body: 'Every generated task is editable, so you can remove the item that has two right answers before the student sees it.' },
     ],
@@ -291,7 +291,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
       { label: 'Choosing the right ESL exercise type', href: '/blog/esl-exercise-type-selection-guide.html', note: 'Matching format to the gap you are trying to see.' },
       { label: 'Task-based language teaching worksheets', href: '/blog/task-based-language-teaching-worksheets.html', note: 'Designing tasks with an outcome, not just a form focus.' },
       { label: 'ESL games for adult English lessons', href: '/blog/esl-games-for-teachers', note: 'Choose an activity that makes a specific communication skill observable.' },
-      { label: 'All 29 exercise types', href: '/exercise-types', note: 'The full catalogue with CEFR fit and use cases.' },
+      { label: 'All 28 exercise types', href: '/exercise-types', note: 'The full catalogue with CEFR fit and use cases.' },
     ],
     faqs: [
       {

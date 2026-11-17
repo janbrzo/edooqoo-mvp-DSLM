@@ -54,7 +54,7 @@ const benefits = [
 ];
 
 const steps = [
-  { number: 1, title: 'Generate a worksheet', description: 'Create a worksheet for your student with any combination of 29 exercise types, then review it before assignment.' },
+  { number: 1, title: 'Generate a worksheet', description: 'Create a worksheet for your student with any combination of 28 exercise types, then review it before assignment.' },
   { number: 2, title: 'Assign as homework', description: 'Click "Send as Homework." Set a deadline, add optional notes. Student receives an email with a direct link.' },
   { number: 3, title: 'Student completes it online', description: 'Interactive interface: fill gaps, drag & drop, write essays, record audio. Progress auto-saves.' },
   { number: 4, title: 'AI assists evaluation', description: 'Objective exercises can be auto-checked. Open-ended answers can receive AI-assisted feedback for teacher review.' },

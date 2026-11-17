@@ -24,15 +24,15 @@ export const SEO_META = {
     path: "/glossary",
   },
   exerciseTypes: {
-    title: "29 Exercise Types for English Teachers | Edooqoo",
+    title: "28 Exercise Types for English Teachers | Edooqoo",
     description:
-      "Guide to all 29 Edooqoo exercise types: 20 basic, 5 audio, 4 picture. Each with CEFR levels and ESL/EFL use cases.",
+      "Guide to all 28 Edooqoo exercise types: 19 basic, 5 audio, 4 picture. Each with CEFR levels and ESL/EFL use cases.",
     path: "/exercise-types",
   },
   eslWorksheets: {
     title: "ESL Worksheets: AI-Generated for Adult Learners",
     description:
-      "Create personalized ESL worksheets with 29 exercise types, CEFR A1-C2 labels, business English, and IELTS prep workflows. Free to start.",
+      "Create personalized ESL worksheets with 28 exercise types, CEFR A1-C2 labels, business English, and IELTS prep workflows. Free to start.",
     path: "/esl-worksheets",
   },
   englishGamesForLearners: {

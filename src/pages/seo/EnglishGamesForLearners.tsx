@@ -57,7 +57,7 @@ const EnglishGamesForLearners = () => (
         <p>The risk with games is they become content-free entertainment. The fix is pairing every game with a follow-up worksheet that locks in the target language. After the Idiom Charades game, assign a short homework exercise covering the same idioms in writing. Edooqoo can draft that worksheet, you review it, assign it as homework, and the learner reviews errors before the next lesson.</p>
         <h2 className="text-xl font-bold text-foreground">How to integrate games into a 60-minute lesson</h2>
         <p>Warm-up (5 min): a fast speaking game from this list. Main input (20 min): grammar or vocabulary presentation. Controlled practice (15 min): Edooqoo worksheet exercises. Freer practice (15 min): a second game from the list applying the new language. Closing + homework assignment (5 min): assign 10–15 minutes of homework from the worksheet for teacher-reviewed AI assistance.</p>
-        <p>For more on the underlying methodology, see <Link to="/glossary" className="text-primary hover:underline">our glossary</Link> entries on Communicative Language Teaching and Task-Based Language Teaching. For the full set of pairable exercise types, see <Link to="/exercise-types" className="text-primary hover:underline">all 29 Edooqoo exercise types</Link>.</p>
+        <p>For more on the underlying methodology, see <Link to="/glossary" className="text-primary hover:underline">our glossary</Link> entries on Communicative Language Teaching and Task-Based Language Teaching. For the full set of pairable exercise types, see <Link to="/exercise-types" className="text-primary hover:underline">all 28 Edooqoo exercise types</Link>.</p>
       </>
     }
     faqs={[
@@ -67,7 +67,7 @@ const EnglishGamesForLearners = () => (
       { question: 'Are these suitable for IELTS or Cambridge prep students?', answer: 'Yes. Hot Seat and Devils Advocate Debate map directly to IELTS Speaking parts 2-3 and FCE/CAE Speaking part 4.' },
     ]}
     ctaTitle="Generate the matching worksheet now"
-    ctaBody="Each game above pairs with one of Edooqoo's 29 exercise types. Sign up free and create your first teacher-reviewed worksheet."
+    ctaBody="Each game above pairs with one of Edooqoo's 28 exercise types. Sign up free and create your first teacher-reviewed worksheet."
   />
 );
 

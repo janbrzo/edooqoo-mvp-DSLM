@@ -71,7 +71,7 @@ const steps = [
     icon: FileText,
     title: "Choose the next focus and generate the worksheet",
     description: "Review or edit the suggested focus, then generate a ready-to-teach worksheet with the topic, CEFR level and exercise types you choose.",
-    benefits: ["29 exercise types", "Audio and image-capable worksheets", "Editable before teaching or assigning"],
+    benefits: ["28 exercise types", "Audio and image-capable worksheets", "Editable before teaching or assigning"],
   },
   {
     number: 8,

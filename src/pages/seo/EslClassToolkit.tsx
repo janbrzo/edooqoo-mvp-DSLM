@@ -28,14 +28,14 @@ const EslClassToolkit = () => (
     solutionHeading="Five components every ESL class needs"
     solutions={[
       { title: 'Placement test', body: '49-question Welcome Test producing CEFR estimation, skill radar, and personalized Learning Path.' },
-      { title: 'Worksheets', body: '29 exercise types generated from teacher inputs and learner profile context.' },
+      { title: 'Worksheets', body: '28 exercise types generated from teacher inputs and learner profile context.' },
       { title: 'Homework review', body: 'Assign exercises with deadlines. Objective answers can be checked automatically and open answers can use AI-assisted evaluation.' },
     ]}
     listHeading="The complete ESL class toolkit"
     listIntro="Each component links to its dedicated page. Start with the placement test, generate the first worksheet, assign homework, track DSLM metrics."
     list={[
       { title: 'Welcome Test (49-question placement)', body: 'Grammar, vocabulary, reading, listening, speaking. Whisper TTS for audio sections. Outputs a Learning Profile with CEFR estimation and identified weaknesses.', href: '/features/placement-test' },
-      { title: 'Worksheet generator (29 exercise types)', body: '20 basic + 5 audio + 4 picture exercises. CEFR A1-C2 labels with student-context personalization.', href: '/exercise-types' },
+      { title: 'Worksheet generator (28 exercise types)', body: '19 basic + 5 audio + 4 picture exercises. CEFR A1-C2 labels with student-context personalization.', href: '/exercise-types' },
       { title: 'Lesson plan templates', body: 'Use Edooqoo worksheets as the lesson plan. Each worksheet doubles as material + structure for a 60-90 minute class.', href: '/blog/english-games-for-learners' },
       { title: 'ESL games for adult lessons', body: 'Choose a speaking game around a practical communication goal, then check whether the learner can use the target language independently.', href: '/blog/esl-games-for-teachers' },
       { title: 'Task-based English worksheets', body: 'Plan a lesson around a real task, such as clarifying a request or agreeing on a next step, with a concrete outcome to review.', href: '/blog/task-based-language-teaching-worksheets.html' },
