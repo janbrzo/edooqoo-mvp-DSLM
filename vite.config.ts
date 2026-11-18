@@ -2,11 +2,13 @@ import { defineConfig, type PluginOption } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
+import { syncSnapshotAssets } from "./scripts/build/sync-snapshot-assets";
 
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
   const plugins: PluginOption[] = [react()];
   plugins.push(mcpPlugin());
+  plugins.push(syncSnapshotAssets());
 
   if (mode === 'development') {
     const { componentTagger } = await import('lovable-tagger');
