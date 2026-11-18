@@ -454,7 +454,6 @@ export const PSEO_PAGE_PACKS = {
   'english-worksheets-for-corporate-training.html': 'business',
   'english-worksheets-for-exam-prep.html': 'exam',
   'environment-climate-english-worksheets.html': 'environment',
-  'esl-homework-grading-tool.html': 'mixed-review',
   'esl-student-progress-tracking-tool.html': 'mixed-review',
   'exam-preparation-worksheets-cambridge-ielts.html': 'exam',
   'fill-in-the-blanks-worksheet-generator.html': 'gerunds',

@@ -11,9 +11,10 @@ const read = (file) => fs.readFileSync(path.join(ROOT, 'public', file), 'utf8');
 const block = (html) => html.slice(html.indexOf(ENRICHMENT_START), html.indexOf(ENRICHMENT_END));
 
 describe('root pSEO enrichment', () => {
-  it('covers exactly the 69 indexable root pages', () => {
-    expect(rootPages).toHaveLength(69);
+  it('covers every indexable root page exactly once and no retired page', () => {
+    expect(rootPages.length).toBeGreaterThan(0);
     expect(Object.keys(PSEO_PAGE_PACKS).sort()).toEqual([...rootPages].sort());
+    expect(PSEO_PAGE_PACKS).not.toHaveProperty('esl-homework-grading-tool.html');
   });
 
   it.each(rootPages)('%s has a task, key, errors, tools, decision tool and Gallery link', (file) => {
@@ -26,6 +27,18 @@ describe('root pSEO enrichment', () => {
     expect(section).toContain('href="/gallery"');
     expect(html).toContain(`<link rel="canonical" href="https://edooqoo.com/${file}"`);
     expect(html).not.toMatch(/noindex/i);
+  });
+
+  it.each(rootPages)('%s bridges one-off value to teacher-reviewed recurring prep', (file) => {
+    const section = block(read(file));
+    const slug = file.replace(/\.html$/, '');
+    expect(section.match(/data-the-bridge-card/g)).toHaveLength(1);
+    expect(section).toContain('Teaching a regular student?');
+    expect(section).toContain('reviewed worksheet and homework results can add evidence');
+    expect(section).toContain('The teacher remains responsible for the final lesson decision and material review.');
+    expect(section).toContain(`href="https://edooqoo.com/signup?src=pseo-${slug}"`);
+    expect(section).toContain('href="/one-minute-prep"');
+    expect(section).not.toContain('\u2014');
   });
 
   it('packs use adult content without em dashes and with three keyed items', () => {

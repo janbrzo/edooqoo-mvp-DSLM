@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * Step 4 of 4: enrich the indexable root pSEO pages with a real adult practice task
- * (with answer key), common adult learner errors, and links to the free tools, the
- * Next Lesson Decision Tool and the public Gallery.
+ * (with answer key), common adult learner errors, links to the free tools, the Next
+ * Lesson Decision Tool and the public Gallery, plus a teacher-reviewed Bridge from
+ * one-off practice to recurring student context.
  *
  * Runs after every generator in seo:sync-generated, so regenerated citable pages keep the
  * block. Idempotent: the block lives between fixed markers and is rewritten in place.
@@ -24,7 +25,25 @@ export const ENRICHMENT_END = '<!-- EDOOQOO:PSEO_ENRICHMENT_END -->';
 const esc = (value) => String(value)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-const STYLE = '<style>.eq-pseo{margin:2.5em 0;padding:1.25em 1.5em;border:1px solid #e0e0e0;border-radius:10px;background:#fafafa}.eq-pseo h2{margin-top:0.5em}.eq-pseo ol li{margin:0.4em 0}.eq-pseo table{width:100%;border-collapse:collapse}.eq-pseo th,.eq-pseo td{border:1px solid #e0e0e0;padding:8px;text-align:left;vertical-align:top}.eq-pseo-tools{display:flex;flex-wrap:wrap;gap:0.75em;padding:0;list-style:none}.eq-pseo-tools a{display:inline-block;padding:8px 14px;border:1px solid #6d28d9;border-radius:8px;text-decoration:none}</style>';
+const STYLE = '<style>.eq-pseo{margin:2.5em 0;padding:1.25em 1.5em;border:1px solid #e0e0e0;border-radius:10px;background:#fafafa}.eq-pseo h2{margin-top:0.5em}.eq-pseo ol li{margin:0.4em 0}.eq-pseo table{width:100%;border-collapse:collapse}.eq-pseo th,.eq-pseo td{border:1px solid #e0e0e0;padding:8px;text-align:left;vertical-align:top}.eq-pseo-tools{display:flex;flex-wrap:wrap;gap:0.75em;padding:0;list-style:none}.eq-pseo-tools a{display:inline-block;padding:8px 14px;border:1px solid #6d28d9;border-radius:8px;text-decoration:none}.eq-bridge{margin-top:1.5em;padding:1.25em;border:1px solid #d9d6fe;border-radius:10px;background:#fff}.eq-bridge h2{margin-top:0}.eq-bridge-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1em;padding:0;list-style:none}.eq-bridge-steps li{margin:0}.eq-bridge-actions{display:flex;flex-wrap:wrap;align-items:center;gap:0.75em;margin-top:1em}.eq-bridge-actions a{display:inline-block;padding:9px 14px;border:1px solid #6d28d9;border-radius:8px;text-decoration:none}.eq-bridge-actions .cta{background:#6d28d9;color:#fff}.eq-bridge-note{font-size:0.9em;margin-bottom:0}@media(max-width:640px){.eq-bridge-steps{grid-template-columns:1fr}.eq-bridge-actions{align-items:stretch;flex-direction:column}.eq-bridge-actions a{text-align:center}}</style>';
+
+export function renderTheBridgeCard(pack, slug) {
+  const headingId = `eq-bridge-${slug}`;
+  return `<section class="eq-bridge" data-the-bridge-card aria-labelledby="${esc(headingId)}">
+    <h2 id="${esc(headingId)}">Teaching a regular student? Carry ${esc(pack.topic)} into the next lesson.</h2>
+    <p>A one-off task solves today's prep. In Edooqoo, reviewed worksheet and homework results can add evidence to the student's learning model, so the next lesson starts with useful context instead of a blank page.</p>
+    <ol class="eq-bridge-steps">
+      <li><strong>Keep the evidence.</strong><br>Retain reviewed results and teacher observations in the student profile.</li>
+      <li><strong>Choose the next focus.</strong><br>Review goals, skill evidence and recent activity before deciding what comes next.</li>
+      <li><strong>Prepare with context.</strong><br>Generate an editable follow-up worksheet, then review it before sharing.</li>
+    </ol>
+    <div class="eq-bridge-actions">
+      <a href="https://edooqoo.com/signup?src=pseo-${esc(slug)}" class="cta">Create an editable ${esc(pack.topic)} worksheet</a>
+      <a href="/one-minute-prep">See how the recurring learning loop works</a>
+    </div>
+    <p class="eq-bridge-note">1-Minute Prep supports recurring lessons after student setup and evidence exist. The teacher remains responsible for the final lesson decision and material review.</p>
+  </section>`;
+}
 
 export function renderEnrichment(file) {
   const packId = PSEO_PAGE_PACKS[file];
@@ -60,8 +79,7 @@ ${rows}
     <li><a href="/tools">All free teaching tools</a></li>
     <li><a href="/gallery">See real published worksheets</a></li>
   </ul>
-  <p><a href="https://edooqoo.com/signup?src=pseo-${esc(slug)}" class="cta">Create an editable ${esc(pack.topic)} worksheet in about a minute</a></p>
-  <p>You review and edit every task before it reaches your learner.</p>
+  ${renderTheBridgeCard(pack, slug)}
 </section>
 ${ENRICHMENT_END}`;
 }

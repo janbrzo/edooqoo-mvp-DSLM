@@ -59,7 +59,7 @@
       "route": "/gallery",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 82,
+      "incoming": 81,
       "outgoing": 47
     },
     {
@@ -73,7 +73,7 @@
       "route": "/one-minute-prep",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 270,
+      "incoming": 311,
       "outgoing": 46
     },
     {
@@ -249,14 +249,14 @@
       "type": "static-landing",
       "state": "hold",
       "incoming": 11,
-      "outgoing": 14
+      "outgoing": 15
     },
     {
       "route": "/a2-elementary-english-worksheets.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 11,
-      "outgoing": 15
+      "outgoing": 16
     },
     {
       "route": "/adult-business-english-lesson-prep.html",
@@ -298,21 +298,21 @@
       "type": "static-landing",
       "state": "hold",
       "incoming": 5,
-      "outgoing": 13
+      "outgoing": 14
     },
     {
       "route": "/b1-intermediate-english-worksheets.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 8,
-      "outgoing": 14
+      "outgoing": 15
     },
     {
       "route": "/b2-upper-intermediate-english-worksheets.html",
       "type": "static-landing",
       "state": "hold",
       "incoming": 11,
-      "outgoing": 14
+      "outgoing": 15
     },
     {
       "route": "/best-ai-tools-for-esl-teachers.html",

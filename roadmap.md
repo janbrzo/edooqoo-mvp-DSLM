@@ -7,8 +7,8 @@ Lean task list. Details live in `docs/` and `.lovable/plan/`.
 - [x] Step 1: safe canonical consolidation and feature-to-reference links.
 - [x] Step 2: anonymous Quick Send on the placement-test feature page.
 - [x] Step 3: cached interactive generator preview with 28 active exercise types, six CEFR workplace contexts and zero AI/token calls; 168 combinations, desktop/mobile browser flow and all SEO/content audits passed.
-- [ ] Step 4: shared Bridge sections and final GEO/SEO synchronization.
-- [ ] SPA snapshot refresh: local prerender timed out on every route; rerun in the normal CI/publication pipeline. The static generator hub is generated and verified independently.
+- [x] Step 4: shared teacher-reviewed Bridge on all 68 indexable root pSEO pages, with preserved source-tagged signup CTAs and a `/one-minute-prep` learning-loop link; retired homework redirect removed from enrichment. Two consecutive syncs were byte-identical; 140 focused tests, SEO/GEO/content/routing audits, zero near-duplicates and desktop/mobile browser navigation passed.
+- [ ] SPA snapshot refresh: local prerender timed out on every route; rerun in the normal CI/publication pipeline. The static generator hub and Bridge pages are generated and verified independently.
 
 ## Generation modal conversion
 
