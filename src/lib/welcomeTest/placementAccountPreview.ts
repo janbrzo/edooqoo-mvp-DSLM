@@ -241,6 +241,11 @@ function buildSampleQuestions(): PlacementPreviewSampleQuestion[] {
   });
 }
 
+/** Reads both current and legacy public report shapes without inventing a level. */
+export function readPlacementSelfAssessedLevel(result: PublicPlacementResult): string | null {
+  return result.selfAssessedLevel ?? result.traits.self_assessed_level ?? null;
+}
+
 /**
  * Goals and the first lesson mirror what claim creates from THIS student's report.
  * AI analysis, traits and questions are fixed illustrative content for the labelled

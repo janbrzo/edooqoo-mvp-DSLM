@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPlacementAccountPreview } from '../placementAccountPreview';
+import { buildPlacementAccountPreview, readPlacementSelfAssessedLevel } from '../placementAccountPreview';
 import type { PublicPlacementResult } from '../publicPlacementTest';
 
 const result = {
@@ -77,5 +77,15 @@ describe('buildPlacementAccountPreview', () => {
     expect(second.traitsData).toEqual(first.traitsData);
     expect(second.sampleQuestions).toEqual(first.sampleQuestions);
     expect(second.goals).not.toEqual(first.goals);
+  });
+
+  it('reads the self-assessed level from legacy traits when the newer field is absent', () => {
+    const legacyResult = {
+      ...result,
+      selfAssessedLevel: undefined,
+      traits: { self_assessed_level: 'A1-A2' },
+    } as PublicPlacementResult;
+    expect(readPlacementSelfAssessedLevel(legacyResult)).toBe('A1-A2');
+    expect(readPlacementSelfAssessedLevel({ ...legacyResult, selfAssessedLevel: 'B1-B2' })).toBe('B1-B2');
   });
 });

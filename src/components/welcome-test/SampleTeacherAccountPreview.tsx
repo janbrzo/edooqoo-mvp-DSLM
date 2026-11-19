@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { LEVEL_IN_PRACTICE } from '@/components/welcome-test/PlacementReportBody';
-import { buildPlacementAccountPreview } from '@/lib/welcomeTest/placementAccountPreview';
+import { buildPlacementAccountPreview, readPlacementSelfAssessedLevel } from '@/lib/welcomeTest/placementAccountPreview';
 import type { PlacementPreviewTrait } from '@/lib/welcomeTest/placementAccountPreview';
 import {
   PUBLIC_PLACEMENT_CONFIDENCE_ROWS,
@@ -155,6 +155,7 @@ export function SampleTeacherAccountPreview({ result, name, showSignup, onSignup
   const { strongest, weakest } = strongestAndWeakest(result);
   const confidence = result.confidenceMatrix ?? {};
   const interests = result.interestTopics ?? [];
+  const selfAssessedLevel = readPlacementSelfAssessedLevel(result);
 
   return (
     <section aria-label="Sample teacher account view" className="space-y-4 rounded-3xl border-2 border-dashed border-primary/50 bg-primary/5 p-3 sm:p-5">
@@ -257,7 +258,7 @@ export function SampleTeacherAccountPreview({ result, name, showSignup, onSignup
               <p className="mt-1 text-xs text-muted-foreground">Estimated Level</p>
             </div>
             <div className="rounded-lg bg-muted/30 p-4 text-center">
-              <p className="text-base font-semibold sm:text-xl">{result.selfAssessedLevel ? traitValueLabel('self_assessed_level', result.selfAssessedLevel) : '-'}</p>
+              <p className="text-base font-semibold sm:text-xl">{selfAssessedLevel ? traitValueLabel('self_assessed_level', selfAssessedLevel) : '-'}</p>
               <p className="mt-1 text-xs text-muted-foreground">Self-Assessed</p>
             </div>
             <div className="rounded-lg bg-muted/30 p-4 text-center">
