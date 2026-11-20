@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { PUBLIC_PLACEMENT_CONFIDENCE_ROWS, type PublicPlacementResult } from '@/lib/welcomeTest/publicPlacementTest';
+import { readPlacementSelfAssessedLevel } from '@/lib/welcomeTest/placementAccountPreview';
 import {
   humanizeDivergenceText,
   interpretSelfAwareness,
@@ -47,6 +48,7 @@ export function PlacementReportBody({ result, audience }: { result: PublicPlacem
   const confidence = result.confidenceMatrix ?? {};
   const hasConfidence = Object.keys(confidence).length > 0;
   const interests = result.interestTopics ?? [];
+  const selfAssessedLevel = readPlacementSelfAssessedLevel(result);
 
   return (
     <div className="space-y-5">
@@ -84,7 +86,7 @@ export function PlacementReportBody({ result, audience }: { result: PublicPlacem
                 <p className="text-xs text-muted-foreground">Estimated Level</p>
               </div>
               <div className="rounded-2xl bg-muted/40 p-3 text-center">
-                <p className="text-base font-semibold">{result.selfAssessedLevel ? traitValueLabel('self_assessed_level', result.selfAssessedLevel) : '-'}</p>
+                <p className="text-base font-semibold">{selfAssessedLevel ? traitValueLabel('self_assessed_level', selfAssessedLevel) : '-'}</p>
                 <p className="text-xs text-muted-foreground">Self-Assessed</p>
               </div>
               <div className="rounded-2xl bg-muted/40 p-3 text-center">
@@ -150,9 +152,9 @@ export function PlacementReportBody({ result, audience }: { result: PublicPlacem
           {isTeacher && (
             <>
               {[{ label: 'Writing', count: result.openResponseCount, noun: 'written answer' }, { label: 'Speaking', count: result.recordingCount, noun: 'recording' }].map((row) => (
-                <div key={row.label} className="flex items-center justify-between gap-3 text-sm">
+                <div key={row.label} className="flex flex-col gap-1 text-sm min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between min-[420px]:gap-3">
                   <span className="font-medium">{row.label}</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground min-[420px]:text-right">
                     {row.count > 0 ? `${row.count} ${row.noun}${row.count === 1 ? '' : 's'}, scored after adding the student` : 'Skipped'}
                   </span>
                 </div>
@@ -193,9 +195,9 @@ export function PlacementReportBody({ result, audience }: { result: PublicPlacem
             {PUBLIC_PLACEMENT_CONFIDENCE_ROWS.map((row) => {
               const value = confidence[row.key];
               return (
-                <div key={row.key} className="flex items-center justify-between rounded-2xl bg-muted/40 p-3" aria-label={`${row.label}: ${value ?? 'not answered'} of 5`}>
-                  <span className="text-sm">{row.label}</span>
-                  <div className="flex gap-0.5">
+                <div key={row.key} className="flex items-center justify-between gap-2 rounded-2xl bg-muted/40 p-3" aria-label={`${row.label}: ${value ?? 'not answered'} of 5`}>
+                  <span className="min-w-0 text-sm">{row.label}</span>
+                  <div className="flex shrink-0 gap-0.5">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <span key={n} className={`h-3 w-3 rounded-full ${value && n <= value ? 'bg-primary' : 'bg-muted'}`} />
                     ))}

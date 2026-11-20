@@ -48,13 +48,13 @@ function PreviewCard({ title, icon, children, className = '' }: {
 }) {
   return (
     <Card className={`rounded-2xl bg-card/95 ${className}`}>
-      <CardHeader className="pb-3">
+      <CardHeader className="p-4 pb-3 sm:p-6 sm:pb-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-lg">{icon}{title}</CardTitle>
+          <CardTitle className="flex min-w-0 items-center gap-2 text-base leading-6 sm:text-lg">{icon}{title}</CardTitle>
           <SampleBadge />
         </div>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">{children}</CardContent>
     </Card>
   );
 }
@@ -182,7 +182,7 @@ export function SampleTeacherAccountPreview({ result, name, showSignup, onSignup
           <p className="text-xs leading-5 text-muted-foreground">
             Example timeline: Created: {previewDate} · Completed: {previewDate} · Reviewed: {previewDate}
           </p>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
             <SummaryStat value={`${result.answeredCount}/${result.totalQuestions}`} label="Answered" />
             <SummaryStat value={skillScore === null ? '-' : `${skillScore}%`} label="Skill Score (keyed items)" highlighted />
             <SummaryStat value={`${keyedCorrect}/${keyedTotal}`} label="Skill Questions Correct" />
@@ -229,7 +229,7 @@ export function SampleTeacherAccountPreview({ result, name, showSignup, onSignup
 
       {preview.level && (
         <Card className="rounded-2xl border-primary/40 bg-primary/5">
-          <CardContent className="py-4">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
                 <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
@@ -282,9 +282,9 @@ export function SampleTeacherAccountPreview({ result, name, showSignup, onSignup
               {PUBLIC_PLACEMENT_CONFIDENCE_ROWS.map((row) => {
                 const value = confidence[row.key];
                 return (
-                  <div key={row.key} className="flex items-center justify-between gap-3 rounded-lg bg-muted/30 p-2.5" aria-label={`${row.label}: ${value ?? 'not answered'} of 5`}>
-                    <span className="text-sm">{row.label}</span>
-                    <div className="flex gap-0.5" aria-hidden="true">
+                  <div key={row.key} className="flex items-center justify-between gap-2 rounded-lg bg-muted/30 p-2.5" aria-label={`${row.label}: ${value ?? 'not answered'} of 5`}>
+                    <span className="min-w-0 text-sm">{row.label}</span>
+                    <div className="flex shrink-0 gap-0.5" aria-hidden="true">
                       {[1, 2, 3, 4, 5].map((n) => (
                         <span key={n} className={`h-3 w-3 rounded-full ${value && n <= value ? 'bg-primary' : 'bg-muted'}`} />
                       ))}
@@ -318,9 +318,9 @@ export function SampleTeacherAccountPreview({ result, name, showSignup, onSignup
             { label: 'Speaking', count: result.recordingCount, noun: 'recording' },
           ].map((row) => (
             <div key={row.label} className="space-y-1.5">
-              <div className="flex items-center justify-between gap-3 text-sm">
+              <div className="flex flex-col gap-1 text-sm min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between min-[420px]:gap-3">
                 <span>{row.label}</span>
-                <span className="text-right text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground min-[420px]:text-right">
                   {row.count > 0 ? `${row.count} ${row.noun}${row.count === 1 ? '' : 's'}, scored in the full account` : 'Skipped'}
                 </span>
               </div>
@@ -442,7 +442,7 @@ export function SampleTeacherAccountPreview({ result, name, showSignup, onSignup
           )}
           <p className="text-xs leading-5 text-muted-foreground">These goals and the first-lesson direction use {name}'s summary. The full account analysis above is illustrative.</p>
           {showSignup && (
-            <Button className="h-auto min-h-10 max-w-full whitespace-normal rounded-full" onClick={onSignup}>
+            <Button className="h-auto min-h-10 w-full max-w-full whitespace-normal rounded-full sm:w-auto" onClick={onSignup}>
               Create free account and see {name}'s real analysis<ArrowRight className="h-4 w-4" />
             </Button>
           )}

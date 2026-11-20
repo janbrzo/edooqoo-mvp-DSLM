@@ -107,13 +107,14 @@ export default function PlacementReportPage() {
 
   const { report } = state;
   const isStudentView = report.role === 'student';
+  const hasTeacherPreview = !isStudentView && !report.claimed;
   const name = report.studentName;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-3 py-6 sm:px-6">
       {head}
-      <div className="max-w-3xl mx-auto space-y-5">
-        <div className="text-center space-y-2">
+      <div className={`mx-auto space-y-5 ${hasTeacherPreview ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        <div className="mx-auto max-w-3xl text-center space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">{isStudentView ? 'Your placement results' : 'Teacher placement report'}</p>
           <h1 className="text-2xl sm:text-3xl font-bold">{isStudentView ? `Well done, ${name}!` : `${name}'s placement report`}</h1>
           <p className="text-sm leading-6 text-muted-foreground max-w-xl mx-auto">
@@ -124,7 +125,7 @@ export default function PlacementReportPage() {
         </div>
 
         {!isStudentView && (
-          <Card className="rounded-3xl border-primary/40 bg-primary/5">
+          <Card className="mx-auto max-w-3xl rounded-3xl border-primary/40 bg-primary/5">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-start gap-3">
                 <UserPlus className="h-6 w-6 text-primary shrink-0 mt-0.5" />
@@ -153,7 +154,9 @@ export default function PlacementReportPage() {
           </Card>
         )}
 
-        <PlacementReportBody result={report.result} audience={isStudentView ? 'student' : 'teacher'} />
+        <div className="mx-auto max-w-3xl">
+          <PlacementReportBody result={report.result} audience={isStudentView ? 'student' : 'teacher'} />
+        </div>
 
         {isStudentView && !report.claimed && (
           <Card className="rounded-3xl border-primary/30" id="forward">
@@ -176,7 +179,7 @@ export default function PlacementReportPage() {
           </Card>
         )}
 
-        {!isStudentView && !report.claimed && (
+        {hasTeacherPreview && (
           <SampleTeacherAccountPreview result={report.result} name={name} showSignup={!isRegisteredUser} onSignup={goToSignup} />
         )}
 

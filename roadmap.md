@@ -32,7 +32,7 @@ Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
 - [x] Step 1/4: added fixed illustrative AI analysis, six grouped trait sections and three real-bank sample questions to the preview data builder, with no UI changes; 19 focused tests passed.
 - [x] Step 2/4: rebuilt the sample teacher-account preview with the account-style test summary, AI analysis, level suggestion, assessment, six skill rows, grouped traits and feedback controls, three sample questions with teacher notes, goals and first-lesson CTA; repeated sample labels and disabled account-only controls.
-- [ ] Step 3/4: harmonize report hierarchy and responsive layout.
+- [x] Step 3/4: harmonized report hierarchy and responsive layout; the authentic summary stays at `max-w-3xl`, the unclaimed teacher-account sample uses the account's `max-w-4xl`, mobile cards and long skill rows wrap cleanly, and legacy self-assessed levels match across both views. The real report passed 390px/1280px browser checks with no horizontal overflow or page errors; 20 focused tests passed.
 - [ ] Step 4/4: run focused tests and desktop/mobile browser verification.
 
 ## UX North Star
