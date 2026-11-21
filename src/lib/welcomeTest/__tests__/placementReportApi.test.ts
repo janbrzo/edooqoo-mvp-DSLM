@@ -9,7 +9,7 @@ vi.stubGlobal('localStorage', {
   removeItem: (k: string) => { store.delete(k); },
   clear: () => store.clear(),
 });
-import { PENDING_PLACEMENT_CLAIM_KEY, rememberPendingClaim, takePendingClaim, sendPlacementInvite, getPlacementReport, claimPlacementReport, forwardPlacementReport } from '../placementReportApi';
+import { PENDING_PLACEMENT_CLAIM_KEY, rememberPendingClaim, takePendingClaim, peekPendingClaim, clearPostSignupAddStudentIntent, sendPlacementInvite, getPlacementReport, claimPlacementReport, forwardPlacementReport } from '../placementReportApi';
 
 describe('pending placement claim', () => {
   beforeEach(() => localStorage.clear());
@@ -21,6 +21,19 @@ describe('pending placement claim', () => {
   it('ignores a malformed stored token', () => {
     localStorage.setItem(PENDING_PLACEMENT_CLAIM_KEY, '../../evil');
     expect(takePendingClaim()).toBeNull();
+  });
+  it('peeks without consuming the pending claim', () => {
+    rememberPendingClaim('abcdefghijklmnopqrstuvwx');
+    expect(peekPendingClaim()).toBe('abcdefghijklmnopqrstuvwx');
+    expect(peekPendingClaim()).toBe('abcdefghijklmnopqrstuvwx');
+    expect(takePendingClaim()).toBe('abcdefghijklmnopqrstuvwx');
+  });
+  it('clears only the generic post-signup Add Student intent', () => {
+    rememberPendingClaim('abcdefghijklmnopqrstuvwx');
+    localStorage.setItem('post-signup-add-student', '1');
+    clearPostSignupAddStudentIntent();
+    expect(localStorage.getItem('post-signup-add-student')).toBeNull();
+    expect(peekPendingClaim()).toBe('abcdefghijklmnopqrstuvwx');
   });
 });
 

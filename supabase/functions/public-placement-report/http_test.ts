@@ -16,7 +16,7 @@ const result = {
   selfAwarenessScore: 30, openResponseCount: 2, recordingCount: 1,
 };
 type Call = { path: string; method: string; body: Record<string, unknown> | null };
-type Options = { failTable?: string; expired?: boolean; claimed?: boolean; unauthorized?: boolean; anonymous?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean };
+type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean };
 
 async function fixture(run: (call: (body: unknown, token?: string, method?: string) => Promise<Response>, calls: Call[]) => Promise<void>, options: Options = {}) {
   const names = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "APP_BASE_URL", "RESEND_API_KEY"];
@@ -52,6 +52,9 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
     } else if (path === "/rest/v1/public_placement_invites") value = req.method === "GET" ? invite : null;
     else if (path.startsWith("/rest/v1/")) {
       if (req.method === "POST" && path.endsWith(`/${options.failTable}`)) { status = 500; value = { message: "fixture write failure", code: "XX000" }; }
+      else if (req.method === "GET" && path.endsWith("/student_tests")) {
+        value = !options.claimedTestMissing && url.searchParams.get("generation_params->>report_id") === "eq.report-id" ? { id: "test-id" } : null;
+      }
       else value = { id: path.endsWith("student_tests") ? "test-id" : "student-id" };
     } else if (path === "/functions/v1/recalculate-pacing") value = { success: true };
     else throw new Error(`Unexpected fixture request: ${path}`);
@@ -119,7 +122,8 @@ for (const options of [{ unauthorized: true }, { anonymous: true }]) {
 }
 Deno.test("HTTP claim creates reviewed test, linked profile, goals and pacing", async () => {
   await fixture(async (call, calls) => {
-    const res = await call({ action: "claim", token: teacherToken }); assertEquals(res.status, 200); assertEquals((await res.json()).studentId, "student-id");
+    const res = await call({ action: "claim", token: teacherToken }); assertEquals(res.status, 200);
+    const claim = await res.json(); assertEquals(claim.studentId, "student-id"); assertEquals(claim.testId, "test-id");
     const writes = (table: string) => calls.find(c => c.path.endsWith(`/${table}`) && c.method === "POST")?.body;
     assertEquals(writes("student_tests")?.status, "reviewed");
     assertEquals(writes("student_learning_profiles")?.welcome_test_id, "test-id");
@@ -137,11 +141,20 @@ for (const failTable of ["student_tests", "student_learning_profiles", "student_
     }, { failTable });
   });
 }
-Deno.test("HTTP repeated completed claim returns the same learner without new writes", async () => {
+Deno.test("HTTP repeated completed claim returns the same learner and exact test without new writes", async () => {
   await fixture(async (call, calls) => {
-    const res = await call({ action: "claim", token: teacherToken }); assertEquals(res.status, 200); assertEquals((await res.json()).alreadyClaimed, true);
+    const res = await call({ action: "claim", token: teacherToken }); assertEquals(res.status, 200);
+    const claim = await res.json();
+    assertEquals(claim.alreadyClaimed, true); assertEquals(claim.studentId, "student-id"); assertEquals(claim.testId, "test-id");
+    assertEquals(calls.some(c => c.path.endsWith("/student_tests") && c.method === "GET"), true);
     assertEquals(calls.some(c => c.method === "POST" || c.method === "PATCH"), false);
   }, { claimed: true });
+});
+Deno.test("HTTP repeated claim never opens a missing or unrelated test", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "claim", token: teacherToken }); assertEquals(res.status, 409); await res.text();
+    assertEquals(calls.some(c => c.method === "POST" || c.method === "PATCH"), false);
+  }, { claimed: true, claimedTestMissing: true });
 });
 Deno.test("HTTP forwarding rejects teacher token and enforces three forwards", async () => {
   await fixture(async call => {

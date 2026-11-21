@@ -310,7 +310,14 @@ export async function handleRequest(req: Request): Promise<Response> {
     const user = userData?.user;
     if (!user || user.is_anonymous) return json({ error: "Sign in to add this student" }, 401);
     if (report.claimed_by) {
-      if (report.claimed_by === user.id && report.claimed_student_id) return json({ success: true, studentId: report.claimed_student_id, alreadyClaimed: true });
+      if (report.claimed_by === user.id && report.claimed_student_id) {
+        const { data: claimedTest, error: claimedTestError } = await admin.from("student_tests")
+          .select("id").eq("student_id", report.claimed_student_id).eq("teacher_id", user.id)
+          .eq("generation_params->>report_id", report.id).maybeSingle();
+        if (claimedTestError) throw claimedTestError;
+        if (!claimedTest) return json({ error: "Test results are still being prepared. Please try again shortly." }, 409);
+        return json({ success: true, studentId: report.claimed_student_id, testId: claimedTest.id, alreadyClaimed: true });
+      }
       if (report.claimed_by === user.id) return json({ error: "Student is still being added. Please try again shortly." }, 409);
       return json({ error: "This report was already added by another teacher" }, 409);
     }
@@ -380,7 +387,7 @@ export async function handleRequest(req: Request): Promise<Response> {
 
     const { error: finishError } = await admin.from("public_placement_reports").update({ claimed_student_id: student.id }).eq("id", report.id).eq("claimed_by", user.id);
     if (finishError) throw finishError;
-    return json({ success: true, studentId: student.id });
+    return json({ success: true, studentId: student.id, testId: testRow.id });
     } catch (failure) {
       // Explicitly remove dependent rows before removing this request's learner.
       for (const table of ["student_progress_goals", "student_learning_profiles", "student_tests", "pacing_proposals"]) {

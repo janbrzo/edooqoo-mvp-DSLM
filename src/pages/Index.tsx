@@ -37,6 +37,7 @@ import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { HERO_TOPIC_PREFILL_EVENT, normalizeHeroLessonTopic } from "@/lib/worksheet/heroTopicPrefill";
+import { clearPostSignupAddStudentIntent, peekPendingClaim } from '@/lib/welcomeTest/placementReportApi';
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -101,6 +102,17 @@ const Index = () => {
   // page right after first-time login, and by other deep links).
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   useEffect(() => {
+    const pendingClaim = peekPendingClaim();
+    if (pendingClaim && isRegisteredUser) {
+      clearPostSignupAddStudentIntent();
+      if (searchParams.get('action') === 'add-student') {
+        const next = new URLSearchParams(searchParams);
+        next.delete('action');
+        setSearchParams(next, { replace: true });
+      }
+      navigate(`/placement-report/${pendingClaim}?claim=1`, { replace: true });
+      return;
+    }
     // v6.9.35: open AddStudentDialog from `?action=add-student` OR persisted
     // localStorage flag (`post-signup-add-student=1`). Flag is more robust
     // than the query param which Supabase email confirmation can strip.
@@ -116,7 +128,7 @@ const Index = () => {
       next.delete('action');
       setSearchParams(next, { replace: true });
     }
-  }, [searchParams, isRegisteredUser, setSearchParams]);
+  }, [searchParams, isRegisteredUser, setSearchParams, navigate]);
   const [oneMinutePrepCalculator, setOneMinutePrepCalculator] = useState<OneMinutePrepCalculatorInput>(
     DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT
   );

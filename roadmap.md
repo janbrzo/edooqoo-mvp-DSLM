@@ -28,6 +28,12 @@ Lean task list. Details live in `docs/` and `.lovable/plan/`.
 - [x] Placement repairs step 5/5 local/public verification: 319 focused Vitest and 22 Deno tests passed; full suite 208 files / 2918 tests passed with temporarily quarantined broken optional canvas restored afterwards. Actual Quick Send, full invited completion, automatic provider-accepted teacher/student results, clipboard readback, sequential listening, student-token isolation and forwarding passed; synthetic teacher-report signup/login and desktop/mobile presentation passed separately. Required claim writes fail safely with compensating cleanup and failed pending claims are retained. Automatic build and SEO audit OK, 107 protected hashes unchanged. Evidence and limitations: `docs/operational/placement-step-5-verification.md`.
 - [ ] Placement hosted verification: authenticated claim and Prep/Insights/goals/pacing readback remain blocked by the unavailable external Supabase teacher session; inbox delivery/rendering cannot be inspected. Synthetic auth and provider acceptance do not certify these checks.
 
+## Placement claim first-screen repair
+
+- [x] Step A: open the exact claimed test, refresh the students cache immediately, and suppress Add Student only while a placement claim is pending, including email/OAuth returns. Verified with 101 Vitest cases, 20 Deno cases and the real already-claimed teacher report: both entries opened the same test, the student appeared without reload, no modal or page errors.
+- [ ] Step B: attach invited reports to existing teacher accounts and reveal pending students only after completion.
+- [ ] Step C: persist the complete account-equivalent placement analysis and question evidence.
+
 ## Public placement report teacher preview
 
 - [x] Step 1/4: added fixed illustrative AI analysis, six grouped trait sections and three real-bank sample questions to the preview data builder, with no UI changes; 19 focused tests passed.

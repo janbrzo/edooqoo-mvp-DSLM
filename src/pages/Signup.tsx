@@ -103,7 +103,7 @@ const Signup = () => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/?action=add-student`,
+          emailRedirectTo: `${window.location.origin}${postSignupPath}`,
           data: {
             first_name: firstName,
             last_name: lastName,

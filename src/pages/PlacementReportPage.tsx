@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Loader2, Send, Sparkles, TriangleAlert, UserPlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import { studentTabPath } from '@/lib/students/workspaceTabs';
 import { PUBLIC_PLACEMENT_TEST_PATH } from '@/lib/welcomeTest/publicPlacementTest';
 import {
   claimPlacementReport,
+  clearPostSignupAddStudentIntent,
   forwardPlacementReport,
   getPlacementReport,
   PLACEMENT_REPORT_TOKEN_PATTERN,
@@ -30,6 +32,7 @@ export default function PlacementReportPage() {
   const [searchParams] = useSearchParams();
   const wantsClaim = searchParams.get('claim') === '1';
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { loading: authLoading, isRegisteredUser } = useAuthFlow();
   const { isDemoMode } = useDemoContext();
   const [state, setState] = useState<LoadState>({ status: 'loading' });
@@ -60,25 +63,27 @@ export default function PlacementReportPage() {
 
   const claim = useCallback(async () => {
     if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
-    if (state.status !== 'ready' || state.report.role !== 'teacher' || state.report.claimed) return;
+    if (state.status !== 'ready' || state.report.role !== 'teacher') return;
     setClaiming(true);
     try {
-      const { studentId } = await claimPlacementReport(token);
+      const { studentId, testId, alreadyClaimed } = await claimPlacementReport(token);
       takePendingClaim();
-      toast.success('Student added with their placement profile.');
-      navigate(studentTabPath(studentId, 'model', { view: 'profile' }));
+      clearPostSignupAddStudentIntent();
+      await queryClient.invalidateQueries({ queryKey: ['students'] });
+      if (!alreadyClaimed) toast.success('Student added with their placement profile.');
+      navigate(studentTabPath(studentId, 'timeline', { filter: 'tests', testId }));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not add the student.');
     } finally {
       setClaiming(false);
     }
-  }, [token, navigate, isDemoMode, state]);
+  }, [token, navigate, isDemoMode, state, queryClient]);
 
   useEffect(() => {
-    if (!wantsClaim || authLoading || !isRegisteredUser || state.status !== 'ready' || state.report.role !== 'teacher' || state.report.claimed || autoClaimed.current) return;
+    if (!wantsClaim || authLoading || !isRegisteredUser || state.status !== 'ready' || state.report.role !== 'teacher' || autoClaimed.current) return;
     autoClaimed.current = true;
     void claim();
-  }, [wantsClaim, authLoading, isRegisteredUser, state.status, claim]);
+  }, [wantsClaim, authLoading, isRegisteredUser, state, claim]);
 
   const returnPath = `/placement-report/${token}?claim=1`;
   const goToSignup = () => { rememberPendingClaim(token); navigate('/signup', { state: { from: returnPath } }); };

@@ -46,7 +46,18 @@ export const getPlacementReport = (token: string) => call<PlacementReport>({ act
 export const forwardPlacementReport = (token: string, teacherEmail: string) =>
   call<{ success: true }>({ action: 'forward', token, teacherEmail });
 export const claimPlacementReport = (token: string) =>
-  call<{ success: true; studentId: string; alreadyClaimed?: boolean }>({ action: 'claim', token });
+  call<{ success: true; studentId: string; testId: string; alreadyClaimed?: boolean }>({ action: 'claim', token });
+
+export function peekPendingClaim(): string | null {
+  try {
+    const token = localStorage.getItem(PENDING_PLACEMENT_CLAIM_KEY);
+    return token && PLACEMENT_REPORT_TOKEN_PATTERN.test(token) ? token : null;
+  } catch { return null; }
+}
+
+export function clearPostSignupAddStudentIntent(): void {
+  try { localStorage.removeItem('post-signup-add-student'); } catch { /* storage unavailable */ }
+}
 
 export function rememberPendingClaim(token: string): void {
   try { localStorage.setItem(PENDING_PLACEMENT_CLAIM_KEY, token); } catch { /* storage unavailable */ }

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getPendingClaimIds } from '@/hooks/useWorksheetClaim';
+import { peekPendingClaim } from '@/lib/welcomeTest/placementReportApi';
 
 interface GoogleSignInButtonProps {
   mode: 'signin' | 'signup';
@@ -29,12 +30,13 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       // the worksheet page they came from so the post-OAuth claim handler
       // (in Signup/Login) runs and redirects to the claimed worksheet.
       const hasClaims = getPendingClaimIds().length > 0;
+      const hasPlacementClaim = peekPendingClaim() !== null;
       const fromPath = (location.state as { from?: string } | null)?.from;
       // v6.9.36: signup mode without pending claims lands on the generator
       // page with `?action=add-student` so Index opens AddStudentDialog after
       // OAuth roundtrip. Sign-in returns to the page that sent the teacher to
       // login (e.g. a student deep link), like the email/password path does.
-      const redirectPath = hasClaims && fromPath
+      const redirectPath = (hasClaims || hasPlacementClaim) && fromPath
         ? fromPath
         : mode === 'signup'
           ? '/?action=add-student'

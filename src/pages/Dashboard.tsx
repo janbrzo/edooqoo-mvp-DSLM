@@ -29,6 +29,7 @@ import { EmptyDashboard } from "@/components/dashboard/EmptyDashboard";
 import { StudentQuickSearch } from "@/components/dashboard/StudentQuickSearch";
 import { RecentStudentsBar } from "@/components/dashboard/RecentStudentsBar";
 import { formatWorksheetTitle, type RecentWorksheet } from "@/components/dashboard/RecentWorksheetRow";
+import { clearPostSignupAddStudentIntent, peekPendingClaim } from '@/lib/welcomeTest/placementReportApi';
 
 /**
  * v6.9.109: `/dashboard` → "Today".
@@ -73,7 +74,8 @@ const Dashboard = () => {
   // v6.9.8: auto-open Add Student dialog when arriving from Welcome email CTA
   useEffect(() => {
     if (searchParams.get('action') === 'add-student' && isRegisteredUser && !isDemoMode) {
-      setAddStudentModalOpen(true);
+      if (peekPendingClaim()) clearPostSignupAddStudentIntent();
+      else setAddStudentModalOpen(true);
       const next = new URLSearchParams(searchParams);
       next.delete('action');
       setSearchParams(next, { replace: true });
