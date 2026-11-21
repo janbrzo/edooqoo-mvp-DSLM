@@ -19,6 +19,7 @@ export default defineTool({
       .select("id, name, english_level, main_goal, native_language, updated_at")
       .eq("teacher_id", auth.teacherId)
       .is("deleted_at", null)
+      .is("placement_pending_at", null)
       .order("updated_at", { ascending: false })
       .limit(limit ?? 50);
     if (error) {

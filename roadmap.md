@@ -31,7 +31,7 @@ Lean task list. Details live in `docs/` and `.lovable/plan/`.
 ## Placement claim first-screen repair
 
 - [x] Step A: open the exact claimed test, refresh the students cache immediately, and suppress Add Student only while a placement claim is pending, including email/OAuth returns. Verified with 101 Vitest cases, 20 Deno cases and the real already-claimed teacher report: both entries opened the same test, the student appeared without reload, no modal or page errors.
-- [ ] Step B: attach invited reports to existing teacher accounts and reveal pending students only after completion.
+- [x] Step B: registered Quick Send invites bind server-owned teacher/student links, new learners stay hidden until completion, and invited submission auto-claims the exact reviewed test with idempotent retry, safe rollback and a direct account email link. Existing active learners are reused; manual claims enforce invite ownership. Verified by 102 Vitest cases, 27 Deno cases, automatic build and a controlled live invite -> auto-claim -> duplicate-rejection flow (one reviewed test, profile, two goals, pending marker cleared); all verification records were removed. Real inbox rendering and a repeated authenticated browser pass were not rechecked.
 - [ ] Step C: persist the complete account-equivalent placement analysis and question evidence.
 
 ## Public placement report teacher preview

@@ -16,7 +16,7 @@ const result = {
   selfAwarenessScore: 30, openResponseCount: 2, recordingCount: 1,
 };
 type Call = { path: string; method: string; body: Record<string, unknown> | null };
-type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean };
+type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean };
 
 async function fixture(run: (call: (body: unknown, token?: string, method?: string) => Promise<Response>, calls: Call[]) => Promise<void>, options: Options = {}) {
   const names = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "APP_BASE_URL", "RESEND_API_KEY"];
@@ -24,11 +24,13 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
   names.forEach((name, i) => Deno.env.set(name, ["https://fixture.example.test", "synthetic-service", "https://app.example.test", "synthetic-mail"][i]));
   const calls: Call[] = [];
   const report = { id: "report-id", report_token: teacherToken, student_report_token: studentToken, result,
-    student_name: "Marta", student_email: "student@example.test", teacher_email: "teacher@example.test", invite_id: null,
+    student_name: "Marta", student_email: "student@example.test", teacher_email: "teacher@example.test", invite_id: options.pendingStudent ? "invite-id" : null,
     expires_at: new Date(Date.now() + (options.expired ? -1 : 7 * 86400_000)).toISOString(),
     claimed_by: options.claimed ? "owner-id" : null, claimed_student_id: options.claimed ? "student-id" : null,
     forward_count: options.forwardCount ?? 0 };
   const invite = { id: "invite-id", teacher_email: "teacher@example.test", student_email: "student@example.test", student_name: "Marta",
+    teacher_id: options.registeredTeacher ? "owner-id" : null,
+    student_id: options.existingStudent || options.pendingStudent ? "student-id" : null,
     expires_at: report.expires_at, completed_at: options.completedInvite ? now.toISOString() : null, completed_report_id: options.completedInvite ? "report-id" : null };
   const fetchStub = stub(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
     const req = input instanceof Request ? input : new Request(input, init);
@@ -41,7 +43,13 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
     if (path === "/emails") { value = { id: "mail-id" }; if (options.failEmail) status = 500; }
     else if (path === "/auth/v1/user") {
       if (options.unauthorized) { status = 401; value = { message: "Invalid token" }; }
-      else value = { id: "owner-id", email: "teacher@example.test", is_anonymous: options.anonymous ?? false };
+      else value = { id: options.differentTeacher ? "other-owner-id" : "owner-id", email: "teacher@example.test", is_anonymous: options.anonymous ?? false };
+    } else if (path === "/rest/v1/profiles") {
+      value = options.registeredTeacher ? { id: "owner-id" } : null;
+    } else if (path === "/rest/v1/students" && req.method === "GET") {
+      value = options.pendingStudent
+        ? { id: "student-id", placement_pending_at: now.toISOString(), english_level: null }
+        : options.existingStudent ? { id: "student-id", placement_pending_at: null, english_level: "B1" } : null;
     } else if (path === "/rest/v1/public_placement_reports") {
       if (req.method === "GET") {
         value = url.searchParams.get("report_token") === `eq.${teacherToken}` || url.searchParams.get("student_report_token") === `eq.${studentToken}` || url.searchParams.has("id") ? report : null;
@@ -49,7 +57,7 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
         value = options.reservationBusy && body?.claimed_by ? null : { id: "report-id" };
         if (options.failFinish && body?.claimed_student_id) { status = 500; value = { message: "fixture finish failure", code: "XX000" }; }
       }
-    } else if (path === "/rest/v1/public_placement_invites") value = req.method === "GET" ? invite : null;
+    } else if (path === "/rest/v1/public_placement_invites") value = req.method === "GET" ? invite : body?.completed_report_id ? { id: "invite-id" } : null;
     else if (path.startsWith("/rest/v1/")) {
       if (req.method === "POST" && path.endsWith(`/${options.failTable}`)) { status = 500; value = { message: "fixture write failure", code: "XX000" }; }
       else if (req.method === "GET" && path.endsWith("/student_tests")) {
@@ -87,6 +95,25 @@ Deno.test("HTTP invite emails identify teacher and confirm sender with seven-day
     const expires = Date.parse(String(row?.expires_at)); assertEquals(Math.abs(expires - Date.now() - 7 * 86400_000) < 2000, true);
   });
 });
+Deno.test("HTTP registered teacher invite creates a hidden pending learner and server-owned links", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "invite", teacherEmail: "teacher@example.test", studentName: "Marta", studentEmail: "student@example.test" });
+    assertEquals(res.status, 200); await res.text();
+    const student = calls.find(c => c.path.endsWith("/students") && c.method === "POST")?.body;
+    assertEquals(typeof student?.placement_pending_at, "string");
+    const invite = calls.find(c => c.path.endsWith("/public_placement_invites") && c.method === "POST")?.body;
+    assertEquals(invite?.teacher_id, "owner-id"); assertEquals(invite?.student_id, "student-id");
+  }, { registeredTeacher: true });
+});
+Deno.test("HTTP registered teacher invite reuses an existing learner without hiding or duplicating them", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "invite", teacherEmail: "teacher@example.test", studentName: "Marta", studentEmail: "student@example.test" });
+    assertEquals(res.status, 200); await res.text();
+    assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "POST"), false);
+    const invite = calls.find(c => c.path.endsWith("/public_placement_invites") && c.method === "POST")?.body;
+    assertEquals(invite?.student_id, "student-id");
+  }, { registeredTeacher: true, existingStudent: true });
+});
 Deno.test("HTTP invited completion routes both emails using server addresses and distinct tokens", async () => {
   await fixture(async (call, calls) => {
     const res = await call({ action: "submit", result, studentName: "Marta", inviteToken, studentEmail: "teacher@example.test", teacherEmail: "attacker@example.test" });
@@ -98,6 +125,38 @@ Deno.test("HTTP invited completion routes both emails using server addresses and
     assertEquals(data.studentUrl.includes(String(row?.student_report_token)), true);
     assertEquals(data.studentUrl.includes(String(row?.report_token)), false);
   });
+});
+Deno.test("HTTP registered invitation auto-claims the exact test, reveals the learner and emails the account result", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "submit", result, studentName: "Marta", inviteToken, studentEmail: "attacker@example.test", teacherEmail: "attacker@example.test" });
+    assertEquals(res.status, 200); const data = await res.json();
+    assertEquals(data.autoClaimed, true); assertEquals(data.teacherSent, true);
+    assertEquals(calls.find(c => c.path.endsWith("/student_tests") && c.method === "POST")?.body?.student_id, "student-id");
+    assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "POST"), false);
+    assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "PATCH" && c.body?.placement_pending_at === null), true);
+    const teacherMail = calls.find(c => c.path === "/emails" && (c.body?.to as string[] | undefined)?.[0] === "teacher@example.test")?.body?.html;
+    assertEquals(String(teacherMail).includes("/student/student-id?tab=timeline&amp;filter=tests&amp;testId=test-id"), true);
+    assertEquals(String(teacherMail).includes("Create free account"), false);
+  }, { registeredTeacher: true, pendingStudent: true });
+});
+Deno.test("HTTP teacher mail failure preserves an already auto-claimed result", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "submit", result, studentName: "Marta", inviteToken });
+    assertEquals(res.status, 200); const data = await res.json();
+    assertEquals(data.autoClaimed, true); assertEquals(data.teacherSent, false);
+    assertEquals(calls.some(c => c.path.endsWith("/public_placement_reports") && c.method === "DELETE"), false);
+    assertEquals(calls.some(c => c.path.endsWith("/student_tests") && c.method === "DELETE"), false);
+  }, { registeredTeacher: true, pendingStudent: true, failEmail: true });
+});
+Deno.test("HTTP auto-claim failure never deletes an existing learner or emails a false success", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "submit", result, studentName: "Marta", inviteToken });
+    assertEquals(res.status, 500); await res.text();
+    assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "DELETE"), false);
+    assertEquals(calls.some(c => c.path.endsWith("/public_placement_invites") && c.method === "PATCH" && c.body?.completed_report_id === null), true);
+    assertEquals(calls.some(c => c.path.endsWith("/public_placement_reports") && c.method === "DELETE"), true);
+    assertEquals(calls.some(c => c.path === "/emails"), false);
+  }, { registeredTeacher: true, existingStudent: true, failTable: "student_tests" });
 });
 Deno.test("HTTP student token does not return teacher-only analysis", async () => {
   await fixture(async call => {
@@ -131,6 +190,20 @@ Deno.test("HTTP claim creates reviewed test, linked profile, goals and pacing", 
     assertEquals((writes("student_progress_goals") as unknown as Array<{ source: string }>).map(g => g.source), ["welcome_test_auto", "welcome_test_auto"]);
     assertEquals(calls.some(c => c.path === "/functions/v1/recalculate-pacing"), true);
   });
+});
+Deno.test("HTTP manual retry reuses and reveals the invited pending learner", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "claim", token: teacherToken }); assertEquals(res.status, 200);
+    const claim = await res.json(); assertEquals(claim.studentId, "student-id"); assertEquals(claim.testId, "test-id");
+    assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "POST"), false);
+    assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "PATCH" && c.body?.placement_pending_at === null), true);
+  }, { registeredTeacher: true, pendingStudent: true });
+});
+Deno.test("HTTP registered invitation cannot be claimed by another teacher", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "claim", token: teacherToken }); assertEquals(res.status, 403); await res.text();
+    assertEquals(calls.some(c => c.method === "PATCH" || c.method === "POST"), false);
+  }, { registeredTeacher: true, pendingStudent: true, differentTeacher: true });
 });
 for (const failTable of ["student_tests", "student_learning_profiles", "student_progress_goals"]) {
   Deno.test(`HTTP failed ${failTable} cannot report successful claim`, async () => {

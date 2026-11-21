@@ -457,7 +457,7 @@ const CalendarSettingsPage = () => {
                         if (v && user?.id && gcalConnected) {
                           // Batch-generate real Google Meet rooms for existing students without one
                           try {
-                            const { data: students } = await supabase.from('students').select('id').eq('teacher_id', user.id).is('deleted_at', null);
+                            const { data: students } = await supabase.from('students').select('id').eq('teacher_id', user.id).is('deleted_at', null).is('placement_pending_at', null);
                             if (students) {
                               let generated = 0;
                               for (const s of students) {

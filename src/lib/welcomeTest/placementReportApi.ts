@@ -39,7 +39,7 @@ export function submitPlacementReport(input: {
   teacherEmail: string;
   inviteToken?: string | null;
 }) {
-  return call<{ success: true; studentUrl: string; studentSent: boolean; sentToInvitingTeacher: boolean }>({ action: 'submit', ...input, inviteToken: input.inviteToken ?? undefined });
+  return call<{ success: true; studentUrl: string; studentSent: boolean; teacherSent: boolean; sentToInvitingTeacher: boolean; autoClaimed: boolean }>({ action: 'submit', ...input, inviteToken: input.inviteToken ?? undefined });
 }
 
 export const getPlacementReport = (token: string) => call<PlacementReport>({ action: 'get', token });

@@ -30,6 +30,7 @@ export const useStudents = () => {
         .select('*')
         .eq('teacher_id', teacherId)
         .is('deleted_at', null)
+        .is('placement_pending_at', null)
         .order('updated_at', { ascending: false });
       if (error) throw error;
       return data || [];

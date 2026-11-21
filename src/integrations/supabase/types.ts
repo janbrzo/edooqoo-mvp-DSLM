@@ -2627,8 +2627,10 @@ export type Database = {
           id: string
           invite_token: string
           student_email: string | null
+          student_id: string | null
           student_name: string
           teacher_email: string
+          teacher_id: string | null
         }
         Insert: {
           completed_at?: string | null
@@ -2638,8 +2640,10 @@ export type Database = {
           id?: string
           invite_token: string
           student_email?: string | null
+          student_id?: string | null
           student_name: string
           teacher_email: string
+          teacher_id?: string | null
         }
         Update: {
           completed_at?: string | null
@@ -2649,10 +2653,20 @@ export type Database = {
           id?: string
           invite_token?: string
           student_email?: string | null
+          student_id?: string | null
           student_name?: string
           teacher_email?: string
+          teacher_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "public_placement_invites_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_placement_reports: {
         Row: {
@@ -3968,6 +3982,7 @@ export type Database = {
           main_goal_target_date: string | null
           name: string
           native_language: string | null
+          placement_pending_at: string | null
           send_overdue_emails: boolean | null
           student_email: string | null
           teacher_email: string | null
@@ -3992,6 +4007,7 @@ export type Database = {
           main_goal_target_date?: string | null
           name: string
           native_language?: string | null
+          placement_pending_at?: string | null
           send_overdue_emails?: boolean | null
           student_email?: string | null
           teacher_email?: string | null
@@ -4016,6 +4032,7 @@ export type Database = {
           main_goal_target_date?: string | null
           name?: string
           native_language?: string | null
+          placement_pending_at?: string | null
           send_overdue_emails?: boolean | null
           student_email?: string | null
           teacher_email?: string | null

@@ -5,11 +5,12 @@
  *            optionally, the student (student-facing link). No auth, 7-day expiry.
  *            Teacher and student links use separate tokens; the role comes from the token.
  *  - get:    returns a report by token (never returns email addresses).
- *  - claim:  signed-in teacher creates a student + learning profile from the report, once.
- *  - invite: teacher without an account sends the student a test link (7-day invite).
+ *  - claim:  signed-in teacher creates/reuses a student + learning profile, once.
+ *  - invite: Quick Send creates a 7-day link; registered teachers get automatic claim.
  *  - invite_get: returns the invited student's name only (teacher email stays server-side).
  */
-import { buildGoalRows, buildWelcomeTestRow, resolveStudentEmail } from "./claimSeed.ts";
+import { resolveStudentEmail } from "./claimSeed.ts";
+import { claimReservedReport, reserveClaim, triggerPlacementPacing, type ClaimInvite, type ClaimReport, type PlacementClaimResult } from "./claim.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
 
@@ -118,6 +119,15 @@ function teacherEmailHtml(name: string, level: string | null, reportUrl: string,
   <p style="color:#6b7280;font-size:12px;">The link is valid for 7 days after the test. ${reportUrl}</p></div>`;
 }
 
+function existingTeacherEmailHtml(name: string, level: string | null, resultUrl: string): string {
+  return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1f2937;">
+  <h2 style="color:#7c3aed;">${escapeHtml(name)} completed a placement test</h2>
+  <p>The results and teaching profile are now available on the student's profile in your Edooqoo account.</p>
+  <p>Estimated level: <strong>${level ?? "not enough evidence yet"}</strong></p>
+  ${button(escapeHtml(resultUrl), `View ${escapeHtml(name)}'s test results`)}
+  <p style="color:#6b7280;font-size:12px;">Sign in to Edooqoo to open the saved result. ${escapeHtml(resultUrl)}</p></div>`;
+}
+
 function teacherLabel(teacherName: string | null, teacherEmail: string): string {
   return teacherName ? `${escapeHtml(teacherName)} (${escapeHtml(teacherEmail)})` : escapeHtml(teacherEmail);
 }
@@ -178,11 +188,41 @@ export async function handleRequest(req: Request): Promise<Response> {
       const token = newToken();
       const studentEmail = body.studentEmail ? body.studentEmail.toLowerCase() : null;
       const teacherName = body.teacherName ? body.teacherName : null;
+      const { data: teacherProfile, error: teacherProfileError } = await admin.from("profiles")
+        .select("id").eq("email", teacherEmail).is("deleted_at", null).limit(1).maybeSingle();
+      if (teacherProfileError) throw teacherProfileError;
+      let linkedStudentId: string | null = null;
+      let createdPendingStudent = false;
+      if (teacherProfile && studentEmail) {
+        const { data: existingStudent, error: existingStudentError } = await admin.from("students")
+          .select("id").eq("teacher_id", teacherProfile.id).eq("student_email", studentEmail)
+          .is("deleted_at", null).limit(1).maybeSingle();
+        if (existingStudentError) throw existingStudentError;
+        linkedStudentId = existingStudent?.id ?? null;
+      }
+      if (teacherProfile && !linkedStudentId) {
+        const { data: pendingStudent, error: pendingStudentError } = await admin.from("students").insert({
+          teacher_id: teacherProfile.id,
+          teacher_email: teacherEmail,
+          name: body.studentName,
+          student_email: studentEmail,
+          placement_pending_at: new Date(now).toISOString(),
+        }).select("id").single();
+        if (pendingStudentError) throw pendingStudentError;
+        linkedStudentId = pendingStudent.id;
+        createdPendingStudent = true;
+      }
       const { error } = await admin.from("public_placement_invites").insert({
         invite_token: token, student_name: body.studentName, student_email: studentEmail,
-        teacher_email: teacherEmail, expires_at: new Date(now + INVITE_TTL_MS).toISOString(),
+        teacher_email: teacherEmail, teacher_id: teacherProfile?.id ?? null, student_id: linkedStudentId,
+        expires_at: new Date(now + INVITE_TTL_MS).toISOString(),
       });
-      if (error) throw error;
+      if (error) {
+        if (createdPendingStudent && linkedStudentId && teacherProfile) {
+          await admin.from("students").delete().eq("id", linkedStudentId).eq("teacher_id", teacherProfile.id);
+        }
+        throw error;
+      }
       const testUrl = `${appBase}/welcome-test/demo?invite=${token}`;
       let studentSent = false;
       if (studentEmail) {
@@ -206,10 +246,10 @@ export async function handleRequest(req: Request): Promise<Response> {
     }
 
     if (body.action === "submit") {
-      let invite: { id: string; teacher_email: string; student_name: string; student_email: string | null } | null = null;
+      let invite: (ClaimInvite & { id: string; teacher_email: string; student_name: string }) | null = null;
       if (body.inviteToken) {
         const { data, error } = await admin.from("public_placement_invites")
-          .select("id, teacher_email, student_name, student_email, expires_at, completed_at")
+          .select("id, teacher_email, student_name, student_email, teacher_id, student_id, expires_at, completed_at")
           .eq("invite_token", body.inviteToken).maybeSingle();
         if (error) throw error;
         if (!data || Date.parse(data.expires_at) <= now) return json({ error: "This test invitation has expired." }, 410);
@@ -240,13 +280,57 @@ export async function handleRequest(req: Request): Promise<Response> {
       if (error) throw error;
       const reportUrl = `${appBase}/placement-report/${token}`;
       const studentUrl = `${appBase}/placement-report/${studentToken}`;
-      try {
-        await sendEmail(teacherEmail, `${body.studentName} shared placement test results with you`, teacherEmailHtml(body.studentName, body.result.level, reportUrl, `${reportUrl}?claim=1`));
-      } catch (failure) {
-        await admin.from("public_placement_reports").delete().eq("id", inserted.id);
-        throw failure;
+      let autoClaim: { studentId: string; testId: string } | null = null;
+      if (invite?.teacher_id) {
+        // Claim the invitation before writing learner evidence. A failed auto-claim
+        // releases both records, so a retry cannot create a duplicate test.
+        const { data: completedInvite, error: inviteReservationError } = await admin.from("public_placement_invites")
+          .update({ completed_at: new Date().toISOString(), completed_report_id: inserted.id })
+          .eq("id", invite.id).is("completed_at", null).select("id").maybeSingle();
+        if (inviteReservationError) throw inviteReservationError;
+        if (!completedInvite) {
+          await admin.from("public_placement_reports").delete().eq("id", inserted.id);
+          return json({ error: "Results for this invitation were already sent." }, 409);
+        }
+        try {
+          const reserved = await reserveClaim(admin, inserted.id, invite.teacher_id, new Date().toISOString());
+          if (!reserved) throw new Error("This report was already added");
+          autoClaim = await claimReservedReport({
+            admin,
+            report: { id: inserted.id, student_name: body.studentName, teacher_email: teacherEmail, result: body.result },
+            teacher: { id: invite.teacher_id, email: teacherEmail },
+            invite,
+            studentEmail,
+          });
+          await triggerPlacementPacing(admin, autoClaim.studentId, invite.teacher_id, body.result.level);
+        } catch (failure) {
+          await admin.from("public_placement_invites").update({ completed_at: null, completed_report_id: null })
+            .eq("id", invite.id).eq("completed_report_id", inserted.id);
+          await admin.from("public_placement_reports").delete().eq("id", inserted.id).is("claimed_by", null);
+          throw failure;
+        }
       }
-      if (invite) {
+
+      let teacherSent = false;
+      if (autoClaim) {
+        const resultUrl = `${appBase}/student/${autoClaim.studentId}?tab=timeline&filter=tests&testId=${autoClaim.testId}`;
+        try {
+          await sendEmail(teacherEmail, `${body.studentName} completed their placement test`, existingTeacherEmailHtml(body.studentName, body.result.level, resultUrl));
+          teacherSent = true;
+        } catch {
+          // The result is already safely claimed. Never remove it or invite a duplicate retry only because mail failed.
+          console.error("[public-placement-report] existing teacher result email failed");
+        }
+      } else {
+        try {
+          await sendEmail(teacherEmail, `${body.studentName} shared placement test results with you`, teacherEmailHtml(body.studentName, body.result.level, reportUrl, `${reportUrl}?claim=1`));
+          teacherSent = true;
+        } catch (failure) {
+          await admin.from("public_placement_reports").delete().eq("id", inserted.id);
+          throw failure;
+        }
+      }
+      if (invite && !autoClaim) {
         const { error: completeError } = await admin.from("public_placement_invites").update({ completed_at: new Date().toISOString(), completed_report_id: inserted.id })
           .eq("id", invite.id).is("completed_at", null);
         if (completeError) throw completeError;
@@ -256,7 +340,7 @@ export async function handleRequest(req: Request): Promise<Response> {
         try { await sendEmail(studentEmail, "Your placement test results", studentEmailHtml(body.studentName, studentUrl)); studentSent = true; }
         catch { console.error("[public-placement-report] student email failed"); }
       }
-      return json({ success: true, studentUrl, studentSent, sentToInvitingTeacher: !!invite });
+      return json({ success: true, studentUrl, studentSent, teacherSent, sentToInvitingTeacher: !!invite, autoClaimed: !!autoClaim });
     }
 
     if (body.action === "forward") {
@@ -323,82 +407,32 @@ export async function handleRequest(req: Request): Promise<Response> {
     }
     if (expired) return json({ error: "expired" }, 410);
 
-    // Reserve the claim first so two parallel requests cannot create two students.
-    const { data: reserved, error: reserveError } = await admin.from("public_placement_reports")
-      .update({ claimed_by: user.id, claimed_at: new Date().toISOString() })
-      .eq("id", report.id).is("claimed_by", null).select("id").maybeSingle();
-    if (reserveError) throw reserveError;
+    let invite: ClaimInvite | null = null;
+    if (report.invite_id) {
+      const { data: inv, error: inviteError } = await admin.from("public_placement_invites")
+        .select("student_email, teacher_id, student_id").eq("id", report.invite_id).maybeSingle();
+      if (inviteError) throw inviteError;
+      invite = inv;
+    }
+    if (invite?.teacher_id && invite.teacher_id !== user.id) {
+      return json({ error: "This invitation belongs to a different teacher account" }, 403);
+    }
+
+    // Reserve first so parallel requests cannot create duplicate tests or learners.
+    const reserved = await reserveClaim(admin, report.id, user.id, new Date().toISOString());
     if (!reserved) return json({ error: "This report was already added" }, 409);
 
-    const r = report.result as z.infer<typeof resultSchema>;
-    let inviteEmail: string | null = null;
-    if (report.invite_id) {
-      const { data: inv } = await admin.from("public_placement_invites").select("student_email").eq("id", report.invite_id).maybeSingle();
-      inviteEmail = inv?.student_email ?? null;
-    }
-    const studentEmail = resolveStudentEmail(inviteEmail, report.invite_id ? null : report.student_email, [report.teacher_email, user.email]);
-    const { data: student, error: studentError } = await admin.from("students").insert({
-      teacher_id: user.id, name: report.student_name, student_email: studentEmail,
-      teacher_email: user.email ?? null, english_level: r.level,
-    }).select("id").single();
-    if (studentError) {
-      await admin.from("public_placement_reports").update({ claimed_by: null, claimed_at: null }).eq("id", report.id).eq("claimed_by", user.id);
-      throw studentError;
-    }
-
-    // Compensate only records created by this request if a required write fails.
-    // Never report success with an incomplete student/test/profile bundle.
-    try {
-    const score = (k: string) => r.skills[k as keyof typeof r.skills]?.score ?? null;
-    const scored = Object.entries(r.skills).filter(([, s]) => s.score !== null) as [string, { score: number }][];
-    scored.sort((a, b) => b[1].score - a[1].score);
-    // A reviewed welcome test makes the Prep tab and results views treat the test as done.
-    const { data: testRow, error: testError } = await admin.from("student_tests")
-      .insert(buildWelcomeTestRow(r, student.id, user.id, report.id)).select("id").single();
-    if (testError) throw testError;
-    if (!testRow) throw new Error("Test could not be saved");
-
-    const { error: profileError } = await admin.from("student_learning_profiles").insert({
-      student_id: student.id, teacher_id: user.id, welcome_test_id: testRow.id,
-      estimated_level: r.level, level_confidence: r.levelConfidence,
-      grammar_score: score("grammar"), vocabulary_score: score("vocabulary"), reading_score: score("reading"),
-      self_awareness_score: r.selfAwarenessScore, traits: r.traits, divergences: r.divergences,
-      motivation_type: r.traits.motivation_type ?? null, preferred_input_channel: r.traits.preferred_input_channel ?? null,
-      feedback_preference: r.traits.feedback_preference ?? null,
-      strongest_skill: scored[0]?.[0] ?? null, weakest_skill: scored.length > 1 ? scored[scored.length - 1][0] : null,
-      raw_answers: { source: "public_placement_preview", report_id: report.id, answered: r.answeredCount, total: r.totalQuestions },
-    });
-    if (profileError) throw profileError;
-
-    if (testRow?.id) {
-      const goals = buildGoalRows(r, student.id, user.id, testRow.id);
-      if (goals.length) {
-        const { error: goalError } = await admin.from("student_progress_goals").insert(goals);
-        if (goalError) throw goalError;
-      }
-    }
-    try {
-      const { error: pacingError } = await admin.functions.invoke("recalculate-pacing", {
-        body: { studentId: student.id, teacherId: user.id, mode: "proposal", triggerType: "placement_test",
-          triggerDetails: { estimatedLevel: r.level, source: "public_placement" } },
-      });
-      if (pacingError) console.warn("[public-placement-report] pacing trigger failed");
-    } catch { console.warn("[public-placement-report] pacing trigger failed"); }
-
-    const { error: finishError } = await admin.from("public_placement_reports").update({ claimed_student_id: student.id }).eq("id", report.id).eq("claimed_by", user.id);
-    if (finishError) throw finishError;
-    return json({ success: true, studentId: student.id, testId: testRow.id });
-    } catch (failure) {
-      // Explicitly remove dependent rows before removing this request's learner.
-      for (const table of ["student_progress_goals", "student_learning_profiles", "student_tests", "pacing_proposals"]) {
-        const { error: cleanupError } = await admin.from(table).delete().eq("student_id", student.id).eq("teacher_id", user.id);
-        if (cleanupError) throw new Error("Student setup could not be completed. Please try again later.");
-      }
-      const { error: cleanupError } = await admin.from("students").delete().eq("id", student.id).eq("teacher_id", user.id);
-      if (cleanupError) throw new Error("Student setup could not be completed. Please try again later.");
-      await admin.from("public_placement_reports").update({ claimed_by: null, claimed_at: null }).eq("id", report.id).eq("claimed_by", user.id);
-      throw failure;
-    }
+    const r = report.result as PlacementClaimResult;
+    const studentEmail = resolveStudentEmail(invite?.student_email, report.invite_id ? null : report.student_email, [report.teacher_email, user.email]);
+    const claimReport: ClaimReport = {
+      id: report.id,
+      student_name: report.student_name,
+      teacher_email: report.teacher_email,
+      result: r,
+    };
+    const claimed = await claimReservedReport({ admin, report: claimReport, teacher: { id: user.id, email: user.email }, invite, studentEmail });
+    await triggerPlacementPacing(admin, claimed.studentId, user.id, r.level);
+    return json({ success: true, studentId: claimed.studentId, testId: claimed.testId });
   } catch (e) {
     console.error("[public-placement-report] request failed");
     return json({ error: "Could not complete this request. Please try again." }, 500);
