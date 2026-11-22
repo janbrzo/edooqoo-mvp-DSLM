@@ -550,6 +550,7 @@ export default function WelcomeTestPage() {
         </Helmet>
         <PublicPlacementResult
           result={publicResult}
+          answers={answers}
           shareStatus={publicShareStatus}
           storageError={publicStorageError}
           onReset={resetPublicTest}

@@ -110,7 +110,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force, integrity, share_token: bodyShareToken } = body || {};
+    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force, integrity, share_token: bodyShareToken, skip_emails: bodySkipEmails } = body || {};
     let answers = (body && body.answers) || null;
     let student_id = bodyStudentId;
     let teacher_id = bodyTeacherId;
@@ -149,6 +149,7 @@ serve(async (req) => {
 
     const caller = await resolveCaller(req);
     const isOwnerOrService = !!authorizedTeacherId(caller, teacher_id);
+    const skipEmails = Boolean(bodySkipEmails) && isOwnerOrService;
 
     // v6.9.48: "force" re-run (teacher "Apply to Progress") rewrites the profile
     // from stored answers, so only the owning teacher or the service role may ask.
@@ -710,7 +711,7 @@ serve(async (req) => {
     // interim result as final and a crash leaves the test re-runnable.
 
     // v6.9.29: Fire-and-forget thank-you email to the student. Idempotent server-side.
-    try {
+    if (!skipEmails) try {
       const { data: studentRow } = await supabase
         .from('students')
         .select('name, student_email')
@@ -1281,7 +1282,7 @@ serve(async (req) => {
     }
 
     // --- Point 8: Email teacher on completion ---
-    if (RESEND_API_KEY && firstRunOfAttempt) {
+    if (RESEND_API_KEY && firstRunOfAttempt && !skipEmails) {
       try {
         const { data: teacherData } = await supabase
           .from('profiles')

@@ -79,6 +79,32 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     loadStudentAndTeacherInfo();
   }, [testId]);
 
+  // Refresh automatically while background Welcome Test analysis is finishing.
+  useEffect(() => {
+    if (!test || test.test_type !== 'welcome' || test.status !== 'completed') return;
+    let cancelled = false;
+    let ticks = 0;
+    const poll = async () => {
+      ticks += 1;
+      const { data } = await supabase
+        .from('student_tests')
+        .select('status')
+        .eq('id', testId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data?.status === 'reviewed') {
+        void loadTest();
+        return;
+      }
+      if (ticks < 30) timer = window.setTimeout(poll, 3000);
+    };
+    let timer = window.setTimeout(poll, 3000);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [test?.id, test?.test_type, test?.status, testId]);
+
   const loadTest = async () => {
     setLoading(true);
     const data = await fetchTestWithQuestions(testId);

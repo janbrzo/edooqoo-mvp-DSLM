@@ -34,12 +34,18 @@ async function call<T>(body: Record<string, unknown>): Promise<T> {
 
 export function submitPlacementReport(input: {
   result: PublicPlacementResult;
+  answers?: Record<string, unknown>;
   studentName: string;
   studentEmail: string;
   teacherEmail: string;
   inviteToken?: string | null;
 }) {
-  return call<{ success: true; studentUrl: string; studentSent: boolean; teacherSent: boolean; sentToInvitingTeacher: boolean; autoClaimed: boolean }>({ action: 'submit', ...input, inviteToken: input.inviteToken ?? undefined });
+  return call<{ success: true; studentUrl: string; studentSent: boolean; teacherSent: boolean; sentToInvitingTeacher: boolean; autoClaimed: boolean }>({
+    action: 'submit',
+    ...input,
+    answers: input.answers && Object.keys(input.answers).length > 0 ? input.answers : undefined,
+    inviteToken: input.inviteToken ?? undefined,
+  });
 }
 
 export const getPlacementReport = (token: string) => call<PlacementReport>({ action: 'get', token });

@@ -2670,6 +2670,7 @@ export type Database = {
       }
       public_placement_reports: {
         Row: {
+          answers: Json | null
           claimed_at: string | null
           claimed_by: string | null
           claimed_student_id: string | null
@@ -2686,6 +2687,7 @@ export type Database = {
           teacher_email: string
         }
         Insert: {
+          answers?: Json | null
           claimed_at?: string | null
           claimed_by?: string | null
           claimed_student_id?: string | null
@@ -2702,6 +2704,7 @@ export type Database = {
           teacher_email: string
         }
         Update: {
+          answers?: Json | null
           claimed_at?: string | null
           claimed_by?: string | null
           claimed_student_id?: string | null

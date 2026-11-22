@@ -9,8 +9,9 @@
  *  - invite: Quick Send creates a 7-day link; registered teachers get automatic claim.
  *  - invite_get: returns the invited student's name only (teacher email stays server-side).
  */
-import { resolveStudentEmail } from "./claimSeed.ts";
-import { claimReservedReport, reserveClaim, triggerPlacementPacing, type ClaimInvite, type ClaimReport, type PlacementClaimResult } from "./claim.ts";
+import { isLocalRecordingMarker, resolveStudentEmail } from "./claimSeed.ts";
+import { claimReservedReport, reserveClaim, triggerPlacementPacing, triggerWelcomeTestProcessing, type ClaimInvite, type ClaimReport, type PlacementClaimResult } from "./claim.ts";
+import { WELCOME_TEST_SEED_BANK_2A } from "../_shared/welcomeTestSeedBank2A.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
 
@@ -28,6 +29,25 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_INVITES_PER_TEACHER_EMAIL_PER_HOUR = 10;
 const tokenSchema = z.string().regex(/^[A-Za-z0-9_-]{20,64}$/);
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
+const KNOWN_BANK_2A_QUESTION_IDS = new Set(WELCOME_TEST_SEED_BANK_2A.map((row) => row.question_data.question_id));
+
+const answerValueSchema = z.union([
+  z.string().max(5_000),
+  z.number().finite(),
+  z.array(z.string().max(500)).max(20),
+  z.record(z.string().max(200), z.number().finite()).refine((m) => Object.keys(m).length <= 20),
+]);
+const answersSchema = z.record(z.string().max(40), answerValueSchema).refine((a) => Object.keys(a).length <= 72);
+
+function sanitizeSubmittedAnswers(answers: Record<string, unknown> | undefined): Record<string, unknown> | null {
+  if (!answers) return null;
+  const clean: Record<string, unknown> = {};
+  for (const [id, value] of Object.entries(answers)) {
+    if (!KNOWN_BANK_2A_QUESTION_IDS.has(id) || isLocalRecordingMarker(value)) continue;
+    clean[id] = value;
+  }
+  return Object.keys(clean).length > 0 ? clean : null;
+}
 
 const skill = z.object({
   score: z.number().min(0).max(100).nullable(),
@@ -62,6 +82,7 @@ const bodySchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("submit"),
     result: resultSchema,
+    answers: answersSchema.optional(),
     studentName: z.string().trim().min(1).max(80),
     studentEmail: z.string().trim().email().max(254).optional().or(z.literal("")),
     teacherEmail: z.string().trim().email().max(254).optional().or(z.literal("")),
@@ -272,15 +293,17 @@ export async function handleRequest(req: Request): Promise<Response> {
       const studentToken = newToken();
       const typedEmail = body.studentEmail ? body.studentEmail.toLowerCase() : null;
       const studentEmail = invite ? (invite.student_email ?? null) : (typedEmail && typedEmail !== resolvedTeacherEmail.toLowerCase() ? typedEmail : null);
+      const storedAnswers = sanitizeSubmittedAnswers(body.answers);
       const { data: inserted, error } = await admin.from("public_placement_reports").insert({
         report_token: token, student_report_token: studentToken, result: body.result, student_name: body.studentName,
         student_email: studentEmail, teacher_email: teacherEmail, expires_at: new Date(expires).toISOString(),
         invite_id: invite?.id ?? null,
+        ...(storedAnswers ? { answers: storedAnswers } : {}),
       }).select("id").single();
       if (error) throw error;
       const reportUrl = `${appBase}/placement-report/${token}`;
       const studentUrl = `${appBase}/placement-report/${studentToken}`;
-      let autoClaim: { studentId: string; testId: string } | null = null;
+      let autoClaim: { studentId: string; testId: string; hasAnswers: boolean } | null = null;
       if (invite?.teacher_id) {
         // Claim the invitation before writing learner evidence. A failed auto-claim
         // releases both records, so a retry cannot create a duplicate test.
@@ -297,12 +320,21 @@ export async function handleRequest(req: Request): Promise<Response> {
           if (!reserved) throw new Error("This report was already added");
           autoClaim = await claimReservedReport({
             admin,
-            report: { id: inserted.id, student_name: body.studentName, teacher_email: teacherEmail, result: body.result },
+            report: { id: inserted.id, student_name: body.studentName, teacher_email: teacherEmail, result: body.result, answers: storedAnswers },
             teacher: { id: invite.teacher_id, email: teacherEmail },
             invite,
             studentEmail,
           });
-          await triggerPlacementPacing(admin, autoClaim.studentId, invite.teacher_id, body.result.level);
+          if (autoClaim.hasAnswers) {
+            await triggerWelcomeTestProcessing(admin, {
+              testId: autoClaim.testId,
+              studentId: autoClaim.studentId,
+              teacherId: invite.teacher_id,
+              answeredCount: body.result.answeredCount,
+            });
+          } else {
+            await triggerPlacementPacing(admin, autoClaim.studentId, invite.teacher_id, body.result.level);
+          }
         } catch (failure) {
           await admin.from("public_placement_invites").update({ completed_at: null, completed_report_id: null })
             .eq("id", invite.id).eq("completed_report_id", inserted.id);
@@ -424,14 +456,27 @@ export async function handleRequest(req: Request): Promise<Response> {
 
     const r = report.result as PlacementClaimResult;
     const studentEmail = resolveStudentEmail(invite?.student_email, report.invite_id ? null : report.student_email, [report.teacher_email, user.email]);
+    const { data: answerRow, error: answerRowError } = await admin.from("public_placement_reports")
+      .select("answers").eq("id", report.id).maybeSingle();
+    if (answerRowError) throw answerRowError;
     const claimReport: ClaimReport = {
       id: report.id,
       student_name: report.student_name,
       teacher_email: report.teacher_email,
       result: r,
+      answers: (answerRow?.answers as Record<string, unknown> | null | undefined) ?? null,
     };
     const claimed = await claimReservedReport({ admin, report: claimReport, teacher: { id: user.id, email: user.email }, invite, studentEmail });
-    await triggerPlacementPacing(admin, claimed.studentId, user.id, r.level);
+    if (claimed.hasAnswers) {
+      await triggerWelcomeTestProcessing(admin, {
+        testId: claimed.testId,
+        studentId: claimed.studentId,
+        teacherId: user.id,
+        answeredCount: r.answeredCount,
+      });
+    } else {
+      await triggerPlacementPacing(admin, claimed.studentId, user.id, r.level);
+    }
     return json({ success: true, studentId: claimed.studentId, testId: claimed.testId });
   } catch (e) {
     console.error("[public-placement-report] request failed");

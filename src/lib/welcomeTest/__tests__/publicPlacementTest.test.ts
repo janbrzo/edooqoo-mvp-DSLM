@@ -8,6 +8,7 @@ import {
   PUBLIC_PLACEMENT_STORAGE_KEY,
   PUBLIC_PLACEMENT_TTL_MS,
   readSharedPublicPlacementResult,
+  sanitizePlacementAnswersForReport,
   sanitizePublicPlacementAnswers,
   savePublicPlacementSession,
 } from '../publicPlacementTest';
@@ -47,6 +48,17 @@ describe('public placement local session', () => {
       injected: 'discard',
       wt_q2: ['one', 'two'],
     })).toEqual({ wt_q1: 'Answer', wt_q16s: 'local-recording:wt_q16s', wt_q2: ['one', 'two'] });
+  });
+
+  it('strips local recording markers and unknown keys when preparing answers for report submission', () => {
+    expect(sanitizePlacementAnswersForReport({
+      wt_q1: 'Answer',
+      wt_q16s: 'local-recording:wt_q16s',
+      wt_q36s: 'blob:private',
+      injected: 'discard',
+      wt_q44: { 'Speaking with strangers': 4 },
+    })).toEqual({ wt_q1: 'Answer', wt_q44: { 'Speaking with strangers': 4 } });
+    expect(sanitizePlacementAnswersForReport({ wt_q16s: 'local-recording:wt_q16s' })).toBeUndefined();
   });
 
   it('clears a local session without touching any other storage key', () => {

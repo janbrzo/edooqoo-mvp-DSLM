@@ -16,7 +16,7 @@ const result = {
   selfAwarenessScore: 30, openResponseCount: 2, recordingCount: 1,
 };
 type Call = { path: string; method: string; body: Record<string, unknown> | null };
-type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean };
+type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean; reportAnswers?: Record<string, unknown> | null };
 
 async function fixture(run: (call: (body: unknown, token?: string, method?: string) => Promise<Response>, calls: Call[]) => Promise<void>, options: Options = {}) {
   const names = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "APP_BASE_URL", "RESEND_API_KEY"];
@@ -24,6 +24,7 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
   names.forEach((name, i) => Deno.env.set(name, ["https://fixture.example.test", "synthetic-service", "https://app.example.test", "synthetic-mail"][i]));
   const calls: Call[] = [];
   const report = { id: "report-id", report_token: teacherToken, student_report_token: studentToken, result,
+    answers: options.reportAnswers ?? null,
     student_name: "Marta", student_email: "student@example.test", teacher_email: "teacher@example.test", invite_id: options.pendingStudent ? "invite-id" : null,
     expires_at: new Date(Date.now() + (options.expired ? -1 : 7 * 86400_000)).toISOString(),
     claimed_by: options.claimed ? "owner-id" : null, claimed_student_id: options.claimed ? "student-id" : null,
@@ -65,6 +66,7 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
       }
       else value = { id: path.endsWith("student_tests") ? "test-id" : "student-id" };
     } else if (path === "/functions/v1/recalculate-pacing") value = { success: true };
+    else if (path === "/functions/v1/process-welcome-test") value = { success: true, accepted: true, status: "completed" };
     else throw new Error(`Unexpected fixture request: ${path}`);
     return new Response(JSON.stringify(value), { status, headers: { "Content-Type": "application/json" } });
   });
@@ -276,4 +278,78 @@ Deno.test("HTTP failure to finish claim rolls back its learner bundle", async ()
     assertEquals(calls.some(c => c.path.endsWith("students") && c.method === "DELETE"), true);
     assertEquals(calls.some(c => c.path.endsWith("public_placement_reports") && c.body?.claimed_by === null), true);
   }, { failFinish: true });
+});
+Deno.test("HTTP submit stores sanitized answers while public get never returns raw answers", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({
+      action: "submit",
+      result,
+      answers: {
+        wt_q1: "I can talk about most topics, but I make grammar mistakes and miss some words",
+        wt_q41: "I want to prepare for product demos.",
+        wt_q16s: "local-recording:wt_q16s",
+        unknown_q: "discard",
+      },
+      studentName: "Marta",
+      teacherEmail: "teacher@example.test",
+    });
+    assertEquals(res.status, 200);
+    await res.text();
+    const inserted = calls.find(c => c.path.endsWith("/public_placement_reports") && c.method === "POST")?.body;
+    assertEquals(inserted?.answers, {
+      wt_q1: "I can talk about most topics, but I make grammar mistakes and miss some words",
+      wt_q41: "I want to prepare for product demos.",
+    });
+    const getRes = await call({ action: "get", token: teacherToken });
+    assertEquals(getRes.status, 200);
+    const got = await getRes.json();
+    assertEquals("answers" in got, false);
+  }, { reportAnswers: { wt_q41: "PRIVATE ANSWER" } });
+});
+Deno.test("HTTP claim with stored answers seeds 72 questions and triggers process-welcome-test with skip_emails", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "claim", token: teacherToken });
+    assertEquals(res.status, 200);
+    const data = await res.json();
+    assertEquals([data.studentId, data.testId], ["student-id", "test-id"]);
+    const testWrite = calls.find(c => c.path.endsWith("/student_tests") && c.method === "POST")?.body;
+    assertEquals(testWrite?.status, "completed");
+    assertEquals(testWrite?.total_questions, 72);
+    assertEquals((testWrite?.generation_params as Record<string, unknown>)?.welcome_bank, 2);
+    const questionsWrite = calls.find(c => c.path.endsWith("/student_test_questions") && c.method === "POST")?.body as unknown as Array<Record<string, unknown>>;
+    assertEquals(questionsWrite.length, 72);
+    assertEquals(questionsWrite.find((q) => (q.question_data as Record<string, unknown>)?.question_id === "wt_q41")?.student_answer, "I want to lead meetings.");
+    assertEquals(calls.some(c => c.path.endsWith("/student_learning_profiles") && c.method === "POST"), false);
+    const processCall = calls.find(c => c.path === "/functions/v1/process-welcome-test")?.body;
+    assertEquals(processCall, { test_id: "test-id", student_id: "student-id", teacher_id: "owner-id", answered_count: 40, skip_emails: true });
+    assertEquals(calls.some(c => c.path === "/functions/v1/recalculate-pacing"), false);
+  }, { reportAnswers: { wt_q41: "I want to lead meetings." } });
+});
+Deno.test("HTTP registered auto-claim with answers seeds questions and runs process-welcome-test", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({
+      action: "submit",
+      result,
+      answers: { wt_q41: "I need English for weekly client calls." },
+      studentName: "Marta",
+      inviteToken,
+    });
+    assertEquals(res.status, 200);
+    const data = await res.json();
+    assertEquals(data.autoClaimed, true);
+    const questionsWrite = calls.find(c => c.path.endsWith("/student_test_questions") && c.method === "POST")?.body as unknown as Array<Record<string, unknown>>;
+    assertEquals(questionsWrite.length, 72);
+    assertEquals(calls.some(c => c.path === "/functions/v1/process-welcome-test" && c.body?.skip_emails === true), true);
+  }, { registeredTeacher: true, pendingStudent: true });
+});
+Deno.test("HTTP failed student_test_questions insert rolls back learner and claim reservation", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "claim", token: teacherToken });
+    assertEquals(res.status, 500);
+    await res.text();
+    assertEquals(calls.some(c => c.path.endsWith("/student_test_questions") && c.method === "DELETE"), true);
+    assertEquals(calls.some(c => c.path.endsWith("/student_tests") && c.method === "DELETE"), true);
+    assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "DELETE"), true);
+    assertEquals(calls.some(c => c.path.endsWith("/public_placement_reports") && c.body?.claimed_by === null), true);
+  }, { reportAnswers: { wt_q41: "I want to lead meetings." }, failTable: "student_test_questions" });
 });

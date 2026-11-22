@@ -127,6 +127,18 @@ export function sanitizePublicPlacementAnswers(answers: Record<string, unknown>)
   return clean;
 }
 
+/** Strips local-only audio markers before submitting answers for account-equivalent analysis. */
+export function sanitizePlacementAnswersForReport(answers: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+  if (!answers) return undefined;
+  const sanitized = sanitizePublicPlacementAnswers(answers);
+  const clean: Record<string, unknown> = {};
+  for (const [questionId, value] of Object.entries(sanitized)) {
+    if (typeof value === 'string' && (value.startsWith('local-recording:') || value.startsWith('blob:'))) continue;
+    clean[questionId] = value;
+  }
+  return Object.keys(clean).length > 0 ? clean : undefined;
+}
+
 export function savePublicPlacementSession(
   session: Omit<PublicPlacementSession, 'version' | 'expiresAt' | 'answers'> & { answers: Record<string, unknown> },
   now: Date = new Date(),

@@ -8,12 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+  sanitizePlacementAnswersForReport,
   type PublicPlacementResult as PublicPlacementResultData,
   type SharedPublicPlacementResult,
 } from '@/lib/welcomeTest/publicPlacementTest';
 
 interface PublicPlacementResultProps {
   result: PublicPlacementResultData | null;
+  answers?: Record<string, unknown>;
   shareStatus: SharedPublicPlacementResult['status'];
   storageError: string | null;
   onReset: () => Promise<void>;
@@ -38,7 +40,7 @@ async function copyText(value: string): Promise<void> {
   if (!copied) throw new Error('Copy was not available');
 }
 
-export function PublicPlacementResult({ result, shareStatus, storageError, onReset, inviteToken = null }: PublicPlacementResultProps) {
+export function PublicPlacementResult({ result, answers, shareStatus, storageError, onReset, inviteToken = null }: PublicPlacementResultProps) {
   const [invite, setInvite] = useState<{ studentName: string; completed: boolean } | null>(null);
   const [inviteLoading, setInviteLoading] = useState(!!inviteToken);
   const [inviteError, setInviteError] = useState(false);
@@ -94,7 +96,15 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
     if (studentEmail.trim() && !emailPattern.test(studentEmail.trim())) { toast.error('Check your email address or leave it empty.'); return; }
     setSending(true);
     try {
-      const response = await submitPlacementReport({ result, studentName: name, studentEmail: studentEmail.trim(), teacherEmail: invited ? '' : teacherEmail.trim(), inviteToken: invited ? inviteToken : null });
+      const reportAnswers = sanitizePlacementAnswersForReport(answers);
+      const response = await submitPlacementReport({
+        result,
+        answers: reportAnswers,
+        studentName: name,
+        studentEmail: studentEmail.trim(),
+        teacherEmail: invited ? '' : teacherEmail.trim(),
+        inviteToken: invited ? inviteToken : null,
+      });
       if (invited) clearPlacementInviteToken();
       setSent({ studentUrl: response.studentUrl, studentSent: response.studentSent });
       if (!invited) toast.success('Report sent to your teacher.');
@@ -211,7 +221,7 @@ export function PublicPlacementResult({ result, shareStatus, storageError, onRes
                   <Button className="w-full rounded-full" onClick={() => { void sendReport(); }} disabled={sending}>
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Send report to my teacher
                   </Button>
-                  <p className="text-xs leading-5 text-muted-foreground">The report contains this summary only, never your written answers or recordings. It is valid for 7 days after the test.</p>
+                  <p className="text-xs leading-5 text-muted-foreground">Your answers are stored for 7 days so your teacher can view the full analysis in their account; voice recordings stay on your device.</p>
                 </>
               )}
             </CardContent>

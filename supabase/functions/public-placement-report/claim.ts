@@ -1,5 +1,11 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
-import { buildGoalRows, buildWelcomeTestRow, type ClaimResult } from "./claimSeed.ts";
+import {
+  buildGoalRows,
+  buildLegacySkillResultRows,
+  buildPlacementQuestionRows,
+  buildWelcomeTestRow,
+  type ClaimResult,
+} from "./claimSeed.ts";
 
 export type PlacementClaimResult = ClaimResult & {
   levelConfidence: string | null;
@@ -13,6 +19,7 @@ export type ClaimReport = {
   student_name: string;
   teacher_email: string;
   result: PlacementClaimResult;
+  answers?: Record<string, unknown> | null;
 };
 
 export type ClaimInvite = {
@@ -45,9 +52,13 @@ export async function claimReservedReport(input: {
   teacher: ClaimTeacher;
   invite: ClaimInvite | null;
   studentEmail: string | null;
-}): Promise<{ studentId: string; testId: string }> {
+}): Promise<{ studentId: string; testId: string; hasAnswers: boolean }> {
   const { admin, report, teacher, invite, studentEmail } = input;
   const r = report.result;
+  const answers = report.answers && typeof report.answers === "object" && !Array.isArray(report.answers)
+    ? report.answers
+    : null;
+  const hasAnswers = !!answers && Object.keys(answers).length > 0;
   let studentId = invite?.student_id ?? "";
   let createdStudent = false;
   let testId = "";
@@ -82,39 +93,60 @@ export async function claimReservedReport(input: {
     }
 
     const { data: testRow, error: testError } = await admin.from("student_tests")
-      .insert(buildWelcomeTestRow(r, studentId, teacher.id, report.id)).select("id").single();
+      .insert(buildWelcomeTestRow(r, studentId, teacher.id, report.id, hasAnswers)).select("id").single();
     if (testError) throw testError;
     if (!testRow) throw new Error("Test could not be saved");
     testId = testRow.id;
 
-    const score = (key: string) => r.skills[key]?.score ?? null;
-    const scored = Object.entries(r.skills).filter(([, value]) => value.score !== null) as [string, { score: number }][];
-    scored.sort((a, b) => b[1].score - a[1].score);
-    const { error: profileError } = await admin.from("student_learning_profiles").insert({
-      student_id: studentId,
-      teacher_id: teacher.id,
-      welcome_test_id: testId,
-      estimated_level: r.level,
-      level_confidence: r.levelConfidence,
-      grammar_score: score("grammar"),
-      vocabulary_score: score("vocabulary"),
-      reading_score: score("reading"),
-      self_awareness_score: r.selfAwarenessScore,
-      traits: r.traits,
-      divergences: r.divergences,
-      motivation_type: r.traits.motivation_type ?? null,
-      preferred_input_channel: r.traits.preferred_input_channel ?? null,
-      feedback_preference: r.traits.feedback_preference ?? null,
-      strongest_skill: scored[0]?.[0] ?? null,
-      weakest_skill: scored.length > 1 ? scored[scored.length - 1][0] : null,
-      raw_answers: { source: "public_placement_preview", report_id: report.id, answered: r.answeredCount, total: r.totalQuestions },
-    });
-    if (profileError) throw profileError;
+    if (hasAnswers) {
+      const questionRows = buildPlacementQuestionRows(testId, answers!, r.completedAt);
+      const { error: questionsError } = await admin.from("student_test_questions").insert(questionRows);
+      if (questionsError) throw questionsError;
+    } else {
+      const score = (key: string) => r.skills[key]?.score ?? null;
+      const scored = Object.entries(r.skills).filter(([, value]) => value.score !== null) as [string, { score: number }][];
+      scored.sort((a, b) => b[1].score - a[1].score);
+      const cm = r.confidenceMatrix ?? {};
+      const { error: profileError } = await admin.from("student_learning_profiles").upsert({
+        student_id: studentId,
+        teacher_id: teacher.id,
+        welcome_test_id: testId,
+        estimated_level: r.level,
+        self_assessed_level: r.selfAssessedLevel ?? r.traits.self_assessed_level ?? null,
+        level_confidence: r.levelConfidence,
+        grammar_score: score("grammar"),
+        vocabulary_score: score("vocabulary"),
+        reading_score: score("reading"),
+        self_awareness_score: r.selfAwarenessScore,
+        traits: r.traits,
+        divergences: r.divergences,
+        motivation_type: r.traits.motivation_type ?? null,
+        preferred_input_channel: r.traits.preferred_input_channel ?? null,
+        feedback_preference: r.traits.feedback_preference ?? null,
+        interest_topics: r.interestTopics ?? [],
+        confidence_speaking: cm.speaking ?? null,
+        confidence_writing: cm.writing ?? null,
+        confidence_listening: cm.listening ?? null,
+        confidence_reading: cm.reading ?? null,
+        confidence_presenting: cm.presenting ?? null,
+        confidence_small_talk: cm.small_talk ?? null,
+        strongest_skill: scored[0]?.[0] ?? null,
+        weakest_skill: scored.length > 1 ? scored[scored.length - 1][0] : null,
+        raw_answers: { source: "public_placement_preview", report_id: report.id, answered: r.answeredCount, total: r.totalQuestions },
+      }, { onConflict: "student_id,teacher_id" });
+      if (profileError) throw profileError;
 
-    const goals = buildGoalRows(r, studentId, teacher.id, testId);
-    if (goals.length) {
-      const { error: goalError } = await admin.from("student_progress_goals").insert(goals);
-      if (goalError) throw goalError;
+      const skillRows = buildLegacySkillResultRows(r, studentId, testId);
+      if (skillRows.length) {
+        const { error: skillError } = await admin.from("test_skill_results").insert(skillRows);
+        if (skillError) throw skillError;
+      }
+
+      const goals = buildGoalRows(r, studentId, teacher.id, testId);
+      if (goals.length) {
+        const { error: goalError } = await admin.from("student_progress_goals").insert(goals);
+        if (goalError) throw goalError;
+      }
     }
 
     if (pendingRestore) {
@@ -130,9 +162,15 @@ export async function claimReservedReport(input: {
     if (finishError) throw finishError;
     if (!finished) throw new Error("Claim reservation was lost");
 
-    return { studentId, testId };
+    return { studentId, testId, hasAnswers };
   } catch (failure) {
     if (testId) {
+      const { error: questionsCleanupError } = await admin.from("student_test_questions").delete()
+        .eq("test_id", testId);
+      if (questionsCleanupError) throw new Error("Student setup could not be completed. Please try again later.");
+      const { error: skillsCleanupError } = await admin.from("test_skill_results").delete()
+        .eq("test_id", testId);
+      if (skillsCleanupError) throw new Error("Student setup could not be completed. Please try again later.");
       const { error: goalsCleanupError } = await admin.from("student_progress_goals").delete()
         .eq("student_id", studentId).eq("teacher_id", teacher.id).eq("metadata->>test_id", testId);
       if (goalsCleanupError) throw new Error("Student setup could not be completed. Please try again later.");
@@ -174,5 +212,25 @@ export async function triggerPlacementPacing(admin: SupabaseClient, studentId: s
     if (error) console.warn("[public-placement-report] pacing trigger failed");
   } catch {
     console.warn("[public-placement-report] pacing trigger failed");
+  }
+}
+
+export async function triggerWelcomeTestProcessing(
+  admin: SupabaseClient,
+  input: { testId: string; studentId: string; teacherId: string; answeredCount: number },
+): Promise<void> {
+  try {
+    const { error } = await admin.functions.invoke("process-welcome-test", {
+      body: {
+        test_id: input.testId,
+        student_id: input.studentId,
+        teacher_id: input.teacherId,
+        answered_count: input.answeredCount,
+        skip_emails: true,
+      },
+    });
+    if (error) console.warn("[public-placement-report] welcome test processing trigger failed");
+  } catch {
+    console.warn("[public-placement-report] welcome test processing trigger failed");
   }
 }
