@@ -5,6 +5,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { appHosts, safeUrl } from "../_shared/auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -80,7 +81,17 @@ serve(async (req) => {
     }
 
     // Generate magic link
-    const origin = req.headers.get('origin') || Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com';
+    const appBase = (Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com').replace(/\/+$/, '');
+    const allowedHosts = [...appHosts(), 'localhost'];
+    const rawOrigin = safeUrl(req.headers.get('origin'));
+    let origin = appBase;
+    if (rawOrigin) {
+      const parsed = new URL(rawOrigin);
+      const host = parsed.hostname.toLowerCase();
+      if (allowedHosts.includes(host) || host.endsWith('.lovable.app')) {
+        origin = parsed.origin;
+      }
+    }
     const redirectTo = `${origin}/dashboard?admin_view=true`;
 
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({

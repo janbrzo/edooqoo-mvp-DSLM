@@ -86,6 +86,30 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Verify the worksheet exists and belongs to the caller (or is still unclaimed)
+    const { data: worksheetRow, error: worksheetError } = await supabase
+      .from('worksheets')
+      .select('id, teacher_id, user_id')
+      .eq('id', worksheetId)
+      .maybeSingle();
+
+    if (worksheetError || !worksheetRow) {
+      return new Response(
+        JSON.stringify({ error: 'Worksheet not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (
+      (worksheetRow.teacher_id && worksheetRow.teacher_id !== userId) ||
+      (worksheetRow.user_id && worksheetRow.user_id !== userId)
+    ) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Create Stripe checkout session
     const session = await createStripeSession({
       worksheetId,

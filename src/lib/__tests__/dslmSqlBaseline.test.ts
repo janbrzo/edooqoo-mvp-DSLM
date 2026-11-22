@@ -269,8 +269,13 @@ describe('Welcome Test server authority and retake history (2026-10-17 audit)', 
     expect(latestDefinition('save_test_answer_by_share_token')).toBe(file);
     expect(file).toMatch(/AND t\.status IN \('assigned', 'in_progress'\)/);
     expect(file).toMatch(/RETURN v_updated > 0;/);
-    expect(latestDefinition('get_test_questions_by_share_token')).toBe(file);
-    expect(file).toMatch(/jsonb_populate_record\(q, jsonb_build_object\('correct_answer', NULL\)\)/);
+    const questionsDef = latestDefinition('get_test_questions_by_share_token');
+    expect(questionsDef).toMatch(/jsonb_populate_record\(q, jsonb_build_object\('correct_answer', NULL\)\)/);
+    expect(questionsDef).toMatch(/t\.share_expires_at IS NULL OR t\.share_expires_at > now\(\)/);
+    const contextDef = latestDefinition('get_test_context_by_share_token');
+    expect(contextDef).toMatch(/t\.share_expires_at IS NULL OR t\.share_expires_at > now\(\)/);
+    const deleteMarkDoneDef = latestDefinition('delete_mark_done_evaluation');
+    expect(deleteMarkDoneDef).toMatch(/FROM public\.worksheets w WHERE w\.id = p_worksheet_id AND w\.teacher_id = v_teacher_id/);
   });
 });
 

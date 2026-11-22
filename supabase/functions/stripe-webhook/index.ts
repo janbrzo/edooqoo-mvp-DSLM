@@ -135,7 +135,7 @@ serve(async (req) => {
       throw new Error('No email found for customer');
     }
 
-    logStep('Customer found', { email, customerId: customer.id });
+    logStep('Customer found', { customerId: customer.id });
 
     // Find user profile by email
     const { data: profile, error: profileError } = await supabaseService
@@ -145,8 +145,8 @@ serve(async (req) => {
       .single();
 
     if (profileError || !profile) {
-      logStep('ERROR: User profile not found', { email, error: profileError });
-      throw new Error(`User profile not found for email: ${email}`);
+      logStep('ERROR: User profile not found', { customerId: customer.id, error: profileError });
+      throw new Error(`User profile not found for customer: ${customer.id}`);
     }
 
     logStep('Profile found', { userId: profile.id, currentType: profile.subscription_type });
@@ -342,7 +342,6 @@ serve(async (req) => {
     logStep('Webhook processing completed successfully', {
       eventType: finalEventType,
       subscriptionId: subscription.id,
-      email: email,
       isRenewal,
       tokensAdded: renewalTokens
     });
