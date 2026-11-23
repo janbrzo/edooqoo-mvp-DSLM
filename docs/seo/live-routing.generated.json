@@ -1,14 +1,15 @@
 {
-  "generatedAt": "2026-08-24T06:48:57.667Z",
+  "generatedAt": "2026-11-23T17:59:35.731Z",
   "base": "https://edooqoo.com",
   "strictHeaders": false,
   "totals": {
-    "checks": 58,
-    "passed": 47,
-    "failed": 11,
+    "checks": 107,
+    "passed": 107,
+    "failed": 0,
     "byOutcome": {
-      "pass-html-stub": 45,
-      "fail-no-signal": 11,
+      "pass-html-stub": 94,
+      "pass-robots-disallow": 1,
+      "pass-html-meta": 10,
       "pass-html-canonical": 1,
       "pass-header-301": 1
     }
@@ -32,7 +33,51 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061502.hOxARWJrHqLoOcl-fLzzKgLGH2SdR9b9TtHUwdLVQNM",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/adult-esl-lesson-ideas-by-level.html",
+      "expected": "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+        "refresh": "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061503.ntg7rvsklMBkprZUWDDgS_MucJRj52zwX9c7LhbpFhg",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/ai-placement-tests-english-students.html",
+      "expected": "https://edooqoo.com/english-placement-test-for-private-tutors.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/english-placement-test-for-private-tutors.html",
+        "refresh": "https://edooqoo.com/english-placement-test-for-private-tutors.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061504.5nDh7bKv8bCk8zvtenK-Z1WN3AgdfpanJFiR4tUh_V8",
         "server": "cloudflare"
       }
     },
@@ -54,7 +99,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061504.5nDh7bKv8bCk8zvtenK-Z1WN3AgdfpanJFiR4tUh_V8",
         "server": "cloudflare"
       }
     },
@@ -76,7 +121,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061505.z9QexykZRL5CTDPcIMv7aOb5BWVOu-hL7q3-p8XulSg",
         "server": "cloudflare"
       }
     },
@@ -98,7 +143,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061506.fZq7ykA_KGtHnkWqjAKLx0r28nnHwtKvQxadWrkuYig",
         "server": "cloudflare"
       }
     },
@@ -120,7 +165,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061507.EgBdyCtkTMlt63ajUC7sFsLxcbH8uA16jJWnkw5eJEc",
         "server": "cloudflare"
       }
     },
@@ -142,7 +187,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061507.EgBdyCtkTMlt63ajUC7sFsLxcbH8uA16jJWnkw5eJEc",
         "server": "cloudflare"
       }
     },
@@ -164,7 +209,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061508.UUly1gkZksWSPJrOIrV2OemMaYiNSeeoQ164VgdRG5s",
         "server": "cloudflare"
       }
     },
@@ -186,7 +231,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061509.6OI5olMQFHqIkXlj8_3VKXwBbZHMICDVmi_iYq42DYE",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/conversation-topics-adult-esl-students.html",
+      "expected": "https://edooqoo.com/blog/discussion-questions-esl-topics.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/discussion-questions-esl-topics.html",
+        "refresh": "https://edooqoo.com/blog/discussion-questions-esl-topics.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061509.6OI5olMQFHqIkXlj8_3VKXwBbZHMICDVmi_iYq42DYE",
         "server": "cloudflare"
       }
     },
@@ -208,7 +275,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061510.uWi71LdB7IclRRO07mUkz1ZQcl2EaM6G_44SEv4LX1Y",
         "server": "cloudflare"
       }
     },
@@ -230,7 +297,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061510.uWi71LdB7IclRRO07mUkz1ZQcl2EaM6G_44SEv4LX1Y",
         "server": "cloudflare"
       }
     },
@@ -252,7 +319,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061512.RqqnbWgzHpMS6fBFyFcuOkEgAEQeDPmggc666kDGLDA",
         "server": "cloudflare"
       }
     },
@@ -274,7 +341,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061513.TrC7xENLlW3K_mNgTcvTTi3ZY-3wBobwZ31b2NmugAM",
         "server": "cloudflare"
       }
     },
@@ -296,7 +363,73 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061514.4sFnU_bGlzIhdwCNtlwPoLtKsYhsOmZ0me5sdFqVUXM",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/english-lesson-plan-template-free.html",
+      "expected": "https://edooqoo.com/ai-lesson-planning-for-english-teachers.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/ai-lesson-planning-for-english-teachers.html",
+        "refresh": "https://edooqoo.com/ai-lesson-planning-for-english-teachers.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061515.AoXZprqv1D6A6yRPpTy5KVH4nTZLynf1lRBwcTmQJmg",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/english-worksheet-generator-ai.html",
+      "expected": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html",
+        "refresh": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061515.AoXZprqv1D6A6yRPpTy5KVH4nTZLynf1lRBwcTmQJmg",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/esl-speaking-assessment-rubric.html",
+      "expected": "https://edooqoo.com/blog/rubrics-for-english-teachers.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/rubrics-for-english-teachers.html",
+        "refresh": "https://edooqoo.com/blog/rubrics-for-english-teachers.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061516.ZgTYJN1ZTLPd3PCIC9a-8w7e8ZNsxmuQKlAM5yN1mmY",
         "server": "cloudflare"
       }
     },
@@ -318,7 +451,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061517.Z51jY1grVF7G5eSCkoxQdIsSQ9D9-XQBAB6A10rxNoY",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/five-minute-filler-activities-esl.html",
+      "expected": "https://edooqoo.com/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+        "refresh": "https://edooqoo.com/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061517.Z51jY1grVF7G5eSCkoxQdIsSQ9D9-XQBAB6A10rxNoY",
         "server": "cloudflare"
       }
     },
@@ -340,7 +495,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061517.Z51jY1grVF7G5eSCkoxQdIsSQ9D9-XQBAB6A10rxNoY",
         "server": "cloudflare"
       }
     },
@@ -362,7 +517,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061518.Gx5BY1NzvN6n-2w2_DQL4XoBZC6wtBKwoIl2dmF9QLY",
         "server": "cloudflare"
       }
     },
@@ -384,7 +539,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061518.Gx5BY1NzvN6n-2w2_DQL4XoBZC6wtBKwoIl2dmF9QLY",
         "server": "cloudflare"
       }
     },
@@ -406,7 +561,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061519.rFVMGhg8P5-PqrlnAs1NbHfg7x-QJYHhGEt2pufIubM",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/getting-more-esl-students-marketing.html",
+      "expected": "https://edooqoo.com/for-english-tutors",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/for-english-tutors",
+        "refresh": "https://edooqoo.com/for-english-tutors"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061520.NDGAm6MsQgQfMzarMC8hmhQdiXZueLy80kypgA0XjaY",
         "server": "cloudflare"
       }
     },
@@ -428,7 +605,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061520.NDGAm6MsQgQfMzarMC8hmhQdiXZueLy80kypgA0XjaY",
         "server": "cloudflare"
       }
     },
@@ -450,7 +627,117 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061521.nGBqbeuVo4sRB83VD9uGkLMuaB5XwRNyfWfHXxmVXC8",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/holiday-themed-esl-activities.html",
+      "expected": "https://edooqoo.com/blog/current-events-esl-lessons.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/current-events-esl-lessons.html",
+        "refresh": "https://edooqoo.com/blog/current-events-esl-lessons.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061522.2Joip7fkPLa9uQjhx_gfCwNdYkUIsY-JU23scK2-lzQ",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/homework-feedback-students-read.html",
+      "expected": "https://edooqoo.com/blog/adult-business-english-homework-feedback-loop.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/adult-business-english-homework-feedback-loop.html",
+        "refresh": "https://edooqoo.com/blog/adult-business-english-homework-feedback-loop.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061523.v4WcdkFQVGnDBRVKTq3laFsF11PwWFnXQxH9TXSwZXQ",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/how-to-give-english-level-test.html",
+      "expected": "https://edooqoo.com/blog/what-should-adult-english-placement-test-include.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/what-should-adult-english-placement-test-include.html",
+        "refresh": "https://edooqoo.com/blog/what-should-adult-english-placement-test-include.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061523.v4WcdkFQVGnDBRVKTq3laFsF11PwWFnXQxH9TXSwZXQ",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/how-to-run-esl-business-online.html",
+      "expected": "https://edooqoo.com/blog/best-workflow-for-private-english-tutors.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/best-workflow-for-private-english-tutors.html",
+        "refresh": "https://edooqoo.com/blog/best-workflow-for-private-english-tutors.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061524.mgdU5JE_wbEQV4xBBjjfm4Yc2qexTt7e_3_p83I04Uo",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/how-to-teach-past-tenses-esl.html",
+      "expected": "https://edooqoo.com/past-simple-worksheets.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/past-simple-worksheets.html",
+        "refresh": "https://edooqoo.com/past-simple-worksheets.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061524.mgdU5JE_wbEQV4xBBjjfm4Yc2qexTt7e_3_p83I04Uo",
         "server": "cloudflare"
       }
     },
@@ -472,7 +759,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061525.uglmApwb--esKH9-72OgKRWa0-3N917H0j3oOMxWpRQ",
         "server": "cloudflare"
       }
     },
@@ -494,7 +781,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061526.RNlSXUANWTj_76uMZR9Tv3fd5GIiT7Zd34kwCNny-5k",
         "server": "cloudflare"
       }
     },
@@ -516,7 +803,51 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061526.RNlSXUANWTj_76uMZR9Tv3fd5GIiT7Zd34kwCNny-5k",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/live-english-lessons-online-tools.html",
+      "expected": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html",
+        "refresh": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061527.b4JEP9HGSCY1F1itiImWjWMs6LtnfQUNFP1UqsHZw_I",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/managing-large-esl-classes.html",
+      "expected": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
+        "refresh": "https://edooqoo.com/blog/teaching-english-one-to-one.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061528.5hyE0e0fGBROwVRNhBS_UC0O31ZN8bsKRfFg_S-o0zo",
         "server": "cloudflare"
       }
     },
@@ -538,7 +869,51 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061528.5hyE0e0fGBROwVRNhBS_UC0O31ZN8bsKRfFg_S-o0zo",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/micro-lessons-busy-adult-esl-students.html",
+      "expected": "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+        "refresh": "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061529.nj_VutVobCNZRdmeDTUIKfTJRA0maT0tweVaAcScju0",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/modal-verbs-exercises-esl-guide.html",
+      "expected": "https://edooqoo.com/modal-verbs-worksheets-esl.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/modal-verbs-worksheets-esl.html",
+        "refresh": "https://edooqoo.com/modal-verbs-worksheets-esl.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061530.s_QaMor0pAPUlL3PyzDMgoEaxXkipypM66R9OLcWU40",
         "server": "cloudflare"
       }
     },
@@ -560,7 +935,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061530.s_QaMor0pAPUlL3PyzDMgoEaxXkipypM66R9OLcWU40",
         "server": "cloudflare"
       }
     },
@@ -582,7 +957,51 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061530.s_QaMor0pAPUlL3PyzDMgoEaxXkipypM66R9OLcWU40",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/online-english-tutor-tools-2026.html",
+      "expected": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html",
+        "refresh": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061531.1FPbYgFdEU4R0qRYHRyKE_FGIFzqHnGl85y_sFlNPT8",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/online-homework-guide-esl-teachers.html",
+      "expected": "https://edooqoo.com/blog/digital-homework-tools-esl-teachers.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/digital-homework-tools-esl-teachers.html",
+        "refresh": "https://edooqoo.com/blog/digital-homework-tools-esl-teachers.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061532.YIVHP9bJ9yflnlafr9AWe1Jj0umPqjg0C2ksvKDVolo",
         "server": "cloudflare"
       }
     },
@@ -604,7 +1023,95 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061533.F19pMrNQ96R8oyj_slPEFW_ux2gHTFF4g_vrLCjxVaQ",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/pair-work-activities-esl.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
+        "refresh": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061534.IJa0NsAtWisXXEKPdL9hmvxDGC4aWjTob2SUBYzMdhQ",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/peer-editing-workshops-esl.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-writing-esl-students.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-to-teach-writing-esl-students.html",
+        "refresh": "https://edooqoo.com/blog/how-to-teach-writing-esl-students.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061534.IJa0NsAtWisXXEKPdL9hmvxDGC4aWjTob2SUBYzMdhQ",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/peer-feedback-activities-english.html",
+      "expected": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
+        "refresh": "https://edooqoo.com/blog/error-correction-techniques-esl.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061535.Y1-pum3T2Ue5sskXfL-74RB-1vGEi4eYpWVFXKhEMeo",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/phrasal-verbs-exercises-esl-worksheets.html",
+      "expected": "https://edooqoo.com/phrasal-verbs-worksheets-esl.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/phrasal-verbs-worksheets-esl.html",
+        "refresh": "https://edooqoo.com/phrasal-verbs-worksheets-esl.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061535.Y1-pum3T2Ue5sskXfL-74RB-1vGEi4eYpWVFXKhEMeo",
         "server": "cloudflare"
       }
     },
@@ -626,7 +1133,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061536.Jp6O6mKN5IKb4jiiYvjhF6KRtG9LK3q7VDNpUv2zv08",
         "server": "cloudflare"
       }
     },
@@ -648,7 +1155,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061537.N5I02Oaoxx14mLtkSSiHdgNDchEJb3-FcpC573esWRw",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/sentence-transformation-exercises-english.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+        "refresh": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061537.N5I02Oaoxx14mLtkSSiHdgNDchEJb3-FcpC573esWRw",
         "server": "cloudflare"
       }
     },
@@ -670,7 +1199,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061538.fmZK_e1j6ZSCLRaw9V2pgGYrNboqkDUxSXxB-LbYKyQ",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/sharing-worksheets-students-online.html",
+      "expected": "https://edooqoo.com/blog/creating-interactive-worksheets-online.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/creating-interactive-worksheets-online.html",
+        "refresh": "https://edooqoo.com/blog/creating-interactive-worksheets-online.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061539.iQbvoIMbDgoDLHrS3OB4kx0bry2JUbJxact_VODOYpw",
         "server": "cloudflare"
       }
     },
@@ -692,7 +1243,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061539.iQbvoIMbDgoDLHrS3OB4kx0bry2JUbJxact_VODOYpw",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/storytelling-activities-esl.html",
+      "expected": "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+        "refresh": "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061540.rcJfFD3SlQ5CNjY9uGIVbr_oGIFe8I0wRfRfAL85n4Y",
         "server": "cloudflare"
       }
     },
@@ -714,7 +1287,73 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061541.nCDAZDDFAUPYihIFdP6jt2RLyJE1GuXDzzJcCMLGhjY",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/student-booking-page-english-lessons.html",
+      "expected": "https://edooqoo.com/english-tutor-calendar-booking-software.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/english-tutor-calendar-booking-software.html",
+        "refresh": "https://edooqoo.com/english-tutor-calendar-booking-software.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061542.dEuHmglw9lD8FL6GWrfDdH3BOyyEto-Y9f1hBguQWBU",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/student-portal-english-tutoring.html",
+      "expected": "https://edooqoo.com/student-hub-for-english-tutors.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/student-hub-for-english-tutors.html",
+        "refresh": "https://edooqoo.com/student-hub-for-english-tutors.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061543.tkhVAhGkQGHlKIntRmopAZNppERYWbtyANktdBAcbSU",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/substitute-teacher-esl-lesson-plans.html",
+      "expected": "https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html",
+        "refresh": "https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061544.8pZJmLfmW0WMpfCTQLl3arxajIExfroJtpsV-2xsE80",
         "server": "cloudflare"
       }
     },
@@ -736,7 +1375,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061544.8pZJmLfmW0WMpfCTQLl3arxajIExfroJtpsV-2xsE80",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-comparative-superlative-esl.html",
+      "expected": "https://edooqoo.com/comparatives-superlatives-worksheets.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/comparatives-superlatives-worksheets.html",
+        "refresh": "https://edooqoo.com/comparatives-superlatives-worksheets.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061545.lv3OfWnJzneoJFsbzP7Q0Hq8vDHjj1CbwJMwbrfLpck",
         "server": "cloudflare"
       }
     },
@@ -758,7 +1419,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061545.lv3OfWnJzneoJFsbzP7Q0Hq8vDHjj1CbwJMwbrfLpck",
         "server": "cloudflare"
       }
     },
@@ -780,7 +1441,51 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061546.bnsQNqSlTikUF2kCg_-75w8UtDrFtRmqi5I3PNFiweo",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-english-customer-service.html",
+      "expected": "https://edooqoo.com/adult-business-english-lesson-prep.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/adult-business-english-lesson-prep.html",
+        "refresh": "https://edooqoo.com/adult-business-english-lesson-prep.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061547.aMpci_CLuSLUfq4kapvquZTTusDiGIBL9Q1SC7kqyzs",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-english-job-interviews-activities.html",
+      "expected": "https://edooqoo.com/job-interview-english-worksheets.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/job-interview-english-worksheets.html",
+        "refresh": "https://edooqoo.com/job-interview-english-worksheets.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061548.-VbclOJjecww1fynOnWJjmXm05LJTW5F_qT1er1Exeg",
         "server": "cloudflare"
       }
     },
@@ -802,7 +1507,51 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061548.-VbclOJjecww1fynOnWJjmXm05LJTW5F_qT1er1Exeg",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-english-senior-learners.html",
+      "expected": "https://edooqoo.com/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
+        "refresh": "https://edooqoo.com/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061549.PtYDF1uRQLbgHAoKeTTYXDV5dF1sIcFIQvxHoPWeYJk",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-english-tenses-complete-guide.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+        "refresh": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061549.PtYDF1uRQLbgHAoKeTTYXDV5dF1sIcFIQvxHoPWeYJk",
         "server": "cloudflare"
       }
     },
@@ -824,7 +1573,139 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061550.H9tmekWGX58_-A3Ad2tiYCtp4NF-VPez3fD6qEzjJtM",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-future-tenses-esl-guide.html",
+      "expected": "https://edooqoo.com/future-tenses-worksheets-english.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/future-tenses-worksheets-english.html",
+        "refresh": "https://edooqoo.com/future-tenses-worksheets-english.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061550.H9tmekWGX58_-A3Ad2tiYCtp4NF-VPez3fD6qEzjJtM",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-gerunds-infinitives-esl.html",
+      "expected": "https://edooqoo.com/gerunds-infinitives-worksheets.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/gerunds-infinitives-worksheets.html",
+        "refresh": "https://edooqoo.com/gerunds-infinitives-worksheets.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061551.gMebzuZs2BiE-cfqgu-MrHtXMXWTM456F5GDiVUMeYs",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-linking-expressions-esl.html",
+      "expected": "https://edooqoo.com/blog/teaching-linking-words-connectors.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/teaching-linking-words-connectors.html",
+        "refresh": "https://edooqoo.com/blog/teaching-linking-words-connectors.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061551.gMebzuZs2BiE-cfqgu-MrHtXMXWTM456F5GDiVUMeYs",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-paraphrasing-skills-esl.html",
+      "expected": "https://edooqoo.com/writing-worksheets-esl.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/writing-worksheets-esl.html",
+        "refresh": "https://edooqoo.com/writing-worksheets-esl.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061552.1RfjFZ3YvPMYF3n2suAmtBl2jMwuAqfN910fYHpN5W0",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-prepositions-time-place-esl.html",
+      "expected": "https://edooqoo.com/prepositions-worksheets-english.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/prepositions-worksheets-english.html",
+        "refresh": "https://edooqoo.com/prepositions-worksheets-english.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061553.YCBugKdX4s3kCVZZ3AGvrtJB-deQOTfIdyMBlxzHPAA",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-question-formation-esl.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+        "refresh": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061553.YCBugKdX4s3kCVZZ3AGvrtJB-deQOTfIdyMBlxzHPAA",
         "server": "cloudflare"
       }
     },
@@ -846,7 +1727,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061554.Lryg0aDeVdUI68JeD8NcYdJeCBCixGk7ktRVHcFHW04",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-second-conditional-activities.html",
+      "expected": "https://edooqoo.com/conditionals-worksheets-english.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/conditionals-worksheets-english.html",
+        "refresh": "https://edooqoo.com/conditionals-worksheets-english.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061555.itQ_obm8yYACKuNgTlvPptKNM5z7fiNpxOYZm4V8rn8",
         "server": "cloudflare"
       }
     },
@@ -868,7 +1771,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061556.JK-tUE7kR-HjN84agXpAtlfhF38BL8ZUNK_u9fAB2uY",
         "server": "cloudflare"
       }
     },
@@ -890,7 +1793,95 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061557.hgz7Alm0CKFcmEx6BIiGQUi4CRypsfgwmvoPuGYSXMg",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-third-conditional-esl.html",
+      "expected": "https://edooqoo.com/conditionals-worksheets-english.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/conditionals-worksheets-english.html",
+        "refresh": "https://edooqoo.com/conditionals-worksheets-english.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061558.BPeAln0C-a4gL6-goSCcCn6wbgw3Kt0FgqUhZopbKZw",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-vocabulary-in-context-methods.html",
+      "expected": "https://edooqoo.com/vocabulary-exercise-generator.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/vocabulary-exercise-generator.html",
+        "refresh": "https://edooqoo.com/vocabulary-exercise-generator.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061558.BPeAln0C-a4gL6-goSCcCn6wbgw3Kt0FgqUhZopbKZw",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/tefl-certification-guide.html",
+      "expected": "https://edooqoo.com/blog/setting-up-freelance-esl-business.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/setting-up-freelance-esl-business.html",
+        "refresh": "https://edooqoo.com/blog/setting-up-freelance-esl-business.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061559.25ENRu2kkvT6WmHYu8KmCYefz7FC-Bz4hCYuhwGkTWI",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/think-pair-share-esl-variations.html",
+      "expected": "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/communicative-language-teaching-activities.html",
+        "refresh": "https://edooqoo.com/blog/communicative-language-teaching-activities.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061559.25ENRu2kkvT6WmHYu8KmCYefz7FC-Bz4hCYuhwGkTWI",
         "server": "cloudflare"
       }
     },
@@ -912,7 +1903,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061560.lEWc6QfPZt0163xLWXxxAicK544LsKD3ML1JJqaS8tc",
         "server": "cloudflare"
       }
     },
@@ -934,7 +1925,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061561.iA3vcSgiat5MnKjighIokoRmEhql2eSewoM5D3U5Xpc",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/tracking-student-progress-ai-esl.html",
+      "expected": "https://edooqoo.com/esl-student-progress-tracking-tool.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/esl-student-progress-tracking-tool.html",
+        "refresh": "https://edooqoo.com/esl-student-progress-tracking-tool.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061562.rt1T-T7wooz2pWfrVm-jU8t8UsYimwXMFmEyAviwXvc",
         "server": "cloudflare"
       }
     },
@@ -956,7 +1969,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061563.LKzURdO_81L6SRbrwGVRGfVNYJwkQ05JL3TKcVvGAkc",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/trauma-informed-teaching-esl.html",
+      "expected": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
+        "refresh": "https://edooqoo.com/blog/teaching-english-one-to-one.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061564.WgI0DStCLVVcdSpSAX9UXiWofp8g5YqEaa-ciJeV_Vk",
         "server": "cloudflare"
       }
     },
@@ -978,7 +2013,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061565.wFTdF5u132dARl72betSapGeE1DA6N13fc-7OA17Y1Q",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/v-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog",
+        "refresh": "https://edooqoo.com/blog"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061565.wFTdF5u132dARl72betSapGeE1DA6N13fc-7OA17Y1Q",
         "server": "cloudflare"
       }
     },
@@ -1000,7 +2057,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061566.nmhXCq9KYZZU5HD2el2fuDem7vh3dtsCi1knKdH5Hm0",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/warm-up-activities-esl.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
+      "outcome": "pass-html-stub",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
+        "refresh": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html"
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061566.nmhXCq9KYZZU5HD2el2fuDem7vh3dtsCi1knKdH5Hm0",
         "server": "cloudflare"
       }
     },
@@ -1008,8 +2087,8 @@
       "type": "signup-noindex",
       "url": "https://edooqoo.com/signup?exerciseType=definition-match&topic=weather",
       "expected": "noindex, nofollow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-robots-disallow",
+      "pass": true,
       "signals": {
         "robots": "",
         "canonical": "https://edooqoo.com/",
@@ -1022,7 +2101,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061566.nmhXCq9KYZZU5HD2el2fuDem7vh3dtsCi1knKdH5Hm0",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/accountants",
+      "expected": "noindex, follow (header or meta)",
+      "outcome": "pass-html-meta",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "",
+        "refresh": ""
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061567.AcOicx8ckxd-5UDQoca7lB5gU4aNH5WHxrrCYnwVhIo",
         "server": "cloudflare"
       }
     },
@@ -1030,11 +2131,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/cabin-crew",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1044,7 +2145,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061568.oGl0TC-8i_a1UVI8ovUXf4QwxxyT_em57qYUCIlyf7k",
         "server": "cloudflare"
       }
     },
@@ -1052,11 +2153,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/call-center-agents",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1066,7 +2167,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061568.oGl0TC-8i_a1UVI8ovUXf4QwxxyT_em57qYUCIlyf7k",
         "server": "cloudflare"
       }
     },
@@ -1074,11 +2175,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/chefs",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1088,7 +2189,29 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061568.oGl0TC-8i_a1UVI8ovUXf4QwxxyT_em57qYUCIlyf7k",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/consultants",
+      "expected": "noindex, follow (header or meta)",
+      "outcome": "pass-html-meta",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "",
+        "refresh": ""
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061569.8RV-9y_SeLlK71OICqSV5OIf1jUl9g5yBCELg_avCXo",
         "server": "cloudflare"
       }
     },
@@ -1096,11 +2219,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/customer-service",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1110,7 +2233,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061570.f-ncHF9ApSEgA8ZmGn11FLgcYbytfI2N0PTKHpBQPGE",
         "server": "cloudflare"
       }
     },
@@ -1118,11 +2241,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/doctors",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1132,7 +2255,51 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061571.KEN1UtEuz-U-L8oVpQKw7TfcDrJcRMyddMY4EWR2-5Y",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/entrepreneurs",
+      "expected": "noindex, follow (header or meta)",
+      "outcome": "pass-html-meta",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "",
+        "refresh": ""
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061572.l1y4wOwNtHyjq3MARlFhQvmFxW5G2KFuDGuPtkz0vdg",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/executives",
+      "expected": "noindex, follow (header or meta)",
+      "outcome": "pass-html-meta",
+      "pass": true,
+      "signals": {
+        "robots": "noindex,follow",
+        "canonical": "",
+        "refresh": ""
+      },
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061573.8ToYkH_bKmhRZJDP6AoSf59MplONSXLWi_QJjEq35iI",
         "server": "cloudflare"
       }
     },
@@ -1140,11 +2307,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/financial-advisors",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1154,95 +2321,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
-        "server": "cloudflare"
-      }
-    },
-    {
-      "type": "public-noindex-follow",
-      "url": "https://edooqoo.com/english-for/hotel-staff",
-      "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
-      "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
-        "refresh": ""
-      },
-      "ok": true,
-      "status": 200,
-      "headers": {
-        "location": "",
-        "xRobotsTag": "",
-        "contentType": "text/html; charset=utf-8",
-        "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
-        "server": "cloudflare"
-      }
-    },
-    {
-      "type": "public-noindex-follow",
-      "url": "https://edooqoo.com/english-for/nurses",
-      "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
-      "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
-        "refresh": ""
-      },
-      "ok": true,
-      "status": 200,
-      "headers": {
-        "location": "",
-        "xRobotsTag": "",
-        "contentType": "text/html; charset=utf-8",
-        "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
-        "server": "cloudflare"
-      }
-    },
-    {
-      "type": "public-noindex-follow",
-      "url": "https://edooqoo.com/english-for/real-estate-agents",
-      "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
-      "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
-        "refresh": ""
-      },
-      "ok": true,
-      "status": 200,
-      "headers": {
-        "location": "",
-        "xRobotsTag": "",
-        "contentType": "text/html; charset=utf-8",
-        "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
-        "server": "cloudflare"
-      }
-    },
-    {
-      "type": "public-noindex-follow",
-      "url": "https://edooqoo.com/english-for/retail-staff",
-      "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
-      "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
-        "refresh": ""
-      },
-      "ok": true,
-      "status": 200,
-      "headers": {
-        "location": "",
-        "xRobotsTag": "",
-        "contentType": "text/html; charset=utf-8",
-        "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061573.8ToYkH_bKmhRZJDP6AoSf59MplONSXLWi_QJjEq35iI",
         "server": "cloudflare"
       }
     },
@@ -1264,7 +2343,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "psr2.5db25be3-bc40-4311-a2f8-cb853207af90.1796061575.USpVIDe3dWPO_Mcfz98YGIT2KWY3kSUrQ8Gff9q7hhQ",
         "server": "cloudflare"
       }
     },
