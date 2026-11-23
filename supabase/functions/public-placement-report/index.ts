@@ -10,7 +10,19 @@
  *  - invite_get: returns the invited student's name only (teacher email stays server-side).
  */
 import { isLocalRecordingMarker, resolveStudentEmail } from "./claimSeed.ts";
-import { claimReservedReport, reserveClaim, triggerPlacementPacing, triggerWelcomeTestProcessing, type ClaimInvite, type ClaimReport, type PlacementClaimResult } from "./claim.ts";
+import {
+  claimReservedReport,
+  claimUnclaimedReport,
+  loadTeacherDiagnosticData,
+  reserveClaim,
+  seedUnclaimedPlacementStudent,
+  triggerPlacementPacing,
+  triggerWelcomeTestProcessing,
+  UNCLAIMED_PLACEMENT_TEACHER_ID,
+  type ClaimInvite,
+  type ClaimReport,
+  type PlacementClaimResult,
+} from "./claim.ts";
 import { WELCOME_TEST_SEED_BANK_2A } from "../_shared/welcomeTestSeedBank2A.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
@@ -367,6 +379,34 @@ export async function handleRequest(req: Request): Promise<Response> {
           .eq("id", invite.id).is("completed_at", null);
         if (completeError) throw completeError;
       }
+      if (!autoClaim) {
+        try {
+          const unclaimed = await seedUnclaimedPlacementStudent({
+            admin,
+            report: {
+              id: inserted.id,
+              student_name: body.studentName,
+              teacher_email: teacherEmail,
+              result: body.result,
+              answers: storedAnswers,
+            },
+            studentEmail,
+          });
+          if (unclaimed.hasAnswers) {
+            await triggerWelcomeTestProcessing(admin, {
+              testId: unclaimed.testId,
+              studentId: unclaimed.studentId,
+              teacherId: UNCLAIMED_PLACEMENT_TEACHER_ID,
+              answeredCount: body.result.answeredCount,
+            });
+          } else {
+            await triggerPlacementPacing(admin, unclaimed.studentId, UNCLAIMED_PLACEMENT_TEACHER_ID, body.result.level);
+          }
+        } catch {
+          // The report is already stored and emailed; claim retains its fallback creation path.
+          console.warn("[public-placement-report] unclaimed student seeding failed");
+        }
+      }
       let studentSent = false;
       if (studentEmail) {
         try { await sendEmail(studentEmail, "Your placement test results", studentEmailHtml(body.studentName, studentUrl)); studentSent = true; }
@@ -393,7 +433,7 @@ export async function handleRequest(req: Request): Promise<Response> {
     }
 
     if (body.action !== "get" && body.action !== "claim") return json({ error: "Unknown action" }, 400);
-    const columns = "id, result, student_name, student_email, teacher_email, invite_id, expires_at, claimed_by, claimed_student_id";
+    const columns = "id, result, student_name, student_email, teacher_email, invite_id, expires_at, claimed_by, claimed_student_id, unclaimed_student_id, unclaimed_test_id";
     let role: "teacher" | "student" = "teacher";
     let { data: report, error } = await admin.from("public_placement_reports").select(columns)
       .eq("report_token", body.token).maybeSingle();
@@ -416,7 +456,26 @@ export async function handleRequest(req: Request): Promise<Response> {
         traits: Object.fromEntries(Object.entries(fullResult.traits).filter(([key]) => ["motivation_type", "latent_goal", "preferred_input_channel", "homework_commitment", "feedback_preference"].includes(key))),
         divergences: [], selfAwarenessScore: null, levelConfidence: null,
       };
-      return json({ role, studentName: report.student_name, result: role === "student" ? studentResult : fullResult, expiresAt: report.expires_at, claimed: !!report.claimed_by });
+      let teacherDiagnostic: Awaited<ReturnType<typeof loadTeacherDiagnosticData>> | undefined;
+      if (role === "teacher") {
+        const diagStudentId = report.claimed_student_id ?? report.unclaimed_student_id ?? null;
+        const diagTestId = report.unclaimed_test_id ?? null;
+        if (diagStudentId && diagTestId) {
+          try {
+            teacherDiagnostic = await loadTeacherDiagnosticData(admin, diagStudentId, diagTestId);
+          } catch {
+            console.warn("[public-placement-report] teacher diagnostic read failed");
+          }
+        }
+      }
+      return json({
+        role,
+        studentName: report.student_name,
+        result: role === "student" ? studentResult : fullResult,
+        expiresAt: report.expires_at,
+        claimed: !!report.claimed_by,
+        ...(teacherDiagnostic ? { teacherDiagnostic } : {}),
+      });
     }
 
     // claim
@@ -455,6 +514,30 @@ export async function handleRequest(req: Request): Promise<Response> {
     if (!reserved) return json({ error: "This report was already added" }, 409);
 
     const r = report.result as PlacementClaimResult;
+    if (report.unclaimed_student_id && report.unclaimed_test_id && !invite?.student_id) {
+      const claimed = await claimUnclaimedReport({
+        admin,
+        reportId: report.id,
+        unclaimedStudentId: report.unclaimed_student_id,
+        unclaimedTestId: report.unclaimed_test_id,
+        teacher: { id: user.id, email: user.email },
+      });
+      if (claimed.needsProcessing) {
+        const { data: answerRow } = await admin.from("public_placement_reports")
+          .select("answers").eq("id", report.id).maybeSingle();
+        const hasAnswers = !!(answerRow?.answers && typeof answerRow.answers === "object" && Object.keys(answerRow.answers as Record<string, unknown>).length > 0);
+        if (hasAnswers) {
+          await triggerWelcomeTestProcessing(admin, {
+            testId: claimed.testId,
+            studentId: claimed.studentId,
+            teacherId: user.id,
+            answeredCount: r.answeredCount,
+          });
+        }
+      }
+      return json({ success: true, studentId: claimed.studentId, testId: claimed.testId });
+    }
+
     const studentEmail = resolveStudentEmail(invite?.student_email, report.invite_id ? null : report.student_email, [report.teacher_email, user.email]);
     const { data: answerRow, error: answerRowError } = await admin.from("public_placement_reports")
       .select("answers").eq("id", report.id).maybeSingle();

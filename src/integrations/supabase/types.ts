@@ -2685,6 +2685,8 @@ export type Database = {
           student_name: string
           student_report_token: string | null
           teacher_email: string
+          unclaimed_student_id: string | null
+          unclaimed_test_id: string | null
         }
         Insert: {
           answers?: Json | null
@@ -2702,6 +2704,8 @@ export type Database = {
           student_name: string
           student_report_token?: string | null
           teacher_email: string
+          unclaimed_student_id?: string | null
+          unclaimed_test_id?: string | null
         }
         Update: {
           answers?: Json | null
@@ -2719,8 +2723,25 @@ export type Database = {
           student_name?: string
           student_report_token?: string | null
           teacher_email?: string
+          unclaimed_student_id?: string | null
+          unclaimed_test_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "public_placement_reports_unclaimed_student_id_fkey"
+            columns: ["unclaimed_student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_placement_reports_unclaimed_test_id_fkey"
+            columns: ["unclaimed_test_id"]
+            isOneToOne: false
+            referencedRelation: "student_tests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       schema_migrations_historical_backup_20261028: {
         Row: {
@@ -4958,6 +4979,14 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      claim_unclaimed_placement_student: {
+        Args: {
+          p_new_teacher_id: string
+          p_student_id: string
+          p_teacher_email?: string
+        }
+        Returns: boolean
       }
       clean_old_geolocation_cache: { Args: never; Returns: undefined }
       cleanup_engine_rate_limits: {

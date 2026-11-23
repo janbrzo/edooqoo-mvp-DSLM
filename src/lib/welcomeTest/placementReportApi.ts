@@ -12,6 +12,48 @@ export interface PlacementReport {
   result: PublicPlacementResult;
   expiresAt: string;
   claimed: boolean;
+  teacherDiagnostic?: {
+    studentId: string;
+    testId: string;
+    test: {
+      id: string;
+      status: string;
+      score_percentage: number | null;
+      answered_count: number | null;
+      total_questions: number | null;
+      completed_at: string | null;
+      reviewed_at: string | null;
+      time_spent_seconds: number | null;
+    } | null;
+    learningProfile: Record<string, unknown> | null;
+    skillResults: Array<{
+      element_type: string;
+      correct_answers: number;
+      total_questions: number;
+      score_percentage: number | null;
+      suggested_rating?: number | null;
+      skill_tags?: string[] | null;
+    }>;
+    questions: Array<{
+      id: string;
+      question_index: number;
+      question_type: string;
+      question_text: string;
+      question_data: Record<string, unknown> | null;
+      correct_answer: unknown;
+      explanation: string | null;
+      element_type: string | null;
+      difficulty_level: string | null;
+      skill_tags: string[] | null;
+      student_answer: unknown;
+      is_correct: boolean | null;
+      answered_at: string | null;
+      ai_feedback: string | null;
+    }>;
+    goals: Array<Record<string, unknown>>;
+    nextSteps: Array<Record<string, unknown>>;
+    curriculumPhases: Array<Record<string, unknown>>;
+  };
 }
 
 export class PlacementReportError extends Error {

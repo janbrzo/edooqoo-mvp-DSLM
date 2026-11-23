@@ -1,6 +1,7 @@
 import { assertEquals, assertNotEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { stub } from "https://deno.land/std@0.224.0/testing/mock.ts";
 import { handleRequest } from "./index.ts";
+import { UNCLAIMED_PLACEMENT_TEACHER_ID } from "./claim.ts";
 
 // These execute the real HTTP adapter with synthetic network boundaries, not hosted auth.
 const teacherToken = "teacher_abcdefghijklmnopqrstuvwx";
@@ -16,7 +17,7 @@ const result = {
   selfAwarenessScore: 30, openResponseCount: 2, recordingCount: 1,
 };
 type Call = { path: string; method: string; body: Record<string, unknown> | null };
-type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean; reportAnswers?: Record<string, unknown> | null };
+type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean; reportAnswers?: Record<string, unknown> | null; unclaimedStudentId?: string | null; unclaimedTestId?: string | null; unclaimedTestStatus?: string; claimRpcResult?: boolean };
 
 async function fixture(run: (call: (body: unknown, token?: string, method?: string) => Promise<Response>, calls: Call[]) => Promise<void>, options: Options = {}) {
   const names = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "APP_BASE_URL", "RESEND_API_KEY"];
@@ -28,6 +29,8 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
     student_name: "Marta", student_email: "student@example.test", teacher_email: "teacher@example.test", invite_id: options.pendingStudent ? "invite-id" : null,
     expires_at: new Date(Date.now() + (options.expired ? -1 : 7 * 86400_000)).toISOString(),
     claimed_by: options.claimed ? "owner-id" : null, claimed_student_id: options.claimed ? "student-id" : null,
+    unclaimed_student_id: options.unclaimedStudentId ?? null,
+    unclaimed_test_id: options.unclaimedTestId ?? null,
     forward_count: options.forwardCount ?? 0 };
   const invite = { id: "invite-id", teacher_email: "teacher@example.test", student_email: "student@example.test", student_name: "Marta",
     teacher_id: options.registeredTeacher ? "owner-id" : null,
@@ -59,10 +62,33 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
         if (options.failFinish && body?.claimed_student_id) { status = 500; value = { message: "fixture finish failure", code: "XX000" }; }
       }
     } else if (path === "/rest/v1/public_placement_invites") value = req.method === "GET" ? invite : body?.completed_report_id ? { id: "invite-id" } : null;
+    else if (path === "/rest/v1/rpc/claim_unclaimed_placement_student") {
+      value = options.claimRpcResult ?? true;
+    }
     else if (path.startsWith("/rest/v1/")) {
       if (req.method === "POST" && path.endsWith(`/${options.failTable}`)) { status = 500; value = { message: "fixture write failure", code: "XX000" }; }
       else if (req.method === "GET" && path.endsWith("/student_tests")) {
-        value = !options.claimedTestMissing && url.searchParams.get("generation_params->>report_id") === "eq.report-id" ? { id: "test-id" } : null;
+        if (url.searchParams.get("generation_params->>report_id") === "eq.report-id") {
+          value = !options.claimedTestMissing ? { id: "test-id" } : null;
+        } else {
+          value = { id: options.unclaimedTestId ?? "test-id", status: options.unclaimedTestStatus ?? "reviewed", score_percentage: 64, answered_count: 40, total_questions: 72, completed_at: now.toISOString(), reviewed_at: now.toISOString(), time_spent_seconds: 900 };
+        }
+      } else if (req.method === "GET" && path.endsWith("/student_learning_profiles")) {
+        value = {
+          id: "profile-id", student_id: options.unclaimedStudentId ?? "student-id", welcome_test_id: options.unclaimedTestId ?? "test-id",
+          estimated_level: "B1", ai_summary: JSON.stringify({ summary: "Strong oral clarity, gaps in past tense.", recommendations: ["Review Past Simple"], writing_quality: "good", key_observations: ["Clear structure"] }),
+          grammar_score: 55, vocabulary_score: 70, reading_score: 65, traits: { motivation_type: "career" }, divergences: [],
+          raw_answers: { interpretation_version: 2, wt_q41: "SHOULD_NOT_LEAK" },
+        };
+      } else if (req.method === "GET" && path.endsWith("/test_skill_results")) {
+        value = [{ element_type: "grammar", correct_answers: 6, total_questions: 11, score_percentage: 55, suggested_rating: 3, skill_tags: ["past_simple"] }];
+      } else if (req.method === "GET" && path.endsWith("/student_test_questions")) {
+        value = [
+          { id: "q1", question_index: 0, question_type: "multiple_choice", question_text: "Answered Q", question_data: { question_id: "wt_q1" }, correct_answer: "A", explanation: "Rule A", element_type: "grammar", difficulty_level: "B1", skill_tags: ["past_simple"], student_answer: "A", is_correct: true, answered_at: now.toISOString(), ai_feedback: null },
+          { id: "q2", question_index: 1, question_type: "multiple_choice", question_text: "Unanswered Q", question_data: { question_id: "wt_q2" }, correct_answer: "SECRET_KEY", explanation: "SECRET_EXPLANATION", element_type: "grammar", difficulty_level: "B1", skill_tags: ["present_perfect"], student_answer: null, is_correct: null, answered_at: null, ai_feedback: null },
+        ];
+      } else if (req.method === "GET" && (path.endsWith("/student_progress_goals") || path.endsWith("/future_worksheet_suggestions") || path.endsWith("/dslm_curriculum_phases"))) {
+        value = [];
       }
       else value = { id: path.endsWith("student_tests") ? "test-id" : "student-id" };
     } else if (path === "/functions/v1/recalculate-pacing") value = { success: true };
@@ -352,4 +378,81 @@ Deno.test("HTTP failed student_test_questions insert rolls back learner and clai
     assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "DELETE"), true);
     assertEquals(calls.some(c => c.path.endsWith("/public_placement_reports") && c.body?.claimed_by === null), true);
   }, { reportAnswers: { wt_q41: "I want to lead meetings." }, failTable: "student_test_questions" });
+});
+
+Deno.test("HTTP unregistered submit with answers seeds unclaimed student, 72 questions and triggers process-welcome-test", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({
+      action: "submit",
+      result,
+      answers: { wt_q41: "I want to prepare for board presentations." },
+      studentName: "Marta",
+      studentEmail: "student@example.test",
+      teacherEmail: "teacher@example.test",
+    });
+    assertEquals(res.status, 200);
+    const data = await res.json();
+    assertEquals(data.autoClaimed, false);
+    assertEquals(data.teacherSent, true);
+    const studentWrite = calls.find(c => c.path.endsWith("/students") && c.method === "POST")?.body;
+    assertEquals(studentWrite?.teacher_id, UNCLAIMED_PLACEMENT_TEACHER_ID);
+    assertEquals(studentWrite?.student_email, "student@example.test");
+    assertEquals(typeof studentWrite?.placement_pending_at, "string");
+    const questionsWrite = calls.find(c => c.path.endsWith("/student_test_questions") && c.method === "POST")?.body as unknown as Array<Record<string, unknown>>;
+    assertEquals(questionsWrite.length, 72);
+    const linkWrite = calls.find(c => c.path.endsWith("/public_placement_reports") && c.method === "PATCH")?.body;
+    assertEquals(linkWrite, { unclaimed_student_id: "student-id", unclaimed_test_id: "test-id" });
+    const processCall = calls.find(c => c.path === "/functions/v1/process-welcome-test")?.body;
+    assertEquals(processCall, {
+      test_id: "test-id",
+      student_id: "student-id",
+      teacher_id: UNCLAIMED_PLACEMENT_TEACHER_ID,
+      answered_count: 40,
+      skip_emails: true,
+    });
+  });
+});
+
+Deno.test("HTTP teacher get returns full diagnostic bundle with unanswered keys masked; student get omits it", async () => {
+  await fixture(async (call, calls) => {
+    const teacherRes = await call({ action: "get", token: teacherToken });
+    assertEquals(teacherRes.status, 200);
+    const teacherData = await teacherRes.json();
+    assertEquals(teacherData.role, "teacher");
+    assertEquals("answers" in teacherData, false);
+    assertEquals(teacherData.teacherDiagnostic.studentId, "unclaimed-student-id");
+    assertEquals(teacherData.teacherDiagnostic.testId, "unclaimed-test-id");
+    assertEquals(teacherData.teacherDiagnostic.learningProfile.estimated_level, "B1");
+    assertEquals(teacherData.teacherDiagnostic.learningProfile.raw_answers, { interpretation_version: 2 });
+    assertEquals(teacherData.teacherDiagnostic.questions[0].correct_answer, "A");
+    assertEquals(teacherData.teacherDiagnostic.questions[1].correct_answer, null);
+    assertEquals(teacherData.teacherDiagnostic.questions[1].explanation, null);
+
+    const callsBeforeStudent = calls.length;
+    const studentRes = await call({ action: "get", token: studentToken });
+    assertEquals(studentRes.status, 200);
+    const studentData = await studentRes.json();
+    assertEquals(studentData.role, "student");
+    assertEquals("teacherDiagnostic" in studentData, false);
+    const studentQueries = calls.slice(callsBeforeStudent).map(c => c.path);
+    assertEquals(studentQueries.some(p => p.endsWith("/student_learning_profiles") || p.endsWith("/student_test_questions")), false);
+  }, { unclaimedStudentId: "unclaimed-student-id", unclaimedTestId: "unclaimed-test-id" });
+});
+
+Deno.test("HTTP claim on pre-seeded unclaimed report transfers ownership atomically via RPC without recreating rows", async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: "claim", token: teacherToken });
+    assertEquals(res.status, 200);
+    const data = await res.json();
+    assertEquals(data, { success: true, studentId: "unclaimed-student-id", testId: "unclaimed-test-id" });
+    const rpcCall = calls.find(c => c.path === "/rest/v1/rpc/claim_unclaimed_placement_student");
+    assertEquals(rpcCall?.body, {
+      p_student_id: "unclaimed-student-id",
+      p_new_teacher_id: "owner-id",
+      p_teacher_email: "teacher@example.test",
+    });
+    assertEquals(calls.some(c => c.path.endsWith("/students") && c.method === "POST"), false);
+    assertEquals(calls.some(c => c.path.endsWith("/student_tests") && c.method === "POST"), false);
+    assertEquals(calls.some(c => c.path === "/functions/v1/process-welcome-test"), false);
+  }, { unclaimedStudentId: "unclaimed-student-id", unclaimedTestId: "unclaimed-test-id", unclaimedTestStatus: "reviewed" });
 });
