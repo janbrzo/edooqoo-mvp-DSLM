@@ -56,6 +56,8 @@ export interface PlacementReport {
   };
 }
 
+export type TeacherPlacementDiagnostic = NonNullable<PlacementReport['teacherDiagnostic']>;
+
 export class PlacementReportError extends Error {
   constructor(message: string, public status: number | null) { super(message); }
 }

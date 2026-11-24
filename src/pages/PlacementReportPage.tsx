@@ -5,11 +5,11 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Loader2, Send, Sparkles, TriangleAlert, UserPlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SampleTeacherAccountPreview } from '@/components/welcome-test/SampleTeacherAccountPreview';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PlacementReportBody } from '@/components/welcome-test/PlacementReportBody';
+import { TeacherPlacementDiagnosticView } from '@/components/welcome-test/TeacherPlacementDiagnosticView';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { studentTabPath } from '@/lib/students/workspaceTabs';
@@ -60,6 +60,34 @@ export default function PlacementReportPage() {
       .catch((error) => { if (!cancelled) setState({ status: 'error', expired: error?.status === 410 }); });
     return () => { cancelled = true; };
   }, [token]);
+
+  const pendingAnalysis = state.status === 'ready'
+    && state.report.role === 'teacher'
+    && Boolean(state.report.teacherDiagnostic)
+    && state.report.teacherDiagnostic?.test?.status === 'completed'
+    && !state.report.teacherDiagnostic?.learningProfile;
+
+  useEffect(() => {
+    if (!pendingAnalysis) return;
+    let cancelled = false;
+    let ticks = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const poll = () => {
+      ticks += 1;
+      getPlacementReport(token)
+        .then((report) => {
+          if (cancelled) return;
+          setState({ status: 'ready', report });
+          const stillPending = report.teacherDiagnostic?.test?.status === 'completed' && !report.teacherDiagnostic?.learningProfile;
+          if (stillPending && ticks < 30) timer = setTimeout(poll, 3000);
+        })
+        .catch(() => {
+          if (!cancelled && ticks < 30) timer = setTimeout(poll, 3000);
+        });
+    };
+    timer = setTimeout(poll, 3000);
+    return () => { cancelled = true; if (timer) clearTimeout(timer); };
+  }, [pendingAnalysis, token]);
 
   const claim = useCallback(async () => {
     if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
@@ -112,56 +140,62 @@ export default function PlacementReportPage() {
 
   const { report } = state;
   const isStudentView = report.role === 'student';
-  const hasTeacherPreview = !isStudentView && !report.claimed;
+  const hasFullDiagnostic = !isStudentView && Boolean(report.teacherDiagnostic);
   const name = report.studentName;
+
+  const claimBanner = !isStudentView ? (
+    <Card className="rounded-3xl border-primary/40 bg-primary/5">
+      <CardContent className="p-5 space-y-3">
+        <div className="flex items-start gap-3">
+          <UserPlus className="h-6 w-6 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+          <div>
+            <p className="font-semibold">{report.claimed ? `${name} has already been added to an Edooqoo account.` : `Teaching ${name}?`}</p>
+            {!report.claimed && (
+              <p className="text-sm leading-6 text-muted-foreground">
+                Add {name} to your Edooqoo account with this full placement profile and generate a personalised first lesson in about a minute.
+              </p>
+            )}
+          </div>
+        </div>
+        {!report.claimed && (
+          isRegisteredUser ? (
+            <Button className="rounded-full w-full sm:w-auto h-auto min-h-10 whitespace-normal" onClick={() => { void claim(); }} disabled={claiming}>
+              {claiming ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}Add {name} to my students
+            </Button>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button className="rounded-full h-auto min-h-10 whitespace-normal" onClick={goToSignup}>Create free account and add {name}<ArrowRight className="h-4 w-4" /></Button>
+              <Button variant="ghost" className="rounded-full" onClick={goToLogin}>I already have an account</Button>
+            </div>
+          )
+        )}
+      </CardContent>
+    </Card>
+  ) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-3 py-6 sm:px-6">
       {head}
-      <div className={`mx-auto space-y-5 ${hasTeacherPreview ? 'max-w-4xl' : 'max-w-3xl'}`}>
+      <div className={`mx-auto space-y-5 ${hasFullDiagnostic ? 'max-w-4xl' : 'max-w-3xl'}`}>
         <div className="mx-auto max-w-3xl text-center space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">{isStudentView ? 'Your placement results' : 'Teacher placement report'}</p>
           <h1 className="text-2xl sm:text-3xl font-bold">{isStudentView ? `Well done, ${name}!` : `${name}'s placement report`}</h1>
           <p className="text-sm leading-6 text-muted-foreground max-w-xl mx-auto">
             {isStudentView
               ? 'Here is what your test shows about your English and how you learn.'
-              : 'Keyed skill scores, learning profile and where declared needs differ from scenario signals. Writing and speaking stayed on the student\'s device.'}
+              : hasFullDiagnostic
+                ? 'Full diagnostic analysis, AI learning profile, skill scores and question-by-question answers.'
+                : 'Keyed skill scores, learning profile and where declared needs differ from scenario signals.'}
           </p>
         </div>
 
-        {!isStudentView && (
-          <Card className="mx-auto max-w-3xl rounded-3xl border-primary/40 bg-primary/5">
-            <CardContent className="p-5 space-y-3">
-              <div className="flex items-start gap-3">
-                <UserPlus className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold">{report.claimed ? `${name} has already been added to an Edooqoo account.` : `Teaching ${name}?`}</p>
-                  {!report.claimed && (
-                    <p className="text-sm leading-6 text-muted-foreground">
-                      Create a free Edooqoo account and {name} is added to your students with this profile, ready for a personalised first lesson prepared in about a minute.
-                    </p>
-                  )}
-                </div>
-              </div>
-              {!report.claimed && (
-                isRegisteredUser ? (
-                  <Button className="rounded-full w-full sm:w-auto h-auto min-h-10 whitespace-normal" onClick={() => { void claim(); }} disabled={claiming}>
-                    {claiming ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}Add {name} to my students
-                  </Button>
-                ) : (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button className="rounded-full h-auto min-h-10 whitespace-normal" onClick={goToSignup}>Create free account and add {name}<ArrowRight className="h-4 w-4" /></Button>
-                    <Button variant="ghost" className="rounded-full" onClick={goToLogin}>I already have an account</Button>
-                  </div>
-                )
-              )}
-            </CardContent>
-          </Card>
-        )}
+        {claimBanner}
 
-        <div className="mx-auto max-w-3xl">
+        {hasFullDiagnostic && report.teacherDiagnostic ? (
+          <TeacherPlacementDiagnosticView diagnostic={report.teacherDiagnostic} studentName={name} />
+        ) : (
           <PlacementReportBody result={report.result} audience={isStudentView ? 'student' : 'teacher'} />
-        </div>
+        )}
 
         {isStudentView && !report.claimed && (
           <Card className="rounded-3xl border-primary/30" id="forward">
@@ -184,9 +218,7 @@ export default function PlacementReportPage() {
           </Card>
         )}
 
-        {hasTeacherPreview && (
-          <SampleTeacherAccountPreview result={report.result} name={name} showSignup={!isRegisteredUser} onSignup={goToSignup} />
-        )}
+        {!isStudentView && !report.claimed && claimBanner}
 
         {isStudentView && (
           <Card className="rounded-3xl border-primary/30">
