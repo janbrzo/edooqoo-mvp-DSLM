@@ -17,12 +17,29 @@ const result = {
   selfAwarenessScore: 30, openResponseCount: 2, recordingCount: 1,
 };
 type Call = { path: string; method: string; body: Record<string, unknown> | null };
-type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean; reportAnswers?: Record<string, unknown> | null; unclaimedStudentId?: string | null; unclaimedTestId?: string | null; unclaimedTestStatus?: string; claimRpcResult?: boolean };
+type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean; reportAnswers?: Record<string, unknown> | null; unclaimedStudentId?: string | null; unclaimedTestId?: string | null; unclaimedTestStatus?: string; claimRpcResult?: boolean; nextSteps?: Record<string, unknown>; nextStepsNotReady?: boolean; gatewayStatus?: number; gatewayCount?: number };
+
+const wireLessons = [1, 2, 3].map(n => ({ topic: `Workplace lesson ${n}`, goal: 'Address a placement gap', additionalInfo: null, grammarFocus: 'Past Simple', rationale: 'Observed past tense gap', difficulty: 'B1', targetQuestionIds: [], exercises: ['reading', 'fill-in-blanks', 'matching', 'dialogue', 'discussion', 'multiple-choice', 'true-false', 'error-correction'].map(id => ({ id, focus: 'grammar' })) }));
+function gatewayStream(count = 3) {
+  const text = JSON.stringify({ suggestions: wireLessons.slice(0, count) });
+  const item = { id: 'msg-fixture', type: 'message', status: 'completed', role: 'assistant', content: [{ type: 'output_text', text, annotations: [] }] };
+  const response = { id: 'response-fixture', object: 'response', created_at: 1, model: 'fixture-model', status: 'completed', output: [item], usage: { input_tokens: 100, output_tokens: 100, total_tokens: 200 } };
+  const events = [
+    { type: 'response.created', response: { ...response, status: 'in_progress', output: [] } },
+    { type: 'response.output_item.added', output_index: 0, item: { ...item, status: 'in_progress', content: [] } },
+    { type: 'response.content_part.added', item_id: item.id, output_index: 0, content_index: 0, part: { type: 'output_text', text: '', annotations: [] } },
+    { type: 'response.output_text.delta', item_id: item.id, output_index: 0, content_index: 0, delta: text },
+    { type: 'response.output_text.done', item_id: item.id, output_index: 0, content_index: 0, text },
+    { type: 'response.output_item.done', output_index: 0, item },
+    { type: 'response.completed', response },
+  ];
+  return new Response(events.map(event => `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`).join(''), { headers: { 'Content-Type': 'text/event-stream' } });
+}
 
 async function fixture(run: (call: (body: unknown, token?: string, method?: string) => Promise<Response>, calls: Call[]) => Promise<void>, options: Options = {}) {
-  const names = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "APP_BASE_URL", "RESEND_API_KEY"];
+  const names = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "APP_BASE_URL", "RESEND_API_KEY", "LOVABLE_API_KEY"];
   const previous = names.map(name => Deno.env.get(name));
-  names.forEach((name, i) => Deno.env.set(name, ["https://fixture.example.test", "synthetic-service", "https://app.example.test", "synthetic-mail"][i]));
+  names.forEach((name, i) => Deno.env.set(name, ["https://fixture.example.test", "synthetic-service", "https://app.example.test", "synthetic-mail", "synthetic-gateway"][i]));
   const calls: Call[] = [];
   const report = { id: "report-id", report_token: teacherToken, student_report_token: studentToken, result,
     answers: options.reportAnswers ?? null,
@@ -31,6 +48,7 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
     claimed_by: options.claimed ? "owner-id" : null, claimed_student_id: options.claimed ? "student-id" : null,
     unclaimed_student_id: options.unclaimedStudentId ?? null,
     unclaimed_test_id: options.unclaimedTestId ?? null,
+    placement_next_steps: options.nextSteps ?? null,
     forward_count: options.forwardCount ?? 0 };
   const invite = { id: "invite-id", teacher_email: "teacher@example.test", student_email: "student@example.test", student_name: "Marta",
     teacher_id: options.registeredTeacher ? "owner-id" : null,
@@ -44,7 +62,21 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
     calls.push({ path, method: req.method, body });
     let value: unknown = null; let status = 200;
     if (req.method === "HEAD") return new Response(null, { headers: { "Content-Range": "*/0" } });
-    if (path === "/emails") { value = { id: "mail-id" }; if (options.failEmail) status = 500; }
+    if (path === "/v1/responses") {
+      if (options.gatewayStatus) return new Response(JSON.stringify({ error: { message: 'Provider access denied' } }), { status: options.gatewayStatus, headers: { 'Content-Type': 'application/json' } });
+      return gatewayStream(options.gatewayCount);
+    }
+    if (path === "/rest/v1/rpc/reserve_placement_next_steps") {
+      if (options.nextStepsNotReady) value = { status: 'not_ready' };
+      else if (report.placement_next_steps) value = report.placement_next_steps;
+      else {
+        report.placement_next_steps = { status: 'running', lease: 'private-lease', attempts: 1 };
+        value = { status: 'reserved', lease: 'private-lease', studentId: 'unclaimed-student-id', testId: 'unclaimed-test-id' };
+      }
+    } else if (path === "/rest/v1/rpc/finish_placement_next_steps") {
+      report.placement_next_steps = body?.p_error ? { status: 'failed', error: body.p_error, terminal: body.p_terminal, attempts: 1 } : { status: 'ready', suggestions: (body?.p_suggestions as Array<Record<string, unknown>>).map((s, i) => ({ ...s, id: `saved-lesson-${i + 1}` })) };
+      value = report.placement_next_steps;
+    } else if (path === "/emails") { value = { id: "mail-id" }; if (options.failEmail) status = 500; }
     else if (path === "/auth/v1/user") {
       if (options.unauthorized) { status = 401; value = { message: "Invalid token" }; }
       else value = { id: options.differentTeacher ? "other-owner-id" : "owner-id", email: "teacher@example.test", is_anonymous: options.anonymous ?? false };
@@ -455,4 +487,65 @@ Deno.test("HTTP claim on pre-seeded unclaimed report transfers ownership atomica
     assertEquals(calls.some(c => c.path.endsWith("/student_tests") && c.method === "POST"), false);
     assertEquals(calls.some(c => c.path === "/functions/v1/process-welcome-test"), false);
   }, { unclaimedStudentId: "unclaimed-student-id", unclaimedTestId: "unclaimed-test-id", unclaimedTestStatus: "reviewed" });
+});
+
+Deno.test('HTTP only an unexpired teacher token can reserve lesson proposals', async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: 'generate_next_steps', token: studentToken });
+    assertEquals(res.status, 403); await res.text();
+    assertEquals(calls.some(c => c.path.includes('reserve_placement_next_steps') || c.path === '/v1/responses'), false);
+  });
+  await fixture(async (call, calls) => {
+    const res = await call({ action: 'generate_next_steps', token: teacherToken });
+    assertEquals(res.status, 410); await res.text();
+    assertEquals(calls.some(c => c.path.includes('reserve_placement_next_steps')), false);
+  }, { expired: true });
+});
+Deno.test('HTTP generated three lessons persist, read back and are cached without a second AI request', async () => {
+  await fixture(async (call, calls) => {
+    const first = await call({ action: 'generate_next_steps', token: teacherToken });
+    assertEquals(first.status, 200); assertEquals(await first.json(), { status: 'running' });
+    const get = await call({ action: 'get', token: teacherToken });
+    const report = await get.json();
+    assertEquals(report.nextSteps.status, 'ready');
+    assertEquals(report.nextSteps.suggestions.length, 3);
+    assertEquals(report.nextSteps.suggestions[0].id, 'saved-lesson-1');
+    const again = await call({ action: 'generate_next_steps', token: teacherToken });
+    assertEquals((await again.json()).status, 'ready');
+    assertEquals(calls.filter(c => c.path === '/v1/responses').length, 1);
+    const ai = calls.find(c => c.path === '/v1/responses')?.body;
+    assertEquals(ai?.stream, true); assertEquals(ai?.store, false);
+    assertEquals(ai?.model, 'openai/gpt-6-astra');
+    assertEquals((ai?.reasoning as Record<string, unknown>)?.effort, 'medium');
+    assertEquals(JSON.stringify(ai).includes('SHOULD_NOT_LEAK'), false);
+    const student = await call({ action: 'get', token: studentToken });
+    assertEquals('nextSteps' in await student.json(), false);
+  }, { unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id' });
+});
+Deno.test('HTTP planner denial persists a terminal state and never replays on a new click', async () => {
+  await fixture(async (call, calls) => {
+    const first = await call({ action: 'generate_next_steps', token: teacherToken }); await first.text();
+    const again = await call({ action: 'generate_next_steps', token: teacherToken });
+    assertEquals(await again.json(), { status: 'failed', error: 'Provider access denied', retryable: false });
+    assertEquals(calls.filter(c => c.path === '/v1/responses').length, 1);
+    assertEquals(calls.filter(c => c.path.includes('finish_placement_next_steps'))[0].body?.p_terminal, true);
+  }, { unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id', gatewayStatus: 403 });
+});
+Deno.test('HTTP incomplete proposals are not saved as a successful three-lesson result', async () => {
+  await fixture(async (call, calls) => {
+    const first = await call({ action: 'generate_next_steps', token: teacherToken }); await first.text();
+    const saved = calls.find(c => c.path.includes('finish_placement_next_steps'))?.body;
+    assertEquals(saved?.p_suggestions, null);
+    assertEquals(typeof saved?.p_error, 'string');
+  }, { unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id', gatewayCount: 2 });
+});
+Deno.test('HTTP in-progress reservations and unfinished analyses never start new billed work', async () => {
+  for (const options of [{ nextSteps: { status: 'running', lease: 'PRIVATE', attempts: 1 } }, { nextStepsNotReady: true }]) {
+    await fixture(async (call, calls) => {
+      const res = await call({ action: 'generate_next_steps', token: teacherToken });
+      assertEquals(res.status, options.nextStepsNotReady ? 409 : 200);
+      assertEquals((await res.text()).includes('PRIVATE'), false);
+      assertEquals(calls.some(c => c.path === '/v1/responses'), false);
+    }, options);
+  }
 });

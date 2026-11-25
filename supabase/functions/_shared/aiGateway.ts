@@ -18,13 +18,15 @@ export type ModelSemanticRole =
   | "chat-primary"
   | "chat-lightweight"
   | "chat-fallback"
-  | "media-passages";
+  | "media-passages"
+  | "placement-next-steps";
 
 export const GATEWAY_ROLES: readonly ModelSemanticRole[] = [
   "chat-primary",
   "chat-lightweight",
   "chat-fallback",
   "media-passages",
+  "placement-next-steps",
 ];
 
 /** Providers this gateway can call for text chat. */
@@ -37,6 +39,8 @@ export interface AiChatMessage {
 
 export interface AiCallPayload {
   messages: AiChatMessage[];
+  /** Strict JSON schema for the isolated Lovable Responses role. */
+  outputSchema?: Record<string, unknown>;
   temperature?: number;
   /** Output cap; sent as `max_completion_tokens` (OpenAI) or `max_output_tokens` (Gemini). */
   maxOutputTokens?: number;
@@ -68,6 +72,8 @@ export interface GatewayDeps {
 }
 
 export interface GatewayOptions {
+  /** Server-only Responses adapter, statically imported by its caller for deployment bundling. */
+  responsesExecutor?: (key: string, model: string, payload: AiCallPayload) => Promise<string>;
   /** Caller Edge Function name, written to error_logs on provider failure. */
   functionName: string;
   /** Set false to disable the registry fallback role for this call. */
@@ -126,11 +132,11 @@ function registryEntry(role: ModelSemanticRole): ModelRegistryEntry {
 export function resolveRole(role: ModelSemanticRole, getEnv: GatewayDeps["getEnv"]): ResolvedTarget {
   const entry = registryEntry(role);
   const raw = getEnv(overrideEnvVar(role))?.trim();
-  const valid = !!raw && /^[A-Za-z0-9._-]{1,80}$/.test(raw);
+  const valid = !!raw && (role === "placement-next-steps" ? /^openai\/[A-Za-z0-9._-]{1,80}$/ : /^[A-Za-z0-9._-]{1,80}$/).test(raw);
   return {
     role,
     provider: entry.provider as GatewayProvider,
-    model: valid ? raw! : entry.id,
+    model: valid && raw ? raw : entry.id,
     overridden: valid,
   };
 }
@@ -254,6 +260,28 @@ export async function executeAiCall(
     logFailure: options.deps?.logFailure ?? defaultLogFailure,
   };
   const chain = resolveChain(role, deps.getEnv, options.allowFallback !== false);
+
+  if (role === "placement-next-steps") {
+    const target = chain[0];
+    const key = deps.getEnv("LOVABLE_API_KEY");
+    if (!key) throw new AiGatewayError("AI is not configured for lesson proposals.", 401, "openai", target.model);
+    if (!payload.outputSchema) throw new AiGatewayError("Lesson proposal schema missing.", 400, "openai", target.model);
+    if (!options.responsesExecutor) throw new AiGatewayError("Lesson proposal AI adapter missing.", 500, "openai", target.model);
+    try {
+      const text = await options.responsesExecutor(key, target.model, payload);
+      return { text, role, provider: "openai", model: target.model, usedFallback: false };
+    } catch (error) {
+      const failure = error as { statusCode?: number; responseBody?: string; cause?: { statusCode?: number; responseBody?: string } };
+      const status = failure.statusCode ?? failure.cause?.statusCode ?? 422;
+      let message = status === 422 ? "AI could not provide complete lesson proposals." : "Lesson proposal AI is unavailable.";
+      try {
+        const body = JSON.parse(failure.responseBody ?? failure.cause?.responseBody ?? "{}");
+        const safe = body.message ?? body.error?.message;
+        if (typeof safe === "string") message = safe.slice(0, 500);
+      } catch { /* keep the safe configuration message */ }
+      throw new AiGatewayError(message, status, "openai", target.model);
+    }
+  }
 
   let last: { status: number; message: string; target: ResolvedTarget } | null = null;
   for (let i = 0; i < chain.length; i++) {

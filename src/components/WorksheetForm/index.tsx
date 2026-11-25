@@ -471,6 +471,9 @@ export default function WorksheetForm({
         if (parsed.grammarFocus) {
           setGrammarFocus(parsed.grammarFocus);
         }
+        if (parsed.englishLevel === 'A1/A2' || parsed.englishLevel === 'B1/B2' || parsed.englishLevel === 'C1/C2') {
+          setEnglishLevel(parsed.englishLevel);
+        }
         sessionStorage.removeItem('prefillWorksheet');
         devLog('✅ [WorksheetForm] Pre-filled from Progress Tab:', parsed);
       } catch (error) {

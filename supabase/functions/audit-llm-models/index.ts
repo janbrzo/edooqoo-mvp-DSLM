@@ -128,6 +128,17 @@ async function probe(target: Target): Promise<ProbeOutcome> {
   });
 
   try {
+    // Gateway-prefixed entries are discovered on their own transport, never probed at a direct provider.
+    if (target.model.startsWith("openai/")) {
+      const key = Deno.env.get("LOVABLE_API_KEY");
+      const endpoint = "https://ai.gateway.lovable.dev/v1/models?include_consent_required=true";
+      if (!key) return done(-1, "missing LOVABLE_API_KEY", endpoint);
+      const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${key}` } });
+      if (!response.ok) return done(response.status, await errorText(response), endpoint);
+      const catalog = await response.json();
+      const model = (catalog.data ?? []).find((entry: { id: string }) => entry.id === target.model);
+      return done(model ? 200 : 404, model ? null : "Gateway model not listed", endpoint);
+    }
     if (target.provider === "openai") {
       const key = Deno.env.get("OPENAI_API_KEY");
       if (!key) return done(-1, "missing OPENAI_API_KEY", "");

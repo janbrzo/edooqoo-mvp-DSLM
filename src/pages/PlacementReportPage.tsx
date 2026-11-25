@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PlacementReportBody } from '@/components/welcome-test/PlacementReportBody';
 import { TeacherPlacementDiagnosticView } from '@/components/welcome-test/TeacherPlacementDiagnosticView';
+import { PlacementNextStepsSection } from '@/components/welcome-test/PlacementNextStepsSection';
+import { prefillPlacementLesson, rememberPlacementLesson, pendingPlacementLessonId, clearPendingPlacementLesson } from '@/lib/welcomeTest/placementLessonPrefill';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { studentTabPath } from '@/lib/students/workspaceTabs';
@@ -19,10 +21,12 @@ import {
   clearPostSignupAddStudentIntent,
   forwardPlacementReport,
   getPlacementReport,
+  generatePlacementNextSteps,
   PLACEMENT_REPORT_TOKEN_PATTERN,
   rememberPendingClaim,
   takePendingClaim,
   type PlacementReport,
+  type PlacementLessonProposal,
 } from '@/lib/welcomeTest/placementReportApi';
 
 type LoadState = { status: 'loading' } | { status: 'error'; expired: boolean } | { status: 'ready'; report: PlacementReport };
@@ -37,6 +41,11 @@ export default function PlacementReportPage() {
   const { isDemoMode } = useDemoContext();
   const [state, setState] = useState<LoadState>({ status: 'loading' });
   const [claiming, setClaiming] = useState(false);
+  const [generatingLessons, setGeneratingLessons] = useState(false);
+  const [lessonError, setLessonError] = useState<string | null>(null);
+  const activeToken = useRef(token);
+  activeToken.current = token;
+  const lessonRequestRunning = useRef(false);
   const wantsForward = searchParams.get('forward') === '1';
   const [forwardEmail, setForwardEmail] = useState('');
   const [forwarding, setForwarding] = useState(false);
@@ -52,6 +61,8 @@ export default function PlacementReportPage() {
 
   useEffect(() => {
     setState({ status: 'loading' });
+    setLessonError(null);
+    setGeneratingLessons(false);
     autoClaimed.current = false;
     if (!PLACEMENT_REPORT_TOKEN_PATTERN.test(token)) { setState({ status: 'error', expired: false }); return; }
     let cancelled = false;
@@ -66,9 +77,10 @@ export default function PlacementReportPage() {
     && Boolean(state.report.teacherDiagnostic)
     && state.report.teacherDiagnostic?.test?.status === 'completed'
     && !state.report.teacherDiagnostic?.learningProfile;
+  const pendingLessons = state.status === 'ready' && state.report.role === 'teacher' && state.report.nextSteps?.status === 'running';
 
   useEffect(() => {
-    if (!pendingAnalysis) return;
+    if (!pendingAnalysis && !pendingLessons) return;
     let cancelled = false;
     let ticks = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -79,15 +91,34 @@ export default function PlacementReportPage() {
           if (cancelled) return;
           setState({ status: 'ready', report });
           const stillPending = report.teacherDiagnostic?.test?.status === 'completed' && !report.teacherDiagnostic?.learningProfile;
-          if (stillPending && ticks < 30) timer = setTimeout(poll, 3000);
+          if ((stillPending || report.nextSteps?.status === 'running') && ticks < 60) timer = setTimeout(poll, 3000);
         })
         .catch(() => {
-          if (!cancelled && ticks < 30) timer = setTimeout(poll, 3000);
+          if (!cancelled && ticks < 60) timer = setTimeout(poll, 3000);
         });
     };
     timer = setTimeout(poll, 3000);
     return () => { cancelled = true; if (timer) clearTimeout(timer); };
-  }, [pendingAnalysis, token]);
+  }, [pendingAnalysis, pendingLessons, token]);
+
+  const generateLessons = async () => {
+    if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
+    if (lessonRequestRunning.current || state.status !== 'ready' || state.report.role !== 'teacher') return;
+    lessonRequestRunning.current = true;
+    const requestToken = token;
+    setGeneratingLessons(true);
+    setLessonError(null);
+    try {
+      const nextSteps = await generatePlacementNextSteps(requestToken);
+      if (activeToken.current !== requestToken) return;
+      setState(previous => previous.status === 'ready' ? { ...previous, report: { ...previous.report, nextSteps } } : previous);
+    } catch (error) {
+      if (activeToken.current === requestToken) setLessonError(error instanceof Error ? error.message : 'Could not prepare lessons.');
+    } finally {
+      lessonRequestRunning.current = false;
+      if (activeToken.current === requestToken) setGeneratingLessons(false);
+    }
+  };
 
   const claim = useCallback(async () => {
     if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
@@ -99,7 +130,13 @@ export default function PlacementReportPage() {
       clearPostSignupAddStudentIntent();
       await queryClient.invalidateQueries({ queryKey: ['students'] });
       if (!alreadyClaimed) toast.success('Student added with their placement profile.');
-      navigate(studentTabPath(studentId, 'timeline', { filter: 'tests', testId }));
+      const selectedId = pendingPlacementLessonId(token);
+      const lesson = state.report.nextSteps?.status === 'ready' ? state.report.nextSteps.suggestions.find(s => s.id === selectedId) : null;
+      if (lesson) {
+        prefillPlacementLesson(lesson, { id: studentId, name: state.report.studentName });
+        clearPendingPlacementLesson();
+        navigate('/#worksheet-form');
+      } else navigate(studentTabPath(studentId, 'timeline', { filter: 'tests', testId }));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not add the student.');
     } finally {
@@ -195,6 +232,26 @@ export default function PlacementReportPage() {
           <TeacherPlacementDiagnosticView diagnostic={report.teacherDiagnostic} studentName={name} />
         ) : (
           <PlacementReportBody result={report.result} audience={isStudentView ? 'student' : 'teacher'} />
+        )}
+
+        {!isStudentView && (!report.claimed || report.nextSteps?.status === 'ready') && (
+          <PlacementNextStepsSection
+            state={report.nextSteps ?? { status: 'idle' }}
+            generating={generatingLessons || claiming}
+            available={Boolean(report.teacherDiagnostic?.learningProfile) && report.teacherDiagnostic?.test?.status === 'reviewed'}
+            claimed={report.claimed} registered={Boolean(isRegisteredUser)} error={lessonError}
+            onGenerate={() => { void generateLessons(); }}
+            onPrepare={(lesson: PlacementLessonProposal) => {
+              try { prefillPlacementLesson(lesson); navigate('/#worksheet-form'); }
+              catch { toast.error('Could not open the worksheet form. Please allow browser storage.'); }
+            }}
+            onSave={(lesson: PlacementLessonProposal) => {
+              if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
+              rememberPlacementLesson(token, lesson.id);
+              if (isRegisteredUser) void claim();
+              else goToSignup();
+            }}
+          />
         )}
 
         {isStudentView && !report.claimed && (

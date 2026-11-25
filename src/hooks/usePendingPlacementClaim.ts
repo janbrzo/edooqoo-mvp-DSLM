@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import { claimPlacementReport, clearPostSignupAddStudentIntent, rememberPendingClaim, takePendingClaim } from '@/lib/welcomeTest/placementReportApi';
 import { studentTabPath } from '@/lib/students/workspaceTabs';
 import { devError } from '@/utils/logger';
+import { getPlacementReport } from '@/lib/welcomeTest/placementReportApi';
+import { pendingPlacementLessonId, prefillPlacementLesson, clearPendingPlacementLesson } from '@/lib/welcomeTest/placementLessonPrefill';
 
 /** After signup (incl. email confirmation), adds the student from a remembered placement report. */
 export function usePendingPlacementClaim(isRegisteredUser: boolean, isDemo: boolean) {
@@ -21,6 +23,17 @@ export function usePendingPlacementClaim(isRegisteredUser: boolean, isDemo: bool
         clearPostSignupAddStudentIntent();
         await queryClient.invalidateQueries({ queryKey: ['students'] });
         if (!alreadyClaimed) toast.success('Student added with their placement profile.');
+        const selectedId = pendingPlacementLessonId(token);
+        if (selectedId) {
+          const report = await getPlacementReport(token);
+          const lesson = report.role === 'teacher' && report.nextSteps?.status === 'ready' ? report.nextSteps.suggestions.find(s => s.id === selectedId) : null;
+          if (lesson) {
+            prefillPlacementLesson(lesson, { id: studentId, name: report.studentName });
+            clearPendingPlacementLesson();
+            navigate('/#worksheet-form');
+            return;
+          }
+        }
         navigate(studentTabPath(studentId, 'timeline', { filter: 'tests', testId }));
       })
       .catch((error) => {

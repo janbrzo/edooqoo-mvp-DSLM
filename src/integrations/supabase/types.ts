@@ -2679,6 +2679,7 @@ export type Database = {
           forward_count: number
           id: string
           invite_id: string | null
+          placement_next_steps: Json | null
           report_token: string
           result: Json
           student_email: string | null
@@ -2687,6 +2688,7 @@ export type Database = {
           teacher_email: string
           unclaimed_student_id: string | null
           unclaimed_test_id: string | null
+          updated_at: string
         }
         Insert: {
           answers?: Json | null
@@ -2698,6 +2700,7 @@ export type Database = {
           forward_count?: number
           id?: string
           invite_id?: string | null
+          placement_next_steps?: Json | null
           report_token: string
           result: Json
           student_email?: string | null
@@ -2706,6 +2709,7 @@ export type Database = {
           teacher_email: string
           unclaimed_student_id?: string | null
           unclaimed_test_id?: string | null
+          updated_at?: string
         }
         Update: {
           answers?: Json | null
@@ -2717,6 +2721,7 @@ export type Database = {
           forward_count?: number
           id?: string
           invite_id?: string | null
+          placement_next_steps?: Json | null
           report_token?: string
           result?: Json
           student_email?: string | null
@@ -2725,6 +2730,7 @@ export type Database = {
           teacher_email?: string
           unclaimed_student_id?: string | null
           unclaimed_test_id?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -5080,6 +5086,17 @@ export type Database = {
           name: string
         }[]
       }
+      finish_placement_next_steps: {
+        Args: {
+          p_context?: Json
+          p_error?: string
+          p_lease: string
+          p_suggestions: Json
+          p_terminal?: boolean
+          p_token: string
+        }
+        Returns: Json
+      }
       generate_flashcard_share_token: {
         Args: {
           p_expires_hours?: number
@@ -5840,6 +5857,7 @@ export type Database = {
       }
       reopen_homework: { Args: { p_homework_id: string }; Returns: Json }
       request_homework_redo: { Args: { p_homework_id: string }; Returns: Json }
+      reserve_placement_next_steps: { Args: { p_token: string }; Returns: Json }
       revoke_mcp_token: { Args: { _id: string }; Returns: undefined }
       rollback_intake_extraction: {
         Args: { p_extraction_id: string }

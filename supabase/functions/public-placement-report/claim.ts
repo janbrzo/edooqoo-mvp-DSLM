@@ -81,7 +81,7 @@ export async function seedUnclaimedPlacementStudent(input: {
     studentId = student.id;
 
     const { data: testRow, error: testError } = await admin.from("student_tests")
-      .insert(buildWelcomeTestRow(r, studentId, teacherId, report.id, hasAnswers)).select("id").single();
+      .insert(buildWelcomeTestRow(r, studentId, teacherId, report.id, hasAnswers) as Record<string, unknown>).select("id").single();
     if (testError) throw testError;
     if (!testRow) throw new Error("Unclaimed test could not be saved");
     testId = testRow.id;
@@ -238,8 +238,9 @@ export async function loadTeacherDiagnosticData(
       .select("id, title, description, goal_type, kind, target_category, source, metadata")
       .eq("student_id", studentId).contains("metadata", { test_id: testId }),
     admin.from("future_worksheet_suggestions")
-      .select("id, title, rationale, topic, exercise_types, cefr_level, status, metadata, created_at")
-      .eq("student_id", studentId).order("created_at", { ascending: false }).limit(6),
+      .select("id, suggested_topic, suggested_goal, suggested_exercises, difficulty_level, rationale, generation_context, created_at")
+      .eq("student_id", studentId).eq("generation_context->>test_id", testId)
+      .is("deleted_at", null).order("sequence_number", { ascending: true }).limit(3),
     admin.from("dslm_curriculum_phases")
       .select("id, phase_number, title, description, focus_skills, target_level, estimated_lessons, status, created_at")
       .eq("student_id", studentId).order("phase_number", { ascending: true }),
@@ -327,7 +328,7 @@ export async function claimReservedReport(input: {
     }
 
     const { data: testRow, error: testError } = await admin.from("student_tests")
-      .insert(buildWelcomeTestRow(r, studentId, teacher.id, report.id, hasAnswers)).select("id").single();
+      .insert(buildWelcomeTestRow(r, studentId, teacher.id, report.id, hasAnswers) as Record<string, unknown>).select("id").single();
     if (testError) throw testError;
     if (!testRow) throw new Error("Test could not be saved");
     testId = testRow.id;

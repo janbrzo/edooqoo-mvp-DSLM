@@ -5,6 +5,22 @@ import type { PublicPlacementResult } from '@/lib/welcomeTest/publicPlacementTes
 export const PENDING_PLACEMENT_CLAIM_KEY = 'edooqoo_pending_placement_claim';
 export const PLACEMENT_REPORT_TOKEN_PATTERN = /^[A-Za-z0-9_-]{20,64}$/;
 
+export interface PlacementLessonProposal {
+  id: string;
+  topic: string;
+  goal: string | null;
+  additionalInfo: string | null;
+  grammarFocus: string | null;
+  exercises: string[];
+  exerciseFocusMap: Record<string, string>;
+  rationale: string | null;
+  difficulty: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
+}
+export type PlacementNextStepsState =
+  | { status: 'idle' | 'running' }
+  | { status: 'ready'; suggestions: PlacementLessonProposal[] }
+  | { status: 'failed'; error: string; retryable: boolean };
+
 export interface PlacementReport {
   /** Decided by the server from the token, never by the URL. */
   role: 'teacher' | 'student';
@@ -12,6 +28,7 @@ export interface PlacementReport {
   result: PublicPlacementResult;
   expiresAt: string;
   claimed: boolean;
+  nextSteps?: PlacementNextStepsState;
   teacherDiagnostic?: {
     studentId: string;
     testId: string;
@@ -93,6 +110,8 @@ export function submitPlacementReport(input: {
 }
 
 export const getPlacementReport = (token: string) => call<PlacementReport>({ action: 'get', token });
+export const generatePlacementNextSteps = (token: string) =>
+  call<PlacementNextStepsState>({ action: 'generate_next_steps', token });
 export const forwardPlacementReport = (token: string, teacherEmail: string) =>
   call<{ success: true }>({ action: 'forward', token, teacherEmail });
 export const claimPlacementReport = (token: string) =>

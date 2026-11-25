@@ -9,7 +9,7 @@ vi.stubGlobal('localStorage', {
   removeItem: (k: string) => { store.delete(k); },
   clear: () => store.clear(),
 });
-import { PENDING_PLACEMENT_CLAIM_KEY, rememberPendingClaim, takePendingClaim, peekPendingClaim, clearPostSignupAddStudentIntent, sendPlacementInvite, getPlacementReport, claimPlacementReport, forwardPlacementReport } from '../placementReportApi';
+import { PENDING_PLACEMENT_CLAIM_KEY, rememberPendingClaim, takePendingClaim, peekPendingClaim, clearPostSignupAddStudentIntent, sendPlacementInvite, getPlacementReport, claimPlacementReport, forwardPlacementReport, generatePlacementNextSteps } from '../placementReportApi';
 
 describe('pending placement claim', () => {
   beforeEach(() => localStorage.clear());
@@ -39,6 +39,10 @@ describe('pending placement claim', () => {
 
 describe('placement API boundary', () => {
   beforeEach(() => { vi.clearAllMocks(); boundary.invoke.mockResolvedValue({ data: { success: true }, error: null }); });
+  it('requests proposals by teacher token only, without client-provided learner IDs or evidence', async () => {
+    await generatePlacementNextSteps('teacher_abcdefghijklmnopqrstuvwx');
+    expect(boundary.invoke).toHaveBeenCalledWith('public-placement-report', { body: { action: 'generate_next_steps', token: 'teacher_abcdefghijklmnopqrstuvwx' } });
+  });
   it('sends the teacher name only with invitation creation', async () => {
     const input = { studentName: 'Marta', studentEmail: 'student@example.test', teacherEmail: 'teacher@example.test', teacherName: 'Anna' };
     await sendPlacementInvite(input);

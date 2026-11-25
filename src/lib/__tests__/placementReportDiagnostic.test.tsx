@@ -6,6 +6,11 @@ import type { PlacementReport } from '@/lib/welcomeTest/placementReportApi';
 
 const mocks = vi.hoisted(() => ({
   getPlacementReport: vi.fn(),
+  generatePlacementNextSteps: vi.fn(),
+  prefillPlacementLesson: vi.fn(),
+  rememberPlacementLesson: vi.fn(),
+  pendingPlacementLessonId: vi.fn(),
+  registered: false,
   claimPlacementReport: vi.fn(),
   forwardPlacementReport: vi.fn(),
   rememberPendingClaim: vi.fn(),
@@ -19,11 +24,18 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/welcomeTest/placementReportApi', () => ({
   PLACEMENT_REPORT_TOKEN_PATTERN: /^[A-Za-z0-9_-]{20,64}$/,
   getPlacementReport: mocks.getPlacementReport,
+  generatePlacementNextSteps: mocks.generatePlacementNextSteps,
   claimPlacementReport: mocks.claimPlacementReport,
   forwardPlacementReport: mocks.forwardPlacementReport,
   rememberPendingClaim: mocks.rememberPendingClaim,
   takePendingClaim: mocks.takePendingClaim,
   clearPostSignupAddStudentIntent: mocks.clearPostSignupAddStudentIntent,
+}));
+vi.mock('@/lib/welcomeTest/placementLessonPrefill', () => ({
+  prefillPlacementLesson: mocks.prefillPlacementLesson,
+  rememberPlacementLesson: mocks.rememberPlacementLesson,
+  pendingPlacementLessonId: mocks.pendingPlacementLessonId,
+  clearPendingPlacementLesson: vi.fn(),
 }));
 vi.mock('react-router-dom', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -33,7 +45,7 @@ vi.mock('react-router-dom', () => ({
 }));
 vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: mocks.invalidateQueries }) }));
 vi.mock('react-helmet-async', () => ({ Helmet: ({ children }: { children?: React.ReactNode }) => <>{children}</> }));
-vi.mock('@/hooks/useAuthFlow', () => ({ useAuthFlow: () => ({ loading: false, isRegisteredUser: false }) }));
+vi.mock('@/hooks/useAuthFlow', () => ({ useAuthFlow: () => ({ loading: false, isRegisteredUser: mocks.registered }) }));
 vi.mock('@/contexts/DemoContext', () => ({ useDemoContext: () => ({ isDemoMode: false }) }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
@@ -119,10 +131,47 @@ function textOf(node: ReactTestRenderer | undefined): string {
   return JSON.stringify(node?.toJSON() ?? '');
 }
 
-beforeEach(() => { vi.clearAllMocks(); });
+beforeEach(() => { vi.clearAllMocks(); mocks.registered = false; });
 afterEach(async () => { await act(async () => renderer?.unmount()); renderer = undefined; });
 
 describe('PlacementReportPage real teacher diagnostic view', () => {
+  const lessons = [1, 2, 3].map(n => ({ id: `lesson-${n}`, topic: `Workplace lesson ${n}`, goal: 'Address a test gap', grammarFocus: null, additionalInfo: null, rationale: 'Measured gap', difficulty: 'B1' as const, exercises: [], exerciseFocusMap: {} }));
+  const report: PlacementReport = { role: 'teacher', studentName: 'Anna', result: baseResult, expiresAt: baseResult.expiresAt, claimed: false, teacherDiagnostic: fullDiagnostic, nextSteps: { status: 'idle' } };
+  it('runs one teacher-token request and hands the selected one of three lessons to the manual form', async () => {
+    mocks.getPlacementReport.mockResolvedValue(report);
+    mocks.generatePlacementNextSteps.mockResolvedValue({ status: 'ready', suggestions: lessons });
+    await act(async () => { renderer = create(<PlacementReportPage />); });
+    const generate = renderer?.root.findAllByType('button').find(b => b.children.some(c => typeof c === 'string' && c.includes('Generate 3')));
+    if (!generate) throw new Error('Generate action missing');
+    await act(async () => { await generate.props.onClick(); });
+    expect(mocks.generatePlacementNextSteps).toHaveBeenCalledTimes(1);
+    expect(mocks.generatePlacementNextSteps).toHaveBeenCalledWith(mocks.token);
+    const prepare = renderer?.root.findAllByType('button').filter(b => b.children.some(c => typeof c === 'string' && c.includes('Prepare worksheet')));
+    expect(prepare).toHaveLength(3);
+    await act(async () => { prepare?.[1].props.onClick(); });
+    expect(mocks.prefillPlacementLesson).toHaveBeenCalledWith(lessons[1]);
+    expect(mocks.navigate).toHaveBeenCalledWith('/#worksheet-form');
+    expect(mocks.claimPlacementReport).not.toHaveBeenCalled();
+  });
+  it('keeps the selected proposal through signup and prepares it only after the exact learner is claimed', async () => {
+    mocks.registered = true;
+    mocks.getPlacementReport.mockResolvedValue({ ...report, nextSteps: { status: 'ready', suggestions: lessons } });
+    mocks.claimPlacementReport.mockResolvedValue({ studentId: 'owned-student', testId: 'exact-test' });
+    mocks.pendingPlacementLessonId.mockReturnValue('lesson-2');
+    await act(async () => { renderer = create(<PlacementReportPage />); });
+    const save = renderer?.root.findAllByType('button').filter(b => b.children.some(c => typeof c === 'string' && c.includes('Add student and prepare')));
+    await act(async () => { save?.[1].props.onClick(); });
+    expect(mocks.rememberPlacementLesson).toHaveBeenCalledWith(mocks.token, 'lesson-2');
+    expect(mocks.claimPlacementReport).toHaveBeenCalledWith(mocks.token);
+    expect(mocks.prefillPlacementLesson).toHaveBeenCalledWith(lessons[1], { id: 'owned-student', name: 'Anna' });
+  });
+  it('blocks lesson generation while the placement diagnostic is not ready', async () => {
+    mocks.getPlacementReport.mockResolvedValue({ ...report, teacherDiagnostic: undefined });
+    await act(async () => { renderer = create(<PlacementReportPage />); });
+    const generate = renderer?.root.findAllByType('button').find(b => b.children.some(c => typeof c === 'string' && c.includes('Generate 3')));
+    expect(generate?.props.disabled).toBe(true);
+    expect(mocks.generatePlacementNextSteps).not.toHaveBeenCalled();
+  });
   it('renders full AI analysis, skills, goals, questions and top+bottom claim CTAs without Sample view', async () => {
     mocks.getPlacementReport.mockResolvedValue({
       role: 'teacher',

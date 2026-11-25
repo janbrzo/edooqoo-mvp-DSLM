@@ -310,7 +310,7 @@ describe('MODEL_REGISTRY integrity', () => {
       }
     };
     walk(root);
-    const registered = new Set(MODEL_REGISTRY.map((e) => e.id));
+    const registered = new Set(MODEL_REGISTRY.map((e) => e.id.replace(/^(openai|google)\//, '')));
     const missing = new Set<string>();
     const re = /["'`](?:google\/|openai\/)?(gpt-[\w.-]+|gemini-[\w.-]+|whisper-\d|tts-1(?:-hd)?|o[1-9]-[\w.-]+)["'`]/g;
     for (const f of files) {

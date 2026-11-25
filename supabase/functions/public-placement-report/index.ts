@@ -10,6 +10,7 @@
  *  - invite_get: returns the invited student's name only (teacher email stays server-side).
  */
 import { isLocalRecordingMarker, resolveStudentEmail } from "./claimSeed.ts";
+import { publicPlacementNextSteps, startPlacementNextSteps } from "./nextSteps.ts";
 import {
   claimReservedReport,
   claimUnclaimedReport,
@@ -110,6 +111,7 @@ const bodySchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("invite_get"), token: tokenSchema }),
   z.object({ action: z.literal("get"), token: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/) }),
   z.object({ action: z.literal("claim"), token: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/) }),
+  z.object({ action: z.literal("generate_next_steps"), token: tokenSchema }),
   z.object({ action: z.literal("forward"), token: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/), teacherEmail: z.string().trim().email().max(254) }),
 ]);
 
@@ -432,8 +434,8 @@ export async function handleRequest(req: Request): Promise<Response> {
       return json({ success: true });
     }
 
-    if (body.action !== "get" && body.action !== "claim") return json({ error: "Unknown action" }, 400);
-    const columns = "id, result, student_name, student_email, teacher_email, invite_id, expires_at, claimed_by, claimed_student_id, unclaimed_student_id, unclaimed_test_id";
+    if (body.action !== "get" && body.action !== "claim" && body.action !== "generate_next_steps") return json({ error: "Unknown action" }, 400);
+    const columns = "id, result, student_name, student_email, teacher_email, invite_id, expires_at, claimed_by, claimed_student_id, unclaimed_student_id, unclaimed_test_id, placement_next_steps";
     let role: "teacher" | "student" = "teacher";
     let { data: report, error } = await admin.from("public_placement_reports").select(columns)
       .eq("report_token", body.token).maybeSingle();
@@ -447,6 +449,17 @@ export async function handleRequest(req: Request): Promise<Response> {
     if (!report) return json({ error: "Report not found" }, 404);
     if (body.action === "claim" && role === "student") return json({ error: "Only the teacher link can add this student" }, 403);
     const expired = Date.parse(report.expires_at) <= now;
+
+    if (body.action === "generate_next_steps") {
+      if (role !== "teacher") return json({ error: "Only the teacher link can prepare lessons" }, 403);
+      if (expired) return json({ error: "This report has expired" }, 410);
+      const nextSteps = await startPlacementNextSteps(admin, body.token);
+      if (nextSteps?.status === "claimed") return json({ error: "Open the student's learning plan in your account to prepare more lessons." }, 409);
+      if (nextSteps?.status === "not_ready") return json({ error: "The placement analysis is still being prepared. Please try again shortly." }, 409);
+      if (nextSteps?.status === "expired") return json({ error: "This report has expired" }, 410);
+      if (nextSteps?.status === "unavailable") return json({ error: "Report not available" }, 404);
+      return json(publicPlacementNextSteps(nextSteps));
+    }
 
     if (body.action === "get") {
       if (expired) return json({ error: "expired" }, 410);
@@ -474,6 +487,7 @@ export async function handleRequest(req: Request): Promise<Response> {
         result: role === "student" ? studentResult : fullResult,
         expiresAt: report.expires_at,
         claimed: !!report.claimed_by,
+        ...(role === "teacher" ? { nextSteps: publicPlacementNextSteps(report.placement_next_steps) } : {}),
         ...(teacherDiagnostic ? { teacherDiagnostic } : {}),
       });
     }
