@@ -330,6 +330,12 @@ TECHNICAL MECHANICS (registered Quick Send acquisition): public-placement-report
 
 RAG KEYWORDS: welcome test, placement test, diagnostic test, signal validation, teacher feedback, evidence gate, server grading, CEFR placement, ESL assessment, speaking recorder, listening test, learner traits, skill metrics, test share token, adult English level, onboarding assessment, proficiency diagnostics, registered Quick Send, placement_pending_at, automatic placement claim, invited learner visibility, exact test deep link, claim retry idempotency
 
+## Public Placement First-Lesson Proposals
+PROBLEM: Teachers without accounts need real first lessons from their exact placement diagnostic, without public access to private account history or duplicate AI charges.
+EDOOQOO SOLUTION: A teacher report link explicitly generates three independent adult lesson proposals, caches them and offers manual worksheet preparation or account claim with the selected lesson retained.
+TECHNICAL MECHANICS: public-placement-report generate_next_steps validates teacher tokens and expiry, reserves through service-only reserve_placement_next_steps and saves atomically through finish_placement_next_steps. The isolated placement-next-steps executeAiCall role streams strict Lovable Responses output from bounded diagnostic evidence, with no provider fallback and persisted terminal failure. All three future_worksheet_suggestions use the current learner owner and survive claim. placementLessonPrefill passes topic, goal, grammar focus, exercises and CEFR; only a successful authenticated claim adds the owned student and suggestion ID. No automatic generation or Worksheet Generation Engine changes. Coverage includes real HTTP/SSE fixtures, isolated actual SQL migrations and live anonymous proposal/cache/form checks; managed external Supabase sign-in remains unavailable.
+RAG KEYWORDS: public placement next steps, first lesson proposals, teacher report token, cached generation reservation, atomic lesson persistence, manual worksheet prefill, selected lesson after signup, Lovable Responses
+
 ## Teacher Calendar Public Booking and Google Calendar
 STATUS: PRODUCTION
 

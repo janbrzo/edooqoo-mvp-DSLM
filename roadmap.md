@@ -36,7 +36,7 @@ Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
 ## Public placement report teacher preview
 
-- [ ] Full report step 3/5: token-authorized, cached three first-lesson proposals, manual generator handoff and preserved suggestions after claim; test and deploy without changing the worksheet engine.
+- [x] Full report step 3/5: teacher-token-only cached three first-lesson proposals, atomic suggestion persistence and manual CEFR/exercise/topic handoff, selected lesson retained through account claim. Live AI produced exactly three A2 proposals and one cached request; desktop/mobile form readback, zero automatic generation, zero overflow/errors, 71 focused Vitest, 6 isolated SQL and 48 Deno cases passed. Functions and migrations deployed; protected engine unchanged. Authenticated hosted claim remains unverified because external Supabase sessions cannot be minted.
 
 - [x] Step 1/4: added fixed illustrative AI analysis, six grouped trait sections and three real-bank sample questions to the preview data builder, with no UI changes; 19 focused tests passed.
 - [x] Step 2/4: rebuilt the sample teacher-account preview with the account-style test summary, AI analysis, level suggestion, assessment, six skill rows, grouped traits and feedback controls, three sample questions with teacher notes, goals and first-lesson CTA; repeated sample labels and disabled account-only controls.

@@ -21,7 +21,7 @@ const executable = (cmd: string) => {
     throw new Error(`Local PostgreSQL binary ${cmd} is required for isolated transaction tests.`);
   }
 };
-const asUser = (cmd: string, args: string[]) => uid === 0 ? ['runuser', ['-u', 'nobody', '--', executable(cmd), ...args]] as const : [executable(cmd), args] as const;
+const asUser = (cmd: string, args: string[]) => uid === 0 ? ['setpriv', ['--reuid=65534', '--regid=65534', '--clear-groups', executable(cmd), ...args]] as const : [executable(cmd), args] as const;
 const sqlArgs = ['-h', dir, '-p', '55438', '-U', 'nobody', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-At'];
 function sql(value: string) { return execFileSync('psql', [...sqlArgs, '-c', value], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim(); }
 

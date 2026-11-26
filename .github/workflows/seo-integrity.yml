@@ -80,6 +80,9 @@ jobs:
       - name: Homework mistake service and HTTP boundary tests
         run: deno test --config supabase/functions/homework-mistake-flashcards/deno.json --allow-net --allow-env supabase/functions/homework-mistake-flashcards/*_test.ts
 
+      - name: Placement report service and HTTP boundary tests
+        run: deno test --config supabase/functions/public-placement-report/deno.json --allow-net --allow-env --allow-read --allow-sys supabase/functions/public-placement-report/*_test.ts
+
       - name: Full SEO production build
         run: npm run build:seo
 
