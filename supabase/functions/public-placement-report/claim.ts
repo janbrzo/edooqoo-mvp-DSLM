@@ -242,8 +242,8 @@ export async function loadTeacherDiagnosticData(
       .eq("student_id", studentId).eq("generation_context->>test_id", testId)
       .is("deleted_at", null).order("sequence_number", { ascending: true }).limit(3),
     admin.from("dslm_curriculum_phases")
-      .select("id, phase_number, title, description, focus_skills, target_level, estimated_lessons, status, created_at")
-      .eq("student_id", studentId).order("phase_number", { ascending: true }),
+      .select("id, sequence_number, title, description, focus_areas, estimated_weeks_start, estimated_weeks_end, status, rationale, created_at")
+      .eq("student_id", studentId).is("deleted_at", null).order("sequence_number", { ascending: true }),
   ]);
 
   const rawProfile = profileRes.data as Record<string, unknown> | null;

@@ -21,6 +21,21 @@ export type PlacementNextStepsState =
   | { status: 'ready'; suggestions: PlacementLessonProposal[] }
   | { status: 'failed'; error: string; retryable: boolean };
 
+export interface PlacementLearningPhase {
+  id: string;
+  sequenceNumber: number;
+  title: string;
+  description: string;
+  focusAreas: string[];
+  estimatedWeeksStart: number;
+  estimatedWeeksEnd: number;
+  rationale: string;
+}
+export type PlacementLearningPathState =
+  | { status: 'idle' | 'running' }
+  | { status: 'ready'; phases: PlacementLearningPhase[] }
+  | { status: 'failed'; error: string; retryable: boolean };
+
 export interface PlacementReport {
   /** Decided by the server from the token, never by the URL. */
   role: 'teacher' | 'student';
@@ -29,6 +44,7 @@ export interface PlacementReport {
   expiresAt: string;
   claimed: boolean;
   nextSteps?: PlacementNextStepsState;
+  learningPath?: PlacementLearningPathState;
   teacherDiagnostic?: {
     studentId: string;
     testId: string;
@@ -112,6 +128,8 @@ export function submitPlacementReport(input: {
 export const getPlacementReport = (token: string) => call<PlacementReport>({ action: 'get', token });
 export const generatePlacementNextSteps = (token: string) =>
   call<PlacementNextStepsState>({ action: 'generate_next_steps', token });
+export const generatePlacementLearningPath = (token: string) =>
+  call<PlacementLearningPathState>({ action: 'generate_learning_path', token });
 export const forwardPlacementReport = (token: string, teacherEmail: string) =>
   call<{ success: true }>({ action: 'forward', token, teacherEmail });
 export const claimPlacementReport = (token: string) =>

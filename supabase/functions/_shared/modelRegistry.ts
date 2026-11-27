@@ -85,6 +85,13 @@ export const MODEL_REGISTRY: ModelRegistryEntry[] = [
     probe: "metadata",
     lifecycle: { shutdownDate: null, replacement: null, sourceUrl: DEPRECATION_PAGES.openai, verifiedAt: "2026-11-25" },
   },
+  {
+    id: "openai/gpt-6-astra", provider: "openai", role: "placement-learning-path",
+    useCase: "Three to five macro curriculum phases grounded in an unclaimed placement diagnostic, served by Lovable Responses.",
+    consumers: ["public-placement-report", "_shared/lovableResponses.ts"],
+    probe: "metadata",
+    lifecycle: { shutdownDate: null, replacement: null, sourceUrl: DEPRECATION_PAGES.openai, verifiedAt: "2026-11-27" },
+  },
   // ── Google Generative Language API (GEMINI_API_KEY) ──────────────────────
   {
     id: "gemini-2.5-flash",
@@ -294,4 +301,5 @@ export const MODEL_ENV_OVERRIDES: Array<{
   { envVar: "AI_GATEWAY_MODEL_CHAT_FALLBACK", provider: "openai", role: "gateway-chat-fallback-override" },
   { envVar: "AI_GATEWAY_MODEL_MEDIA_PASSAGES", provider: "openai", role: "gateway-media-passages-override" },
   { envVar: "AI_GATEWAY_MODEL_PLACEMENT_NEXT_STEPS", provider: "openai", role: "gateway-placement-next-steps-override" },
+  { envVar: "AI_GATEWAY_MODEL_PLACEMENT_LEARNING_PATH", provider: "openai", role: "gateway-placement-learning-path-override" },
 ];

@@ -19,7 +19,8 @@ export type ModelSemanticRole =
   | "chat-lightweight"
   | "chat-fallback"
   | "media-passages"
-  | "placement-next-steps";
+  | "placement-next-steps"
+  | "placement-learning-path";
 
 export const GATEWAY_ROLES: readonly ModelSemanticRole[] = [
   "chat-primary",
@@ -27,7 +28,11 @@ export const GATEWAY_ROLES: readonly ModelSemanticRole[] = [
   "chat-fallback",
   "media-passages",
   "placement-next-steps",
+  "placement-learning-path",
 ];
+
+const isLovableResponsesRole = (role: ModelSemanticRole): boolean =>
+  role === "placement-next-steps" || role === "placement-learning-path";
 
 /** Providers this gateway can call for text chat. */
 export type GatewayProvider = Extract<ModelProvider, "openai" | "google">;
@@ -132,7 +137,7 @@ function registryEntry(role: ModelSemanticRole): ModelRegistryEntry {
 export function resolveRole(role: ModelSemanticRole, getEnv: GatewayDeps["getEnv"]): ResolvedTarget {
   const entry = registryEntry(role);
   const raw = getEnv(overrideEnvVar(role))?.trim();
-  const valid = !!raw && (role === "placement-next-steps" ? /^openai\/[A-Za-z0-9._-]{1,80}$/ : /^[A-Za-z0-9._-]{1,80}$/).test(raw);
+  const valid = !!raw && (isLovableResponsesRole(role) ? /^openai\/[A-Za-z0-9._-]{1,80}$/ : /^[A-Za-z0-9._-]{1,80}$/).test(raw);
   return {
     role,
     provider: entry.provider as GatewayProvider,
@@ -261,19 +266,20 @@ export async function executeAiCall(
   };
   const chain = resolveChain(role, deps.getEnv, options.allowFallback !== false);
 
-  if (role === "placement-next-steps") {
+  if (isLovableResponsesRole(role)) {
     const target = chain[0];
     const key = deps.getEnv("LOVABLE_API_KEY");
-    if (!key) throw new AiGatewayError("AI is not configured for lesson proposals.", 401, "openai", target.model);
-    if (!payload.outputSchema) throw new AiGatewayError("Lesson proposal schema missing.", 400, "openai", target.model);
-    if (!options.responsesExecutor) throw new AiGatewayError("Lesson proposal AI adapter missing.", 500, "openai", target.model);
+    const label = role === "placement-learning-path" ? "learning path" : "lesson proposals";
+    if (!key) throw new AiGatewayError(`AI is not configured for ${label}.`, 401, "openai", target.model);
+    if (!payload.outputSchema) throw new AiGatewayError(`Schema missing for ${label}.`, 400, "openai", target.model);
+    if (!options.responsesExecutor) throw new AiGatewayError(`AI adapter missing for ${label}.`, 500, "openai", target.model);
     try {
       const text = await options.responsesExecutor(key, target.model, payload);
       return { text, role, provider: "openai", model: target.model, usedFallback: false };
     } catch (error) {
       const failure = error as { statusCode?: number; responseBody?: string; cause?: { statusCode?: number; responseBody?: string } };
       const status = failure.statusCode ?? failure.cause?.statusCode ?? 422;
-      let message = status === 422 ? "AI could not provide complete lesson proposals." : "Lesson proposal AI is unavailable.";
+      let message = status === 422 ? `AI could not provide a complete ${label}.` : `AI for ${label} is unavailable.`;
       try {
         const body = JSON.parse(failure.responseBody ?? failure.cause?.responseBody ?? "{}");
         const safe = body.message ?? body.error?.message;

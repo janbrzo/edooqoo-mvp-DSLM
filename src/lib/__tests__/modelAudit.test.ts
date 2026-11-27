@@ -295,7 +295,7 @@ describe('MODEL_REGISTRY integrity', () => {
 
   it('covers every model id hardcoded in supabase/functions', () => {
     const root = join(__dirname, '../../../supabase/functions');
-    const skip = new Set(['audit-llm-models', 'test-model-failure-logger', 'mcp']);
+    const skip = new Set(['audit-llm-models', 'test-model-failure-logger', 'mcp', 'node_modules']);
     // Strings that look like model ids but are labels or aliases rewritten to a registry model.
     const ignored = new Set(['gemini-3.1-flash-image-preview']);
     const files: string[] = [];

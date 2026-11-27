@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PlacementReportBody } from '@/components/welcome-test/PlacementReportBody';
 import { TeacherPlacementDiagnosticView } from '@/components/welcome-test/TeacherPlacementDiagnosticView';
 import { PlacementNextStepsSection } from '@/components/welcome-test/PlacementNextStepsSection';
+import { PlacementLearningPathSection } from '@/components/welcome-test/PlacementLearningPathSection';
 import { prefillPlacementLesson, rememberPlacementLesson, pendingPlacementLessonId, clearPendingPlacementLesson } from '@/lib/welcomeTest/placementLessonPrefill';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { useDemoContext } from '@/contexts/DemoContext';
@@ -22,6 +23,7 @@ import {
   forwardPlacementReport,
   getPlacementReport,
   generatePlacementNextSteps,
+  generatePlacementLearningPath,
   PLACEMENT_REPORT_TOKEN_PATTERN,
   rememberPendingClaim,
   takePendingClaim,
@@ -43,9 +45,12 @@ export default function PlacementReportPage() {
   const [claiming, setClaiming] = useState(false);
   const [generatingLessons, setGeneratingLessons] = useState(false);
   const [lessonError, setLessonError] = useState<string | null>(null);
+  const [generatingPath, setGeneratingPath] = useState(false);
+  const [pathError, setPathError] = useState<string | null>(null);
   const activeToken = useRef(token);
   activeToken.current = token;
   const lessonRequestRunning = useRef(false);
+  const pathRequestRunning = useRef(false);
   const wantsForward = searchParams.get('forward') === '1';
   const [forwardEmail, setForwardEmail] = useState('');
   const [forwarding, setForwarding] = useState(false);
@@ -63,6 +68,8 @@ export default function PlacementReportPage() {
     setState({ status: 'loading' });
     setLessonError(null);
     setGeneratingLessons(false);
+    setPathError(null);
+    setGeneratingPath(false);
     autoClaimed.current = false;
     if (!PLACEMENT_REPORT_TOKEN_PATTERN.test(token)) { setState({ status: 'error', expired: false }); return; }
     let cancelled = false;
@@ -78,9 +85,10 @@ export default function PlacementReportPage() {
     && state.report.teacherDiagnostic?.test?.status === 'completed'
     && !state.report.teacherDiagnostic?.learningProfile;
   const pendingLessons = state.status === 'ready' && state.report.role === 'teacher' && state.report.nextSteps?.status === 'running';
+  const pendingPath = state.status === 'ready' && state.report.role === 'teacher' && state.report.learningPath?.status === 'running';
 
   useEffect(() => {
-    if (!pendingAnalysis && !pendingLessons) return;
+    if (!pendingAnalysis && !pendingLessons && !pendingPath) return;
     let cancelled = false;
     let ticks = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -91,7 +99,7 @@ export default function PlacementReportPage() {
           if (cancelled) return;
           setState({ status: 'ready', report });
           const stillPending = report.teacherDiagnostic?.test?.status === 'completed' && !report.teacherDiagnostic?.learningProfile;
-          if ((stillPending || report.nextSteps?.status === 'running') && ticks < 60) timer = setTimeout(poll, 3000);
+          if ((stillPending || report.nextSteps?.status === 'running' || report.learningPath?.status === 'running') && ticks < 60) timer = setTimeout(poll, 3000);
         })
         .catch(() => {
           if (!cancelled && ticks < 60) timer = setTimeout(poll, 3000);
@@ -99,7 +107,7 @@ export default function PlacementReportPage() {
     };
     timer = setTimeout(poll, 3000);
     return () => { cancelled = true; if (timer) clearTimeout(timer); };
-  }, [pendingAnalysis, pendingLessons, token]);
+  }, [pendingAnalysis, pendingLessons, pendingPath, token]);
 
   const generateLessons = async () => {
     if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
@@ -117,6 +125,25 @@ export default function PlacementReportPage() {
     } finally {
       lessonRequestRunning.current = false;
       if (activeToken.current === requestToken) setGeneratingLessons(false);
+    }
+  };
+
+  const generateLearningPath = async () => {
+    if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
+    if (pathRequestRunning.current || state.status !== 'ready' || state.report.role !== 'teacher') return;
+    pathRequestRunning.current = true;
+    const requestToken = token;
+    setGeneratingPath(true);
+    setPathError(null);
+    try {
+      const learningPath = await generatePlacementLearningPath(requestToken);
+      if (activeToken.current !== requestToken) return;
+      setState(previous => previous.status === 'ready' ? { ...previous, report: { ...previous.report, learningPath } } : previous);
+    } catch (error) {
+      if (activeToken.current === requestToken) setPathError(error instanceof Error ? error.message : 'Could not build learning path.');
+    } finally {
+      pathRequestRunning.current = false;
+      if (activeToken.current === requestToken) setGeneratingPath(false);
     }
   };
 
@@ -250,6 +277,29 @@ export default function PlacementReportPage() {
               rememberPlacementLesson(token, lesson.id);
               if (isRegisteredUser) void claim();
               else goToSignup();
+            }}
+          />
+        )}
+
+        {!isStudentView && (!report.claimed || report.learningPath?.status === 'ready') && (
+          <PlacementLearningPathSection
+            state={report.learningPath ?? { status: 'idle' }}
+            studentName={name}
+            generating={generatingPath || claiming}
+            available={Boolean(report.teacherDiagnostic?.learningProfile) && report.teacherDiagnostic?.test?.status === 'reviewed'}
+            claimed={report.claimed}
+            registered={Boolean(isRegisteredUser)}
+            error={pathError}
+            onGenerate={() => { void generateLearningPath(); }}
+            onOpenAccount={() => {
+              if (isDemoMode) { toast.error('Not available in demo mode.'); return; }
+              if (report.claimed && report.teacherDiagnostic?.studentId) {
+                navigate(studentTabPath(report.teacherDiagnostic.studentId, 'model'));
+              } else if (isRegisteredUser) {
+                void claim();
+              } else {
+                goToSignup();
+              }
             }}
           />
         )}

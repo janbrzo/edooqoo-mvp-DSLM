@@ -7,6 +7,7 @@ import type { PlacementReport } from '@/lib/welcomeTest/placementReportApi';
 const mocks = vi.hoisted(() => ({
   getPlacementReport: vi.fn(),
   generatePlacementNextSteps: vi.fn(),
+  generatePlacementLearningPath: vi.fn(),
   prefillPlacementLesson: vi.fn(),
   rememberPlacementLesson: vi.fn(),
   pendingPlacementLessonId: vi.fn(),
@@ -25,6 +26,7 @@ vi.mock('@/lib/welcomeTest/placementReportApi', () => ({
   PLACEMENT_REPORT_TOKEN_PATTERN: /^[A-Za-z0-9_-]{20,64}$/,
   getPlacementReport: mocks.getPlacementReport,
   generatePlacementNextSteps: mocks.generatePlacementNextSteps,
+  generatePlacementLearningPath: mocks.generatePlacementLearningPath,
   claimPlacementReport: mocks.claimPlacementReport,
   forwardPlacementReport: mocks.forwardPlacementReport,
   rememberPendingClaim: mocks.rememberPendingClaim,
@@ -136,7 +138,29 @@ afterEach(async () => { await act(async () => renderer?.unmount()); renderer = u
 
 describe('PlacementReportPage real teacher diagnostic view', () => {
   const lessons = [1, 2, 3].map(n => ({ id: `lesson-${n}`, topic: `Workplace lesson ${n}`, goal: 'Address a test gap', grammarFocus: null, additionalInfo: null, rationale: 'Measured gap', difficulty: 'B1' as const, exercises: [], exerciseFocusMap: {} }));
-  const report: PlacementReport = { role: 'teacher', studentName: 'Anna', result: baseResult, expiresAt: baseResult.expiresAt, claimed: false, teacherDiagnostic: fullDiagnostic, nextSteps: { status: 'idle' } };
+  const phases = [1, 2, 3].map((n, i) => ({ id: `phase-${n}`, sequenceNumber: n, title: `Career phase ${n}`, description: `Practice task ${n}`, focusAreas: ['past simple', 'status updates'], estimatedWeeksStart: i * 3 + 1, estimatedWeeksEnd: (i + 1) * 3, rationale: 'Addresses measured placement gap.' }));
+  const report: PlacementReport = { role: 'teacher', studentName: 'Anna', result: baseResult, expiresAt: baseResult.expiresAt, claimed: false, teacherDiagnostic: fullDiagnostic, nextSteps: { status: 'idle' }, learningPath: { status: 'idle' } };
+  it('generates a learning path with one teacher-token request and renders phases with account CTA', async () => {
+    mocks.getPlacementReport.mockResolvedValue(report);
+    mocks.generatePlacementLearningPath.mockResolvedValue({ status: 'ready', phases });
+    await act(async () => { renderer = create(<PlacementReportPage />); });
+    const generate = renderer?.root.findAllByType('button').find(b => b.children.some(c => typeof c === 'string' && c.includes('Generate learning path')));
+    if (!generate) throw new Error('Generate learning path action missing');
+    await act(async () => { await generate.props.onClick(); });
+    expect(mocks.generatePlacementLearningPath).toHaveBeenCalledTimes(1);
+    expect(mocks.generatePlacementLearningPath).toHaveBeenCalledWith(mocks.token);
+    const rendered = textOf(renderer);
+    expect(rendered).toContain('Career phase 1');
+    expect(rendered).toContain('Weeks ');
+    expect(rendered).toContain('Create free account to save and edit learning path');
+  });
+  it('blocks learning path generation while the placement diagnostic is not ready', async () => {
+    mocks.getPlacementReport.mockResolvedValue({ ...report, teacherDiagnostic: undefined });
+    await act(async () => { renderer = create(<PlacementReportPage />); });
+    const generate = renderer?.root.findAllByType('button').find(b => b.children.some(c => typeof c === 'string' && c.includes('Generate learning path')));
+    expect(generate?.props.disabled).toBe(true);
+    expect(mocks.generatePlacementLearningPath).not.toHaveBeenCalled();
+  });
   it('runs one teacher-token request and hands the selected one of three lessons to the manual form', async () => {
     mocks.getPlacementReport.mockResolvedValue(report);
     mocks.generatePlacementNextSteps.mockResolvedValue({ status: 'ready', suggestions: lessons });
@@ -241,5 +265,6 @@ describe('PlacementReportPage real teacher diagnostic view', () => {
     expect(rendered).toContain('Well done, ');
     expect(rendered).not.toContain('AI Analysis');
     expect(rendered).not.toContain('Create free account and add');
+    expect(rendered).not.toContain('Generate learning path');
   });
 });

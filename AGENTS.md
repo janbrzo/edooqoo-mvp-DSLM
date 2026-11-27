@@ -13,7 +13,7 @@ Subdirectories `src/` and `supabase/` have their own `AGENTS.md`; read them befo
 
 ## Protected Systems
 
-- Public placement lesson proposals use a teacher-token-only, service-reserved cached job and isolated Lovable Responses role; persist all proposals in `future_worksheet_suggestions` for ownership transfer, and hand off only manual form prefills with no unclaimed learner ID or auto-generation flags, because public planning must not expose account history, duplicate billed work or modify the protected worksheet engine.
+- Public placement lesson proposals and learning paths use teacher-token-only, service-reserved cached jobs and isolated Lovable Responses roles (`placement-next-steps`, `placement-learning-path`); persist proposals in `future_worksheet_suggestions` and 3-5 contiguous phases in `dslm_curriculum_phases` for ownership transfer, and hand off only manual form prefills with no unclaimed learner ID or auto-generation flags, because public planning must not expose account history, duplicate billed work or modify the protected worksheet engine.
 
 - Placement regression coverage executes the real HTTP adapter with synthetic network boundaries and React runtime tests, while browser checks exercise public completion and token-selected reports; never treat synthetic auth, email-provider acceptance or read-only production checks as proof of inbox delivery or an authenticated claim, because external Supabase sessions are not managed by Lovable.
 

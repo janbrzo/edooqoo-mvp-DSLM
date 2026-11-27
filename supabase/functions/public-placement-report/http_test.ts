@@ -17,11 +17,21 @@ const result = {
   selfAwarenessScore: 30, openResponseCount: 2, recordingCount: 1,
 };
 type Call = { path: string; method: string; body: Record<string, unknown> | null };
-type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean; reportAnswers?: Record<string, unknown> | null; unclaimedStudentId?: string | null; unclaimedTestId?: string | null; unclaimedTestStatus?: string; claimRpcResult?: boolean; nextSteps?: Record<string, unknown>; nextStepsNotReady?: boolean; gatewayStatus?: number; gatewayCount?: number };
+type Options = { failTable?: string; expired?: boolean; claimed?: boolean; claimedTestMissing?: boolean; unauthorized?: boolean; anonymous?: boolean; differentTeacher?: boolean; registeredTeacher?: boolean; existingStudent?: boolean; pendingStudent?: boolean; forwardCount?: number; completedInvite?: boolean; failEmail?: boolean; failFinish?: boolean; reservationBusy?: boolean; reportAnswers?: Record<string, unknown> | null; unclaimedStudentId?: string | null; unclaimedTestId?: string | null; unclaimedTestStatus?: string; claimRpcResult?: boolean; nextSteps?: Record<string, unknown>; nextStepsNotReady?: boolean; learningPath?: Record<string, unknown>; learningPathNotReady?: boolean; gatewayStatus?: number; gatewayCount?: number; gatewayMode?: 'next_steps' | 'learning_path' };
 
 const wireLessons = [1, 2, 3].map(n => ({ topic: `Workplace lesson ${n}`, goal: 'Address a placement gap', additionalInfo: null, grammarFocus: 'Past Simple', rationale: 'Observed past tense gap', difficulty: 'B1', targetQuestionIds: [], exercises: ['reading', 'fill-in-blanks', 'matching', 'dialogue', 'discussion', 'multiple-choice', 'true-false', 'error-correction'].map(id => ({ id, focus: 'grammar' })) }));
-function gatewayStream(count = 3) {
-  const text = JSON.stringify({ suggestions: wireLessons.slice(0, count) });
+const wirePhases = [1, 2, 3, 4].map((n, i) => ({
+  title: `Workplace roadmap phase ${n}`,
+  description: `Build fluency in scenario ${n}.`,
+  focusAreas: ['past simple', 'client updates'],
+  estimatedWeeksStart: i * 3 + 1,
+  estimatedWeeksEnd: (i + 1) * 3,
+  rationale: 'Addresses measured placement gaps.',
+}));
+function gatewayStream(count = 3, mode: 'next_steps' | 'learning_path' = 'next_steps') {
+  const text = mode === 'learning_path'
+    ? JSON.stringify({ phases: wirePhases.slice(0, count) })
+    : JSON.stringify({ suggestions: wireLessons.slice(0, count) });
   const item = { id: 'msg-fixture', type: 'message', status: 'completed', role: 'assistant', content: [{ type: 'output_text', text, annotations: [] }] };
   const response = { id: 'response-fixture', object: 'response', created_at: 1, model: 'fixture-model', status: 'completed', output: [item], usage: { input_tokens: 100, output_tokens: 100, total_tokens: 200 } };
   const events = [
@@ -49,6 +59,7 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
     unclaimed_student_id: options.unclaimedStudentId ?? null,
     unclaimed_test_id: options.unclaimedTestId ?? null,
     placement_next_steps: options.nextSteps ?? null,
+    placement_learning_path: options.learningPath ?? null,
     forward_count: options.forwardCount ?? 0 };
   const invite = { id: "invite-id", teacher_email: "teacher@example.test", student_email: "student@example.test", student_name: "Marta",
     teacher_id: options.registeredTeacher ? "owner-id" : null,
@@ -64,7 +75,7 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
     if (req.method === "HEAD") return new Response(null, { headers: { "Content-Range": "*/0" } });
     if (path === "/v1/responses") {
       if (options.gatewayStatus) return new Response(JSON.stringify({ error: { message: 'Provider access denied' } }), { status: options.gatewayStatus, headers: { 'Content-Type': 'application/json' } });
-      return gatewayStream(options.gatewayCount);
+      return gatewayStream(options.gatewayCount ?? (options.gatewayMode === 'learning_path' ? 4 : 3), options.gatewayMode ?? 'next_steps');
     }
     if (path === "/rest/v1/rpc/reserve_placement_next_steps") {
       if (options.nextStepsNotReady) value = { status: 'not_ready' };
@@ -76,6 +87,18 @@ async function fixture(run: (call: (body: unknown, token?: string, method?: stri
     } else if (path === "/rest/v1/rpc/finish_placement_next_steps") {
       report.placement_next_steps = body?.p_error ? { status: 'failed', error: body.p_error, terminal: body.p_terminal, attempts: 1 } : { status: 'ready', suggestions: (body?.p_suggestions as Array<Record<string, unknown>>).map((s, i) => ({ ...s, id: `saved-lesson-${i + 1}` })) };
       value = report.placement_next_steps;
+    } else if (path === "/rest/v1/rpc/reserve_placement_learning_path") {
+      if (options.learningPathNotReady) value = { status: 'not_ready' };
+      else if (report.placement_learning_path) value = report.placement_learning_path;
+      else {
+        report.placement_learning_path = { status: 'running', lease: 'private-path-lease', attempts: 1 };
+        value = { status: 'reserved', lease: 'private-path-lease', studentId: 'unclaimed-student-id', testId: 'unclaimed-test-id' };
+      }
+    } else if (path === "/rest/v1/rpc/finish_placement_learning_path") {
+      report.placement_learning_path = body?.p_error
+        ? { status: 'failed', error: body.p_error, terminal: body.p_terminal, attempts: 1 }
+        : { status: 'ready', phases: (body?.p_phases as Array<Record<string, unknown>>).map((p, i) => ({ ...p, id: `saved-phase-${i + 1}`, sequenceNumber: i + 1 })) };
+      value = report.placement_learning_path;
     } else if (path === "/emails") { value = { id: "mail-id" }; if (options.failEmail) status = 500; }
     else if (path === "/auth/v1/user") {
       if (options.unauthorized) { status = 401; value = { message: "Invalid token" }; }
@@ -545,6 +568,70 @@ Deno.test('HTTP in-progress reservations and unfinished analyses never start new
       const res = await call({ action: 'generate_next_steps', token: teacherToken });
       assertEquals(res.status, options.nextStepsNotReady ? 409 : 200);
       assertEquals((await res.text()).includes('PRIVATE'), false);
+      assertEquals(calls.some(c => c.path === '/v1/responses'), false);
+    }, options);
+  }
+});
+
+Deno.test('HTTP only an unexpired teacher token can reserve a learning path', async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: 'generate_learning_path', token: studentToken });
+    assertEquals(res.status, 403); await res.text();
+    assertEquals(calls.some(c => c.path.includes('reserve_placement_learning_path') || c.path === '/v1/responses'), false);
+  });
+  await fixture(async (call, calls) => {
+    const res = await call({ action: 'generate_learning_path', token: teacherToken });
+    assertEquals(res.status, 410); await res.text();
+    assertEquals(calls.some(c => c.path.includes('reserve_placement_learning_path')), false);
+  }, { expired: true });
+});
+
+Deno.test('HTTP generated learning path persists, reads back and is cached without a second AI request', async () => {
+  await fixture(async (call, calls) => {
+    const first = await call({ action: 'generate_learning_path', token: teacherToken });
+    assertEquals(first.status, 200); assertEquals(await first.json(), { status: 'running' });
+    const get = await call({ action: 'get', token: teacherToken });
+    const report = await get.json();
+    assertEquals(report.learningPath.status, 'ready');
+    assertEquals(report.learningPath.phases.length, 4);
+    assertEquals(report.learningPath.phases[0].id, 'saved-phase-1');
+    const again = await call({ action: 'generate_learning_path', token: teacherToken });
+    assertEquals((await again.json()).status, 'ready');
+    assertEquals(calls.filter(c => c.path === '/v1/responses').length, 1);
+    const ai = calls.find(c => c.path === '/v1/responses')?.body;
+    assertEquals(ai?.stream, true); assertEquals(ai?.store, false);
+    assertEquals(ai?.model, 'openai/gpt-6-astra');
+    assertEquals(JSON.stringify(ai).includes('SHOULD_NOT_LEAK'), false);
+    const student = await call({ action: 'get', token: studentToken });
+    assertEquals('learningPath' in await student.json(), false);
+  }, { unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id', gatewayMode: 'learning_path' });
+});
+
+Deno.test('HTTP learning path denial persists a terminal state and never replays', async () => {
+  await fixture(async (call, calls) => {
+    const first = await call({ action: 'generate_learning_path', token: teacherToken }); await first.text();
+    const again = await call({ action: 'generate_learning_path', token: teacherToken });
+    assertEquals(await again.json(), { status: 'failed', error: 'Provider access denied', retryable: false });
+    assertEquals(calls.filter(c => c.path === '/v1/responses').length, 1);
+    assertEquals(calls.filter(c => c.path.includes('finish_placement_learning_path'))[0].body?.p_terminal, true);
+  }, { unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id', gatewayStatus: 403, gatewayMode: 'learning_path' });
+});
+
+Deno.test('HTTP incomplete learning path is rejected and never saved as ready', async () => {
+  await fixture(async (call, calls) => {
+    const first = await call({ action: 'generate_learning_path', token: teacherToken }); await first.text();
+    const saved = calls.find(c => c.path.includes('finish_placement_learning_path'))?.body;
+    assertEquals(saved?.p_phases, null);
+    assertEquals(typeof saved?.p_error, 'string');
+  }, { unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id', gatewayCount: 2, gatewayMode: 'learning_path' });
+});
+
+Deno.test('HTTP in-progress learning path reservation and unfinished analysis never start new AI work', async () => {
+  for (const options of [{ learningPath: { status: 'running', lease: 'PRIVATE_PATH', attempts: 1 } }, { learningPathNotReady: true }]) {
+    await fixture(async (call, calls) => {
+      const res = await call({ action: 'generate_learning_path', token: teacherToken });
+      assertEquals(res.status, options.learningPathNotReady ? 409 : 200);
+      assertEquals((await res.text()).includes('PRIVATE_PATH'), false);
       assertEquals(calls.some(c => c.path === '/v1/responses'), false);
     }, options);
   }
