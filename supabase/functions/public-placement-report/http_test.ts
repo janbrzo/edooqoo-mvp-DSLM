@@ -636,3 +636,57 @@ Deno.test('HTTP in-progress learning path reservation and unfinished analysis ne
     }, options);
   }
 });
+
+Deno.test('HTTP caller-selected role and learner cannot elevate a student report token', async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: 'get', token: studentToken, role: 'teacher', studentId: 'another-student', testId: 'another-test' });
+    assertEquals(res.status, 200);
+    const data = await res.json();
+    assertEquals(data.role, 'student');
+    for (const key of ['teacherDiagnostic', 'nextSteps', 'learningPath', 'student_email', 'teacher_email', 'answers']) {
+      assertEquals(key in data, false);
+    }
+    assertEquals(calls.some(c => c.path.endsWith('/student_learning_profiles') || c.path.endsWith('/student_test_questions') || c.path === '/v1/responses'), false);
+  }, {
+    unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id',
+    nextSteps: { status: 'running', lease: 'private-lesson-lease' },
+    learningPath: { status: 'running', lease: 'private-path-lease' },
+  });
+});
+
+Deno.test('HTTP teacher read strips both reservation leases and stored contact fields', async () => {
+  await fixture(async (call) => {
+    const res = await call({ action: 'get', token: teacherToken });
+    assertEquals(res.status, 200);
+    const data = await res.json();
+    assertEquals(data.nextSteps, { status: 'running' });
+    assertEquals(data.learningPath, { status: 'running' });
+    const serialized = JSON.stringify(data);
+    for (const secret of ['private-lesson-lease', 'private-path-lease', 'student@example.test', 'teacher@example.test', 'SHOULD_NOT_LEAK']) {
+      assertEquals(serialized.includes(secret), false);
+    }
+  }, {
+    unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id',
+    nextSteps: { status: 'running', lease: 'private-lesson-lease', attempts: 1 },
+    learningPath: { status: 'running', lease: 'private-path-lease', attempts: 1 },
+  });
+});
+
+for (const action of ['generate_next_steps', 'generate_learning_path']) {
+  Deno.test(`HTTP ${action} rejects role spoofing before reservation or AI work`, async () => {
+    await fixture(async (call, calls) => {
+      const res = await call({ action, token: studentToken, role: 'teacher', studentId: 'another-student', testId: 'another-test' });
+      assertEquals(res.status, 403); await res.text();
+      assertEquals(calls.some(c => c.path.includes('/rpc/') || c.path === '/v1/responses'), false);
+    });
+  });
+}
+
+Deno.test('HTTP expired teacher report cannot read diagnostic evidence or cached plans', async () => {
+  await fixture(async (call, calls) => {
+    const res = await call({ action: 'get', token: teacherToken });
+    assertEquals(res.status, 410);
+    assertEquals(await res.json(), { error: 'expired' });
+    assertEquals(calls.some(c => c.path.endsWith('/student_learning_profiles') || c.path.endsWith('/student_test_questions') || c.path === '/v1/responses'), false);
+  }, { expired: true, unclaimedStudentId: 'unclaimed-student-id', unclaimedTestId: 'unclaimed-test-id' });
+});
